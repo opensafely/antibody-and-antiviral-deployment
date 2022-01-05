@@ -1,9 +1,13 @@
-######################################
-
-# This script defines the project pipeline - it specifys the execution orders for all the code in this
-# repo using a series of actions.
-
-######################################
+################################################################################
+#
+# Description: This script defines the project pipeline - it specifys the 
+#              execution orders for all the code in this repo using a series of 
+#              actions.
+#
+# Author(s): M Green
+# Date last updated: 05/01/2022
+#
+################################################################################
 
 version: '3.0'
 
@@ -16,8 +20,19 @@ actions:
   
   ## Cohort data
   extract_data:
-    run: cohortextractor:latest generate_cohort --study-definition study_definition --index-date-range "2021-11-01 to 2021-12-01 by week" --output-dir=output/data --output-format=csv.gz
+    run: cohortextractor:latest generate_cohort --study-definition study_definition --index-date-range "2021-01-01 to 2022-01-01 by week" --output-dir=output/data --output-format=csv.gz
     outputs:
       highly_sensitive:
         cohort: output/data/input_*.csv.gz
+        
+  
+  # Data processing ----
+  
+  ## Calculate weekly counts
+  code_counts:
+    run: r:latest analysis/process/weekly_code_counts.R
+    needs: [extract_data]
+    outputs:
+      moderately_sensitive:
+        data: output/data/data_weekly_counts.csv
   

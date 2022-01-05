@@ -3,7 +3,10 @@
 # Description: This script provides the formal specification of the study data 
 #              that will be extracted from the OpenSAFELY database.
 #
-# output: output/data/input_*.csv.gz
+# Output: output/data/input_*.csv.gz
+#
+# Author(s): M Green
+# Date last updated: 05/01/2022
 #
 ################################################################################
 
@@ -179,5 +182,3 @@ study = StudyDefinition(
   ),
   
 )
-
-
