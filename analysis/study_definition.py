@@ -71,7 +71,7 @@ study = StudyDefinition(
     ),
     
   ),
-
+  
   
   # NEUTRALISING MONOCLONAL ANTIBODIES OR ANTIVIRALS ----
   
@@ -79,9 +79,8 @@ study = StudyDefinition(
   anti_infective_agent = patients.with_these_clinical_events(
     anti_infective_agent_codes,
     between = ["index_date", "index_date + 6 days"],
-    returning = "number_of_matches_in_period",
+    returning = "binary_flag",
     return_expectations = {
-      "int": {"distribution": "normal", "mean": 3, "stddev": 1},
       "incidence": 0.5,
     },
   ),
@@ -90,9 +89,8 @@ study = StudyDefinition(
   sotrovimab = patients.with_these_medications(
     sotrovimab_codes,
     between = ["index_date", "index_date + 6 days"],
-    returning = "number_of_matches_in_period",
+    returning = "binary_flag",
     return_expectations = {
-      "int": {"distribution": "normal", "mean": 3, "stddev": 1},
       "incidence": 0.2,
     },
   ),
@@ -118,9 +116,8 @@ study = StudyDefinition(
   ronapreve = patients.with_these_medications(
     ronapreve_codes,
     between = ["index_date", "index_date + 6 days"],
-    returning = "number_of_matches_in_period",
+    returning = "binary_flag",
     return_expectations = {
-      "int": {"distribution": "normal", "mean": 3, "stddev": 1},
       "incidence": 0.2,
     },
   ),
@@ -146,9 +143,8 @@ study = StudyDefinition(
   antiviral_therapy = patients.with_these_clinical_events(
     antiviral_therapy_codes,
     between = ["index_date", "index_date + 6 days"],
-    returning = "number_of_matches_in_period",
+    returning = "binary_flag",
     return_expectations = {
-      "int": {"distribution": "normal", "mean": 2, "stddev": 1},
       "incidence": 0.3,
     },
   ),
@@ -157,9 +153,8 @@ study = StudyDefinition(
   molnupiravir = patients.with_these_medications(
     molnupiravir_codes,
     between = ["index_date", "index_date + 6 days"],
-    returning = "number_of_matches_in_period",
+    returning = "binary_flag",
     return_expectations = {
-      "int": {"distribution": "normal", "mean": 3, "stddev": 1},
       "incidence": 0.2,
     },
   ),
@@ -182,3 +177,83 @@ study = StudyDefinition(
   ),
   
 )
+
+
+# DEFINE MEASURES ----
+
+measures = [
+  
+  # Weekly totals
+  
+  ## Anti-infective agent
+  Measure(
+    id = "anti_infective_agent",
+    numerator = "anti_infective_agent",
+    denominator = "population",
+    group_by = ["population"],
+    small_number_suppression = False,
+  ),
+  
+  ## Sotrovimab
+  Measure(
+    id = "sotrovimab",
+    numerator = "sotrovimab",
+    denominator = "population",
+    group_by = ["population"],
+    small_number_suppression = False,
+  ),
+  
+  Measure(
+    id = "sotrovimab_code",
+    numerator = "sotrovimab",
+    denominator = "population",
+    group_by = ["sotrovimab_code"],
+    small_number_suppression = False,
+  ),
+  
+    
+  ## Ronapreve
+  Measure(
+    id = "ronapreve",
+    numerator = "ronapreve",
+    denominator = "population",
+    group_by = ["population"],
+    small_number_suppression = False,
+  ),
+  
+  Measure(
+    id = "ronapreve_code",
+    numerator = "ronapreve",
+    denominator = "population",
+    group_by = ["ronapreve_code"],
+    small_number_suppression = False,
+  ),
+  
+  ## Antiviral therapy
+  Measure(
+    id = "antiviral_therapy",
+    numerator = "antiviral_therapy",
+    denominator = "population",
+    group_by = ["population"],
+    small_number_suppression = False,
+  ),
+  
+  ## Molnupiravir
+  Measure(
+    id = "molnupiravir",
+    numerator = "molnupiravir",
+    denominator = "population",
+    group_by = ["population"],
+    small_number_suppression = False,
+  ),
+  
+  Measure(
+    id = "molnupiravir_code",
+    numerator = "molnupiravir",
+    denominator = "population",
+    group_by = ["molnupiravir_code"],
+    small_number_suppression = False,
+  ),
+
+]
+

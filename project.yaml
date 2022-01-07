@@ -28,6 +28,14 @@ actions:
   
   # Data processing ----
   
+  ## Generate measures
+  generate_measures:
+    run: cohortextractor:latest generate_measures --study-definition study_definition --output-dir=output/data
+    needs: [extract_data]
+    outputs:
+      moderately_sensitive:
+        measure_csv: output/data/measure_*.csv
+  
   ## Calculate weekly counts
   code_counts:
     run: r:latest analysis/process/weekly_code_counts.R
