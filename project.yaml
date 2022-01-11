@@ -25,7 +25,13 @@ actions:
       highly_sensitive:
         cohort: output/data/input_*.csv.gz
         
-  
+  ## HCD data 
+  generate_study_population:
+    run: cohortextractor:latest generate_cohort --study-definition all
+    outputs:
+      highly_sensitive:
+        cohort: output/input_hcd.csv
+
   # Data processing ----
   
   ## Generate measures
