@@ -1,5 +1,5 @@
 ################################################################################
-
+#
 # Description: This script imports the NHS digital codelists from:
 #              https://digital.nhs.uk/coronavirus/treatments/methodology/demographics-and-test-result-rules
 #              and converts them into seprate codelists based on the different
@@ -133,8 +133,8 @@ for (i in 1:length(cohorts)){
   print(i)
 }
 
-## Create API information ----
-r <- GET("http://httpbin.org/get")
 
+## Upload to opencodelists ----
 codelist_names <- names(cohort_codelists)
+lapply(codelist_names, FUN = openc_api())
 
