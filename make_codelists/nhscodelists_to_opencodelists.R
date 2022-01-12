@@ -1,0 +1,144 @@
+################################################################################
+
+# Description: This script imports the codelists provided and
+#              calculates the counts and rates of neutralising monoclonal 
+#              antibodies and antivirals for non-hospitalised patients with 
+#              COVID-19
+#
+# Input: /output/data/input_*.csv.gz
+#
+# Output: /output/data/data_weekly_counts.csv
+#
+# Author(s): M Green
+# Date last updated: 12/01/2022
+#
+################################################################################
+
+
+# Preliminaries ----
+
+## Import libraries
+library('tidyverse')
+library('here')
+library('httr')
+library('readxl')
+
+
+# Custom functions ----
+
+## Read in .xlxs file with multiple sheets
+read_in_data <- function(fname) {
+  
+  # Get info about all excel sheets
+  sheets <- readxl::excel_sheets(fname)
+  tibble <- lapply(sheets, function(x) readxl::read_excel(fname, sheet = x))
+  data_frame <- lapply(tibble, as.data.frame)
+  
+  # Asign names to data frames
+  names(data_frame) <- sheets
+  
+  print(data_frame)
+  
+}
+
+## Seperate out different coding systems
+seperate <- function(cohort) {
+  
+  # NHS Cohort codelists 
+  if (cohort == "Downs Syndrome") {
+    codelist_data <- COVID_methodology_cohorts[cohort] %>%
+      as.data.frame() %>%
+      select(coding_system_id = contains("Coding.System"), codes = contains("Code.value"))
+  } else {
+    codelist_data <- COVID_methodology_cohorts[cohort] %>%
+      as.data.frame() %>%
+      select(coding_system_id = contains("Dataset"), codes = contains("Code.value"))
+  }
+  
+  # Split out different coding systems
+  unique_codelists <- split(codelist_data, f = codelist_data$coding_system_id)
+  
+  seperate_codelists <- names(unique_codelists) %>% 
+    str_detect("ICD-10|SNOMED|DM|HES|ICD10") %>%
+    keep(unique_codelists, .)
+  
+  if (length(seperate_codelists) > 0) {
+    names(seperate_codelists) <- paste(cohort, " (", names(seperate_codelists), ")", sep = "")
+  } else {
+    seperate_codelists = list()
+  }
+  
+  seperate_codelists
+  
+}
+
+## Opencodelists API
+openc_api <- function(codelist_name) {
+  
+  # Generic 
+  api_token = "XXX"
+  codes = c(111, 222)
+  
+  # Codelist
+  codelist_data <- cohort_codelists[codelist_name] %>%
+    as.data.frame() %>%
+    select(coding_system = contains("coding_system_id"), codes = contains("codes")) %>%
+    left_join(data.frame(coding_system = c("ICD-10", "SNOMED", "DMD+d", "HES", "ICD10"), 
+                         coding_system_id = c("icd10", "snomedct", "dmd", "icd10", "icd10")))
+  
+  # Data
+  body = list(
+    name =  codelist_name,
+    coding_system_id = unique(codelist_data$coding_system_id),
+    codes = codelist_data$codes,
+    description = paste("Taken from the ",
+                        sub("\\(.*", "", codelist_name),
+                        "tab in the Population Risk COVID-19 Treatments code list v1.3, published by NHS digital, 13/12/2021."),
+    references = list(
+      url = c("https://digital.nhs.uk/coronavirus/treatments/methodology/demographics-and-test-result-rules"),
+      text = c("This document lists all the codes used for the COVID-19 therapeutics detailing the datasets, coding systems, 
+               code values and code descriptions.")
+    )
+  )
+  
+  # Organisation
+  organisation = "NHS Digital"
+  
+  # URL and headers
+  url = paste("https://www.opencodelists.org/api/v1/codelist/", organisation, "/", sep = "")
+  #headers = {"authorization": f"Token {api_token}"}
+  
+  rsp = POST(url, body = body, encode = "json", verbose())
+  
+  # if rsp.status_code == 200:
+  #   print("Success :)")
+  # else:
+  #   print("Failure, talk to Peter :(")
+  # print(rsp.content)
+}
+  
+
+
+
+
+# Process NHS codelists ----
+
+## Read in data
+path <- here::here("docs", "COVID+methodology+cohorts++.xlsx")
+COVID_methodology_cohorts <- read_in_data(path)
+
+## Seperate out different coding systems
+cohorts <- names(COVID_methodology_cohorts)[-1]
+cohort_codelists <- list()
+
+for (i in 1:length(cohorts)){
+  cohort_codelists <- append(cohort_codelists, seperate(cohorts[i]))
+  
+  print(i)
+}
+
+## Create API information ----
+r <- GET("http://httpbin.org/get")
+
+codelist_names <- names(cohort_codelists)
+
