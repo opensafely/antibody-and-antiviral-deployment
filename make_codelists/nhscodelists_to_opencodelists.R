@@ -72,9 +72,8 @@ seperate <- function(cohort) {
 openc_api <- function(codelist_name) {
   
   # Generic 
-  api_token = "XXX"
-  codes = c(111, 222)
-  
+  api_token = "xxx"
+
   # Codelist
   codelist_data <- cohort_codelists[codelist_name] %>%
     as.data.frame() %>%
@@ -93,24 +92,24 @@ openc_api <- function(codelist_name) {
     references = list(
       url = c("https://digital.nhs.uk/coronavirus/treatments/methodology/demographics-and-test-result-rules"),
       text = c("This document lists all the codes used for the COVID-19 therapeutics detailing the datasets, coding systems, 
-               code values and code descriptions.")
-    )
+               code values and code descriptions."))
   )
   
   # Organisation
-  organisation = "NHS Digital"
+  organisation = "nhsd"
   
   # URL and headers
   url = paste("https://www.opencodelists.org/api/v1/codelist/", organisation, "/", sep = "")
-  #headers = {"authorization": f"Token {api_token}"}
-  
-  rsp = POST(url, body = body, encode = "json", verbose())
-  
-  # if rsp.status_code == 200:
-  #   print("Success :)")
-  # else:
-  #   print("Failure, talk to Peter :(")
-  # print(rsp.content)
+
+  rsp = POST(url, body = body, encode = "json", verbose(), add_headers(authorization = paste("Token ", api_token, sep = "")))
+
+  # Check status
+  if (status_code(rsp) == 200){
+    print("sucess")
+  } else {
+    print("Failure, talk to Peter")
+  }
+
 }
   
 
@@ -136,5 +135,7 @@ for (i in 1:length(cohorts)){
 
 ## Upload to opencodelists ----
 codelist_names <- names(cohort_codelists)
+
+openc_api(codelist_names[1])
 lapply(codelist_names, FUN = openc_api())
 
