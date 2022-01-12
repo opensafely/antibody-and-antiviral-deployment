@@ -1,13 +1,9 @@
 ################################################################################
 
-# Description: This script imports the codelists provided and
-#              calculates the counts and rates of neutralising monoclonal 
-#              antibodies and antivirals for non-hospitalised patients with 
-#              COVID-19
-#
-# Input: /output/data/input_*.csv.gz
-#
-# Output: /output/data/data_weekly_counts.csv
+# Description: This script imports the NHS digital codelists from:
+#              https://digital.nhs.uk/coronavirus/treatments/methodology/demographics-and-test-result-rules
+#              and converts them into seprate codelists based on the different
+#              coding systems and uploads them to opencodelists
 #
 # Author(s): M Green
 # Date last updated: 12/01/2022
