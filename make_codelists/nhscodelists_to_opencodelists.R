@@ -41,15 +41,9 @@ read_in_data <- function(fname) {
 seperate <- function(cohort) {
   
   # NHS Cohort codelists 
-  if (cohort == "Downs Syndrome") {
-    codelist_data <- COVID_methodology_cohorts[cohort] %>%
-      as.data.frame() %>%
-      select(coding_system_id = contains("Coding.System"), codes = contains("Code.value"))
-  } else {
-    codelist_data <- COVID_methodology_cohorts[cohort] %>%
-      as.data.frame() %>%
-      select(coding_system_id = contains("Dataset"), codes = contains("Code.value"))
-  }
+  codelist_data <- COVID_methodology_cohorts[cohort] %>%
+    as.data.frame() %>%
+    select(coding_system_id = contains("Dataset"), codes = contains("Code.value"))
   
   # Split out different coding systems
   unique_codelists <- split(codelist_data, f = codelist_data$coding_system_id)
@@ -57,6 +51,7 @@ seperate <- function(cohort) {
   seperate_codelists <- names(unique_codelists) %>% 
     str_detect("ICD-10|SNOMED|DM|HES|ICD10") %>%
     keep(unique_codelists, .)
+  
   
   if (length(seperate_codelists) > 0) {
     names(seperate_codelists) <- paste(cohort, " (", names(seperate_codelists), ")", sep = "")
@@ -88,11 +83,11 @@ openc_api <- function(codelist_name) {
     codes = codelist_data$codes,
     description = paste("Taken from the ",
                         sub("\\(.*", "", codelist_name),
-                        "tab in the Population Risk COVID-19 Treatments code list v1.3, published by NHS digital, 13/12/2021."),
-    references = list(
-      url = c("https://digital.nhs.uk/coronavirus/treatments/methodology/demographics-and-test-result-rules"),
-      text = c("This document lists all the codes used for the COVID-19 therapeutics detailing the datasets, coding systems, 
-               code values and code descriptions."))
+                        "tab in the Population Risk COVID-19 Treatments code list v1.3, published by NHS digital, 13/12/2021.")
+    # references = list(
+    #   url = c("https://digital.nhs.uk/coronavirus/treatments/methodology/demographics-and-test-result-rules"),
+    #   text = c("This document lists all the codes used for the COVID-19 therapeutics detailing the datasets, coding systems, 
+    #            code values and code descriptions."))
   )
   
   # Organisation
@@ -113,16 +108,30 @@ openc_api <- function(codelist_name) {
 }
   
 
-
-
-
 # Process NHS codelists ----
 
 ## Read in data
 path <- here::here("docs", "COVID+methodology+cohorts++.xlsx")
 COVID_methodology_cohorts <- read_in_data(path)
 
-## Seperate out different coding systems
+## Same column names and types
+COVID_methodology_cohorts$`Downs Syndrome` <- COVID_methodology_cohorts$`Downs Syndrome` %>%
+  dplyr::rename(Dataset = 'Coding System')
+
+COVID_methodology_cohorts$`Transplant (SPL-AtRiskv4)` <- COVID_methodology_cohorts$`Transplant (SPL-AtRiskv4)` %>%
+  dplyr::rename(Dataset = Dateset, 'Code values' = 'Code Values')
+
+COVID_methodology_cohorts$`Sickle (SPL-HES)` <- COVID_methodology_cohorts$`Sickle (SPL-HES)` %>%
+  dplyr::rename(`Code value` = 'Code') %>%
+  mutate(Dataset = CodeType)
+
+COVID_methodology_cohorts$`Huntington's` <- COVID_methodology_cohorts$`Huntington's` %>%
+  mutate(Dataset = ifelse(Dataset == "HES", "ICD10", Dataset))
+
+COVID_methodology_cohorts$`Myasthenia Gravis` <- COVID_methodology_cohorts$`Myasthenia Gravis` %>%
+  mutate(Dataset = ifelse(Dataset == "HES", "ICD10", Dataset))
+
+## Separate out different coding systems
 cohorts <- names(COVID_methodology_cohorts)[-1]
 cohort_codelists <- list()
 
@@ -138,4 +147,5 @@ codelist_names <- names(cohort_codelists)
 
 openc_api(codelist_names[1])
 lapply(codelist_names, FUN = openc_api())
+
 
