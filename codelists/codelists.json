@@ -1,3 +1,16 @@
 {
-  "files": {}
+  "files": {
+    "nhsd-downs-syndrome-snomed-ct.csv": {
+      "id": "nhsd/downs-syndrome-snomed-ct/3bb246d7",
+      "url": "https://codelists.opensafely.org/codelist/nhsd/downs-syndrome-snomed-ct/3bb246d7/",
+      "downloaded_at": "2022-01-14 12:33:27.056899Z",
+      "sha": "87740850d5efad6d1d1762de77a6895854a7679c"
+    },
+    "nhsd-downs-syndrome-icd-10.csv": {
+      "id": "nhsd/downs-syndrome-icd-10/22a2d3a2",
+      "url": "https://codelists.opensafely.org/codelist/nhsd/downs-syndrome-icd-10/22a2d3a2/",
+      "downloaded_at": "2022-01-14 12:09:01.563144Z",
+      "sha": "ea6bdda54711d24ea40e4d6ca354c295c5710420"
+    }
+  }
 }

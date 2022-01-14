@@ -26,11 +26,6 @@ from cohortextractor import (
 
 ## Import codelists from codelist.py (which pulls them from the codelist folder)
 from codelists import *
-  
-  ## Custom functions
-  def make_fixed_date(date_str):
-  # Abuse `categorised_as` to give us a value which is fixed for every patient where "1=1" i.e. all of them
-  return patients.categorised_as({date_str: "1=1", "1900-01-01": "DEFAULT"})
 
 
 # DEFINE STUDY POPULATION ----
@@ -190,14 +185,30 @@ study = StudyDefinition(
   
   # HIGH RISK GROUPS ----
   
-  ## Cut off date for calculating high risk group eligibility
-  # end_date = make_fixed_date(
-  #   date.today().isoformat(),
-  # ),
-  # 
-  # cut_off_hr_group_date = patients.minimum_of("nMABS_antiviral_date", "end_date"),
+  ## Down's syndrome
+  downs_syndrome_nhsd_snomed = patients.with_these_clinical_events(
+    downs_syndrome_nhsd_snomed_codes,
+    returning = "date",
+    date_format = "YYYY-MM-DD",
+    find_first_match_in_period = True,
+    on_or_before = index_date,
+  ),
+  
+  downs_syndrome_nhsd_icd10 = patients.admitted_to_hospital(
+    returning = "date_admitted",
+    with_these_diagnoses = downs_syndrome_nhsd_icd10_codes,
+    on_or_before = index_date,
+    find_first_match_in_period = True,
+    date_format = "YYYY-MM-DD",
+  ),
+  
+  downs_syndrome_nhsd = patients.minimum_of("downs_syndrome_nhsd_snomed", "downs_syndrome_nhsd_icd10"), 
+
+  
   
 
+  
+  
   
   
   
