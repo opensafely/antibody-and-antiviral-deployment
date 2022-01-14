@@ -48,5 +48,18 @@ downs_syndrome_nhsd_icd10_codes = codelist_from_csv(
   system = "icd10",
   column = "code",
 )
+
+### Sickle cell disease
+sickle_cell_disease_nhsd_snomed_codes = codelist_from_csv(
+  "codelists/nhsd-sickle-spl-atriskv4-snomed-ct.csv",
+  system = "snomed",
+  column = "code",
+)
+
+sickle_cell_disease_nhsd_icd10_codes = codelist_from_csv(
+  "codelists/nhsd-sickle-spl-hes-icd-10.csv",
+  system = "icd10",
+  column = "code",
+)
   
   

@@ -11,6 +11,18 @@
       "url": "https://codelists.opensafely.org/codelist/nhsd/downs-syndrome-icd-10/22a2d3a2/",
       "downloaded_at": "2022-01-14 12:09:01.563144Z",
       "sha": "ea6bdda54711d24ea40e4d6ca354c295c5710420"
+    },
+    "nhsd-sickle-spl-atriskv4-snomed-ct.csv": {
+      "id": "nhsd/sickle-spl-atriskv4-snomed-ct/7083ed37",
+      "url": "https://codelists.opensafely.org/codelist/nhsd/sickle-spl-atriskv4-snomed-ct/7083ed37/",
+      "downloaded_at": "2022-01-14 15:27:19.678902Z",
+      "sha": "9798e11fac7650aa56002ded0177d38c5c2192a7"
+    },
+    "nhsd-sickle-spl-hes-icd-10.csv": {
+      "id": "nhsd/sickle-spl-hes-icd-10/789c2d19",
+      "url": "https://codelists.opensafely.org/codelist/nhsd/sickle-spl-hes-icd-10/789c2d19/",
+      "downloaded_at": "2022-01-14 15:27:19.882980Z",
+      "sha": "5b1407e877e6f8c1c045ac083dd5dbc4c36ef3a4"
     }
   }
 }

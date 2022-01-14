@@ -203,6 +203,25 @@ study = StudyDefinition(
   ),
   
   downs_syndrome_nhsd = patients.minimum_of("downs_syndrome_nhsd_snomed", "downs_syndrome_nhsd_icd10"), 
+  
+  ## Sickle cell disease
+  sickle_cell_disease_nhsd_snomed = patients.with_these_clinical_events(
+    sickle_cell_disease_nhsd_snomed_codes,
+    returning = "date",
+    date_format = "YYYY-MM-DD",
+    find_first_match_in_period = True,
+    on_or_before = index_date,
+  ),
+  
+  sickle_cell_disease_nhsd_icd10 = patients.admitted_to_hospital(
+    returning = "date_admitted",
+    with_these_diagnoses = sickle_cell_disease_nhsd_icd10_codes,
+    on_or_before = index_date,
+    find_first_match_in_period = True,
+    date_format = "YYYY-MM-DD",
+  ),
+  
+  sickle_cell_disease_nhsd = patients.minimum_of("sickle_cell_disease_nhsd_snomed", "sickle_cell_disease_nhsd_icd10"), 
 
   
   
