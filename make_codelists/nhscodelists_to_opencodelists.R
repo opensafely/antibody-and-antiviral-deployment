@@ -67,7 +67,7 @@ seperate <- function(cohort) {
 openc_api <- function(codelist_name) {
   
   # Generic 
-  api_token = "xxx"
+  api_token = "7a046994a6161e7a63bd407b9c6be62d1d32804c"
 
   # Codelist
   codelist_data <- cohort_codelists[codelist_name] %>%
@@ -139,6 +139,27 @@ for (i in 1:length(cohorts)){
   cohort_codelists <- append(cohort_codelists, seperate(cohorts[i]))
   
   print(i)
+}
+
+
+## Save codelists as individual .csvs ----
+dir.create(here::here("make_codelists", "NHS Digital codelists"), showWarnings = FALSE, recursive=TRUE)
+codelist_names <- names(cohort_codelists)
+
+for (i in 1:length(codelist_names)){
+  
+  ind_codelists <- cohort_codelists[i] %>%
+    as.data.frame() %>%
+    select(codes = contains("codes"))
+  
+  names(ind_codelists) <- NULL
+  
+  write.csv(ind_codelists, 
+            file = (here::here("make_codelists", "NHS Digital codelists", paste(codelist_names[i], ".csv", sep = ""))), 
+            row.names = FALSE)
+  
+  print(i)
+  
 }
 
 
