@@ -2,3 +2,6 @@ nhsd/downs-syndrome-snomed-ct/3bb246d7
 nhsd/downs-syndrome-icd-10/22a2d3a2
 nhsd/sickle-spl-atriskv4-snomed-ct/7083ed37
 nhsd/sickle-spl-hes-icd-10/789c2d19
+opensafely/cancer-excluding-lung-and-haematological-snomed/2020-04-15
+opensafely/lung-cancer-snomed/2020-04-15
+opensafely/chemotherapy-or-radiotherapy-snomed/2020-04-15

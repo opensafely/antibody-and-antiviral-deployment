@@ -23,6 +23,24 @@
       "url": "https://codelists.opensafely.org/codelist/nhsd/sickle-spl-hes-icd-10/789c2d19/",
       "downloaded_at": "2022-01-14 15:27:19.882980Z",
       "sha": "5b1407e877e6f8c1c045ac083dd5dbc4c36ef3a4"
+    },
+    "opensafely-cancer-excluding-lung-and-haematological-snomed.csv": {
+      "id": "opensafely/cancer-excluding-lung-and-haematological-snomed/2020-04-15",
+      "url": "https://codelists.opensafely.org/codelist/opensafely/cancer-excluding-lung-and-haematological-snomed/2020-04-15/",
+      "downloaded_at": "2022-01-14 15:44:30.079448Z",
+      "sha": "d43aff12fcb3b404c635e24f964ba2a368c96c98"
+    },
+    "opensafely-lung-cancer-snomed.csv": {
+      "id": "opensafely/lung-cancer-snomed/2020-04-15",
+      "url": "https://codelists.opensafely.org/codelist/opensafely/lung-cancer-snomed/2020-04-15/",
+      "downloaded_at": "2022-01-14 15:44:30.610149Z",
+      "sha": "f0debdf1c968242fa8790cd0b773662b8e169f43"
+    },
+    "opensafely-chemotherapy-or-radiotherapy-snomed.csv": {
+      "id": "opensafely/chemotherapy-or-radiotherapy-snomed/2020-04-15",
+      "url": "https://codelists.opensafely.org/codelist/opensafely/chemotherapy-or-radiotherapy-snomed/2020-04-15/",
+      "downloaded_at": "2022-01-14 15:44:30.955160Z",
+      "sha": "10f223ed1c0b45b4f8276e33c8293e0287b3f611"
     }
   }
 }

@@ -61,5 +61,24 @@ sickle_cell_disease_nhsd_icd10_codes = codelist_from_csv(
   system = "icd10",
   column = "code",
 )
+
+### Solid cancer
+non_haematological_cancer_opensafely_snomed_codes = codelist_from_csv(
+  "codelists/opensafely-cancer-excluding-lung-and-haematological-snomed.csv",
+  system = "snomed",
+  column = "id",
+)
+
+lung_cancer_opensafely_snomed_codes = codelist_from_csv(
+  "codelists/opensafely-lung-cancer-snomed.csv", 
+  system = "snomed", 
+  column = "id"
+)
+
+chemotherapy_radiotherapy_opensafely_snomed_codes = codelist_from_csv(
+  "codelists/opensafely-chemotherapy-or-radiotherapy-snomed.csv", 
+  system = "snomed", 
+  column = "id"
+)
   
   
