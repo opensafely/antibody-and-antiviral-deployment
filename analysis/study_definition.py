@@ -224,7 +224,7 @@ study = StudyDefinition(
   sickle_cell_disease_nhsd = patients.minimum_of("sickle_cell_disease_nhsd_snomed", "sickle_cell_disease_nhsd_icd10"), 
   
   ### Solid cancer
-  cancer = patients.with_these_clinical_events(
+  cancer_opensafely_snomed = patients.with_these_clinical_events(
     combine_codelists(
       non_haematological_cancer_opensafely_snomed_codes,
       lung_cancer_opensafely_snomed_codes,
