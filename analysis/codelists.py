@@ -80,5 +80,58 @@ chemotherapy_radiotherapy_opensafely_snomed_codes = codelist_from_csv(
   system = "snomed", 
   column = "id"
 )
-  
+
+### Rare neurological conditions
+
+#### Multiple sclerosis
+multiple_sclerosis_nhsd_snomed_codes = codelist_from_csv(
+  "codelists/nhsd-multiple-sclerosis-snomed-ct.csv",
+  system = "snomed",
+  column = "code",
+)
+
+multiple_sclerosis_nhsd_icd10_codes = codelist_from_csv(
+  "codelists/nhsd-multiple-sclerosis.csv",
+  system = "icd10",
+  column = "code",
+)
+
+#### Motor neurone disease
+motor_neurone_disease_nhsd_snomed_codes = codelist_from_csv(
+  "codelists/nhsd-motor-neurone-disease-snomed-ct.csv",
+  system = "snomed",
+  column = "code",
+)
+
+motor_neurone_disease_nhsd_icd10_codes = codelist_from_csv(
+  "codelists/nhsd-motor-neurone-disease-icd-10.csv",
+  system = "icd10",
+  column = "code",
+)
+
+#### Myasthenia gravis
+myasthenia_gravis_nhsd_snomed_codes = codelist_from_csv(
+  "codelists/nhsd-myasthenia-gravis-snomed-ct.csv",
+  system = "snomed",
+  column = "code",
+)
+
+myasthenia_gravis_nhsd_icd10_codes = codelist_from_csv(
+  "codelists/nhsd-myasthenia-gravis.csv",
+  system = "icd10",
+  column = "code",
+)
+
+#### Huntington’s disease
+huntingtons_disease_nhsd_snomed_codes = codelist_from_csv(
+  "codelists/nhsd-huntingtons-snomed-ct.csv",
+  system = "snomed",
+  column = "code",
+)
+
+huntingtons_disease_nhsd_icd10_codes = codelist_from_csv(
+  "codelists/nhsd-huntingtons.csv",
+  system = "icd10",
+  column = "code",
+)  
   

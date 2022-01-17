@@ -26,8 +26,8 @@ from cohortextractor import (
 
 ## Import codelists from codelist.py (which pulls them from the codelist folder)
 from codelists import *
-
-
+  
+  
 # DEFINE STUDY POPULATION ----
 
 ## Define study time variables
@@ -223,7 +223,7 @@ study = StudyDefinition(
   
   sickle_cell_disease_nhsd = patients.minimum_of("sickle_cell_disease_nhsd_snomed", "sickle_cell_disease_nhsd_icd10"), 
   
-  ### Solid cancer
+  ## Solid cancer
   cancer_opensafely_snomed = patients.with_these_clinical_events(
     combine_codelists(
       non_haematological_cancer_opensafely_snomed_codes,
@@ -235,13 +235,84 @@ study = StudyDefinition(
     find_first_match_in_period = True,
     on_or_before = "index_date",
   ),
-
   
+  ## Rare neurological conditions
   
-
+  ### Multiple sclerosis
+  multiple_sclerosis_nhsd_snomed = patients.with_these_clinical_events(
+    multiple_sclerosis_nhsd_snomed_codes,
+    returning = "date",
+    date_format = "YYYY-MM-DD",
+    find_first_match_in_period = True,
+    on_or_before = index_date,
+  ),
   
+  multiple_sclerosis_nhsd_icd10 = patients.admitted_to_hospital(
+    returning = "date_admitted",
+    with_these_diagnoses = multiple_sclerosis_nhsd_icd10_codes,
+    on_or_before = index_date,
+    find_first_match_in_period = True,
+    date_format = "YYYY-MM-DD",
+  ),
   
+  multiple_sclerosis_nhsd = patients.minimum_of("multiple_sclerosis_nhsd_snomed", "multiple_sclerosis_nhsd_icd10"), 
   
+  ### Motor neurone disease
+  motor_neurone_disease_nhsd_snomed = patients.with_these_clinical_events(
+    motor_neurone_disease_nhsd_snomed_codes,
+    returning = "date",
+    date_format = "YYYY-MM-DD",
+    find_first_match_in_period = True,
+    on_or_before = index_date,
+  ),
+  
+  motor_neurone_disease_nhsd_icd10 = patients.admitted_to_hospital(
+    returning = "date_admitted",
+    with_these_diagnoses = motor_neurone_disease_nhsd_icd10_codes,
+    on_or_before = index_date,
+    find_first_match_in_period = True,
+    date_format = "YYYY-MM-DD",
+  ),
+  
+  motor_neurone_disease_nhsd = patients.minimum_of("motor_neurone_disease_nhsd_snomed", "motor_neurone_disease_nhsd_icd10"),
+  
+  ### Myasthenia gravis
+  myasthenia_gravis_nhsd_snomed = patients.with_these_clinical_events(
+    myasthenia_gravis_nhsd_snomed_codes,
+    returning = "date",
+    date_format = "YYYY-MM-DD",
+    find_first_match_in_period = True,
+    on_or_before = index_date,
+  ),
+  
+  myasthenia_gravis_nhsd_icd10 = patients.admitted_to_hospital(
+    returning = "date_admitted",
+    with_these_diagnoses = myasthenia_gravis_nhsd_icd10_codes,
+    on_or_before = index_date,
+    find_first_match_in_period = True,
+    date_format = "YYYY-MM-DD",
+  ),
+  
+  myasthenia_gravis_nhsd = patients.minimum_of("myasthenia_gravis_nhsd_snomed", "myasthenia_gravis_nhsd_icd10"),
+  
+  ### Huntington’s disease
+  huntingtons_disease_nhsd_snomed = patients.with_these_clinical_events(
+    huntingtons_disease_nhsd_snomed_codes,
+    returning = "date",
+    date_format = "YYYY-MM-DD",
+    find_first_match_in_period = True,
+    on_or_before = index_date,
+  ),
+  
+  huntingtons_disease_nhsd_icd10 = patients.admitted_to_hospital(
+    returning = "date_admitted",
+    with_these_diagnoses = huntingtons_disease_nhsd_icd10_codes,
+    on_or_before = index_date,
+    find_first_match_in_period = True,
+    date_format = "YYYY-MM-DD",
+  ),
+  
+  huntingtons_disease_nhsd = patients.minimum_of("huntingtons_disease_nhsd_snomed", "huntingtons_disease_nhsd_icd10"),
   
   
   
