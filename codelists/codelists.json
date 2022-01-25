@@ -42,6 +42,12 @@
       "downloaded_at": "2022-01-14 15:44:30.955160Z",
       "sha": "10f223ed1c0b45b4f8276e33c8293e0287b3f611"
     },
+    "opensafely-haematological-cancer-snomed.csv": {
+      "id": "opensafely/haematological-cancer-snomed/2020-04-15",
+      "url": "https://codelists.opensafely.org/codelist/opensafely/haematological-cancer-snomed/2020-04-15/",
+      "downloaded_at": "2022-01-25 13:39:24.531232Z",
+      "sha": "c87e49e8d2965bc489f9baba670783f15ce73896"
+    },
     "nhsd-multiple-sclerosis-snomed-ct.csv": {
       "id": "nhsd/multiple-sclerosis-snomed-ct/7336ad2d",
       "url": "https://codelists.opensafely.org/codelist/nhsd/multiple-sclerosis-snomed-ct/7336ad2d/",

@@ -236,6 +236,15 @@ study = StudyDefinition(
     on_or_before = "index_date",
   ),
   
+  ## Patients with a haematological diseases
+  haematological_cancer = patients.with_these_clinical_events(
+    haematological_cancer_codes,
+    returning = "date",
+    date_format = "YYYY-MM-DD",
+    find_first_match_in_period = True,
+    on_or_before = "index_date",
+  ),
+  
   ## Rare neurological conditions
   
   ### Multiple sclerosis
