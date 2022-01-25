@@ -10,6 +10,7 @@ opensafely/kidney-transplant/2020-07-15
 primis-covid19-vacc-uptake/cld/v1
 nhsd/immunosupression-pcdcluster-snomed-ct/0993606d
 opensafely/hiv-snomed/2020-07-13
+opensafely/solid-organ-transplantation/2020-04-10
 nhsd/multiple-sclerosis-snomed-ct/7336ad2d
 nhsd/multiple-sclerosis/4be2c69b
 nhsd/motor-neurone-disease-snomed-ct/5a2739f8

@@ -110,8 +110,25 @@ liver_disease_primis_codes = codelist_from_csv(
 ### Immune-mediated inflammatory disorders (IMID)
   
 ### Primary immune deficiencies
+immunosupression_nhsd_codes = codelist_from_csv(
+  "codelists/nhsd-immunosupression-pcdcluster-snomed-ct.csv",
+  system = "snomed",
+  column = "code",
+)
 
+## HIV/AIDs
+hiv_aids_opensafely_codes = codelist_from_csv(
+  "codelists/opensafely-hiv-snomed.csv",
+  system = "snomed",
+  column = "code",
+)
 
+## Solid organ transplant
+solid_organ_transplant_opensafely_codes = codelist_from_csv(
+  "codelists/opensafely-solid-organ-transplantation.csv",
+  system = "snomed",
+  column = "code",
+)
 
 ### Rare neurological conditions
 

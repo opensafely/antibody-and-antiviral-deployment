@@ -297,6 +297,14 @@ study = StudyDefinition(
     date_format = "YYYY-MM-DD",
   ),
   
+  ## Solid organ transplant
+  solid_organ_transplant_opensafely_codes = patients.with_these_clinical_events(
+    solid_organ_transplant_opensafely_codes,
+    returning = "date",
+    find_last_match_in_period = True,
+    on_or_before = "index_date",
+    date_format = "YYYY-MM-DD",
+  ),
   
   ## Rare neurological conditions
   
