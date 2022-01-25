@@ -7,6 +7,7 @@ opensafely/lung-cancer-snomed/2020-04-15
 opensafely/chemotherapy-or-radiotherapy-snomed/2020-04-15
 opensafely/haematological-cancer-snomed/2020-04-15
 opensafely/kidney-transplant/2020-07-15
+primis-covid19-vacc-uptake/cld/v1
 nhsd/multiple-sclerosis-snomed-ct/7336ad2d
 nhsd/multiple-sclerosis/4be2c69b
 nhsd/motor-neurone-disease-snomed-ct/5a2739f8

@@ -100,6 +100,12 @@ kidney_transplant_codes = codelist_from_csv(
 #### Creatinine to calculate egfr/CKD 
 creatinine_codes = codelist(["XE2q5"], system = "ctv3")
 
+### Patients with liver disease
+cld_codes = codelist_from_csv(
+  "codelists/primis-covid19-vacc-uptake-cld.csv",
+  system = "snomed",
+  column = "code",
+)
 
 ### Rare neurological conditions
 

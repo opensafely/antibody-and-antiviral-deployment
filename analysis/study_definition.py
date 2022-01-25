@@ -236,7 +236,7 @@ study = StudyDefinition(
     on_or_before = "index_date",
   ),
   
-  ## Patients with a haematological diseases
+  ## Haematological diseases
   haematological_cancer = patients.with_these_clinical_events(
     haematological_cancer_codes,
     returning = "date",
@@ -245,7 +245,7 @@ study = StudyDefinition(
     on_or_before = "index_date",
   ),
   
-  ## Patients with renal disease
+  ## Renal disease
   
   ### Kidney transplant
   kidney_transplant = patients.with_these_clinical_events(
@@ -266,6 +266,15 @@ study = StudyDefinition(
       "float": {"distribution": "normal", "mean": 60.0, "stddev": 15},
       "incidence": 0.25,
     },
+  ),
+  
+  ## Liver disease
+  liver_disease = patients.with_these_clinical_events(
+    cld_codes,
+    returning = "date",
+    find_last_match_in_period = True,
+    on_or_before = "index_date",
+    date_format = "YYYY-MM-DD",
   ),
   
   ## Rare neurological conditions
