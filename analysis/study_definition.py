@@ -245,6 +245,29 @@ study = StudyDefinition(
     on_or_before = "index_date",
   ),
   
+  ## Patients with renal disease
+  
+  ### Kidney transplant
+  kidney_transplant = patients.with_these_clinical_events(
+    kidney_transplant_codes,
+    returning = "date",
+    date_format = "YYYY-MM-DD",
+    find_first_match_in_period = True,
+    on_or_before = "index_date",
+  ),
+
+  ### Creatinine to calculate egfr/CKD 
+  creatinine = patients.with_these_clinical_events(
+    creatinine_codes,
+    find_last_match_in_period = True,
+    between = ["index_date - 1 year", "index_date"],
+    returning = "numeric_value",
+    return_expectations = {
+      "float": {"distribution": "normal", "mean": 60.0, "stddev": 15},
+      "incidence": 0.25,
+    },
+  ),
+  
   ## Rare neurological conditions
   
   ### Multiple sclerosis

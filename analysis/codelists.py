@@ -81,6 +81,26 @@ chemotherapy_radiotherapy_opensafely_snomed_codes = codelist_from_csv(
   column = "id"
 )
 
+### Patients with a haematological diseases
+haematological_cancer_codes = codelist_from_csv(
+  "codelists/opensafely-haematological-cancer-snomed.csv", 
+  system = "snomed", 
+  column = "id"
+)
+
+### Patients with renal disease
+
+#### Kidney transplant
+kidney_transplant_codes = codelist_from_csv(
+  "codelists/opensafely-kidney-transplant.csv",
+  system = "ctv3",
+  column = "CTV3ID",
+)
+
+#### Creatinine to calculate egfr/CKD 
+creatinine_codes = codelist(["XE2q5"], system = "ctv3")
+
+
 ### Rare neurological conditions
 
 #### Multiple sclerosis
