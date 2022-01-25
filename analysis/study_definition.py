@@ -278,6 +278,8 @@ study = StudyDefinition(
   ),
   
   ## Immune-mediated inflammatory disorders (IMID)
+  
+  ## Primary immune deficiencies
   immunosupression_nhsd = patients.with_these_clinical_events(
     immunosupression_nhsd_codes,
     returning = "date",
@@ -286,7 +288,15 @@ study = StudyDefinition(
     date_format = "YYYY-MM-DD",
   ),
   
-  ## Primary immune deficiencies
+  ## HIV/AIDs
+  hiv_aids_opensafely = patients.with_these_clinical_events(
+    hiv_aids_opensafely_codes,
+    returning = "date",
+    find_last_match_in_period = True,
+    on_or_before = "index_date",
+    date_format = "YYYY-MM-DD",
+  ),
+  
   
   ## Rare neurological conditions
   

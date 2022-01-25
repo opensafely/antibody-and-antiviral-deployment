@@ -66,6 +66,12 @@
       "downloaded_at": "2022-01-25 14:10:29.990164Z",
       "sha": "3cc58660e33777bd2cd4e9d43b4ff3843ee9ead2"
     },
+    "opensafely-hiv-snomed.csv": {
+      "id": "opensafely/hiv-snomed/2020-07-13",
+      "url": "https://codelists.opensafely.org/codelist/opensafely/hiv-snomed/2020-07-13/",
+      "downloaded_at": "2022-01-25 14:16:03.606314Z",
+      "sha": "9273c81432c3cfba328a19a1037a0dc2621ef543"
+    },
     "nhsd-multiple-sclerosis-snomed-ct.csv": {
       "id": "nhsd/multiple-sclerosis-snomed-ct/7336ad2d",
       "url": "https://codelists.opensafely.org/codelist/nhsd/multiple-sclerosis-snomed-ct/7336ad2d/",
