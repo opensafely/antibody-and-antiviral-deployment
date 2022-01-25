@@ -237,8 +237,8 @@ study = StudyDefinition(
   ),
   
   ## Haematological diseases
-  haematological_cancer = patients.with_these_clinical_events(
-    haematological_cancer_codes,
+  haematological_cancer_opensafely = patients.with_these_clinical_events(
+    haematological_cancer_opensafely_codes,
     returning = "date",
     date_format = "YYYY-MM-DD",
     find_first_match_in_period = True,
@@ -248,8 +248,8 @@ study = StudyDefinition(
   ## Renal disease
   
   ### Kidney transplant
-  kidney_transplant = patients.with_these_clinical_events(
-    kidney_transplant_codes,
+  kidney_transplant_opensafely = patients.with_these_clinical_events(
+    kidney_transplant_opensafely_codes,
     returning = "date",
     date_format = "YYYY-MM-DD",
     find_first_match_in_period = True,
@@ -269,13 +269,17 @@ study = StudyDefinition(
   ),
   
   ## Liver disease
-  liver_disease = patients.with_these_clinical_events(
-    cld_codes,
+  liver_disease_primis = patients.with_these_clinical_events(
+    liver_disease_primis_codes,
     returning = "date",
     find_last_match_in_period = True,
     on_or_before = "index_date",
     date_format = "YYYY-MM-DD",
   ),
+  
+  ## Immune-mediated inflammatory disorders (IMID)
+  
+  ## Primary immune deficiencies
   
   ## Rare neurological conditions
   

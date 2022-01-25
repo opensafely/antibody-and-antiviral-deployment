@@ -82,7 +82,7 @@ chemotherapy_radiotherapy_opensafely_snomed_codes = codelist_from_csv(
 )
 
 ### Patients with a haematological diseases
-haematological_cancer_codes = codelist_from_csv(
+haematological_cancer_opensafely_codes = codelist_from_csv(
   "codelists/opensafely-haematological-cancer-snomed.csv", 
   system = "snomed", 
   column = "id"
@@ -91,7 +91,7 @@ haematological_cancer_codes = codelist_from_csv(
 ### Patients with renal disease
 
 #### Kidney transplant
-kidney_transplant_codes = codelist_from_csv(
+kidney_transplant_opensafely_codes = codelist_from_csv(
   "codelists/opensafely-kidney-transplant.csv",
   system = "ctv3",
   column = "CTV3ID",
@@ -101,11 +101,17 @@ kidney_transplant_codes = codelist_from_csv(
 creatinine_codes = codelist(["XE2q5"], system = "ctv3")
 
 ### Patients with liver disease
-cld_codes = codelist_from_csv(
+liver_disease_primis_codes = codelist_from_csv(
   "codelists/primis-covid19-vacc-uptake-cld.csv",
   system = "snomed",
   column = "code",
 )
+
+### Immune-mediated inflammatory disorders (IMID)
+  
+### Primary immune deficiencies
+
+
 
 ### Rare neurological conditions
 
