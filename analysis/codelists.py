@@ -120,14 +120,14 @@ immunosupression_nhsd_codes = codelist_from_csv(
 hiv_aids_opensafely_codes = codelist_from_csv(
   "codelists/opensafely-hiv-snomed.csv",
   system = "snomed",
-  column = "code",
+  column = "id",
 )
 
 ## Solid organ transplant
 solid_organ_transplant_opensafely_codes = codelist_from_csv(
   "codelists/opensafely-solid-organ-transplantation.csv",
-  system = "snomed",
-  column = "code",
+  system = "ctv3",
+  column = "CTV3ID",
 )
 
 ### Rare neurological conditions
