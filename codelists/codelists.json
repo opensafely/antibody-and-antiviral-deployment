@@ -60,6 +60,12 @@
       "downloaded_at": "2022-01-25 14:05:06.154249Z",
       "sha": "745227a835b2d87102a314c654adebff254d4db8"
     },
+    "nhsd-immunosupression-pcdcluster-snomed-ct.csv": {
+      "id": "nhsd/immunosupression-pcdcluster-snomed-ct/0993606d",
+      "url": "https://codelists.opensafely.org/codelist/nhsd/immunosupression-pcdcluster-snomed-ct/0993606d/",
+      "downloaded_at": "2022-01-25 14:10:29.990164Z",
+      "sha": "3cc58660e33777bd2cd4e9d43b4ff3843ee9ead2"
+    },
     "nhsd-multiple-sclerosis-snomed-ct.csv": {
       "id": "nhsd/multiple-sclerosis-snomed-ct/7336ad2d",
       "url": "https://codelists.opensafely.org/codelist/nhsd/multiple-sclerosis-snomed-ct/7336ad2d/",
