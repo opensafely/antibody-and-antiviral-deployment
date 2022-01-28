@@ -31,7 +31,6 @@ from codelists import *
 # DEFINE STUDY POPULATION ----
 
 ## Define study time variables
-
 from datetime import date
 
 campaign_start = "2021-12-16"
@@ -44,7 +43,6 @@ study = StudyDefinition(
   # PRELIMINARIES ----
   
   ## Configure the expectations framework
-
   default_expectations = {
     "date": {"earliest": "2019-01-01", "latest": "today"},
     "rate": "uniform",
@@ -53,7 +51,6 @@ study = StudyDefinition(
   
   ## Define index date
   index_date = index_date,
-
   
   # POPULATION ----
   population = patients.satisfying(
@@ -186,6 +183,128 @@ study = StudyDefinition(
   ),
   
   
+  # ELIGIBILITY CRITERIA VARIABLES ----
+  
+  ## Inclusion criteria variables
+  
+  ### SARS-CoV-2 test
+  covid_test_date = patients.with_test_result_in_sgss(
+    pathogen = "SARS-CoV-2",
+    test_result = "any",
+    returning = "date",
+    date_format = "YYYY-MM-DD",
+    between = ["index_date", "index_date + 7 days"],
+    find_first_match_in_period = True,
+    restrict_to_earliest_specimen_date = False,
+    return_expectations = {
+      "date": {"earliest": "2020-02-01"},
+      "rate": "exponential_increase",
+      "incidence": 0.6
+    },
+  ),
+  
+  covid_positive_test_type = patients.with_test_result_in_sgss(
+    pathogen = "SARS-CoV-2",
+    test_result = "positive",
+    returning = "case_category",
+    between = ["index_date", "index_date + 7 days"],
+    restrict_to_earliest_specimen_date = True,
+    return_expectations = {
+      "category": {"ratios": {"LFT_Only": 0.4, "PCR_Only": 0.4, "LFT_WithPCR": 0.2}},
+      "incidence": 0.4,
+    },
+  ),
+  
+  covid_positive_previous_30_days = patients.with_test_result_in_sgss(
+    pathogen = "SARS-CoV-2",
+    test_result = "positive",
+    returning = "date",
+    date_format = "YYYY-MM-DD",
+    between = ["covid_test_date - 31 days", "covid_test_date - 1 day"],
+    find_last_match_in_period = True,
+    restrict_to_earliest_specimen_date = False,
+    return_expectations = {
+      "date": {"earliest": "2020-02-01"},
+      "rate": "exponential_increase",
+      "incidence": 0.01
+    },
+  ),
+  
+  ### Onset of symptoms of COVID-19
+  symptomatic_covid_test = patients.with_test_result_in_sgss(
+    pathogen = "SARS-CoV-2",
+    test_result = "any",
+    returning = "symptomatic",
+    between = ["index_date", "index_date + 7 days"],
+    find_first_match_in_period = True,
+    restrict_to_earliest_specimen_date = False,
+    return_expectations={
+      "incidence": 0.1,
+      "category": {
+        "ratios": {
+          "": 0.2,
+          "N": 0.2,
+          "Y": 0.6,
+        }
+      },
+    },
+  ),
+  
+  covid_symptoms_snomed = patients.with_these_clinical_events(
+    covid_symptoms_snomed_codes,
+    returning = "date",
+    date_format = "YYYY-MM-DD",
+    find_first_match_in_period = True,
+    between = ["index_date", "index_date + 7 days"],
+  ),
+  
+  ### NHSD ‘high risk’ cohort (codelist to be defined if/when data avaliable)
+  # high_risk_cohort_nhsd = patients.with_these_clinical_events(
+  #   high_risk_cohort_nhsd_codes,
+  #   between = [campaign_start, index_date],
+  #   returning = "date",
+  #   date_format = "YYYY-MM-DD",
+  #   find_first_match_in_period = True,
+  # ),
+  
+  ## Exclusion criteria
+  
+  ### Pattern of clinical presentation indicates that there is recovery rather than risk of deterioration from infection
+  #   (not currently possible to define/code)
+  
+  ### Require hospitalisation for COVID-19
+  covid_hospital_addmission_date = patients.admitted_to_hospital(
+    returning = "date_admitted",
+    with_these_diagnoses = covid_icd10_codes,
+    on_or_after = "index_date",
+    date_format = "YYYY-MM-DD",
+    find_first_match_in_period = True,
+    return_expectations = {
+      "date": {"earliest": "2020-02-01"},
+      "rate": "exponential_increase",
+      "incidence": 0.01,
+    },
+  ),
+  
+  ### New supplemental oxygen requirement specifically for the management of COVID-19 symptoms
+  #   (not currently possible to define/code)
+  
+  ### Children weighing less than 40kg
+  #   (not currently possible to define/code)
+  
+  ### Children aged under 12 years
+  age = patients.age_as_of(
+    "index_date",
+    return_expectations = {
+      "rate": "universal",
+      "int": {"distribution": "population_ages"},
+      "incidence" : 0.9
+    },
+  ),
+  
+  ### Known hypersensitivity reaction to the active substances or to any of the excipients of sotrovimab
+  
+  
   # HIGH RISK GROUPS ----
   
   ## Down's syndrome
@@ -258,7 +377,7 @@ study = StudyDefinition(
     find_first_match_in_period = True,
     on_or_before = "index_date",
   ),
-
+  
   ### Creatinine to calculate egfr/CKD 
   creatinine = patients.with_these_clinical_events(
     creatinine_codes,

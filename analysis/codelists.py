@@ -34,6 +34,23 @@ antiviral_therapy_codes = codelist(["427314002"], system = "snomed")
 molnupiravir_codes = codelist(["40251211000001109"], system = "snomed")
 
 
+## ELIGIBILITY CRITERIA VARIABLES ----
+
+### Onset of symptoms of COVID-19
+covid_symptoms_snomed_codes = codelist_from_csv(
+  "codelists/user-MillieGreen-covid-19-symptoms.csv",
+  system = "snomed",
+  column = "code",
+)
+
+### Require hospitalisation for COVID-19
+covid_icd10_codes = codelist_from_csv(
+  "codelists/opensafely-covid-identification.csv",
+  system = "icd10",
+  column = "icd10_code",
+)
+
+
 ## HIGH RISK GROUPS ----
 
 ### Down's syndrome
@@ -108,7 +125,7 @@ liver_disease_primis_codes = codelist_from_csv(
 )
 
 ### Immune-mediated inflammatory disorders (IMID)
-  
+
 ### Primary immune deficiencies
 immunosupression_nhsd_codes = codelist_from_csv(
   "codelists/nhsd-immunosupression-pcdcluster-snomed-ct.csv",
@@ -183,4 +200,4 @@ huntingtons_disease_nhsd_icd10_codes = codelist_from_csv(
   system = "icd10",
   column = "code",
 )  
-  
+

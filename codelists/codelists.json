@@ -1,5 +1,17 @@
 {
   "files": {
+    "user-MillieGreen-covid-19-symptoms.csv": {
+      "id": "user/MillieGreen/covid-19-symptoms/0ca4c5ac",
+      "url": "https://codelists.opensafely.org/codelist/user/MillieGreen/covid-19-symptoms/0ca4c5ac/",
+      "downloaded_at": "2022-01-28 14:16:05.416870Z",
+      "sha": "bc21046f8f59de701e27a07f47e6a7e4397d23c2"
+    },
+    "opensafely-covid-identification.csv": {
+      "id": "opensafely/covid-identification/2020-06-03",
+      "url": "https://codelists.opensafely.org/codelist/opensafely/covid-identification/2020-06-03/",
+      "downloaded_at": "2022-01-28 14:27:02.985609Z",
+      "sha": "124db6929439379b7dacd55ba26ae4f2ed9370bc"
+    },
     "nhsd-downs-syndrome-snomed-ct.csv": {
       "id": "nhsd/downs-syndrome-snomed-ct/3bb246d7",
       "url": "https://codelists.opensafely.org/codelist/nhsd/downs-syndrome-snomed-ct/3bb246d7/",
