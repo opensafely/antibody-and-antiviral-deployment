@@ -1,7 +1,7 @@
 library(tidyverse)
 library(glue)
 
-hc_drug_names <- read_csv("output/input_drug_name_unique.csv", col_types = cols(.default = col_character())) %>%
+hc_drug_names <- read_csv("output/drug_name_unique.csv", col_types = cols(.default = col_character())) %>%
   mutate(DrugName = tolower(DrugName)) %>% 
   distinct(DrugName)
 drug_mapping <- read_csv("output/input_druglist_mapping.csv")
