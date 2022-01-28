@@ -172,8 +172,8 @@ immunosuppresant_drugs_snomed_codes = codelist_from_csv(
 
 oral_steroid_drugs_dmd_codes = codelist_from_csv(
   "codelists/nhsd-oral-steroid-drugs-pra-dmd.csv", 
-  system = "snomed", 
-  column="id",
+  system = "snomed",
+  column = "dmd_id",
 )
 
 oral_steroid_drugs_snomed_codes = codelist_from_csv(
