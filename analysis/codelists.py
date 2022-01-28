@@ -99,32 +99,88 @@ chemotherapy_radiotherapy_opensafely_snomed_codes = codelist_from_csv(
 )
 
 ### Patients with a haematological diseases
-haematological_cancer_opensafely_codes = codelist_from_csv(
-  "codelists/opensafely-haematological-cancer-snomed.csv", 
+haematopoietic_stem_cell_transplant_nhsd_snomed_codes = codelist_from_csv(
+  "codelists/nhsd-haematopoietic-stem-cell-transplant-snomed.csv", 
   system = "snomed", 
-  column = "id"
+  column = "code"
+)
+
+haematopoietic_stem_cell_transplant_nhsd_icd10_codes = codelist_from_csv(
+  "codelists/nhsd-haematopoietic-stem-cell-transplant-icd-10.csv", 
+  system = "icd10", 
+  column = "code"
+)
+
+haematopoietic_stem_cell_transplant_nhsd_opcs4_codes = codelist_from_csv(
+  "codelists/nhsd-haematopoietic-stem-cell-transplant-opcs4.csv", 
+  system = "opcs4", 
+  column = "code"
+)
+
+# haematological_malignancies_nhsd_snomed_codes = codelist_from_csv(
+#   "codelists/nhsd-haematological-malignancies-snomed.csv", 
+#   system = "snomed", 
+#   column = "code"
+# )
+
+haematological_malignancies_nhsd_icd10_codes = codelist_from_csv(
+  "codelists/nhsd-haematological-malignancies-icd-10.csv", 
+  system = "icd10", 
+  column = "code"
 )
 
 ### Patients with renal disease
 
-#### Kidney transplant
-kidney_transplant_opensafely_codes = codelist_from_csv(
-  "codelists/opensafely-kidney-transplant.csv",
-  system = "ctv3",
-  column = "CTV3ID",
+#### CKD stage 5
+ckd_stage_5_nhsd_snomed_codes = codelist_from_csv(
+  "codelists/nhsd-ckd-stage-5-snomed-ct.csv", 
+  system = "snomed", 
+  column = "code"
 )
 
-#### Creatinine to calculate egfr/CKD 
-creatinine_codes = codelist(["XE2q5"], system = "ctv3")
+ckd_stage_5_nhsd_icd10_codes = codelist_from_csv(
+  "codelists/nhsd-ckd-stage-5-icd-10.csv", 
+  system = "icd10", 
+  column = "code"
+)
 
 ### Patients with liver disease
-liver_disease_primis_codes = codelist_from_csv(
-  "codelists/primis-covid19-vacc-uptake-cld.csv",
-  system = "snomed",
-  column = "code",
+liver_disease_nhsd_snomed_codes = codelist_from_csv(
+  "codelists/nhsd-liver-cirrhosis.csv", 
+  system = "snomed", 
+  column = "code"
+)
+
+liver_disease_nhsd_icd10_codes = codelist_from_csv(
+  "codelists/nhsd-liver-cirrhosis-icd-10.csv", 
+  system = "icd10", 
+  column = "code"
 )
 
 ### Immune-mediated inflammatory disorders (IMID)
+immunosuppresant_drugs_dmd_codes = codelist_from_csv(
+  "codelists/nhsd-immunosuppresant-drugs-pra-dmd.csv", 
+  system = "snomed", 
+  column = "code"
+)
+
+immunosuppresant_drugs_snomed_codes = codelist_from_csv(
+  "codelists/nhsd-immunosuppresant-drugs-pra-snomed.csv", 
+  system = "snomed", 
+  column = "code"
+)
+
+oral_steroid_drugs_dmd_codes = codelist_from_csv(
+  "codelists/nhsd-oral-steroid-drugs-pra-dmd.csv", 
+  system = "snomed", 
+  column="id",
+)
+
+oral_steroid_drugs_snomed_codes = codelist_from_csv(
+  "codelists/nhsd-oral-steroid-drugs-snomed.csv", 
+  system = "snomed", 
+  column = "code"
+)
 
 ### Primary immune deficiencies
 immunosupression_nhsd_codes = codelist_from_csv(
@@ -134,17 +190,29 @@ immunosupression_nhsd_codes = codelist_from_csv(
 )
 
 ## HIV/AIDs
-hiv_aids_opensafely_codes = codelist_from_csv(
-  "codelists/opensafely-hiv-snomed.csv",
-  system = "snomed",
-  column = "id",
+hiv_aids_nhsd_snomed_codes = codelist_from_csv(
+  "codelists/nhsd-hiv-aids-snomed.csv", 
+  system = "snomed", 
+  column = "code"
+)
+
+hiv_aids_nhsd_icd10_codes = codelist_from_csv(
+  "codelists/nhsd-hiv-aids-icd10.csv", 
+  system = "icd10", 
+  column = "code"
 )
 
 ## Solid organ transplant
-solid_organ_transplant_opensafely_codes = codelist_from_csv(
-  "codelists/opensafely-solid-organ-transplantation.csv",
-  system = "ctv3",
-  column = "CTV3ID",
+solid_organ_transplant_nhsd_snomed_codes = codelist_from_csv(
+  "codelists/nhsd-transplant-spl-atriskv4-snomed-ct.csv",
+  system = "snomed",
+  column = "code",
+)
+
+solid_organ_transplant_nhsd_opcs4_codes = codelist_from_csv(
+  "codelists/nhsd-transplant-spl-hes-opcs4.csv", 
+  system = "opcs4", 
+  column = "code"
 )
 
 ### Rare neurological conditions

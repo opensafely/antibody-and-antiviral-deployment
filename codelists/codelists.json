@@ -54,23 +54,83 @@
       "downloaded_at": "2022-01-14 15:44:30.955160Z",
       "sha": "10f223ed1c0b45b4f8276e33c8293e0287b3f611"
     },
-    "opensafely-haematological-cancer-snomed.csv": {
-      "id": "opensafely/haematological-cancer-snomed/2020-04-15",
-      "url": "https://codelists.opensafely.org/codelist/opensafely/haematological-cancer-snomed/2020-04-15/",
-      "downloaded_at": "2022-01-25 13:39:24.531232Z",
-      "sha": "c87e49e8d2965bc489f9baba670783f15ce73896"
+    "nhsd-haematopoietic-stem-cell-transplant-snomed.csv": {
+      "id": "nhsd/haematopoietic-stem-cell-transplant-snomed/3ec3ac16",
+      "url": "https://codelists.opensafely.org/codelist/nhsd/haematopoietic-stem-cell-transplant-snomed/3ec3ac16/",
+      "downloaded_at": "2022-01-28 14:58:55.997690Z",
+      "sha": "cf529748a01cfa37247b550248db8edfc494ebc2"
     },
-    "opensafely-kidney-transplant.csv": {
-      "id": "opensafely/kidney-transplant/2020-07-15",
-      "url": "https://codelists.opensafely.org/codelist/opensafely/kidney-transplant/2020-07-15/",
-      "downloaded_at": "2022-01-25 13:52:48.200225Z",
-      "sha": "db6b47d17273b563cb428e4a97a7ba8b6d62afa9"
+    "nhsd-haematopoietic-stem-cell-transplant-icd-10.csv": {
+      "id": "nhsd/haematopoietic-stem-cell-transplant-icd-10/395e2c2a",
+      "url": "https://codelists.opensafely.org/codelist/nhsd/haematopoietic-stem-cell-transplant-icd-10/395e2c2a/",
+      "downloaded_at": "2022-01-28 14:58:56.216435Z",
+      "sha": "2635631fd1f67bb6a0442c91d119dec2fab24900"
     },
-    "primis-covid19-vacc-uptake-cld.csv": {
-      "id": "primis-covid19-vacc-uptake/cld/v1",
-      "url": "https://codelists.opensafely.org/codelist/primis-covid19-vacc-uptake/cld/v1/",
-      "downloaded_at": "2022-01-25 14:05:06.154249Z",
-      "sha": "745227a835b2d87102a314c654adebff254d4db8"
+    "nhsd-haematopoietic-stem-cell-transplant-opcs4.csv": {
+      "id": "nhsd/haematopoietic-stem-cell-transplant-opcs4/204eb8f5",
+      "url": "https://codelists.opensafely.org/codelist/nhsd/haematopoietic-stem-cell-transplant-opcs4/204eb8f5/",
+      "downloaded_at": "2022-01-28 14:58:56.628053Z",
+      "sha": "cf4870f86f0b704c125d1398765c05826d0bb9ea"
+    },
+    "nhsd-haematological-malignancies-icd-10.csv": {
+      "id": "nhsd/haematological-malignancies-icd-10/073f45c0",
+      "url": "https://codelists.opensafely.org/codelist/nhsd/haematological-malignancies-icd-10/073f45c0/",
+      "downloaded_at": "2022-01-28 14:58:56.854347Z",
+      "sha": "4ba51c56e9dfb0ab05161da4b381b9cbb0337003"
+    },
+    "nhsd-haematological-malignancies-snomed.csv": {
+      "id": "nhsd/haematological-malignancies-snomed/1583b91d",
+      "url": "https://codelists.opensafely.org/codelist/nhsd/haematological-malignancies-snomed/1583b91d/",
+      "downloaded_at": "2022-01-28 14:58:57.130117Z",
+      "sha": "b1294df28507599466e68691864434d79affb788"
+    },
+    "nhsd-ckd-stage-5-snomed-ct.csv": {
+      "id": "nhsd/ckd-stage-5-snomed-ct/2808538e",
+      "url": "https://codelists.opensafely.org/codelist/nhsd/ckd-stage-5-snomed-ct/2808538e/",
+      "downloaded_at": "2022-01-28 15:20:48.450301Z",
+      "sha": "6c0621a51526d91170b31fd3ebf5bcaac73bb1bc"
+    },
+    "nhsd-ckd-stage-5-icd-10.csv": {
+      "id": "nhsd/ckd-stage-5-icd-10/0ef8e059",
+      "url": "https://codelists.opensafely.org/codelist/nhsd/ckd-stage-5-icd-10/0ef8e059/",
+      "downloaded_at": "2022-01-28 15:20:48.735128Z",
+      "sha": "1ea228f377108464145ae7da66ed5f870145e615"
+    },
+    "nhsd-liver-cirrhosis.csv": {
+      "id": "nhsd/liver-cirrhosis/64f239d0",
+      "url": "https://codelists.opensafely.org/codelist/nhsd/liver-cirrhosis/64f239d0/",
+      "downloaded_at": "2022-01-28 15:23:28.128274Z",
+      "sha": "bc5a4a1e876c1ddebbc075b1fe772ddb497d6a7a"
+    },
+    "nhsd-liver-cirrhosis-icd-10.csv": {
+      "id": "nhsd/liver-cirrhosis-icd-10/3e6506cd",
+      "url": "https://codelists.opensafely.org/codelist/nhsd/liver-cirrhosis-icd-10/3e6506cd/",
+      "downloaded_at": "2022-01-28 15:23:28.333624Z",
+      "sha": "1731536c7ccb70aadee34fcf2507dc0a2f69a33a"
+    },
+    "nhsd-immunosuppresant-drugs-pra-dmd.csv": {
+      "id": "nhsd/immunosuppresant-drugs-pra-dmd/526d9f5f",
+      "url": "https://codelists.opensafely.org/codelist/nhsd/immunosuppresant-drugs-pra-dmd/526d9f5f/",
+      "downloaded_at": "2022-01-28 15:28:37.639651Z",
+      "sha": "fbb772601936d4df67f1ebe8a2e7e0bb3ec0777f"
+    },
+    "nhsd-immunosuppresant-drugs-pra-snomed.csv": {
+      "id": "nhsd/immunosuppresant-drugs-pra-snomed/6b7d1294",
+      "url": "https://codelists.opensafely.org/codelist/nhsd/immunosuppresant-drugs-pra-snomed/6b7d1294/",
+      "downloaded_at": "2022-01-28 15:28:37.859044Z",
+      "sha": "48bc788a302d38b71a706262f0f2813afddb2c18"
+    },
+    "nhsd-oral-steroid-drugs-pra-dmd.csv": {
+      "id": "nhsd/oral-steroid-drugs-pra-dmd/4d081f73",
+      "url": "https://codelists.opensafely.org/codelist/nhsd/oral-steroid-drugs-pra-dmd/4d081f73/",
+      "downloaded_at": "2022-01-28 15:28:38.281813Z",
+      "sha": "c0325bf811fe1eb06dca6e6b724c804df8305991"
+    },
+    "nhsd-oral-steroid-drugs-snomed.csv": {
+      "id": "nhsd/oral-steroid-drugs-snomed/1ae93909",
+      "url": "https://codelists.opensafely.org/codelist/nhsd/oral-steroid-drugs-snomed/1ae93909/",
+      "downloaded_at": "2022-01-28 15:28:38.570355Z",
+      "sha": "5f2688b864aca2a50e8d67a2b71703922d9b7dd0"
     },
     "nhsd-immunosupression-pcdcluster-snomed-ct.csv": {
       "id": "nhsd/immunosupression-pcdcluster-snomed-ct/0993606d",
@@ -78,17 +138,29 @@
       "downloaded_at": "2022-01-25 14:10:29.990164Z",
       "sha": "3cc58660e33777bd2cd4e9d43b4ff3843ee9ead2"
     },
-    "opensafely-hiv-snomed.csv": {
-      "id": "opensafely/hiv-snomed/2020-07-13",
-      "url": "https://codelists.opensafely.org/codelist/opensafely/hiv-snomed/2020-07-13/",
-      "downloaded_at": "2022-01-25 14:16:03.606314Z",
-      "sha": "9273c81432c3cfba328a19a1037a0dc2621ef543"
+    "nhsd-hiv-aids-snomed.csv": {
+      "id": "nhsd/hiv-aids-snomed/68ca529e",
+      "url": "https://codelists.opensafely.org/codelist/nhsd/hiv-aids-snomed/68ca529e/",
+      "downloaded_at": "2022-01-28 15:40:10.275491Z",
+      "sha": "0a17c7d5410264ef321a0e8f8fed48fdbbec483a"
     },
-    "opensafely-solid-organ-transplantation.csv": {
-      "id": "opensafely/solid-organ-transplantation/2020-04-10",
-      "url": "https://codelists.opensafely.org/codelist/opensafely/solid-organ-transplantation/2020-04-10/",
-      "downloaded_at": "2022-01-25 14:18:56.924460Z",
-      "sha": "94178a9e19770b9c43c08fe42df6ab5ed0d9ec49"
+    "nhsd-hiv-aids-icd10.csv": {
+      "id": "nhsd/hiv-aids-icd10/01d9c5d4",
+      "url": "https://codelists.opensafely.org/codelist/nhsd/hiv-aids-icd10/01d9c5d4/",
+      "downloaded_at": "2022-01-28 15:40:10.472628Z",
+      "sha": "c89c973bdb73b5c23c541905e3c71bd7dfe72930"
+    },
+    "nhsd-transplant-spl-atriskv4-snomed-ct.csv": {
+      "id": "nhsd/transplant-spl-atriskv4-snomed-ct/57747a02",
+      "url": "https://codelists.opensafely.org/codelist/nhsd/transplant-spl-atriskv4-snomed-ct/57747a02/",
+      "downloaded_at": "2022-01-28 15:40:10.780681Z",
+      "sha": "512bf4922c32d3826e17eeb0870e465825ec2e21"
+    },
+    "nhsd-transplant-spl-hes-opcs4.csv": {
+      "id": "nhsd/transplant-spl-hes-opcs4/5b4c92d0",
+      "url": "https://codelists.opensafely.org/codelist/nhsd/transplant-spl-hes-opcs4/5b4c92d0/",
+      "downloaded_at": "2022-01-28 15:40:11.004235Z",
+      "sha": "8b5d6d8d7d65d39cd5749cd262b583a1aa8515fe"
     },
     "nhsd-multiple-sclerosis-snomed-ct.csv": {
       "id": "nhsd/multiple-sclerosis-snomed-ct/7336ad2d",

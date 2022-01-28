@@ -359,47 +359,105 @@ study = StudyDefinition(
   ),
   
   ## Haematological diseases
-  haematological_cancer_opensafely = patients.with_these_clinical_events(
-    haematological_cancer_opensafely_codes,
+  haematopoietic_stem_cell_transplant_nhsd_snomed = patients.with_these_clinical_events(
+    haematopoietic_stem_cell_transplant_nhsd_snomed_codes,
     returning = "date",
     date_format = "YYYY-MM-DD",
     find_first_match_in_period = True,
-    on_or_before = "index_date",
+    on_or_before = index_date,
   ),
   
-  ## Renal disease
+  haematopoietic_stem_cell_transplant_nhsd_icd10 = patients.admitted_to_hospital(
+    returning = "date_admitted",
+    with_these_diagnoses = haematopoietic_stem_cell_transplant_nhsd_icd10_codes,
+    on_or_before = index_date,
+    find_first_match_in_period = True,
+    date_format = "YYYY-MM-DD",
+  ),
   
-  ### Kidney transplant
-  kidney_transplant_opensafely = patients.with_these_clinical_events(
-    kidney_transplant_opensafely_codes,
-    returning = "date",
+  haematopoietic_stem_cell_transplant_nhsd_opcs4 = patients.admitted_to_hospital(
+    returning = "date_admitted",
+    with_these_procedures = haematopoietic_stem_cell_transplant_nhsd_opcs4_codes,
+    on_or_before = index_date,
     date_format = "YYYY-MM-DD",
     find_first_match_in_period = True,
-    on_or_before = "index_date",
-  ),
-  
-  ### Creatinine to calculate egfr/CKD 
-  creatinine = patients.with_these_clinical_events(
-    creatinine_codes,
-    find_last_match_in_period = True,
-    between = ["index_date - 1 year", "index_date"],
-    returning = "numeric_value",
     return_expectations = {
-      "float": {"distribution": "normal", "mean": 60.0, "stddev": 15},
-      "incidence": 0.25,
+      "date": {"earliest": "2020-02-01"},
+      "rate": "exponential_increase",
+      "incidence": 0.01,
     },
   ),
   
+  # haematological_malignancies_nhsd_snomed = patients.with_these_clinical_events(
+  #   haematological_malignancies_nhsd_snomed_codes,
+  #   returning = "date",
+  #   date_format = "YYYY-MM-DD",
+  #   find_first_match_in_period = True,
+  #   on_or_before = index_date,
+  # ),
+  
+  haematological_malignancies_nhsd_icd10 = patients.admitted_to_hospital(
+    returning = "date_admitted",
+    with_these_diagnoses = haematological_malignancies_nhsd_icd10_codes,
+    on_or_before = index_date,
+    find_first_match_in_period = True,
+    date_format = "YYYY-MM-DD",
+  ),
+  
+  haematological_disease_nhsd = patients.minimum_of("haematopoietic_stem_cell_transplant_nhsd_snomed", 
+                                                    "haematopoietic_stem_cell_transplant_nhsd_icd10", 
+                                                    "haematopoietic_stem_cell_transplant_nhsd_opcs4", 
+                                                    #"haematological_malignancies_nhsd_snomed", 
+                                                    "haematological_malignancies_nhsd_icd10"), 
+  
+  
+  ## Renal disease
+  ckd_stage_5_nhsd_snomed = patients.with_these_clinical_events(
+    ckd_stage_5_nhsd_snomed_codes,
+    returning = "date",
+    date_format = "YYYY-MM-DD",
+    find_first_match_in_period = True,
+    on_or_before = index_date,
+  ),
+  
+  ckd_stage_5_nhsd_icd10 = patients.admitted_to_hospital(
+    returning = "date_admitted",
+    with_these_diagnoses = ckd_stage_5_nhsd_icd10_codes,
+    on_or_before = index_date,
+    find_first_match_in_period = True,
+    date_format = "YYYY-MM-DD",
+  ),
+  
+  ckd_stage_5_nhsd = patients.minimum_of("ckd_stage_5_nhsd_snomed", "ckd_stage_5_nhsd_icd10"), 
+  
   ## Liver disease
-  liver_disease_primis = patients.with_these_clinical_events(
-    liver_disease_primis_codes,
+  liver_disease_nhsd_snomed = patients.with_these_clinical_events(
+    ckd_stage_5_nhsd_snomed_codes,
+    returning = "date",
+    date_format = "YYYY-MM-DD",
+    find_first_match_in_period = True,
+    on_or_before = index_date,
+  ),
+  
+  liver_disease_nhsd_icd10 = patients.admitted_to_hospital(
+    returning = "date_admitted",
+    with_these_diagnoses = ckd_stage_5_nhsd_icd10_codes,
+    on_or_before = index_date,
+    find_first_match_in_period = True,
+    date_format = "YYYY-MM-DD",
+  ),
+  
+  liver_disease_nhsd = patients.minimum_of("liver_disease_nhsd_snomed", "liver_disease_nhsd_icd10"), 
+  
+  ## Immune-mediated inflammatory disorders (IMID)
+  imid_nhsd = patients.with_these_clinical_events(
+    codelist = combine_codelists(immunosuppresant_drugs_dmd_codes, immunosuppresant_drugs_snomed_codes, 
+                                 oral_steroid_drugs_dmd_codes, oral_steroid_drugs_snomed_codes),
     returning = "date",
     find_last_match_in_period = True,
     on_or_before = "index_date",
     date_format = "YYYY-MM-DD",
   ),
-  
-  ## Immune-mediated inflammatory disorders (IMID)
   
   ## Primary immune deficiencies
   immunosupression_nhsd = patients.with_these_clinical_events(
@@ -411,22 +469,47 @@ study = StudyDefinition(
   ),
   
   ## HIV/AIDs
-  hiv_aids_opensafely = patients.with_these_clinical_events(
-    hiv_aids_opensafely_codes,
+  hiv_aids_nhsd_snomed = patients.with_these_clinical_events(
+    hiv_aids_nhsd_snomed_codes,
     returning = "date",
-    find_last_match_in_period = True,
-    on_or_before = "index_date",
+    date_format = "YYYY-MM-DD",
+    find_first_match_in_period = True,
+    on_or_before = index_date,
+  ),
+  
+  hiv_aids_nhsd_icd10 = patients.admitted_to_hospital(
+    returning = "date_admitted",
+    with_these_diagnoses = hiv_aids_nhsd_icd10_codes,
+    on_or_before = index_date,
+    find_first_match_in_period = True,
     date_format = "YYYY-MM-DD",
   ),
   
+  hiv_aids_nhsd = patients.minimum_of("hiv_aids_nhsd_snomed", "hiv_aids_nhsd_icd10"),
+  
   ## Solid organ transplant
-  solid_organ_transplant_opensafely_codes = patients.with_these_clinical_events(
-    solid_organ_transplant_opensafely_codes,
+  solid_organ_transplant_nhsd_snomed = patients.with_these_clinical_events(
+    solid_organ_transplant_nhsd_snomed_codes,
     returning = "date",
-    find_last_match_in_period = True,
-    on_or_before = "index_date",
     date_format = "YYYY-MM-DD",
+    find_first_match_in_period = True,
+    on_or_before = index_date,
   ),
+  
+  solid_organ_transplant_nhsd_opcs4 = patients.admitted_to_hospital(
+    returning = "date_admitted",
+    with_these_procedures = solid_organ_transplant_nhsd_opcs4_codes,
+    on_or_before = index_date,
+    date_format = "YYYY-MM-DD",
+    find_first_match_in_period = True,
+    return_expectations = {
+      "date": {"earliest": "2020-02-01"},
+      "rate": "exponential_increase",
+      "incidence": 0.01,
+    },
+  ),
+  
+  solid_organ_transplant_nhsd = patients.minimum_of("solid_organ_transplant_nhsd_snomed", "solid_organ_transplant_nhsd_opcs4"), 
   
   ## Rare neurological conditions
   
