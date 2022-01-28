@@ -1,0 +1,21 @@
+
+##https://github.com/opensafely/highcostdrugs-research/blob/c5d3a0ae2f95e672deafd7d8036fce3898a211c7/analysis/unique_drug_names.R
+
+## simple script to create new csv with unique drug names from the high cost drugs dataset
+
+install.packages("tidyverse")
+install.packages("here")
+library(tidyverse)
+
+column_names = c("DrugName", "HighCostTariffExcludedDrugCode", "DerivedSNOMEDFromName", "DerivedVTM", "DerivedVTMName", "NumOfAppearances")
+drug_names <- read.csv(file = here::here("output","high cost drugs codelist","drug_name_summary.csv"), 
+                       header = FALSE)
+
+colnames(drug_names) <- column_names
+
+drug_names_unique <- drug_names %>%
+  mutate(DrugName = ifelse(DrugName == "FLUOROURACIL", "FLUOROURACIL", DrugName)) %>%
+  group_by(DrugName) %>%
+  summarise()
+
+write.csv(drug_names_unique, file = here::here("output","high cost drugs codelist","drug_name_unique.csv"))

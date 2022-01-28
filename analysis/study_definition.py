@@ -31,6 +31,7 @@ from codelists import *
 # DEFINE STUDY POPULATION ----
 
 ## Define study time variables
+
 from datetime import date
 
 campaign_start = "2021-12-16"
@@ -43,6 +44,7 @@ study = StudyDefinition(
   # PRELIMINARIES ----
   
   ## Configure the expectations framework
+
   default_expectations = {
     "date": {"earliest": "2019-01-01", "latest": "today"},
     "rate": "uniform",
@@ -51,6 +53,7 @@ study = StudyDefinition(
   
   ## Define index date
   index_date = index_date,
+
   
   # POPULATION ----
   population = patients.satisfying(
