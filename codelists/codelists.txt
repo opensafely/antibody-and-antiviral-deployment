@@ -18,7 +18,7 @@ nhsd/liver-cirrhosis/64f239d0
 nhsd/liver-cirrhosis-icd-10/3e6506cd
 nhsd/immunosuppresant-drugs-pra-dmd/526d9f5f
 nhsd/immunosuppresant-drugs-pra-snomed/6b7d1294
-nhsd/oral-steroid-drugs-pra-dmd/4d081f73
+nhsd/oral-steroid-drugs-pra-dmd/44292c02
 nhsd/oral-steroid-drugs-snomed/1ae93909
 nhsd/immunosupression-pcdcluster-snomed-ct/0993606d
 nhsd/hiv-aids-snomed/68ca529e
