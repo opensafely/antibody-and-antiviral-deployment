@@ -452,7 +452,7 @@ study = StudyDefinition(
   ## Immune-mediated inflammatory disorders (IMID)
   imid_nhsd = patients.with_these_clinical_events(
     codelist = combine_codelists(immunosuppresant_drugs_dmd_codes, immunosuppresant_drugs_snomed_codes, 
-                                 # oral_steroid_drugs_dmd_codes, 
+                                 oral_steroid_drugs_dmd_codes, 
                                  oral_steroid_drugs_snomed_codes),
     returning = "date",
     find_last_match_in_period = True,
