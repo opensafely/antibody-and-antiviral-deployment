@@ -6,7 +6,7 @@
 # Output: output/data/input_*.csv.gz
 #
 # Author(s): M Green
-# Date last updated: 11/01/2022
+# Date last updated: 31/01/2022
 #
 ################################################################################
 
@@ -183,11 +183,24 @@ study = StudyDefinition(
   ),
   
   
+  
   # ELIGIBILITY CRITERIA VARIABLES ----
   
   ## Inclusion criteria variables
   
   ### SARS-CoV-2 test
+  covid_test_positive = patients.with_test_result_in_sgss(
+    pathogen = "SARS-CoV-2",
+    test_result = "positive",
+    returning = "binary_flag",
+    between = ["index_date", "index_date + 7 days"],
+    find_first_match_in_period = True,
+    restrict_to_earliest_specimen_date = False,
+    return_expectations = {
+      "incidence": 0.4
+    },
+  ),
+  
   covid_test_date = patients.with_test_result_in_sgss(
     pathogen = "SARS-CoV-2",
     test_result = "any",
@@ -199,7 +212,7 @@ study = StudyDefinition(
     return_expectations = {
       "date": {"earliest": "2020-02-01"},
       "rate": "exponential_increase",
-      "incidence": 0.6
+      "incidence": 0.55
     },
   ),
   
@@ -211,7 +224,7 @@ study = StudyDefinition(
     restrict_to_earliest_specimen_date = True,
     return_expectations = {
       "category": {"ratios": {"LFT_Only": 0.4, "PCR_Only": 0.4, "LFT_WithPCR": 0.2}},
-      "incidence": 0.4,
+      "incidence": 0.2,
     },
   ),
   
@@ -303,6 +316,8 @@ study = StudyDefinition(
   ),
   
   ### Known hypersensitivity reaction to the active substances or to any of the excipients of sotrovimab
+  #   (not currently possible to define/code)
+  
   
   
   # HIGH RISK GROUPS ----
@@ -313,13 +328,13 @@ study = StudyDefinition(
     returning = "date",
     date_format = "YYYY-MM-DD",
     find_first_match_in_period = True,
-    on_or_before = index_date,
+    on_or_before = "index_date - 7 days",
   ),
   
   downs_syndrome_nhsd_icd10 = patients.admitted_to_hospital(
     returning = "date_admitted",
     with_these_diagnoses = downs_syndrome_nhsd_icd10_codes,
-    on_or_before = index_date,
+    on_or_before = "index_date - 7 days",
     find_first_match_in_period = True,
     date_format = "YYYY-MM-DD",
   ),
@@ -332,13 +347,13 @@ study = StudyDefinition(
     returning = "date",
     date_format = "YYYY-MM-DD",
     find_first_match_in_period = True,
-    on_or_before = index_date,
+    on_or_before = "index_date - 7 days",
   ),
   
   sickle_cell_disease_nhsd_icd10 = patients.admitted_to_hospital(
     returning = "date_admitted",
     with_these_diagnoses = sickle_cell_disease_nhsd_icd10_codes,
-    on_or_before = index_date,
+    on_or_before = "index_date - 7 days",
     find_first_match_in_period = True,
     date_format = "YYYY-MM-DD",
   ),
@@ -355,7 +370,7 @@ study = StudyDefinition(
     returning = "date",
     date_format = "YYYY-MM-DD",
     find_first_match_in_period = True,
-    on_or_before = "index_date",
+    on_or_before = "index_date - 7 days",
   ),
   
   ## Haematological diseases
@@ -364,13 +379,13 @@ study = StudyDefinition(
     returning = "date",
     date_format = "YYYY-MM-DD",
     find_first_match_in_period = True,
-    on_or_before = index_date,
+    on_or_before = "index_date - 7 days",
   ),
   
   haematopoietic_stem_cell_transplant_nhsd_icd10 = patients.admitted_to_hospital(
     returning = "date_admitted",
     with_these_diagnoses = haematopoietic_stem_cell_transplant_nhsd_icd10_codes,
-    on_or_before = index_date,
+    on_or_before = "index_date - 7 days",
     find_first_match_in_period = True,
     date_format = "YYYY-MM-DD",
   ),
@@ -378,7 +393,7 @@ study = StudyDefinition(
   haematopoietic_stem_cell_transplant_nhsd_opcs4 = patients.admitted_to_hospital(
     returning = "date_admitted",
     with_these_procedures = haematopoietic_stem_cell_transplant_nhsd_opcs4_codes,
-    on_or_before = index_date,
+    on_or_before = "index_date - 7 days",
     date_format = "YYYY-MM-DD",
     find_first_match_in_period = True,
     return_expectations = {
@@ -393,13 +408,13 @@ study = StudyDefinition(
   #   returning = "date",
   #   date_format = "YYYY-MM-DD",
   #   find_first_match_in_period = True,
-  #   on_or_before = index_date,
+  #   on_or_before = "index_date - 7 days",
   # ),
   
   haematological_malignancies_nhsd_icd10 = patients.admitted_to_hospital(
     returning = "date_admitted",
     with_these_diagnoses = haematological_malignancies_nhsd_icd10_codes,
-    on_or_before = index_date,
+    on_or_before = "index_date - 7 days",
     find_first_match_in_period = True,
     date_format = "YYYY-MM-DD",
   ),
@@ -417,13 +432,13 @@ study = StudyDefinition(
     returning = "date",
     date_format = "YYYY-MM-DD",
     find_first_match_in_period = True,
-    on_or_before = index_date,
+    on_or_before = "index_date - 7 days",
   ),
   
   ckd_stage_5_nhsd_icd10 = patients.admitted_to_hospital(
     returning = "date_admitted",
     with_these_diagnoses = ckd_stage_5_nhsd_icd10_codes,
-    on_or_before = index_date,
+    on_or_before = "index_date - 7 days",
     find_first_match_in_period = True,
     date_format = "YYYY-MM-DD",
   ),
@@ -436,13 +451,13 @@ study = StudyDefinition(
     returning = "date",
     date_format = "YYYY-MM-DD",
     find_first_match_in_period = True,
-    on_or_before = index_date,
+    on_or_before = "index_date - 7 days",
   ),
   
   liver_disease_nhsd_icd10 = patients.admitted_to_hospital(
     returning = "date_admitted",
     with_these_diagnoses = ckd_stage_5_nhsd_icd10_codes,
-    on_or_before = index_date,
+    on_or_before = "index_date - 7 days",
     find_first_match_in_period = True,
     date_format = "YYYY-MM-DD",
   ),
@@ -456,7 +471,7 @@ study = StudyDefinition(
                                  oral_steroid_drugs_snomed_codes),
     returning = "date",
     find_last_match_in_period = True,
-    on_or_before = "index_date",
+    on_or_before = "index_date - 7 days",
     date_format = "YYYY-MM-DD",
   ),
   
@@ -465,7 +480,7 @@ study = StudyDefinition(
     immunosupression_nhsd_codes,
     returning = "date",
     find_last_match_in_period = True,
-    on_or_before = "index_date",
+    on_or_before = "index_date - 7 days",
     date_format = "YYYY-MM-DD",
   ),
   
@@ -475,14 +490,14 @@ study = StudyDefinition(
     returning = "date",
     date_format = "YYYY-MM-DD",
     find_first_match_in_period = True,
-    on_or_before = index_date,
+    on_or_before = "index_date - 7 days",
   ),
   
   hiv_aids_nhsd_icd10 = patients.admitted_to_hospital(
     returning = "date_admitted",
     with_these_diagnoses = hiv_aids_nhsd_icd10_codes,
-    on_or_before = index_date,
     find_first_match_in_period = True,
+    on_or_before = "index_date - 7 days",
     date_format = "YYYY-MM-DD",
   ),
   
@@ -494,13 +509,13 @@ study = StudyDefinition(
     returning = "date",
     date_format = "YYYY-MM-DD",
     find_first_match_in_period = True,
-    on_or_before = index_date,
+    on_or_before = "index_date - 7 days",
   ),
   
   solid_organ_transplant_nhsd_opcs4 = patients.admitted_to_hospital(
     returning = "date_admitted",
     with_these_procedures = solid_organ_transplant_nhsd_opcs4_codes,
-    on_or_before = index_date,
+    on_or_before = "index_date - 7 days",
     date_format = "YYYY-MM-DD",
     find_first_match_in_period = True,
     return_expectations = {
@@ -520,13 +535,13 @@ study = StudyDefinition(
     returning = "date",
     date_format = "YYYY-MM-DD",
     find_first_match_in_period = True,
-    on_or_before = index_date,
+    on_or_before = "index_date - 7 days",
   ),
   
   multiple_sclerosis_nhsd_icd10 = patients.admitted_to_hospital(
     returning = "date_admitted",
     with_these_diagnoses = multiple_sclerosis_nhsd_icd10_codes,
-    on_or_before = index_date,
+    on_or_before = "index_date - 7 days",
     find_first_match_in_period = True,
     date_format = "YYYY-MM-DD",
   ),
@@ -539,13 +554,13 @@ study = StudyDefinition(
     returning = "date",
     date_format = "YYYY-MM-DD",
     find_first_match_in_period = True,
-    on_or_before = index_date,
+    on_or_before = "index_date - 7 days",
   ),
   
   motor_neurone_disease_nhsd_icd10 = patients.admitted_to_hospital(
     returning = "date_admitted",
     with_these_diagnoses = motor_neurone_disease_nhsd_icd10_codes,
-    on_or_before = index_date,
+    on_or_before = "index_date - 7 days",
     find_first_match_in_period = True,
     date_format = "YYYY-MM-DD",
   ),
@@ -558,13 +573,13 @@ study = StudyDefinition(
     returning = "date",
     date_format = "YYYY-MM-DD",
     find_first_match_in_period = True,
-    on_or_before = index_date,
+    on_or_before = "index_date - 7 days",
   ),
   
   myasthenia_gravis_nhsd_icd10 = patients.admitted_to_hospital(
     returning = "date_admitted",
     with_these_diagnoses = myasthenia_gravis_nhsd_icd10_codes,
-    on_or_before = index_date,
+    on_or_before = "index_date - 7 days",
     find_first_match_in_period = True,
     date_format = "YYYY-MM-DD",
   ),
@@ -577,13 +592,13 @@ study = StudyDefinition(
     returning = "date",
     date_format = "YYYY-MM-DD",
     find_first_match_in_period = True,
-    on_or_before = index_date,
+    on_or_before = "index_date - 7 days",
   ),
   
   huntingtons_disease_nhsd_icd10 = patients.admitted_to_hospital(
     returning = "date_admitted",
     with_these_diagnoses = huntingtons_disease_nhsd_icd10_codes,
-    on_or_before = index_date,
+    on_or_before = "index_date - 7 days",
     find_first_match_in_period = True,
     date_format = "YYYY-MM-DD",
   ),
