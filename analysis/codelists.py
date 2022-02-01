@@ -215,6 +215,31 @@ solid_organ_transplant_nhsd_opcs4_codes = codelist_from_csv(
   column = "code"
 )
 
+thymus_gland_transplant_nhsd_opcs4_codes = codelist_from_csv(
+  "codelists/nhsd-transplant-thymus-gland-spl-hes-opcs4.csv", 
+  system = "opcs4", 
+  column = "code"
+)
+
+replacement_of_organ_transplant_nhsd_opcs4_codes = codelist_from_csv(
+  "codelists/nhsd-transplant-replacement-of-organ-spl-hes-opcs4.csv", 
+  system = "opcs4", 
+  column = "code"
+)
+
+conjunctiva_transplant_nhsd_opcs4_codes = codelist_from_csv(
+  "codelists/nhsd-transplant-conjunctiva-spl-hes-opcs4.csv", 
+  system = "opcs4", 
+  column = "code"
+)
+
+conjunctiva_y_codes_transplant_nhsd_opcs4_codes = codelist_from_csv(
+  "codelists/nhsd-transplant-conjunctiva-y-codes-spl-hes-opcs4.csv", 
+  system = "opcs4", 
+  column = "code"
+)
+
+
 ### Rare neurological conditions
 
 #### Multiple sclerosis
