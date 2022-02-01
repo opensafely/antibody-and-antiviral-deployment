@@ -1,12 +1,28 @@
+################################################################################
+#
+# Description: This script defines the project pipeline - it specifys the 
+#              execution orders for all the code in this repo using a series of 
+#              actions.
+#
+# Author(s): M Green
+# Date last updated: 31/01/2022
+#
+################################################################################
+
 version: '3.0'
 
 expectations:
-  population_size: 1000
+  population_size: 100000
 
 actions:
+  
+  # Extract data ----
 
-  generate_study_population:
-    run: cohortextractor:latest generate_cohort --study-definition study_definition
+  ## Cohort data
+  extract_data:
+    run: cohortextractor:latest generate_cohort --study-definition study_definition --index-date-range "2021-12-13 to 2022-01-24 by week" --output-dir=output/data --output-format=csv.gz
     outputs:
       highly_sensitive:
-        cohort: output/input.csv
+        cohort: output/data/input_*.csv.gz
+
+
