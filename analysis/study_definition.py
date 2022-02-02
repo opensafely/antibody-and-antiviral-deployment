@@ -589,7 +589,7 @@ transplant_multiple_opcs4_conjunctiva_OS=patients.satisfying(
   ),
 ),
 
-  #solid_organ_transplant_nhsd = patients.minimum_of("solid_organ_transplant_nhsd_snomed", "solid_organ_transplant_nhsd_opcs4","transplant_multiple_opcs4_thymus_OS", "transplant_multiple_opcs4_conjunctiva_OS"), 
+  solid_organ_transplant_nhsd = patients.minimum_of("solid_organ_transplant_nhsd_snomed", "solid_organ_transplant_nhsd_opcs4","transplant_multiple_opcs4_thymus_OS", "transplant_multiple_opcs4_conjunctiva_OS"), 
   
   ## Rare neurological conditions
   
