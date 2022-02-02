@@ -38,7 +38,7 @@ dup_ids <- data_processed %>%
 
 data_processed_clean <- data_processed %>%
   mutate(high_risk_group_nhsd = ifelse(is.na(high_risk_group_nhsd), "Non-digital", high_risk_group_nhsd),
-         elig_start = ifelse(is.na(elig_start) & high_risk_group_nhsd == "Non-digital", treatment_date, elig_start))
+         elig_start = as.Date(ifelse(is.na(elig_start) & high_risk_group_nhsd == "Non-digital", treatment_date, elig_start), origin = "1970-01-01"))
 
 # Exclusion criteria ----
 data_criteria <- data_processed_clean %>%
