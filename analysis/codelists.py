@@ -250,3 +250,14 @@ huntingtons_disease_nhsd_icd10_codes = codelist_from_csv(
   column = "code",
 )  
 
+## CLINICAL/DEMOGRAPHIC COVARIATES ----
+
+### Ethnicity
+ethnicity_primis_codes = codelist_from_csv(
+  "codelists/primis-covid19-vacc-uptake-eth2001.csv",
+  system = "snomed",
+  column = "code",
+  category_column="grouping_6_id",
+)
+
+
