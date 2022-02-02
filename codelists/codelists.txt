@@ -13,7 +13,7 @@ nhsd/haematopoietic-stem-cell-transplant-opcs4/204eb8f5
 nhsd/haematological-malignancies-icd-10/073f45c0
 nhsd/haematological-malignancies-snomed/1583b91d
 nhsd/ckd-stage-5-snomed-ct/2808538e
-nhsd/ckd-stage-5-icd-10/0ef8e059
+nhsd/ckd-stage-5-icd-10/bad9258
 nhsd/liver-cirrhosis/64f239d0
 nhsd/liver-cirrhosis-icd-10/3e6506cd
 nhsd/immunosuppresant-drugs-pra-dmd/526d9f5f
