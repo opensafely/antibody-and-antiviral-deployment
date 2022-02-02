@@ -24,5 +24,48 @@ actions:
     outputs:
       highly_sensitive:
         cohort: output/data/input_*.csv.gz
+  
+  
+  # Data processing ----
+
+  ## Process data
+  data_process:
+    run: r:latest analysis/process/process_data.R
+    needs: [extract_data]
+    outputs:
+      highly_sensitive:
+        data: output/data/data_processed.rds
+  
+  ## Inclusion/exclusion flow chart
+  flow_chart:
+    run: r:latest analysis/descriptive/flow_chart.R
+    needs: [data_process]
+    outputs:
+      moderately_sensitive:
+        data: output/data/flowchart.csv
+
+  ## Data properties     
+  data_properties:
+    run: r:latest analysis/descriptive/data_properties.R output/data/data_processed.rds output/data_properties
+    needs: [data_process]
+    outputs:
+      moderately_sensitive:
+        cohort: output/data_properties/data_processed*.txt
+  
+  
+  # Report ----
+  
+  ## Data, figures and tables
+  report_data:
+    run: r:latest reports/coverage/report_data.R
+    needs: [data_process]
+    outputs:
+      moderately_sensitive:
+        table1: reports/coverage/tables/report_stats.csv
+        table2: reports/coverage/tables/table_elig_treat_redacted.csv
+        table3: reports/coverage/tables/table_demo_clinc_breakdown_redacted.csv
+        figure1: reports/coverage/figures/cum_treatment_plot.png
+        figure2: reports/coverage/figures/cum_eligiblity_plot.png
+
 
 
