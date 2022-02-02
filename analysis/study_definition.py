@@ -44,9 +44,9 @@ study = StudyDefinition(
   
   ## Configure the expectations framework
   default_expectations = {
-    "date": {"earliest": "2019-01-01", "latest": "today"},
+    "date": {"earliest": "2021-11-01", "latest": "today"},
     "rate": "uniform",
-    "incidence": 0.2,
+    "incidence": 0.4,
   },
   
   ## Define index date
@@ -58,6 +58,8 @@ study = StudyDefinition(
     NOT has_died
     AND
     registered
+    AND
+    (sotrovimab_covid_therapeutics OR molnupiravir_covid_therapeutics OR covid_test_positive)
     """,
     
     has_died = patients.died_from_any_cause(
@@ -70,116 +72,60 @@ study = StudyDefinition(
   ),
   
   
+  # CENSORING ----
+  
+  ## Death of any cause
+  death_date = patients.died_from_any_cause(
+    returning = "date_of_death",
+    date_format = "YYYY-MM-DD",
+    between = ["index_date", "index_date + 7 days"],
+    return_expectations = {
+      "date": {"earliest": "2021-12-20", "latest": "index_date"},
+      "incidence": 0.1
+      },
+  ),
+  
+  ## De-registration
+  dereg_date = patients.date_deregistered_from_all_supported_practices(
+    between = ["index_date", "index_date + 7 days"],
+    date_format = "YYYY-MM-DD",
+    return_expectations = {
+      "date": {"earliest": "2021-12-20", "latest": "index_date"},
+      "incidence": 0.1
+      },
+  ),
+  
+  
   # NEUTRALISING MONOCLONAL ANTIBODIES OR ANTIVIRALS ----
-  
-  ## Administration of anti-infective agent
-  anti_infective_agent = patients.with_these_clinical_events(
-    anti_infective_agent_codes,
-    between = [campaign_start, index_date],
-    returning = "binary_flag",
-    return_expectations = {
-      "incidence": 0.5,
-    },
-  ),
-  
-  ### Sotrovimab
-  sotrovimab = patients.with_these_medications(
-    sotrovimab_codes,
-    between = [campaign_start, index_date],
-    returning = "binary_flag",
-    return_expectations = {
-      "incidence": 0.2,
-    },
-  ),
-  
-  sotrovimab_code = patients.with_these_medications(
-    sotrovimab_codes,
-    between = [campaign_start, index_date],
-    returning = "code",
-    return_expectations = {
-      "category": {"ratios": {str(40219011000001108): 1.0}}
-    },
-  ),
-  
-  sotrovimab_date = patients.with_these_medications(
-    sotrovimab_codes,
-    between = [campaign_start, index_date],
+
+  ## Sotrovimab
+  sotrovimab_covid_therapeutics = patients.with_covid_therapeutics(
+    with_these_statuses = ["Approved", "Treatment Complete"],
+    with_these_therapeutics = "Sotrovimab",
+    with_these_indications = "non_hospitalised",
+    between = ["index_date", "index_date + 7 days"],
+    find_first_match_in_period = True,
     returning = "date",
     date_format = "YYYY-MM-DD",
-    find_first_match_in_period = True,
-  ),
-  
-  ### Ronapreve
-  ronapreve = patients.with_these_medications(
-    ronapreve_codes,
-    between = [campaign_start, index_date],
-    returning = "binary_flag",
     return_expectations = {
-      "incidence": 0.2,
-    },
-  ),
-  
-  ronapreve_code = patients.with_these_medications(
-    ronapreve_codes,
-    between = [campaign_start, index_date],
-    returning = "code",
-    return_expectations = {
-      "category": {"ratios": {str(40025711000001108): 0.8, str(39654011000001101): 0.2}}
-    },
-  ),
-  
-  ronapreve_date = patients.with_these_medications(
-    ronapreve_codes,
-    between = [campaign_start, index_date],
-    returning = "date",
-    date_format = "YYYY-MM-DD",
-    find_first_match_in_period = True,
-  ),
-  
-  ## Provision of antiviral therapy
-  antiviral_therapy = patients.with_these_clinical_events(
-    antiviral_therapy_codes,
-    between = [campaign_start, index_date],
-    returning = "binary_flag",
-    return_expectations = {
-      "incidence": 0.3,
-    },
+      "date": {"earliest": "2021-12-20"},
+      "incidence": 0.4
+      },
   ),
   
   ### Molnupiravir
-  molnupiravir = patients.with_these_medications(
-    molnupiravir_codes,
-    between = [campaign_start, index_date],
-    returning = "binary_flag",
-    return_expectations = {
-      "incidence": 0.2,
-    },
-  ),
-  
-  molnupiravir_code = patients.with_these_medications(
-    molnupiravir_codes,
-    between = [campaign_start, index_date],
-    returning = "code",
-    return_expectations = {
-      "category": {"ratios": {str(40251211000001109): 1.0}}
-    },
-  ),
-  
-  molnupiravir_date = patients.with_these_medications(
-    molnupiravir_codes,
-    between = [campaign_start, index_date],
+  molnupiravir_covid_therapeutics = patients.with_covid_therapeutics(
+    with_these_statuses = ["Approved", "Treatment Complete"],
+    with_these_therapeutics = "Molnupiravir",
+    with_these_indications = "non_hospitalised",
+    between = ["index_date", "index_date + 7 days"],
+    find_first_match_in_period = True,
     returning = "date",
     date_format = "YYYY-MM-DD",
-    find_first_match_in_period = True,
-  ),
-  
-  ## Date of (first) nMABS or antiviral
-  nMABS_antiviral_date = patients.with_these_medications(
-    codelist = combine_codelists(sotrovimab_codes, ronapreve_codes, molnupiravir_codes),
-    between = [campaign_start, index_date],
-    returning = "date",
-    date_format = "YYYY-MM-DD",
-    find_first_match_in_period = True,
+    return_expectations = {
+      "date": {"earliest": "2021-12-20"},
+      "incidence": 0.4
+      },
   ),
   
   
@@ -197,25 +143,25 @@ study = StudyDefinition(
     find_first_match_in_period = True,
     restrict_to_earliest_specimen_date = False,
     return_expectations = {
-      "incidence": 0.4
+      "incidence": 0.2
     },
   ),
   
   covid_test_date = patients.with_test_result_in_sgss(
     pathogen = "SARS-CoV-2",
     test_result = "any",
+    find_first_match_in_period = True,
+    restrict_to_earliest_specimen_date = False,
     returning = "date",
     date_format = "YYYY-MM-DD",
     between = ["index_date", "index_date + 7 days"],
-    find_first_match_in_period = True,
-    restrict_to_earliest_specimen_date = False,
     return_expectations = {
-      "date": {"earliest": "2020-02-01"},
-      "rate": "exponential_increase",
-      "incidence": 0.55
-    },
+      "date": {"earliest": "2021-12-20", "latest": "index_date"},
+      "incidence": 0.9
+      },
   ),
   
+
   covid_positive_test_type = patients.with_test_result_in_sgss(
     pathogen = "SARS-CoV-2",
     test_result = "positive",
@@ -231,15 +177,12 @@ study = StudyDefinition(
   covid_positive_previous_30_days = patients.with_test_result_in_sgss(
     pathogen = "SARS-CoV-2",
     test_result = "positive",
-    returning = "date",
-    date_format = "YYYY-MM-DD",
+    returning = "binary_flag",
     between = ["covid_test_date - 31 days", "covid_test_date - 1 day"],
     find_last_match_in_period = True,
     restrict_to_earliest_specimen_date = False,
     return_expectations = {
-      "date": {"earliest": "2020-02-01"},
-      "rate": "exponential_increase",
-      "incidence": 0.01
+      "incidence": 0.05
     },
   ),
   
@@ -271,6 +214,31 @@ study = StudyDefinition(
     between = ["index_date", "index_date + 7 days"],
   ),
   
+  ### Blueteq ‘high risk’ cohort
+  high_risk_cohort_covid_therapeutics = patients.with_covid_therapeutics(
+    with_these_statuses = ["Approved", "Treatment Complete"],
+    with_these_therapeutics = ["Sotrovimab", "Molnupiravir"],
+    with_these_indications = "non_hospitalised",
+    between = ["index_date", "index_date + 7 days"],
+    find_first_match_in_period = True,
+    returning = "risk_group",
+    date_format = "YYYY-MM-DD",
+    return_expectations = {
+      "rate": "universal",
+      "category": {
+        "ratios": {
+          "Down's syndrome": 0.1,
+          "Sickle cell disease": 0.1,
+          "Patients with a solid cancer": 0.1,
+          "Patients with a haematological diseases and stem cell transplant recipients": 0.1,
+          "Patients with renal disease": 0.1,
+          "Patients with liver disease": 0.1,
+          "Patients with immune-mediated inflammatory disorders (IMID)": 0.2,
+          "Primary immune deficiencies": 0.1,
+          "HIV/AIDS": 0.1,},},
+    },
+  ),
+  
   ### NHSD ‘high risk’ cohort (codelist to be defined if/when data avaliable)
   # high_risk_cohort_nhsd = patients.with_these_clinical_events(
   #   high_risk_cohort_nhsd_codes,
@@ -293,9 +261,9 @@ study = StudyDefinition(
     date_format = "YYYY-MM-DD",
     find_first_match_in_period = True,
     return_expectations = {
-      "date": {"earliest": "2020-02-01"},
-      "rate": "exponential_increase",
-      "incidence": 0.01,
+      "date": {"earliest": "index_date", "latest": "index_date + 7 days"},
+      "rate": "uniform",
+      "incidence": 0.05
     },
   ),
   
@@ -328,13 +296,13 @@ study = StudyDefinition(
     returning = "date",
     date_format = "YYYY-MM-DD",
     find_first_match_in_period = True,
-    on_or_before = "index_date - 7 days",
+    on_or_before = "index_date + 7 days",
   ),
   
   downs_syndrome_nhsd_icd10 = patients.admitted_to_hospital(
     returning = "date_admitted",
     with_these_diagnoses = downs_syndrome_nhsd_icd10_codes,
-    on_or_before = "index_date - 7 days",
+    on_or_before = "index_date + 7 days",
     find_first_match_in_period = True,
     date_format = "YYYY-MM-DD",
   ),
@@ -347,13 +315,13 @@ study = StudyDefinition(
     returning = "date",
     date_format = "YYYY-MM-DD",
     find_first_match_in_period = True,
-    on_or_before = "index_date - 7 days",
+    on_or_before = "index_date + 7 days",
   ),
   
   sickle_cell_disease_nhsd_icd10 = patients.admitted_to_hospital(
     returning = "date_admitted",
     with_these_diagnoses = sickle_cell_disease_nhsd_icd10_codes,
-    on_or_before = "index_date - 7 days",
+    on_or_before = "index_date + 7 days",
     find_first_match_in_period = True,
     date_format = "YYYY-MM-DD",
   ),
@@ -370,7 +338,7 @@ study = StudyDefinition(
     returning = "date",
     date_format = "YYYY-MM-DD",
     find_first_match_in_period = True,
-    on_or_before = "index_date - 7 days",
+    on_or_before = "index_date + 7 days",
   ),
   
   ## Haematological diseases
@@ -379,13 +347,13 @@ study = StudyDefinition(
     returning = "date",
     date_format = "YYYY-MM-DD",
     find_first_match_in_period = True,
-    on_or_before = "index_date - 7 days",
+    on_or_before = "index_date + 7 days",
   ),
   
   haematopoietic_stem_cell_transplant_nhsd_icd10 = patients.admitted_to_hospital(
     returning = "date_admitted",
     with_these_diagnoses = haematopoietic_stem_cell_transplant_nhsd_icd10_codes,
-    on_or_before = "index_date - 7 days",
+    on_or_before = "index_date + 7 days",
     find_first_match_in_period = True,
     date_format = "YYYY-MM-DD",
   ),
@@ -393,7 +361,7 @@ study = StudyDefinition(
   haematopoietic_stem_cell_transplant_nhsd_opcs4 = patients.admitted_to_hospital(
     returning = "date_admitted",
     with_these_procedures = haematopoietic_stem_cell_transplant_nhsd_opcs4_codes,
-    on_or_before = "index_date - 7 days",
+    on_or_before = "index_date + 7 days",
     date_format = "YYYY-MM-DD",
     find_first_match_in_period = True,
     return_expectations = {
@@ -408,13 +376,13 @@ study = StudyDefinition(
   #   returning = "date",
   #   date_format = "YYYY-MM-DD",
   #   find_first_match_in_period = True,
-  #   on_or_before = "index_date - 7 days",
+  #   on_or_before = "index_date + 7 days",
   # ),
   
   haematological_malignancies_nhsd_icd10 = patients.admitted_to_hospital(
     returning = "date_admitted",
     with_these_diagnoses = haematological_malignancies_nhsd_icd10_codes,
-    on_or_before = "index_date - 7 days",
+    on_or_before = "index_date + 7 days",
     find_first_match_in_period = True,
     date_format = "YYYY-MM-DD",
   ),
@@ -432,13 +400,13 @@ study = StudyDefinition(
     returning = "date",
     date_format = "YYYY-MM-DD",
     find_first_match_in_period = True,
-    on_or_before = "index_date - 7 days",
+    on_or_before = "index_date + 7 days",
   ),
   
   ckd_stage_5_nhsd_icd10 = patients.admitted_to_hospital(
     returning = "date_admitted",
     with_these_diagnoses = ckd_stage_5_nhsd_icd10_codes,
-    on_or_before = "index_date - 7 days",
+    on_or_before = "index_date + 7 days",
     find_first_match_in_period = True,
     date_format = "YYYY-MM-DD",
   ),
@@ -451,13 +419,13 @@ study = StudyDefinition(
     returning = "date",
     date_format = "YYYY-MM-DD",
     find_first_match_in_period = True,
-    on_or_before = "index_date - 7 days",
+    on_or_before = "index_date + 7 days",
   ),
   
   liver_disease_nhsd_icd10 = patients.admitted_to_hospital(
     returning = "date_admitted",
     with_these_diagnoses = ckd_stage_5_nhsd_icd10_codes,
-    on_or_before = "index_date - 7 days",
+    on_or_before = "index_date + 7 days",
     find_first_match_in_period = True,
     date_format = "YYYY-MM-DD",
   ),
@@ -471,7 +439,7 @@ study = StudyDefinition(
                                  oral_steroid_drugs_snomed_codes),
     returning = "date",
     find_last_match_in_period = True,
-    on_or_before = "index_date - 7 days",
+    on_or_before = "index_date + 7 days",
     date_format = "YYYY-MM-DD",
   ),
   
@@ -480,7 +448,7 @@ study = StudyDefinition(
     immunosupression_nhsd_codes,
     returning = "date",
     find_last_match_in_period = True,
-    on_or_before = "index_date - 7 days",
+    on_or_before = "index_date + 7 days",
     date_format = "YYYY-MM-DD",
   ),
   
@@ -490,14 +458,14 @@ study = StudyDefinition(
     returning = "date",
     date_format = "YYYY-MM-DD",
     find_first_match_in_period = True,
-    on_or_before = "index_date - 7 days",
+    on_or_before = "index_date + 7 days",
   ),
   
   hiv_aids_nhsd_icd10 = patients.admitted_to_hospital(
     returning = "date_admitted",
     with_these_diagnoses = hiv_aids_nhsd_icd10_codes,
     find_first_match_in_period = True,
-    on_or_before = "index_date - 7 days",
+    on_or_before = "index_date + 7 days",
     date_format = "YYYY-MM-DD",
   ),
   
@@ -509,13 +477,13 @@ study = StudyDefinition(
     returning = "date",
     date_format = "YYYY-MM-DD",
     find_first_match_in_period = True,
-    on_or_before = "index_date - 7 days",
+    on_or_before = "index_date + 7 days",
   ),
   
   solid_organ_transplant_nhsd_opcs4 = patients.admitted_to_hospital(
     returning = "date_admitted",
     with_these_procedures = solid_organ_transplant_nhsd_opcs4_codes,
-    on_or_before = "index_date - 7 days",
+    on_or_before = "index_date + 7 days",
     date_format = "YYYY-MM-DD",
     find_first_match_in_period = True,
     return_expectations = {
@@ -535,13 +503,13 @@ study = StudyDefinition(
     returning = "date",
     date_format = "YYYY-MM-DD",
     find_first_match_in_period = True,
-    on_or_before = "index_date - 7 days",
+    on_or_before = "index_date + 7 days",
   ),
   
   multiple_sclerosis_nhsd_icd10 = patients.admitted_to_hospital(
     returning = "date_admitted",
     with_these_diagnoses = multiple_sclerosis_nhsd_icd10_codes,
-    on_or_before = "index_date - 7 days",
+    on_or_before = "index_date + 7 days",
     find_first_match_in_period = True,
     date_format = "YYYY-MM-DD",
   ),
@@ -554,13 +522,13 @@ study = StudyDefinition(
     returning = "date",
     date_format = "YYYY-MM-DD",
     find_first_match_in_period = True,
-    on_or_before = "index_date - 7 days",
+    on_or_before = "index_date + 7 days",
   ),
   
   motor_neurone_disease_nhsd_icd10 = patients.admitted_to_hospital(
     returning = "date_admitted",
     with_these_diagnoses = motor_neurone_disease_nhsd_icd10_codes,
-    on_or_before = "index_date - 7 days",
+    on_or_before = "index_date + 7 days",
     find_first_match_in_period = True,
     date_format = "YYYY-MM-DD",
   ),
@@ -573,13 +541,13 @@ study = StudyDefinition(
     returning = "date",
     date_format = "YYYY-MM-DD",
     find_first_match_in_period = True,
-    on_or_before = "index_date - 7 days",
+    on_or_before = "index_date + 7 days",
   ),
   
   myasthenia_gravis_nhsd_icd10 = patients.admitted_to_hospital(
     returning = "date_admitted",
     with_these_diagnoses = myasthenia_gravis_nhsd_icd10_codes,
-    on_or_before = "index_date - 7 days",
+    on_or_before = "index_date + 7 days",
     find_first_match_in_period = True,
     date_format = "YYYY-MM-DD",
   ),
@@ -592,20 +560,18 @@ study = StudyDefinition(
     returning = "date",
     date_format = "YYYY-MM-DD",
     find_first_match_in_period = True,
-    on_or_before = "index_date - 7 days",
+    on_or_before = "index_date + 7 days",
   ),
   
   huntingtons_disease_nhsd_icd10 = patients.admitted_to_hospital(
     returning = "date_admitted",
     with_these_diagnoses = huntingtons_disease_nhsd_icd10_codes,
-    on_or_before = "index_date - 7 days",
+    on_or_before = "index_date + 7 days",
     find_first_match_in_period = True,
     date_format = "YYYY-MM-DD",
   ),
   
   huntingtons_disease_nhsd = patients.minimum_of("huntingtons_disease_nhsd_snomed", "huntingtons_disease_nhsd_icd10"),
-  
-  
   
   
   
