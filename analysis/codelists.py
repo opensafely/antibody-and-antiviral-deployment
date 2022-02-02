@@ -239,6 +239,35 @@ conjunctiva_y_codes_transplant_nhsd_opcs4_codes = codelist_from_csv(
   column = "code"
 )
 
+stomach_transplant_nhsd_opcs4_codes = codelist_from_csv(
+  "codelists/nhsd-transplant-stomach-spl-hes-opcs4.csv", 
+  system = "opcs4", 
+  column = "code"
+)
+
+ileum_1_transplant_nhsd_opcs4_codes = codelist_from_csv(
+  "codelists/nhsd-transplant-ileum_1-spl-hes-opcs4.csv", 
+  system = "opcs4", 
+  column = "code"
+)
+
+ileum_2_transplant_nhsd_opcs4_codes = codelist_from_csv(
+  "codelists/nhsd-transplant-ileum_2-spl-hes-opcs4.csv", 
+  system = "opcs4", 
+  column = "code"
+)
+
+ileum_1_y_codes_transplant_nhsd_opcs4_codes = codelist_from_csv(
+  "codelists/nhsd-transplant-ileum_1-y-codes-spl-hes-opcs4.csv", 
+  system = "opcs4", 
+  column = "code"
+)
+
+ileum_2_y_codes_transplant_nhsd_opcs4_codes = codelist_from_csv(
+  "codelists/nhsd-transplant-ileum_2-y-codes-spl-hes-opcs4.csv", 
+  system = "opcs4", 
+  column = "code"
+)
 
 ### Rare neurological conditions
 

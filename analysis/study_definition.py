@@ -525,12 +525,9 @@ study = StudyDefinition(
     },
   ),
   
-transplant_multiple_opcs4_thymus_OS=patients.satisfying(
-    """
-    (has_thymus_transplant = has_transplant_y_code)
-    """,
-
-  has_transplant_y_code = patients.admitted_to_hospital(
+  # OPCS4 transplant criteria with 2 opcs4 codes
+  # Y codes
+  transplant_all_y_codes_opcs4 = patients.admitted_to_hospital(
     returning = "date_admitted",
     with_these_procedures = replacement_of_organ_transplant_nhsd_opcs4_codes,
     on_or_before = "index_date - 7 days",
@@ -542,8 +539,9 @@ transplant_multiple_opcs4_thymus_OS=patients.satisfying(
       "incidence": 0.01,
     },
   ),
-  
-  has_thymus_transplant = patients.admitted_to_hospital(
+
+  # thymus 
+  transplant_thymus_opcs4 = patients.admitted_to_hospital(
     returning = "date_admitted",
     with_these_procedures = thymus_gland_transplant_nhsd_opcs4_codes,
     on_or_before = "index_date - 7 days",
@@ -555,14 +553,9 @@ transplant_multiple_opcs4_thymus_OS=patients.satisfying(
       "incidence": 0.01,
     },
   ),
-),
 
-transplant_multiple_opcs4_conjunctiva_OS=patients.satisfying(
-    """
-    (has_conjunctiva_OS_transplant = has_conjunctiva_transplant_y_code)
-    """,
-
-  has_conjunctiva_transplant_y_code = patients.admitted_to_hospital(
+  # conjunctiva
+  transplant_conjunctiva_y_code_opcs4 = patients.admitted_to_hospital(
     returning = "date_admitted",
     with_these_procedures = conjunctiva_y_codes_transplant_nhsd_opcs4_codes,
     on_or_before = "index_date - 7 days",
@@ -575,7 +568,7 @@ transplant_multiple_opcs4_conjunctiva_OS=patients.satisfying(
     },
   ),
   
-  has_conjunctiva_OS_transplant = patients.admitted_to_hospital(
+  transplant_conjunctiva_opcs4 = patients.admitted_to_hospital(
     returning = "date_admitted",
     with_these_procedures = conjunctiva_transplant_nhsd_opcs4_codes,
     on_or_before = "index_date - 7 days",
@@ -587,9 +580,75 @@ transplant_multiple_opcs4_conjunctiva_OS=patients.satisfying(
       "incidence": 0.01,
     },
   ),
-),
 
-  solid_organ_transplant_nhsd = patients.minimum_of("solid_organ_transplant_nhsd_snomed", "solid_organ_transplant_nhsd_opcs4","transplant_multiple_opcs4_thymus_OS", "transplant_multiple_opcs4_conjunctiva_OS"), 
+  # stomach
+  transplant_stomach_opcs4 = patients.admitted_to_hospital(
+    returning = "date_admitted",
+    with_these_procedures = stomach_transplant_nhsd_opcs4_codes,
+    on_or_before = "index_date - 7 days",
+    date_format = "YYYY-MM-DD",
+    find_first_match_in_period = True,
+    return_expectations = {
+      "date": {"earliest": "2020-02-01"},
+      "rate": "exponential_increase",
+      "incidence": 0.01,
+    },
+  ),
+
+ # ileum
+  transplant_ileum_1_opcs4 = patients.admitted_to_hospital(
+    returning = "date_admitted",
+    with_these_procedures = ileum_1_transplant_nhsd_opcs4_codes,
+    on_or_before = "index_date - 7 days",
+    date_format = "YYYY-MM-DD",
+    find_first_match_in_period = True,
+    return_expectations = {
+      "date": {"earliest": "2020-02-01"},
+      "rate": "exponential_increase",
+      "incidence": 0.01,
+    },
+  ),
+
+transplant_ileum_2_opcs4 = patients.admitted_to_hospital(
+    returning = "date_admitted",
+    with_these_procedures = ileum_2_transplant_nhsd_opcs4_codes,
+    on_or_before = "index_date - 7 days",
+    date_format = "YYYY-MM-DD",
+    find_first_match_in_period = True,
+    return_expectations = {
+      "date": {"earliest": "2020-02-01"},
+      "rate": "exponential_increase",
+      "incidence": 0.01,
+    },
+  ),
+
+  transplant_ileum_1_Y_codes_opcs4 = patients.admitted_to_hospital(
+    returning = "date_admitted",
+    with_these_procedures = ileum_1_y_codes_transplant_nhsd_opcs4_codes,
+    on_or_before = "index_date - 7 days",
+    date_format = "YYYY-MM-DD",
+    find_first_match_in_period = True,
+    return_expectations = {
+      "date": {"earliest": "2020-02-01"},
+      "rate": "exponential_increase",
+      "incidence": 0.01,
+    },
+  ),
+
+  transplant_ileum_2_Y_codes_opcs4 = patients.admitted_to_hospital(
+    returning = "date_admitted",
+    with_these_procedures = ileum_2_y_codes_transplant_nhsd_opcs4_codes,
+    on_or_before = "index_date - 7 days",
+    date_format = "YYYY-MM-DD",
+    find_first_match_in_period = True,
+    return_expectations = {
+      "date": {"earliest": "2020-02-01"},
+      "rate": "exponential_increase",
+      "incidence": 0.01,
+    },
+  ),
+
+  #solid_organ_transplant_nhsd = patients.minimum_of("solid_organ_transplant_nhsd_snomed", "solid_organ_transplant_nhsd_opcs4","transplant_multiple_opcs4_thymus_OS", "transplant_multiple_opcs4_conjunctiva_OS"), 
   
   ## Rare neurological conditions
   

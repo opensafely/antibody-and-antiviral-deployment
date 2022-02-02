@@ -13,7 +13,7 @@ nhsd/haematopoietic-stem-cell-transplant-opcs4/204eb8f5
 nhsd/haematological-malignancies-icd-10/073f45c0
 nhsd/haematological-malignancies-snomed/1583b91d
 nhsd/ckd-stage-5-snomed-ct/2808538e
-nhsd/ckd-stage-5-icd-10/0ef8e059
+nhsd/ckd-stage-5-icd-10/7bad9258
 nhsd/liver-cirrhosis/64f239d0
 nhsd/liver-cirrhosis-icd-10/3e6506cd
 nhsd/immunosuppresant-drugs-pra-dmd/526d9f5f
@@ -29,6 +29,11 @@ nhsd/transplant-thymus-gland-spl-hes-opcs4/5feb5f2d
 nhsd/transplant-replacement-of-organ-spl-hes-opcs4/46dbebf8
 nhsd/transplant-conjunctiva-spl-hes-opcs4/2dcc78c3/
 nhsd/transplant-conjunctiva-y-codes-spl-hes-opcs4/14bd058e/
+nhsd/transplant-stomach-spl-hes-opcs4/6550df19/
+nhsd/transplant-ileum_1-spl-hes-opcs4/3331f8af/
+nhsd/transplant-ileum_2-spl-hes-opcs4/1a22857a/
+nhsd/transplant-ileum_1-y-codes-spl-hes-opcs4/01131245/
+nhsd/transplant-ileum_2-y-codes-spl-hes-opcs4/68039f0f/
 nhsd/multiple-sclerosis-snomed-ct/7336ad2d
 nhsd/multiple-sclerosis/4be2c69b
 nhsd/motor-neurone-disease-snomed-ct/5a2739f8
