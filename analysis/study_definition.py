@@ -447,7 +447,7 @@ study = StudyDefinition(
   
   ## Liver disease
   liver_disease_nhsd_snomed = patients.with_these_clinical_events(
-    ckd_stage_5_nhsd_snomed_codes,
+    liver_disease_nhsd_snomed_codes,
     returning = "date",
     date_format = "YYYY-MM-DD",
     find_first_match_in_period = True,
@@ -456,7 +456,7 @@ study = StudyDefinition(
   
   liver_disease_nhsd_icd10 = patients.admitted_to_hospital(
     returning = "date_admitted",
-    with_these_diagnoses = ckd_stage_5_nhsd_icd10_codes,
+    with_these_diagnoses = liver_disease_nhsd_icd10_codes,
     on_or_before = "index_date - 7 days",
     find_first_match_in_period = True,
     date_format = "YYYY-MM-DD",
