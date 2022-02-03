@@ -54,7 +54,7 @@ data_processed_clean <- data_processed %>%
     !is.na(high_risk_group_nhsd),
     
     # Apply exclusion criteria
-    is.na(covid_hospital_addmission_date) | covid_hospital_addmission_date < (elig_start - 30) & covid_hospital_addmission_date >= (elig_start + 1),
+    is.na(covid_hospital_admission_date) | covid_hospital_admission_date < (elig_start - 30) & covid_hospital_admission_date >= (elig_start + 1),
     age >= 12,
     
     # Only eligible patients
@@ -118,9 +118,13 @@ molnupiravir <- paste(format(data_processed_clean %>% filter(treatment_type == "
                       " (",
                       round(data_processed_clean %>% filter(treatment_type == "molnupiravir") %>% nrow()/nrow(data_processed_clean)*100, digits = 0),
                       "%)", sep = "")
+casirivimab <- paste(format(data_processed_clean %>% filter(treatment_type == "casirivimab") %>% nrow(), big.mark = ",", scientific = FALSE),
+                      " (",
+                      round(data_processed_clean %>% filter(treatment_type == "casirivimab") %>% nrow()/nrow(data_processed_clean)*100, digits = 0),
+                      "%)", sep = "")
 
 
-text <- data.frame(study_start, study_end, eligible_patients, treated_patients, sotrovimab, molnupiravir)
+text <- data.frame(study_start, study_end, eligible_patients, treated_patients, sotrovimab, molnupiravir, casirivimab)
 
 write_csv(text, here::here("reports", "coverage", "tables", "report_stats.csv"))
 
@@ -271,29 +275,36 @@ ggsave(
 tbl1 <- cbind(data_processed_clean %>% summarise(Eligible = n()),
               data_processed_clean %>% filter(!is.na(treatment_date) & treatment_type == "sotrovimab") %>% summarise(sotrovimab = n()),
               data_processed_clean %>% filter(!is.na(treatment_date) & treatment_type == "molnupiravir") %>% summarise(molnupiravir = n()),
+              data_processed_clean %>% filter(!is.na(treatment_date) & treatment_type == "casirivimab") %>% summarise(casirivimab = n()),
               data_processed_clean %>% filter(!is.na(treatment_date)) %>% summarise(any = n())) %>%
   mutate(`Recieved treatment` = paste(any, " (", round(any/Eligible*100, digits = 0), "%)", sep = ""),
          `Recieved sotrovimab` = paste(sotrovimab, " (", round(sotrovimab/any*100, digits = 0), "%)", sep = ""),
          `Recieved molnupiravir` = paste(molnupiravir, " (", round(molnupiravir/any*100, digits = 0), "%)", sep = ""),
+         `Recieved casirivimab` = paste(casirivimab, " (", round(casirivimab/any*100, digits = 0), "%)", sep = ""),
          `High risk cohort` = "All") %>%
   select(`High risk cohort`, `Number of eligible patients, n` = Eligible, 
          `Eligible patients recieving treatment, n (%)` = `Recieved treatment`, 
          `Treated patients recieving sotrovimab, n (%)` = `Recieved sotrovimab`, 
-         `Treated patients recieving molnupiravir, n (%)` = `Recieved molnupiravir`)
+         `Treated patients recieving molnupiravir, n (%)` = `Recieved molnupiravir`, 
+         `Treated patients recieving casirivimab, n (%)` = `Recieved casirivimab`)
 
 tbl2 <- left_join(data_processed_clean %>% group_by(high_risk_group_nhsd) %>% summarise(Eligible = n()),
                   data_processed_clean %>% group_by(high_risk_group_nhsd) %>% 
                     filter(!is.na(treatment_date) & treatment_type == "sotrovimab") %>% summarise(sotrovimab = n())) %>%
   left_join(data_processed_clean %>% group_by(high_risk_group_nhsd) %>% filter(!is.na(treatment_date) & treatment_type == "molnupiravir") %>% 
               summarise(molnupiravir = n())) %>%
+  left_join(data_processed_clean %>% group_by(high_risk_group_nhsd) %>% filter(!is.na(treatment_date) & treatment_type == "casirivimab") %>% 
+              summarise(casirivimab = n())) %>%
   left_join(data_processed_clean %>% group_by(high_risk_group_nhsd) %>% filter(!is.na(treatment_date)) %>% summarise(any = n())) %>%
   mutate(`Recieved treatment` = paste(any, " (", round(any/Eligible*100, digits = 0), "%)", sep = ""),
          `Recieved sotrovimab` = paste(sotrovimab, " (", round(sotrovimab/any*100, digits = 0), "%)", sep = ""),
-         `Recieved molnupiravir` = paste(molnupiravir, " (", round(molnupiravir/any*100, digits = 0), "%)", sep = "")) %>%
+         `Recieved molnupiravir` = paste(molnupiravir, " (", round(molnupiravir/any*100, digits = 0), "%)", sep = ""),
+         `Recieved casirivimab` = paste(casirivimab, " (", round(casirivimab/any*100, digits = 0), "%)", sep = "")) %>%
   select(`High risk cohort` = high_risk_group_nhsd, `Number of eligible patients, n` = Eligible, 
          `Eligible patients recieving treatment, n (%)` = `Recieved treatment`, 
          `Treated patients recieving sotrovimab, n (%)` = `Recieved sotrovimab`, 
-         `Treated patients recieving molnupiravir, n (%)` = `Recieved molnupiravir`) %>%
+         `Treated patients recieving molnupiravir, n (%)` = `Recieved molnupiravir`, 
+         `Treated patients recieving casirivimab, n (%)` = `Recieved casirivimab`) %>%
   ungroup()
 
 table_elig_treat_redacted <- rbind(tbl1, tbl2) %>%
