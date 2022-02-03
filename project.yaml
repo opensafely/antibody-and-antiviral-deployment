@@ -37,7 +37,7 @@ actions:
   ## Process data
   data_process:
     run: r:latest analysis/process/process_data.R
-    needs: [extract_data]
+    needs: [extract_data_not_weekly]
     outputs:
       highly_sensitive:
         data: output/data/data_processed.rds

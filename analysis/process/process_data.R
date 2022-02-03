@@ -37,7 +37,7 @@ source(here("analysis", "lib", "custom_functions.R"))
 # Process data ----
 
 ## Read in and process each input file
-input.files = list.files(path = here::here("output", "data"), pattern = "input")
+input.files = list.files(path = here::here("output", "data"), pattern = "input_not_weekly")
 
 data_processed_full = lapply(input.files, FUN = process_data) %>%
    bind_rows()
