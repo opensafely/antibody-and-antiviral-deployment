@@ -277,16 +277,16 @@ tbl1 <- cbind(data_processed_clean %>% summarise(Eligible = n()),
               data_processed_clean %>% filter(!is.na(treatment_date) & treatment_type == "molnupiravir") %>% summarise(molnupiravir = n()),
               data_processed_clean %>% filter(!is.na(treatment_date) & treatment_type == "casirivimab") %>% summarise(casirivimab = n()),
               data_processed_clean %>% filter(!is.na(treatment_date)) %>% summarise(any = n())) %>%
-  mutate(`Recieved treatment` = paste(any, " (", round(any/Eligible*100, digits = 0), "%)", sep = ""),
-         `Recieved sotrovimab` = paste(sotrovimab, " (", round(sotrovimab/any*100, digits = 0), "%)", sep = ""),
-         `Recieved molnupiravir` = paste(molnupiravir, " (", round(molnupiravir/any*100, digits = 0), "%)", sep = ""),
-         `Recieved casirivimab` = paste(casirivimab, " (", round(casirivimab/any*100, digits = 0), "%)", sep = ""),
+  mutate(`Received treatment` = paste(any, " (", round(any/Eligible*100, digits = 0), "%)", sep = ""),
+         `Received sotrovimab` = paste(sotrovimab, " (", round(sotrovimab/any*100, digits = 0), "%)", sep = ""),
+         `Received molnupiravir` = paste(molnupiravir, " (", round(molnupiravir/any*100, digits = 0), "%)", sep = ""),
+         `Received casirivimab` = paste(casirivimab, " (", round(casirivimab/any*100, digits = 0), "%)", sep = ""),
          `High risk cohort` = "All") %>%
   select(`High risk cohort`, `Number of eligible patients, n` = Eligible, 
-         `Eligible patients recieving treatment, n (%)` = `Recieved treatment`, 
-         `Treated patients recieving sotrovimab, n (%)` = `Recieved sotrovimab`, 
-         `Treated patients recieving molnupiravir, n (%)` = `Recieved molnupiravir`, 
-         `Treated patients recieving casirivimab, n (%)` = `Recieved casirivimab`)
+         `Eligible patients receiving treatment, n (%)` = `Received treatment`, 
+         `Treated patients receiving sotrovimab, n (%)` = `Received sotrovimab`, 
+         `Treated patients receiving molnupiravir, n (%)` = `Received molnupiravir`, 
+         `Treated patients receiving casirivimab, n (%)` = `Received casirivimab`)
 
 tbl2 <- left_join(data_processed_clean %>% group_by(high_risk_group_nhsd) %>% summarise(Eligible = n()),
                   data_processed_clean %>% group_by(high_risk_group_nhsd) %>% 
@@ -296,15 +296,15 @@ tbl2 <- left_join(data_processed_clean %>% group_by(high_risk_group_nhsd) %>% su
   left_join(data_processed_clean %>% group_by(high_risk_group_nhsd) %>% filter(!is.na(treatment_date) & treatment_type == "casirivimab") %>% 
               summarise(casirivimab = n())) %>%
   left_join(data_processed_clean %>% group_by(high_risk_group_nhsd) %>% filter(!is.na(treatment_date)) %>% summarise(any = n())) %>%
-  mutate(`Recieved treatment` = paste(any, " (", round(any/Eligible*100, digits = 0), "%)", sep = ""),
-         `Recieved sotrovimab` = paste(sotrovimab, " (", round(sotrovimab/any*100, digits = 0), "%)", sep = ""),
-         `Recieved molnupiravir` = paste(molnupiravir, " (", round(molnupiravir/any*100, digits = 0), "%)", sep = ""),
-         `Recieved casirivimab` = paste(casirivimab, " (", round(casirivimab/any*100, digits = 0), "%)", sep = "")) %>%
+  mutate(`Received treatment` = paste(any, " (", round(any/Eligible*100, digits = 0), "%)", sep = ""),
+         `Received sotrovimab` = paste(sotrovimab, " (", round(sotrovimab/any*100, digits = 0), "%)", sep = ""),
+         `Received molnupiravir` = paste(molnupiravir, " (", round(molnupiravir/any*100, digits = 0), "%)", sep = ""),
+         `Received casirivimab` = paste(casirivimab, " (", round(casirivimab/any*100, digits = 0), "%)", sep = "")) %>%
   select(`High risk cohort` = high_risk_group_nhsd, `Number of eligible patients, n` = Eligible, 
-         `Eligible patients recieving treatment, n (%)` = `Recieved treatment`, 
-         `Treated patients recieving sotrovimab, n (%)` = `Recieved sotrovimab`, 
-         `Treated patients recieving molnupiravir, n (%)` = `Recieved molnupiravir`, 
-         `Treated patients recieving casirivimab, n (%)` = `Recieved casirivimab`) %>%
+         `Eligible patients receiving treatment, n (%)` = `Received treatment`, 
+         `Treated patients receiving sotrovimab, n (%)` = `Received sotrovimab`, 
+         `Treated patients receiving molnupiravir, n (%)` = `Received molnupiravir`, 
+         `Treated patients receiving casirivimab, n (%)` = `Received casirivimab`) %>%
   ungroup()
 
 table_elig_treat_redacted <- rbind(tbl1, tbl2) %>%

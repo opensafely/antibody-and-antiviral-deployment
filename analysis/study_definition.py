@@ -2,11 +2,12 @@
 #
 # Description: This script provides the formal specification of the study data 
 #              that will be extracted from the OpenSAFELY database.
+#              This study_definition is run `by week` to produce a weekly file
 #
 # Output: output/data/input_*.csv.gz
 #
-# Author(s): M Green
-# Date last updated: 31/01/2022
+# Author(s): M Green (edited by H Curtis)
+# Date last updated: 03/02/2022
 #
 ################################################################################
 
@@ -34,7 +35,7 @@ from codelists import *
 from datetime import date
 
 campaign_start = "2021-12-16"
-#index_date = date.today().isoformat()
+#end_date = date.today().isoformat()
 
 
 ## Define study population and variables
