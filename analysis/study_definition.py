@@ -59,7 +59,11 @@ study = StudyDefinition(
     AND
     registered
     AND
-    (sotrovimab_covid_therapeutics OR molnupiravir_covid_therapeutics OR covid_test_positive)
+    (sotrovimab_covid_therapeutics 
+      OR molnupiravir_covid_therapeutics 
+      OR casirivimab_covid_therapeutics
+      OR covid_test_positive
+      )
     """,
     
     has_died = patients.died_from_any_cause(
@@ -127,7 +131,21 @@ study = StudyDefinition(
       "incidence": 0.4
       },
   ),
-  
+
+  ### Casirivimab and imdevimab
+  casirivimab_covid_therapeutics = patients.with_covid_therapeutics(
+    with_these_statuses = ["Approved", "Treatment Complete"],
+    with_these_therapeutics = "Casirivimab and imdevimab",
+    with_these_indications = "non_hospitalised",
+    between = ["index_date", "index_date + 7 days"],
+    find_first_match_in_period = True,
+    returning = "date",
+    date_format = "YYYY-MM-DD",
+    return_expectations = {
+      "date": {"earliest": "2021-12-20"},
+      "incidence": 0.4
+      },
+  ), 
   
   
   # ELIGIBILITY CRITERIA VARIABLES ----
