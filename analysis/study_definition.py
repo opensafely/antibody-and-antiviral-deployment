@@ -104,7 +104,7 @@ study = StudyDefinition(
 
   ## Sotrovimab
   sotrovimab_covid_therapeutics = patients.with_covid_therapeutics(
-    with_these_statuses = ["Approved", "Treatment Complete"],
+    #with_these_statuses = ["Approved", "Treatment Complete"],
     with_these_therapeutics = "Sotrovimab",
     with_these_indications = "non_hospitalised",
     between = ["index_date", "index_date + 6 days"],
@@ -119,7 +119,7 @@ study = StudyDefinition(
   
   ### Molnupiravir
   molnupiravir_covid_therapeutics = patients.with_covid_therapeutics(
-    with_these_statuses = ["Approved", "Treatment Complete"],
+    #with_these_statuses = ["Approved", "Treatment Complete"],
     with_these_therapeutics = "Molnupiravir",
     with_these_indications = "non_hospitalised",
     between = ["index_date", "index_date + 6 days"],
@@ -134,7 +134,7 @@ study = StudyDefinition(
 
   ### Casirivimab and imdevimab
   casirivimab_covid_therapeutics = patients.with_covid_therapeutics(
-    with_these_statuses = ["Approved", "Treatment Complete"],
+    #with_these_statuses = ["Approved", "Treatment Complete"],
     with_these_therapeutics = "Casirivimab and imdevimab",
     with_these_indications = "non_hospitalised",
     between = ["index_date", "index_date + 6 days"],
@@ -279,7 +279,7 @@ study = StudyDefinition(
     date_format = "YYYY-MM-DD",
     find_first_match_in_period = True,
     return_expectations = {
-      "date": {"earliest": "index_date", "latest": "index_date + 7 days"},
+      "date": {"earliest": "index_date", "latest": "index_date + 6 days"},
       "rate": "uniform",
       "incidence": 0.05
     },
@@ -673,7 +673,7 @@ study = StudyDefinition(
   ),
   
   region_covid_therapeutics = patients.with_covid_therapeutics(
-    with_these_statuses = ["Approved", "Treatment Complete"],
+    #with_these_statuses = ["Approved", "Treatment Complete"],
     with_these_therapeutics = ["Sotrovimab", "Molnupiravir", "Casirivimab and imdevimab"],
     with_these_indications = "non_hospitalised",
     between = ["index_date", "index_date + 6 days"],
