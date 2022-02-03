@@ -25,6 +25,12 @@ actions:
       highly_sensitive:
         cohort: output/data/input_*.csv.gz
   
+ ## Cohort data - not weekly
+  extract_data_not_weekly:
+    run: cohortextractor:latest generate_cohort --study-definition study_definition_not_weekly --output-dir=output/data
+    outputs:
+      highly_sensitive:
+        cohort: output/data/input_not_weekly.csv # use csv temporarily to avoid match with wildcard in previous output
   
   # Data processing ----
 
