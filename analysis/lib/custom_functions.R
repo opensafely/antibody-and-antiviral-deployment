@@ -57,7 +57,7 @@ process_data <- function(x) {
       symptomatic_covid_test = col_character(),
       covid_symptoms_snomed = col_date(format = "%Y-%m-%d"),
       high_risk_cohort_covid_therapeutics = col_character(),
-      covid_hospital_addmission_date = col_date(format = "%Y-%m-%d"),
+      covid_hospital_admission_date = col_date(format = "%Y-%m-%d"),
       age = col_integer(),
       
       # HIGH RISK GROUPS ----
@@ -220,7 +220,7 @@ process_data <- function(x) {
            covid_test_positive, covid_positive_previous_30_days, tb_postest_treat, elig_start, elig_end,
            treatment_date, treatment_type,
            high_risk_cohort_covid_therapeutics, high_risk_group_nhsd, high_risk_group_nhsd_date = high_risk_group_date,
-           covid_hospital_addmission_date, age, sex, ethnicity, imd, region_nhs, region_covid_therapeutics
+           covid_hospital_admission_date, age, sex, ethnicity, imd, region_nhs, region_covid_therapeutics
     )
   
 }

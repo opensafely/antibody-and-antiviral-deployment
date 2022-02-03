@@ -48,9 +48,9 @@ data_criteria <- data_processed_clean %>%
     no_positive_covid_test_previous_30_days = (covid_positive_previous_30_days != 1),
     treated_within_10_days = ((tb_postest_treat <= 10 & tb_postest_treat >= 0) | is.na(tb_postest_treat)),
     high_risk_group = !is.na(high_risk_group_nhsd),
-    no_covid_hospital_addmission_last_30_days = (is.na(covid_hospital_addmission_date) | 
-                                                   covid_hospital_addmission_date < (elig_start - 30) & 
-                                                   covid_hospital_addmission_date >= (elig_start + 1)),
+    no_covid_hospital_admission_last_30_days = (is.na(covid_hospital_admission_date) | 
+                                                   covid_hospital_admission_date < (elig_start - 30) & 
+                                                   covid_hospital_admission_date >= (elig_start + 1)),
     aged_over_12 = (age >= 12),
     with_elig_start_date = !is.na(elig_start),
     not_duplicated_entries = !(patient_id %in% dup_ids$patient_id),
@@ -60,7 +60,7 @@ data_criteria <- data_processed_clean %>%
         no_positive_covid_test_previous_30_days & 
         treated_within_10_days & 
         high_risk_group & 
-        no_covid_hospital_addmission_last_30_days &
+        no_covid_hospital_admission_last_30_days &
         aged_over_12 &
         with_elig_start_date &
         not_duplicated_entries)
@@ -74,14 +74,14 @@ data_flowchart <- data_criteria %>%
     c2_no_positive_covid_test_previous_30_days = c0_all & has_positive_covid_test & no_positive_covid_test_previous_30_days,
     c3_treated_within_10_days = c0_all & has_positive_covid_test & no_positive_covid_test_previous_30_days & treated_within_10_days,
     c4_high_risk_group = c0_all & has_positive_covid_test & no_positive_covid_test_previous_30_days & treated_within_10_days & high_risk_group,
-    c5_no_covid_hospital_addmission_last_30_days = c0_all & has_positive_covid_test & no_positive_covid_test_previous_30_days & 
-      treated_within_10_days & high_risk_group & no_covid_hospital_addmission_last_30_days,
+    c5_no_covid_hospital_admission_last_30_days = c0_all & has_positive_covid_test & no_positive_covid_test_previous_30_days & 
+      treated_within_10_days & high_risk_group & no_covid_hospital_admission_last_30_days,
     c6_aged_over_12 = c0_all & has_positive_covid_test & no_positive_covid_test_previous_30_days & 
-      treated_within_10_days & high_risk_group & no_covid_hospital_addmission_last_30_days & aged_over_12,
+      treated_within_10_days & high_risk_group & no_covid_hospital_admission_last_30_days & aged_over_12,
     c7_with_elig_start_date = c0_all & has_positive_covid_test & no_positive_covid_test_previous_30_days & 
-      treated_within_10_days & high_risk_group & no_covid_hospital_addmission_last_30_days & aged_over_12 & with_elig_start_date,
+      treated_within_10_days & high_risk_group & no_covid_hospital_admission_last_30_days & aged_over_12 & with_elig_start_date,
     c8_not_duplicated_entries = c0_all & has_positive_covid_test & no_positive_covid_test_previous_30_days & 
-      treated_within_10_days & high_risk_group & no_covid_hospital_addmission_last_30_days & aged_over_12 & 
+      treated_within_10_days & high_risk_group & no_covid_hospital_admission_last_30_days & aged_over_12 & 
       with_elig_start_date & not_duplicated_entries
   ) %>%
   summarise(

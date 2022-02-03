@@ -254,7 +254,7 @@ study = StudyDefinition(
   #   (not currently possible to define/code)
   
   ### Require hospitalisation for COVID-19
-  covid_hospital_addmission_date = patients.admitted_to_hospital(
+  covid_hospital_admission_date = patients.admitted_to_hospital(
     returning = "date_admitted",
     with_these_diagnoses = covid_icd10_codes,
     on_or_after = "index_date",
