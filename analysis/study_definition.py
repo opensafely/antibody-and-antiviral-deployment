@@ -66,7 +66,7 @@ study = StudyDefinition(
       OR
     casirivimab_covid_therapeutics
       OR
-    covid_test_positive
+    (covid_test_positive AND (age >= 12 AND age < 110))
       )
     """,
     
