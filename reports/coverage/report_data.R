@@ -67,8 +67,8 @@ data_processed_clean <- data_processed %>%
   mutate(
     ageband = cut(
       age,
-      breaks = c(16, 30, 40, 50, 60, 70, 80, Inf),
-      labels = c("16-29", "30-39", "40-49", "50-59", "60-69", "70-79", "80+"),
+      breaks = c(12, 30, 40, 50, 60, 70, 80, Inf),
+      labels = c("12-29", "30-39", "40-49", "50-59", "60-69", "70-79", "80+"),
       right = FALSE),
     
     imd = as.character(imd),
