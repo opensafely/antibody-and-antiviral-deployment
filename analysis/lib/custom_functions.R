@@ -154,11 +154,6 @@ process_data <- function(x) {
         TRUE ~ NA_character_),
       
       # CLINICAL/DEMOGRAPHIC COVARIATES ----
-      ageband = cut(age,
-                    breaks = c(0, 17, 24, 34, 44, 54, 69, 79, Inf),
-                    labels = c("0-17", "18-24", "25-34", "35-44", "45-54", "55-69", "70-79", "80+"),
-                    right = FALSE),
-      
       sex = fct_case_when(
         sex == "F" ~ "Female",
         sex == "M" ~ "Male",
@@ -222,7 +217,7 @@ process_data <- function(x) {
     select(patient_id,
            death_date, dereg_date,
            covid_test_positive, covid_positive_previous_30_days, tb_postest_treat, elig_start, elig_end,
-           treatment_date, treatment_type,
+           sotrovimab_covid_therapeutics, molnupiravir_covid_therapeutics, casirivimab_covid_therapeutics, treatment_date, treatment_type,
            high_risk_cohort_covid_therapeutics, high_risk_group_nhsd, high_risk_group_nhsd_date = high_risk_group_date,
            covid_hospital_admission_date, age, sex, ethnicity, imd, region_nhs, region_covid_therapeutics
     )
