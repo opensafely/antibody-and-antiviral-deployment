@@ -5,11 +5,11 @@
 #
 # Input: /output/data/data_processed.rds
 #
-# Output: /reports/coverage/tables/report_stats.csv
-#         /reports/coverage/tables/table_elig_treat_redacted.csv
-#         /reports/coverage/tables/table_demo_clinc_breakdown_redacted.csv
-#         /reports/coverage/figures/cum_treatment_plot.png
-#         /reports/coverage/figures/cum_eligiblity_plot.png
+# Output: /output/reports/coverage/tables/report_stats.csv
+#         /output/reports/coverage/tables/table_elig_treat_redacted.csv
+#         /output/reports/coverage/tables/table_demo_clinc_breakdown_redacted.csv
+#         /output/reports/coverage/figures/cum_treatment_plot.png
+#         /output/reports/coverage/figures/cum_eligiblity_plot.png
 #
 # Author(s): M Green
 # Date last updated: 04/02/2022
@@ -31,8 +31,8 @@ library(reshape2)
 source(here("analysis", "lib", "custom_functions.R"))
 
 ## Create output directory
-fs::dir_create(here::here("reports", "coverage", "tables"))
-fs::dir_create(here::here("reports", "coverage", "figures"))
+fs::dir_create(here::here("output", "reports", "coverage", "tables"))
+fs::dir_create(here::here("output", "reports", "coverage", "figures"))
 
 ## Import data
 data_processed <- read_rds(here::here("output", "data", "data_processed.rds"))
@@ -172,7 +172,7 @@ casirivimab <- paste(format(plyr::round_any(data_processed_clean %>% filter(trea
 
 text <- data.frame(study_start, study_end, eligible_patients, treated_patients, sotrovimab, molnupiravir, casirivimab)
 
-write_csv(text, here::here("reports", "coverage", "tables", "report_stats.csv"))
+write_csv(text, here::here("output", "reports", "coverage", "tables", "report_stats.csv"))
 
 
 # Plots ----
@@ -221,7 +221,7 @@ plot_order <- rbind(plot_data_coverage, plot_data_coverage_groups) %>%
 coverage_plot <- rbind(plot_data_coverage, plot_data_coverage_groups) %>%
   mutate(high_risk_group_nhsd = factor(high_risk_group_nhsd, levels = plot_order$high_risk_group_nhsd))
 
-write_csv(coverage_plot, here::here("reports", "coverage", "figures", "cum_eligiblity_plot.csv"))
+write_csv(coverage_plot, here::here("output", "reports", "coverage", "figures", "cum_eligiblity_plot.csv"))
 
 coverage_plot %>%
   ggplot(aes(x = elig_start, y = cum_count_redacted, colour = high_risk_group_nhsd, group = high_risk_group_nhsd)) +
@@ -246,7 +246,7 @@ coverage_plot %>%
     legend.box.margin = margin(t = 1, l = 1, b = 1, r = 1))
 
 ggsave(
-  here::here("reports", "coverage", "figures", "cum_eligiblity_plot.png"),
+  here::here("output", "reports", "coverage", "figures", "cum_eligiblity_plot.png"),
   coverage_plot,
   units = "cm", width = 35, height = 20
 )
@@ -298,7 +298,7 @@ plot_order <- rbind(plot_data_treatment, plot_data_treatment_groups) %>%
 treatment_plot <- rbind(plot_data_treatment, plot_data_treatment_groups) %>%
   mutate(high_risk_group_nhsd = factor(high_risk_group_nhsd, levels = plot_order$high_risk_group_nhsd)) 
 
-write_csv(coverage_plot, here::here("reports", "coverage", "figures", "cum_treatment_plot.csv"))
+write_csv(coverage_plot, here::here("output", "reports", "coverage", "figures", "cum_treatment_plot.csv"))
 
 treatment_plot %>%
   ggplot(aes(x = treatment_date, y = cum_count_redacted, colour = high_risk_group_nhsd, group = high_risk_group_nhsd)) +
@@ -323,7 +323,7 @@ treatment_plot %>%
     legend.box.margin = margin(t = 1, l = 1, b = 1, r = 1))
 
 ggsave(
-  here::here("reports", "coverage", "figures", "cum_treatment_plot.png"),
+  here::here("output", "reports", "coverage", "figures", "cum_treatment_plot.png"),
   treatment_plot,
   units = "cm", width = 35, height = 20
 )
@@ -376,7 +376,7 @@ table_elig_treat_redacted <- rbind(tbl1, tbl2) %>%
                                                  "Primary immune deficiencies", "HIV or AIDS",
                                                  "Solid organ transplant recipients", "Rare neurological conditions", "Not deemed eligible"))) 
 
-write_csv(table_elig_treat_redacted, here::here("reports", "coverage", "tables", "table_elig_treat_redacted.csv"))
+write_csv(table_elig_treat_redacted, here::here("output", "reports", "coverage", "tables", "table_elig_treat_redacted.csv"))
 
 ## Clinical and demographics table
 variables <- c("ageband", "sex", "ethnicity", "imd", "region")
@@ -393,7 +393,7 @@ table_demo_clinc_breakdown <- data_processed_clean %>%
   ) %>%
   bold_labels()
 
-gt::gtsave(as_gt(table_demo_clinc_breakdown), here::here("reports", "coverage", "tables", "table_demo_clinc_breakdown_redacted.html"))
+gt::gtsave(as_gt(table_demo_clinc_breakdown), here::here("output", "reports", "coverage", "tables", "table_demo_clinc_breakdown_redacted.html"))
 
 
 
