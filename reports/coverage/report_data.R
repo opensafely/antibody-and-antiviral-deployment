@@ -37,6 +37,8 @@ fs::dir_create(here::here("output", "reports", "coverage", "figures"))
 ## Import data
 data_processed <- read_rds(here::here("output", "data", "data_processed.rds"))
 
+## Redaction threshold
+threshold = 8
 
 # Format data ----
 
@@ -56,7 +58,7 @@ data_processed_eligible <- data_processed %>%
     # Only eligible patients
     !is.na(elig_start),
   ) %>%
-  mutate(eligibility_status = "Eligible")
+  mutate(eligibility_status = "Eligible") 
 
 ## Include treated patients not flagged as eligible
 data_processed_treated <- data_processed %>%
@@ -332,49 +334,62 @@ ggsave(
 # Tables ---
 
 ## Treatment table
-tbl1 <- cbind(data_processed_clean %>% summarise(Eligible = n()),
-              data_processed_clean %>% filter(!is.na(treatment_date) & treatment_type == "sotrovimab") %>% summarise(sotrovimab = n()),
-              data_processed_clean %>% filter(!is.na(treatment_date) & treatment_type == "molnupiravir") %>% summarise(molnupiravir = n()),
-              data_processed_clean %>% filter(!is.na(treatment_date) & treatment_type == "casirivimab") %>% summarise(casirivimab = n()),
-              data_processed_clean %>% filter(!is.na(treatment_date)) %>% summarise(any = n())) %>%
-  mutate(`Received treatment` = paste(any, " (", round(any/Eligible*100, digits = 0), "%)", sep = ""),
-         `Received sotrovimab` = paste(sotrovimab, " (", round(sotrovimab/any*100, digits = 0), "%)", sep = ""),
-         `Received molnupiravir` = paste(molnupiravir, " (", round(molnupiravir/any*100, digits = 0), "%)", sep = ""),
-         `Received casirivimab` = paste(casirivimab, " (", round(casirivimab/any*100, digits = 0), "%)", sep = ""),
-         `High risk cohort` = "All") %>%
-  select(`High risk cohort`, `Number of eligible patients, n` = Eligible, 
-         `Eligible patients receiving treatment, n (%)` = `Received treatment`, 
-         `Treated patients receiving sotrovimab, n (%)` = `Received sotrovimab`, 
-         `Treated patients receiving molnupiravir, n (%)` = `Received molnupiravir`, 
-         `Treated patients receiving casirivimab, n (%)` = `Received casirivimab`)
+eligibility_table <- data_processed_clean %>%
+  select(high_risk_group_nhsd) %>%
+  tbl_summary()
 
-tbl2 <- left_join(data_processed_clean %>% group_by(high_risk_group_nhsd) %>% summarise(Eligible = n()),
-                  data_processed_clean %>% group_by(high_risk_group_nhsd) %>% 
-                    filter(!is.na(treatment_date) & treatment_type == "sotrovimab") %>% summarise(sotrovimab = n())) %>%
-  left_join(data_processed_clean %>% group_by(high_risk_group_nhsd) %>% filter(!is.na(treatment_date) & treatment_type == "molnupiravir") %>% 
-              summarise(molnupiravir = n())) %>%
-  left_join(data_processed_clean %>% group_by(high_risk_group_nhsd) %>% filter(!is.na(treatment_date) & treatment_type == "casirivimab") %>% 
-              summarise(casirivimab = n())) %>%
-  left_join(data_processed_clean %>% group_by(high_risk_group_nhsd) %>% filter(!is.na(treatment_date)) %>% summarise(any = n())) %>%
-  mutate(`Received treatment` = paste(any, " (", round(any/Eligible*100, digits = 0), "%)", sep = ""),
-         `Received sotrovimab` = paste(sotrovimab, " (", round(sotrovimab/any*100, digits = 0), "%)", sep = ""),
-         `Received molnupiravir` = paste(molnupiravir, " (", round(molnupiravir/any*100, digits = 0), "%)", sep = ""),
-         `Received casirivimab` = paste(casirivimab, " (", round(casirivimab/any*100, digits = 0), "%)", sep = "")) %>%
-  select(`High risk cohort` = high_risk_group_nhsd, `Number of eligible patients, n` = Eligible, 
-         `Eligible patients receiving treatment, n (%)` = `Received treatment`, 
-         `Treated patients receiving sotrovimab, n (%)` = `Received sotrovimab`, 
-         `Treated patients receiving molnupiravir, n (%)` = `Received molnupiravir`, 
-         `Treated patients receiving casirivimab, n (%)` = `Received casirivimab`) %>%
-  ungroup()
+eligibility_table$inputs$data <- NULL
 
-table_elig_treat_redacted <- rbind(tbl1, tbl2) %>%
-  mutate(`High risk cohort` = factor(`High risk cohort`, 
+eligibility_table <- eligibility_table$table_body %>%
+  separate(stat_0, c("stat_0","perc0"), sep = " ([(])") %>%
+  select(`High risk cohort` = label, 
+         `Number of eligible patients` = stat_0) %>%
+  data.frame()
+
+treatment_table <- data_processed_clean %>%
+  select(high_risk_group_nhsd, treatment_type) %>%
+  tbl_summary(by = treatment_type) %>%
+  add_overall()
+
+treatment_table$inputs$data <- NULL
+
+treatment_table <- treatment_table$table_body %>%
+  separate(stat_0, c("stat_0","perc0"), sep = " ([(])") %>%
+  separate(stat_1, c("stat_1","perc1"), sep = " ([(])") %>%
+  separate(stat_2, c("stat_2","perc2"), sep = " ([(])") %>%
+  separate(stat_3, c("stat_3","perc3"), sep = " ([(])") %>%
+  select(`High risk cohort` = label, 
+         `Number of treated patients` = stat_0,
+         `Treated with Casirivimab` = stat_1,
+         `Treated with Molnupiravir` = stat_2,
+         `Treated with Sotrovimab` = stat_3) %>%
+  mutate(`High risk cohort` = as.numeric(gsub(",", "", `High risk cohort`)),
+         `Number of treated patients` = as.numeric(gsub(",", "", `Number of treated patients`)),
+         `Treated with Molnupiravir` = as.numeric(gsub(",", "", `Treated with Molnupiravir`)),
+         `Treated with Sotrovimab` = as.numeric(gsub(",", "", `Treated with Sotrovimab`))) %>%
+  data.frame()
+
+table_elig_treat_redacted <- left_join(eligibility_table, treatment_table, by = "High.risk.cohort") %>%
+  mutate(High.risk.cohort = factor(High.risk.cohort, 
                                      levels = c( "All", "Down's syndrome", "Sickle cell disease", "Solid cancer", 
                                                  "Haematological diseases and stem cell transplant recipients",
                                                  "Renal disease", "Liver disease",
                                                  "Immune-mediated inflammatory disorders",
                                                  "Primary immune deficiencies", "HIV or AIDS",
-                                                 "Solid organ transplant recipients", "Rare neurological conditions", "Not deemed eligible"))) 
+                                                 "Solid organ transplant recipients", "Rare neurological conditions", "Not deemed eligible"))) %>%
+  # Redact values < 8
+  mutate(Number.of.eligible.patients = ifelse(Number.of.eligible.patients < threshold, NA, as.numeric(Number.of.eligible.patients)),
+         Number.of.treated.patients = ifelse(Number.of.treated.patients < threshold, NA, as.numeric(Number.of.treated.patients)),
+         Treated.with.Casirivimab = ifelse(Treated.with.Casirivimab < threshold, NA, as.numeric(Treated.with.Casirivimab)),
+         Treated.with.Molnupiravir = ifelse(Treated.with.Molnupiravir < threshold, NA, as.numeric(Treated.with.Molnupiravir)),
+         Treated.with.Sotrovimab = ifelse(Treated.with.Sotrovimab < threshold, NA, as.numeric(Treated.with.Sotrovimab))
+         ) %>%
+  # Round to nearest 10
+  mutate(Number.of.eligible.patients = plyr::round_any(Number.of.eligible.patients, 10),
+         Number.of.treated.patients = plyr::round_any(Number.of.treated.patients, 10),
+         Treated.with.Casirivimab = plyr::round_any(Treated.with.Casirivimab, 10),
+         Treated.with.Molnupiravir = plyr::round_any(Treated.with.Molnupiravir, 10),
+         Treated.with.Sotrovimab = plyr::round_any(Treated.with.Sotrovimab, 10))
 
 write_csv(table_elig_treat_redacted, here::here("output", "reports", "coverage", "tables", "table_elig_treat_redacted.csv"))
 
@@ -393,7 +408,40 @@ table_demo_clinc_breakdown <- data_processed_clean %>%
   ) %>%
   bold_labels()
 
-gt::gtsave(as_gt(table_demo_clinc_breakdown), here::here("output", "reports", "coverage", "tables", "table_demo_clinc_breakdown_redacted.html"))
+table_demo_clinc_breakdown$inputs$data <- NULL
+
+table_demo_clinc_breakdown <- table_demo_clinc_breakdown$table_body %>%
+  separate(stat_0, c("stat_0","perc0"), sep = " ([(])") %>%
+  separate(stat_1, c("stat_1","perc1"), sep = " ([(])") %>%
+  separate(stat_2, c("stat_2","perc2"), sep = " ([(])") %>%
+  separate(stat_3, c("stat_3","perc3"), sep = " ([(])") %>%
+  select(Variable = label, 
+         All = stat_0,
+         Casirivimab = stat_1,
+         Molnupiravir = stat_2,
+         Sotrovimab = stat_3) %>%
+  mutate(All = as.numeric(gsub(",", "", All)),
+         Casirivimab = as.numeric(gsub(",", "", Casirivimab)),
+         Molnupiravir = as.numeric(gsub(",", "", Molnupiravir)),
+         Sotrovimab = as.numeric(gsub(",", "", Sotrovimab))) %>%
+
+  data.frame()
+
+table_demo_clinc_breakdown_redacted <- table_demo_clinc_breakdown %>%
+  # Redact values < 8
+  mutate(All = ifelse(All < threshold, NA, as.numeric(All)),
+         Casirivimab = ifelse(Casirivimab < threshold, NA, as.numeric(Casirivimab)),
+         Molnupiravir = ifelse(Molnupiravir < threshold, NA, as.numeric(Molnupiravir)),
+         Sotrovimab = ifelse(Sotrovimab < threshold, NA, as.numeric(Sotrovimab))
+  ) %>%
+  # Round to nearest 10
+  mutate(All = plyr::round_any(All, 10),
+         Casirivimab = plyr::round_any(Casirivimab, 10),
+         Molnupiravir = plyr::round_any(Molnupiravir, 10),
+         Sotrovimab = plyr::round_any(Sotrovimab, 10))
+
+
+gt::gtsave(as_gt(table_demo_clinc_breakdown_redacted), here::here("output", "reports", "coverage", "tables", "table_demo_clinc_breakdown_redacted.html"))
 
 
 
