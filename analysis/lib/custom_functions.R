@@ -48,6 +48,7 @@ process_data <- function(x) {
       # NEUTRALISING MONOCLONAL ANTIBODIES OR ANTIVIRALS ----
       sotrovimab_covid_therapeutics = col_date(format = "%Y-%m-%d"),
       molnupiravir_covid_therapeutics = col_date(format = "%Y-%m-%d"),
+      casirivimab_covid_therapeutics = col_date(format = "%Y-%m-%d"),
       
       # ELIGIBILITY CRITERIA VARIABLES ----
       covid_test_positive = col_logical(),
@@ -57,7 +58,7 @@ process_data <- function(x) {
       symptomatic_covid_test = col_character(),
       covid_symptoms_snomed = col_date(format = "%Y-%m-%d"),
       high_risk_cohort_covid_therapeutics = col_character(),
-      covid_hospital_addmission_date = col_date(format = "%Y-%m-%d"),
+      covid_hospital_admission_date = col_date(format = "%Y-%m-%d"),
       age = col_integer(),
       
       # HIGH RISK GROUPS ----
@@ -96,7 +97,8 @@ process_data <- function(x) {
              
              date2 = as.Date(covid_test_date + sample(-1:10, 1, replace=TRUE), origin = "1970-01-01"),
              sotrovimab_covid_therapeutics = ifelse(!is.na(sotrovimab_covid_therapeutics), date2, NA),
-             molnupiravir_covid_therapeutics = ifelse(!is.na(molnupiravir_covid_therapeutics), date2, NA))
+             molnupiravir_covid_therapeutics = ifelse(!is.na(molnupiravir_covid_therapeutics), date2, NA),
+             casirivimab_covid_therapeutics = ifelse(!is.na(casirivimab_covid_therapeutics), date2, NA))
   }
   
   ## Parse NAs
@@ -122,8 +124,10 @@ process_data <- function(x) {
     mutate(
       
       # NEUTRALISING MONOCLONAL ANTIBODIES OR ANTIVIRALS ----
-      treatment_date = as.Date(pmin(sotrovimab_covid_therapeutics, molnupiravir_covid_therapeutics, na.rm = TRUE), origin = "1970-01-01"),
-      treatment_type = ifelse(!is.na(sotrovimab_covid_therapeutics), "sotrovimab", ifelse(!is.na(molnupiravir_covid_therapeutics), "molnupiravir", NA)),
+      treatment_date = as.Date(pmin(sotrovimab_covid_therapeutics, molnupiravir_covid_therapeutics, casirivimab_covid_therapeutics, na.rm = TRUE), origin = "1970-01-01"),
+      treatment_type = ifelse(!is.na(sotrovimab_covid_therapeutics), "sotrovimab", 
+                              ifelse(!is.na(molnupiravir_covid_therapeutics), "molnupiravir", 
+                                     ifelse(!is.na(casirivimab_covid_therapeutics), "casirivimab", NA))),
       
       
       # HIGH RISK GROUPS ----
@@ -150,11 +154,6 @@ process_data <- function(x) {
         TRUE ~ NA_character_),
       
       # CLINICAL/DEMOGRAPHIC COVARIATES ----
-      ageband = cut(age,
-                    breaks = c(0, 17, 24, 34, 44, 54, 69, 79, Inf),
-                    labels = c("0-17", "18-24", "25-34", "35-44", "45-54", "55-69", "70-79", "80+"),
-                    right = FALSE),
-      
       sex = fct_case_when(
         sex == "F" ~ "Female",
         sex == "M" ~ "Male",
@@ -218,9 +217,9 @@ process_data <- function(x) {
     select(patient_id,
            death_date, dereg_date,
            covid_test_positive, covid_positive_previous_30_days, tb_postest_treat, elig_start, elig_end,
-           treatment_date, treatment_type,
+           sotrovimab_covid_therapeutics, molnupiravir_covid_therapeutics, casirivimab_covid_therapeutics, treatment_date, treatment_type,
            high_risk_cohort_covid_therapeutics, high_risk_group_nhsd, high_risk_group_nhsd_date = high_risk_group_date,
-           covid_hospital_addmission_date, age, sex, ethnicity, imd, region_nhs, region_covid_therapeutics
+           covid_hospital_admission_date, age, sex, ethnicity, imd, region_nhs, region_covid_therapeutics
     )
   
 }
@@ -238,6 +237,7 @@ calculate_weekly_counts <- function(x) {
               sotrovimab_events = sum(sotrovimab, na.rm = T),
               ronapreve_events = sum(ronapreve, na.rm = T),
               molnupiravir_events = sum(molnupiravir, na.rm = T),
+              casirivimab_events = sum(casirivimab, na.rm = T),
               antiviral_therapy_events = sum(antiviral_therapy, na.rm = T),
               population = n())
   
@@ -247,14 +247,16 @@ calculate_weekly_counts <- function(x) {
            antiviral_therapy = ifelse(antiviral_therapy > 0, 1, 0),
            sotrovimab = ifelse(sotrovimab > 0, 1, 0),
            ronapreve = ifelse(ronapreve > 0, 1, 0),
+           casirivimab = ifelse(casirivimab > 0, 1, 0),
            molnupiravir = ifelse(molnupiravir > 0, 1, 0)) %>%
     summarise(anti_infective_agent_count = sum(anti_infective_agent, na.rm = T),
               antiviral_therapy_count = sum(antiviral_therapy, na.rm = T),
               sotrovimab_count = sum(sotrovimab, na.rm = T),
               ronapreve_count = sum(ronapreve, na.rm = T),
+              casirivimab_count = sum(casirivimab, na.rm = T),
               molnupiravir_count = sum(molnupiravir, na.rm = T)) %>%
     cbind(data_extract %>%
-            select(sotrovimab_code, ronapreve_code, molnupiravir_code) %>%
+            select(sotrovimab_code, ronapreve_code, molnupiravir_code, casirivimab_code) %>%
             gather() %>%
             filter(!is.na(value)) %>%
             mutate(code = paste(key, value, sep = "_")) %>%

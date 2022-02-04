@@ -37,13 +37,12 @@ fs::dir_create(here::here("reports", "coverage", "figures"))
 ## Import data
 data_processed <- read_rds(here::here("output", "data", "data_processed.rds"))
 
-## Format data
-dup_ids <- data_processed %>%
-  group_by(patient_id) %>%
-  summarise(count = n()) %>%
-  filter(count > 1)
 
-data_processed_clean <- data_processed %>%
+# Format data ----
+
+## Apply eligibility and exclusion criteria
+data_processed_eligible <- data_processed %>%
+  # Temporary fix to include treated patients not flagged as eligible due to high risk cohort 
   mutate(high_risk_group_nhsd = ifelse(is.na(high_risk_group_nhsd), "Non-digital", high_risk_group_nhsd),
          elig_start = as.Date(ifelse(is.na(elig_start) & high_risk_group_nhsd == "Non-digital", treatment_date, elig_start), origin = "1970-01-01")) %>%
   filter(
@@ -54,26 +53,27 @@ data_processed_clean <- data_processed %>%
     !is.na(high_risk_group_nhsd),
     
     # Apply exclusion criteria
-    is.na(covid_hospital_addmission_date) | covid_hospital_addmission_date < (elig_start - 30) & covid_hospital_addmission_date >= (elig_start + 1),
+    is.na(covid_hospital_admission_date) | covid_hospital_admission_date < (elig_start - 30) & covid_hospital_admission_date >= (elig_start + 1),
     age >= 12,
     
     # Only eligible patients
     !is.na(elig_start),
-    
-    ## Remove duplicates
-    !(patient_id %in% dup_ids$patient_id)
-    
-  ) %>%
+  )
+
+## Formatting variables
+data_processed_eligible <- data_processed_eligible %>%
   mutate(
+    
+    # Age groups
     ageband = cut(
       age,
-      breaks = c(16, 30, 40, 50, 60, 70, 80, Inf),
-      labels = c("16-29", "30-39", "40-49", "50-59", "60-69", "70-79", "80+"),
+      breaks = c(12, 30, 40, 50, 60, 70, 80, Inf),
+      labels = c("12-29", "30-39", "40-49", "50-59", "60-69", "70-79", "80+"),
       right = FALSE),
     
+    #IMD
     imd = as.character(imd),
     imd = ifelse(imd %in% c("1 most deprived", 2:4, "5 least deprived"), imd, "Unknown"),
-    
     imd = fct_case_when(
       imd == "1 most deprived" ~ "1 most deprived",
       imd == 2 ~ "2",
@@ -85,8 +85,8 @@ data_processed_clean <- data_processed %>%
       TRUE ~ NA_character_
     ),
     
+    # Region
     region = as.character(region_nhs),
-    
     region = fct_case_when(
       region == "London" ~ "London",
       region == "East of England" ~ "East of England",
@@ -98,8 +98,36 @@ data_processed_clean <- data_processed %>%
       region == "West Midlands" ~ "West Midlands",
       region == "Yorkshire and the Humber" ~ "Yorkshire and the Humber",
       #TRUE ~ "Unknown"
-      TRUE ~ NA_character_)
-    )
+      TRUE ~ NA_character_),
+    
+    # High risk cohort
+    high_risk_group_nhsd = factor(high_risk_group_nhsd, levels = c("Down's syndrome", "Sickle cell disease", "Patients with a solid cancer",
+                                                                   "Patients with a haematological diseases and stem cell transplant recipients",
+                                                                   "Patients with renal disease", "Patients with liver disease",
+                                                                   "Patients with immune-mediated inflammatory disorders (IMID)",
+                                                                   "Primary immune deficiencies", "HIV/AIDS", "Solid organ transplant recipients", 
+                                                                   "Rare neurological conditions", "Non-digital"))
+    
+  )
+
+## Exclude duplicated patients issued more than one treatment within two weeks
+dup_ids <- data_processed_eligible %>%
+  select(patient_id, treatment_date, sotrovimab_covid_therapeutics, molnupiravir_covid_therapeutics, casirivimab_covid_therapeutics) %>%
+  filter(!is.na(treatment_date)) %>%
+  mutate(sotrovimab_covid_therapeutics = as.Date(sotrovimab_covid_therapeutics, origin="1970-01-01"),
+         molnupiravir_covid_therapeutics = as.Date(molnupiravir_covid_therapeutics, origin="1970-01-01"),
+         casirivimab_covid_therapeutics = as.Date(casirivimab_covid_therapeutics, origin="1970-01-01"),
+         sot_mol_diff = as.numeric(sotrovimab_covid_therapeutics - molnupiravir_covid_therapeutics),
+         sot_cas_diff = as.numeric(sotrovimab_covid_therapeutics - casirivimab_covid_therapeutics),
+         mol_cas_diff = as.numeric(molnupiravir_covid_therapeutics - casirivimab_covid_therapeutics)) %>%
+  melt(id.var = "patient_id", measure.vars = c("sot_mol_diff", "sot_cas_diff", "mol_cas_diff")) %>%
+  filter(!is.na(value),
+         value <= 14 | value >= -14) %>%
+  group_by(patient_id) %>%
+  arrange(patient_id) 
+
+data_processed_clean <- data_processed_eligible %>%
+  mutate(!(patient_id %in% dup_ids$patient_id))
 
 
 # Numbers for text ----
@@ -118,9 +146,13 @@ molnupiravir <- paste(format(data_processed_clean %>% filter(treatment_type == "
                       " (",
                       round(data_processed_clean %>% filter(treatment_type == "molnupiravir") %>% nrow()/nrow(data_processed_clean)*100, digits = 0),
                       "%)", sep = "")
+casirivimab <- paste(format(data_processed_clean %>% filter(treatment_type == "casirivimab") %>% nrow(), big.mark = ",", scientific = FALSE),
+                      " (",
+                      round(data_processed_clean %>% filter(treatment_type == "casirivimab") %>% nrow()/nrow(data_processed_clean)*100, digits = 0),
+                      "%)", sep = "")
 
 
-text <- data.frame(study_start, study_end, eligible_patients, treated_patients, sotrovimab, molnupiravir)
+text <- data.frame(study_start, study_end, eligible_patients, treated_patients, sotrovimab, molnupiravir, casirivimab)
 
 write_csv(text, here::here("reports", "coverage", "tables", "report_stats.csv"))
 
@@ -271,29 +303,36 @@ ggsave(
 tbl1 <- cbind(data_processed_clean %>% summarise(Eligible = n()),
               data_processed_clean %>% filter(!is.na(treatment_date) & treatment_type == "sotrovimab") %>% summarise(sotrovimab = n()),
               data_processed_clean %>% filter(!is.na(treatment_date) & treatment_type == "molnupiravir") %>% summarise(molnupiravir = n()),
+              data_processed_clean %>% filter(!is.na(treatment_date) & treatment_type == "casirivimab") %>% summarise(casirivimab = n()),
               data_processed_clean %>% filter(!is.na(treatment_date)) %>% summarise(any = n())) %>%
-  mutate(`Recieved treatment` = paste(any, " (", round(any/Eligible*100, digits = 0), "%)", sep = ""),
-         `Recieved sotrovimab` = paste(sotrovimab, " (", round(sotrovimab/any*100, digits = 0), "%)", sep = ""),
-         `Recieved molnupiravir` = paste(molnupiravir, " (", round(molnupiravir/any*100, digits = 0), "%)", sep = ""),
+  mutate(`Received treatment` = paste(any, " (", round(any/Eligible*100, digits = 0), "%)", sep = ""),
+         `Received sotrovimab` = paste(sotrovimab, " (", round(sotrovimab/any*100, digits = 0), "%)", sep = ""),
+         `Received molnupiravir` = paste(molnupiravir, " (", round(molnupiravir/any*100, digits = 0), "%)", sep = ""),
+         `Received casirivimab` = paste(casirivimab, " (", round(casirivimab/any*100, digits = 0), "%)", sep = ""),
          `High risk cohort` = "All") %>%
   select(`High risk cohort`, `Number of eligible patients, n` = Eligible, 
-         `Eligible patients recieving treatment, n (%)` = `Recieved treatment`, 
-         `Treated patients recieving sotrovimab, n (%)` = `Recieved sotrovimab`, 
-         `Treated patients recieving molnupiravir, n (%)` = `Recieved molnupiravir`)
+         `Eligible patients receiving treatment, n (%)` = `Received treatment`, 
+         `Treated patients receiving sotrovimab, n (%)` = `Received sotrovimab`, 
+         `Treated patients receiving molnupiravir, n (%)` = `Received molnupiravir`, 
+         `Treated patients receiving casirivimab, n (%)` = `Received casirivimab`)
 
 tbl2 <- left_join(data_processed_clean %>% group_by(high_risk_group_nhsd) %>% summarise(Eligible = n()),
                   data_processed_clean %>% group_by(high_risk_group_nhsd) %>% 
                     filter(!is.na(treatment_date) & treatment_type == "sotrovimab") %>% summarise(sotrovimab = n())) %>%
   left_join(data_processed_clean %>% group_by(high_risk_group_nhsd) %>% filter(!is.na(treatment_date) & treatment_type == "molnupiravir") %>% 
               summarise(molnupiravir = n())) %>%
+  left_join(data_processed_clean %>% group_by(high_risk_group_nhsd) %>% filter(!is.na(treatment_date) & treatment_type == "casirivimab") %>% 
+              summarise(casirivimab = n())) %>%
   left_join(data_processed_clean %>% group_by(high_risk_group_nhsd) %>% filter(!is.na(treatment_date)) %>% summarise(any = n())) %>%
-  mutate(`Recieved treatment` = paste(any, " (", round(any/Eligible*100, digits = 0), "%)", sep = ""),
-         `Recieved sotrovimab` = paste(sotrovimab, " (", round(sotrovimab/any*100, digits = 0), "%)", sep = ""),
-         `Recieved molnupiravir` = paste(molnupiravir, " (", round(molnupiravir/any*100, digits = 0), "%)", sep = "")) %>%
+  mutate(`Received treatment` = paste(any, " (", round(any/Eligible*100, digits = 0), "%)", sep = ""),
+         `Received sotrovimab` = paste(sotrovimab, " (", round(sotrovimab/any*100, digits = 0), "%)", sep = ""),
+         `Received molnupiravir` = paste(molnupiravir, " (", round(molnupiravir/any*100, digits = 0), "%)", sep = ""),
+         `Received casirivimab` = paste(casirivimab, " (", round(casirivimab/any*100, digits = 0), "%)", sep = "")) %>%
   select(`High risk cohort` = high_risk_group_nhsd, `Number of eligible patients, n` = Eligible, 
-         `Eligible patients recieving treatment, n (%)` = `Recieved treatment`, 
-         `Treated patients recieving sotrovimab, n (%)` = `Recieved sotrovimab`, 
-         `Treated patients recieving molnupiravir, n (%)` = `Recieved molnupiravir`) %>%
+         `Eligible patients receiving treatment, n (%)` = `Received treatment`, 
+         `Treated patients receiving sotrovimab, n (%)` = `Received sotrovimab`, 
+         `Treated patients receiving molnupiravir, n (%)` = `Received molnupiravir`, 
+         `Treated patients receiving casirivimab, n (%)` = `Received casirivimab`) %>%
   ungroup()
 
 table_elig_treat_redacted <- rbind(tbl1, tbl2) %>%
