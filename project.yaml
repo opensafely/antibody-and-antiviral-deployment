@@ -20,24 +20,18 @@ actions:
 
   ## Cohort data
   extract_data:
-    run: cohortextractor:latest generate_cohort --study-definition study_definition --index-date-range "2021-12-13 to 2022-01-24 by week" --output-dir=output/data --output-format=csv.gz
+    run: cohortextractor:latest generate_cohort --study-definition study_definition --output-dir=output/data --output-format=csv.gz
     outputs:
       highly_sensitive:
-        cohort: output/data/input_*.csv.gz
+        cohort: output/data/input.csv.gz
   
- ## Cohort data - not weekly
-  extract_data_not_weekly:
-    run: cohortextractor:latest generate_cohort --study-definition study_definition_not_weekly --output-dir=output/data
-    outputs:
-      highly_sensitive:
-        cohort: output/data/input_not_weekly.csv # use csv temporarily to avoid match with wildcard in previous output
   
   # Data processing ----
 
   ## Process data
   data_process:
     run: r:latest analysis/process/process_data.R
-    needs: [extract_data_not_weekly]
+    needs: [extract_data]
     outputs:
       highly_sensitive:
         data: output/data/data_processed.rds

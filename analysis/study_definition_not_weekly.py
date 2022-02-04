@@ -3,10 +3,10 @@
 # Description: This script provides the formal specification of the study data 
 #              that will be extracted from the OpenSAFELY database.
 #
-# Output: output/data/input_*.csv.gz
+# Output: output/data/input.csv.gz
 #
-# Author(s): M Green (edited by H Curtis)
-# Date last updated: 03/02/2022
+# Author(s): M Green, H Curtis)
+# Date last updated: 04/02/2022
 #
 ################################################################################
 
@@ -28,7 +28,7 @@ from cohortextractor import (
 from codelists import *
   
   
-# DEFINE STUDY POPULATION ----
+  # DEFINE STUDY POPULATION ----
 
 ## Define study time variables
 from datetime import date
@@ -57,12 +57,16 @@ study = StudyDefinition(
     """
     (registered_eligible OR registered_treated)
     AND
-    NOT has_died
+    NOT
+    has_died
     AND
     (sotrovimab_covid_therapeutics 
-      OR molnupiravir_covid_therapeutics 
-      OR casirivimab_covid_therapeutics
-      OR covid_test_positive
+      OR 
+    molnupiravir_covid_therapeutics 
+      OR
+    casirivimab_covid_therapeutics
+      OR
+    covid_test_positive
       )
     """,
     
@@ -76,7 +80,7 @@ study = StudyDefinition(
   
   
   # TREATMENT - NEUTRALISING MONOCLONAL ANTIBODIES OR ANTIVIRALS ----
-
+  
   ## Sotrovimab
   sotrovimab_covid_therapeutics = patients.with_covid_therapeutics(
     #with_these_statuses = ["Approved", "Treatment Complete"],
@@ -87,9 +91,9 @@ study = StudyDefinition(
     returning = "date",
     date_format = "YYYY-MM-DD",
     return_expectations = {
-      "date": {"earliest": "2021-12-20"},
+      "date": {"earliest": "2021-12-16"},
       "incidence": 0.4
-      },
+    },
   ),
   
   ### Molnupiravir
@@ -102,11 +106,11 @@ study = StudyDefinition(
     returning = "date",
     date_format = "YYYY-MM-DD",
     return_expectations = {
-      "date": {"earliest": "2021-12-20"},
+      "date": {"earliest": "2021-12-16"},
       "incidence": 0.4
-      },
+    },
   ),
-
+  
   ### Casirivimab and imdevimab
   casirivimab_covid_therapeutics = patients.with_covid_therapeutics(
     #with_these_statuses = ["Approved", "Treatment Complete"],
@@ -117,17 +121,54 @@ study = StudyDefinition(
     returning = "date",
     date_format = "YYYY-MM-DD",
     return_expectations = {
-      "date": {"earliest": "2021-12-20"},
+      "date": {"earliest": "2021-12-16"},
       "incidence": 0.4
-      },
+    },
   ), 
   
-  date_treated = patients.minimum_of(
-    "sotrovimab_covid_therapeutics",
-    "molnupiravir_covid_therapeutics",
-    "casirivimab_covid_therapeutics",
+  
+  
+  # CENSORING ----
+  
+  ## Death of any cause
+  death_date = patients.died_from_any_cause(
+    returning = "date_of_death",
+    date_format = "YYYY-MM-DD",
+    on_or_after = "covid_test_date",
+    return_expectations = {
+      "date": {"earliest": "2021-12-20", "latest": "index_date"},
+      "incidence": 0.1
+    },
   ),
-
+  
+  ## De-registration
+  dereg_date = patients.date_deregistered_from_all_supported_practices(
+    on_or_after = "covid_test_date",
+    date_format = "YYYY-MM-DD",
+    return_expectations = {
+      "date": {"earliest": "2021-12-20", "latest": "index_date"},
+      "incidence": 0.1
+    },
+  ),
+  
+  ## Study start date for extracting variables
+  registered_eligible = patients.registered_as_of("covid_test_date"),
+  
+  registered_treated = patients.registered_as_of(
+    "date_treated",
+    
+    date_treated = patients.minimum_of(
+      "sotrovimab_covid_therapeutics",
+      "molnupiravir_covid_therapeutics",
+      "casirivimab_covid_therapeutics",
+    ),
+    
+  ),
+  
+  start_date = patients.minimum_of("registered_eligible", "registered_treated")
+  
+  
+  
   # ELIGIBILITY CRITERIA VARIABLES ----
   
   ## Inclusion criteria variables
@@ -158,7 +199,7 @@ study = StudyDefinition(
     return_expectations = {
       "date": {"earliest": "2021-12-20", "latest": "index_date"},
       "incidence": 0.9
-      },
+    },
   ),
   
   covid_positive_test_type = patients.with_test_result_in_sgss(
@@ -213,72 +254,7 @@ study = StudyDefinition(
     on_or_after = "index_date - 5 days",
   ),
   
-  
-  
-  # CENSORING ----
-  
-  registered_eligible = patients.registered_as_of("covid_test_date"),
-
-  registered_treated = patients.registered_as_of("date_treated"),
-
-
-  ## Death of any cause
-  death_date = patients.died_from_any_cause(
-    returning = "date_of_death",
-    date_format = "YYYY-MM-DD",
-    on_or_after = "covid_test_date",
-    return_expectations = {
-      "date": {"earliest": "2021-12-20", "latest": "index_date"},
-      "incidence": 0.1
-      },
-  ),
-  
-  ## De-registration
-  dereg_date = patients.date_deregistered_from_all_supported_practices(
-    on_or_after = "covid_test_date",
-    date_format = "YYYY-MM-DD",
-    return_expectations = {
-      "date": {"earliest": "2021-12-20", "latest": "index_date"},
-      "incidence": 0.1
-      },
-  ),
-
-
-  ### Blueteq ‘high risk’ cohort
-  high_risk_cohort_covid_therapeutics = patients.with_covid_therapeutics(
-    with_these_statuses = ["Approved", "Treatment Complete"],
-    with_these_therapeutics = ["Sotrovimab", "Molnupiravir","Casirivimab and imdevimab"],
-    with_these_indications = "non_hospitalised",
-    on_or_after = "index_date",
-    find_first_match_in_period = True,
-    returning = "risk_group",
-    date_format = "YYYY-MM-DD",
-    return_expectations = {
-      "rate": "universal",
-      "category": {
-        "ratios": {
-          "Down's syndrome": 0.1,
-          "Sickle cell disease": 0.1,
-          "solid cancer": 0.1,
-          "haematological diseases, stem cell transplant recipients": 0.1,
-          "renal disease": 0.1,
-          "liver disease": 0.1,
-          "immune-mediated inflammatory disorders (IMID)": 0.2,
-          "Primary immune deficiencies": 0.1,
-          "HIV/AIDS": 0.1,},},
-    },
-  ),
-  
-  ### NHSD ‘high risk’ cohort (codelist to be defined if/when data avaliable)
-  # high_risk_cohort_nhsd = patients.with_these_clinical_events(
-  #   high_risk_cohort_nhsd_codes,
-  #   between = [campaign_start, index_date],
-  #   returning = "date",
-  #   date_format = "YYYY-MM-DD",
-  #   find_first_match_in_period = True,
-  # ),
-  
-  ## Exclusion criteria
+  ## Exclusion criteria variables
   
   ### Pattern of clinical presentation indicates that there is recovery rather than risk of deterioration from infection
   #   (not currently possible to define/code)
@@ -320,6 +296,40 @@ study = StudyDefinition(
   
   
   # HIGH RISK GROUPS ----
+  
+  ## NHSD ‘high risk’ cohort (codelist to be defined if/when data avaliable)
+  # high_risk_cohort_nhsd = patients.with_these_clinical_events(
+  #   high_risk_cohort_nhsd_codes,
+  #   between = [campaign_start, index_date],
+  #   returning = "date",
+  #   date_format = "YYYY-MM-DD",
+  #   find_first_match_in_period = True,
+  # ),
+  
+  ## Blueteq ‘high risk’ cohort
+  high_risk_cohort_covid_therapeutics = patients.with_covid_therapeutics(
+    with_these_statuses = ["Approved", "Treatment Complete"],
+    with_these_therapeutics = ["Sotrovimab", "Molnupiravir","Casirivimab and imdevimab"],
+    with_these_indications = "non_hospitalised",
+    on_or_after = "index_date",
+    find_first_match_in_period = True,
+    returning = "risk_group",
+    date_format = "YYYY-MM-DD",
+    return_expectations = {
+      "rate": "universal",
+      "category": {
+        "ratios": {
+          "Down's syndrome": 0.1,
+          "Sickle cell disease": 0.1,
+          "solid cancer": 0.1,
+          "haematological diseases, stem cell transplant recipients": 0.1,
+          "renal disease": 0.1,
+          "liver disease": 0.1,
+          "immune-mediated inflammatory disorders (IMID)": 0.2,
+          "Primary immune deficiencies": 0.1,
+          "HIV/AIDS": 0.1,},},
+    },
+  ),
   
   ## Down's syndrome
   downs_syndrome_nhsd_snomed = patients.with_these_clinical_events(
@@ -579,7 +589,7 @@ study = StudyDefinition(
   
   
   
- # CLINICAL/DEMOGRAPHIC COVARIATES ----
+  # CLINICAL/DEMOGRAPHIC COVARIATES ----
   
   ## Sex
   sex = patients.sex(
