@@ -168,7 +168,7 @@ study = StudyDefinition(
   
   covid_test_date = patients.with_test_result_in_sgss(
     pathogen = "SARS-CoV-2",
-    test_result = "any",
+    test_result = "positive",
     find_first_match_in_period = True,
     restrict_to_earliest_specimen_date = False,
     returning = "date",
@@ -273,6 +273,7 @@ study = StudyDefinition(
   #   (not currently possible to define/code)
   
   ### Require hospitalisation for COVID-19
+  ## NB this data lags behind the therapeutics/testing data so may be missing
   covid_hospital_admission_date = patients.admitted_to_hospital(
     returning = "date_admitted",
     with_these_diagnoses = covid_icd10_codes,
