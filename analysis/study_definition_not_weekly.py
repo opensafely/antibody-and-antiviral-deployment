@@ -55,9 +55,9 @@ study = StudyDefinition(
   # POPULATION ----
   population = patients.satisfying(
     """
-    NOT has_died
+    (registered_eligible OR registered_treated)
     AND
-    registered
+    NOT has_died
     AND
     (sotrovimab_covid_therapeutics 
       OR molnupiravir_covid_therapeutics 
@@ -71,36 +71,13 @@ study = StudyDefinition(
       returning = "binary_flag",
     ),
 
-    registered = patients.registered_as_of("index_date - 1 day"),
+    #registered = patients.registered_as_of("index_date - 1 day"),
     
   ),
   
   
-  # CENSORING ----
   
-  ## Death of any cause
-  death_date = patients.died_from_any_cause(
-    returning = "date_of_death",
-    date_format = "YYYY-MM-DD",
-    on_or_after = "index_date",
-    return_expectations = {
-      "date": {"earliest": "2021-12-20", "latest": "index_date"},
-      "incidence": 0.1
-      },
-  ),
-  
-  ## De-registration
-  dereg_date = patients.date_deregistered_from_all_supported_practices(
-    on_or_after = "index_date",
-    date_format = "YYYY-MM-DD",
-    return_expectations = {
-      "date": {"earliest": "2021-12-20", "latest": "index_date"},
-      "incidence": 0.1
-      },
-  ),
-  
-  
-  # NEUTRALISING MONOCLONAL ANTIBODIES OR ANTIVIRALS ----
+  # TREATMENT - NEUTRALISING MONOCLONAL ANTIBODIES OR ANTIVIRALS ----
 
   ## Sotrovimab
   sotrovimab_covid_therapeutics = patients.with_covid_therapeutics(
@@ -147,7 +124,12 @@ study = StudyDefinition(
       },
   ), 
   
-  
+  date_treated = patients.minimum_of(
+    "sotrovimab_covid_therapeutics",
+    "molnupiravir_covid_therapeutics",
+    "casirivimab_covid_therapeutics",
+  ),
+
   # ELIGIBILITY CRITERIA VARIABLES ----
   
   ## Inclusion criteria variables
@@ -169,7 +151,7 @@ study = StudyDefinition(
   
   covid_test_date = patients.with_test_result_in_sgss(
     pathogen = "SARS-CoV-2",
-    test_result = "any",
+    test_result = "positive",
     find_first_match_in_period = True,
     restrict_to_earliest_specimen_date = False,
     returning = "date",
@@ -181,7 +163,6 @@ study = StudyDefinition(
       },
   ),
   
-
   covid_positive_test_type = patients.with_test_result_in_sgss(
     pathogen = "SARS-CoV-2",
     test_result = "positive",
@@ -234,6 +215,37 @@ study = StudyDefinition(
     on_or_after = "index_date - 5 days",
   ),
   
+  
+  
+  # CENSORING ----
+  
+  registered_eligible = patients.registered_as_of("covid_test_date"),
+
+  registered_treated = patients.registered_as_of("date_treated"),
+
+
+  ## Death of any cause
+  death_date = patients.died_from_any_cause(
+    returning = "date_of_death",
+    date_format = "YYYY-MM-DD",
+    on_or_after = "covid_test_date",
+    return_expectations = {
+      "date": {"earliest": "2021-12-20", "latest": "index_date"},
+      "incidence": 0.1
+      },
+  ),
+  
+  ## De-registration
+  dereg_date = patients.date_deregistered_from_all_supported_practices(
+    on_or_after = "covid_test_date",
+    date_format = "YYYY-MM-DD",
+    return_expectations = {
+      "date": {"earliest": "2021-12-20", "latest": "index_date"},
+      "incidence": 0.1
+      },
+  ),
+
+
   ### Blueteq ‘high risk’ cohort
   high_risk_cohort_covid_therapeutics = patients.with_covid_therapeutics(
     with_these_statuses = ["Approved", "Treatment Complete"],
@@ -274,6 +286,7 @@ study = StudyDefinition(
   #   (not currently possible to define/code)
   
   ### Require hospitalisation for COVID-19
+  ## NB this data lags behind the therapeutics/testing data so may be missing
   covid_hospital_admission_date = patients.admitted_to_hospital(
     returning = "date_admitted",
     with_these_diagnoses = covid_icd10_codes,
