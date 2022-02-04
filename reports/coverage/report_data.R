@@ -110,15 +110,21 @@ data_processed_eligible <- data_processed_eligible %>%
     
   )
 
-## Exclude duplicated patients issued more than one treatment
+## Exclude duplicated patients issued more than one treatment within two weeks
 dup_ids <- data_processed_eligible %>%
-  select(patient_id, sotrovimab_covid_therapeutics, molnupiravir_covid_therapeutics, casirivimab_covid_therapeutics) %>%
-  melt(id.var = "patient_id") %>%
-  filter(!is.na(value)) %>%
-  mutate(value = as.Date(value, origin="1970-01-01")) %>%
+  select(patient_id, treatment_date, sotrovimab_covid_therapeutics, molnupiravir_covid_therapeutics, casirivimab_covid_therapeutics) %>%
+  filter(!is.na(treatment_date)) %>%
+  mutate(sotrovimab_covid_therapeutics = as.Date(sotrovimab_covid_therapeutics, origin="1970-01-01"),
+         molnupiravir_covid_therapeutics = as.Date(molnupiravir_covid_therapeutics, origin="1970-01-01"),
+         casirivimab_covid_therapeutics = as.Date(casirivimab_covid_therapeutics, origin="1970-01-01"),
+         sot_mol_diff = as.numeric(sotrovimab_covid_therapeutics - molnupiravir_covid_therapeutics),
+         sot_cas_diff = as.numeric(sotrovimab_covid_therapeutics - casirivimab_covid_therapeutics),
+         mol_cas_diff = as.numeric(molnupiravir_covid_therapeutics - casirivimab_covid_therapeutics)) %>%
+  melt(id.var = "patient_id", measure.vars = c("sot_mol_diff", "sot_cas_diff", "mol_cas_diff")) %>%
+  filter(!is.na(value),
+         value <= 14 | value >= -14) %>%
   group_by(patient_id) %>%
-  summarise(count = n()) %>%
-  filter(count > 1)
+  arrange(patient_id) 
 
 data_processed_clean <- data_processed_eligible %>%
   mutate(!(patient_id %in% dup_ids$patient_id))
