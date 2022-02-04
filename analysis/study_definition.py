@@ -286,7 +286,7 @@ study = StudyDefinition(
   
   ### Children aged under 12 years
   age = patients.age_as_of(
-    "index_date",
+    "start_date - 1 days",
     return_expectations = {
       "rate": "universal",
       "int": {"distribution": "population_ages"},
@@ -338,6 +338,7 @@ study = StudyDefinition(
   ## Down's syndrome
   downs_syndrome_nhsd_snomed = patients.with_these_clinical_events(
     downs_syndrome_nhsd_snomed_codes,
+    on_or_after = "start_date - 30 days",
     returning = "date",
     date_format = "YYYY-MM-DD",
     find_first_match_in_period = True,
