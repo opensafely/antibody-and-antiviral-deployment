@@ -70,8 +70,6 @@ study = StudyDefinition(
       on_or_before = "index_date - 1 day",
       returning = "binary_flag",
     ),
-
-    #registered = patients.registered_as_of("index_date - 1 day"),
     
   ),
   
