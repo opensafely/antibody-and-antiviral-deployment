@@ -531,7 +531,126 @@ study = StudyDefinition(
     },
   ),
   
-  solid_organ_transplant_nhsd = patients.minimum_of("solid_organ_transplant_nhsd_snomed", "solid_organ_transplant_nhsd_opcs4"), 
+  transplant_all_y_codes_opcs4 = patients.admitted_to_hospital(
+    returning = "date_admitted",
+    with_these_procedures = replacement_of_organ_transplant_nhsd_opcs4_codes,
+    on_or_before = "start_date",
+    date_format = "YYYY-MM-DD",
+    find_last_match_in_period = True,
+    return_expectations = {
+      "date": {"earliest": "2020-02-01"},
+      "rate": "exponential_increase",
+      "incidence": 0.01,
+    },
+  ),
+  
+  transplant_thymus_opcs4 = patients.admitted_to_hospital(
+    returning = "date_admitted",
+    with_these_procedures = thymus_gland_transplant_nhsd_opcs4_codes,
+    between = ["transplant_all_y_codes_opcs4","transplant_all_y_codes_opcs4"],
+    date_format = "YYYY-MM-DD",
+    find_last_match_in_period = True,
+    return_expectations = {
+      "date": {"earliest": "2020-02-01"},
+      "rate": "exponential_increase",
+      "incidence": 0.01,
+    },
+  ),
+  
+  transplant_conjunctiva_y_code_opcs4 = patients.admitted_to_hospital(
+    returning = "date_admitted",
+    with_these_procedures = conjunctiva_y_codes_transplant_nhsd_opcs4_codes,
+    on_or_before = "start_date",
+    date_format = "YYYY-MM-DD",
+    find_last_match_in_period = True,
+    return_expectations = {
+      "date": {"earliest": "2020-02-01"},
+      "rate": "exponential_increase",
+      "incidence": 0.01,
+    },
+  ),
+  
+  transplant_conjunctiva_opcs4 = patients.admitted_to_hospital(
+    returning = "date_admitted",
+    with_these_procedures = conjunctiva_transplant_nhsd_opcs4_codes,
+    between = ["transplant_conjunctiva_y_code_opcs4","transplant_conjunctiva_y_code_opcs4"],
+    date_format = "YYYY-MM-DD",
+    find_last_match_in_period = True,
+    return_expectations = {
+      "date": {"earliest": "2020-02-01"},
+      "rate": "exponential_increase",
+      "incidence": 0.01,
+    },
+  ),
+  
+  transplant_stomach_opcs4 = patients.admitted_to_hospital(
+    returning = "date_admitted",
+    with_these_procedures = stomach_transplant_nhsd_opcs4_codes,
+    between = ["transplant_all_y_codes_opcs4","transplant_all_y_codes_opcs4"],
+    date_format = "YYYY-MM-DD",
+    find_last_match_in_period = True,
+    return_expectations = {
+      "date": {"earliest": "2020-02-01"},
+      "rate": "exponential_increase",
+      "incidence": 0.01,
+    },
+  ),
+  
+  transplant_ileum_1_Y_codes_opcs4 = patients.admitted_to_hospital(
+    returning = "date_admitted",
+    with_these_procedures = ileum_1_y_codes_transplant_nhsd_opcs4_codes,
+    on_or_before = "start_date",
+    date_format = "YYYY-MM-DD",
+    find_last_match_in_period = True,
+    return_expectations = {
+      "date": {"earliest": "2020-02-01"},
+      "rate": "exponential_increase",
+      "incidence": 0.01,
+    },
+  ),
+  
+  transplant_ileum_2_Y_codes_opcs4 = patients.admitted_to_hospital(
+    returning = "date_admitted",
+    with_these_procedures = ileum_2_y_codes_transplant_nhsd_opcs4_codes,
+    on_or_before = "start_date",
+    date_format = "YYYY-MM-DD",
+    find_last_match_in_period = True,
+    return_expectations = {
+      "date": {"earliest": "2020-02-01"},
+      "rate": "exponential_increase",
+      "incidence": 0.01,
+    },
+  ),
+  
+  transplant_ileum_1_opcs4 = patients.admitted_to_hospital(
+    returning = "date_admitted",
+    with_these_procedures = ileum_1_transplant_nhsd_opcs4_codes,
+    between = ["transplant_ileum_1_Y_codes_opcs4","transplant_ileum_1_Y_codes_opcs4"],
+    date_format = "YYYY-MM-DD",
+    find_last_match_in_period = True,
+    return_expectations = {
+      "date": {"earliest": "2020-02-01"},
+      "rate": "exponential_increase",
+      "incidence": 0.01,
+    },
+  ),
+  
+  transplant_ileum_2_opcs4 = patients.admitted_to_hospital(
+    returning = "date_admitted",
+    with_these_procedures = ileum_2_transplant_nhsd_opcs4_codes,
+    between = ["transplant_ileum_2_Y_codes_opcs4","transplant_ileum_2_Y_codes_opcs4"],
+    date_format = "YYYY-MM-DD",
+    find_first_match_in_period = True,
+    return_expectations = {
+      "date": {"earliest": "2020-02-01"},
+      "rate": "exponential_increase",
+      "incidence": 0.01,
+    },
+  ),
+  
+  solid_organ_transplant_nhsd = patients.minimum_of("solid_organ_transplant_nhsd_snomed", "solid_organ_transplant_nhsd_opcs4",
+                                                    "transplant_thymus_opcs4", "transplant_conjunctiva_opcs4", "transplant_stomach_opcs4",
+                                                    "transplant_ileum_1_opcs4","transplant_ileum_2_opcs4"), 
   
   ## Rare neurological conditions
   
