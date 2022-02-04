@@ -15,25 +15,6 @@ from cohortextractor import (codelist, codelist_from_csv, combine_codelists)
 
 # --- CODELISTS ---
 
-
-## NEUTRALISING MONOCLONAL ANTIBODIES OR ANTIVIRALS ----
-
-### Administration of anti-infective agent
-anti_infective_agent_codes = codelist(["47943005"], system = "snomed")
-
-#### Sotrovimab
-sotrovimab_codes = codelist(["40219011000001108"], system = "snomed")
-
-#### Ronapreve
-ronapreve_codes = codelist(["40025711000001108", "39654011000001101"], system = "snomed")
-
-### Provision of antiviral therapy
-antiviral_therapy_codes = codelist(["427314002"], system = "snomed")
-
-### Molnupiravir
-molnupiravir_codes = codelist(["40251211000001109"], system = "snomed")
-
-
 ## ELIGIBILITY CRITERIA VARIABLES ----
 
 ### Onset of symptoms of COVID-19
@@ -322,4 +303,15 @@ huntingtons_disease_nhsd_icd10_codes = codelist_from_csv(
   system = "icd10",
   column = "code",
 )  
+
+## CLINICAL/DEMOGRAPHIC COVARIATES ----
+
+### Ethnicity
+ethnicity_primis_codes = codelist_from_csv(
+  "codelists/primis-covid19-vacc-uptake-eth2001.csv",
+  system = "snomed",
+  column = "code",
+  category_column="grouping_6_id",
+)
+
 

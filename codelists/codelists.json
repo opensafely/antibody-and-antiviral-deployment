@@ -94,7 +94,6 @@
       "id": "nhsd/ckd-stage-5-icd-10/7bad9258",
       "url": "https://codelists.opensafely.org/codelist/nhsd/ckd-stage-5-icd-10/7bad9258/",
       "downloaded_at": "2022-02-02 16:15:41.433436Z",
-
       "sha": "242f2707db9159f86616ae31397ee63deb396bb5"
     },
     "nhsd-liver-cirrhosis.csv": {
@@ -264,6 +263,12 @@
       "url": "https://codelists.opensafely.org/codelist/nhsd/huntingtons/7e01ad05/",
       "downloaded_at": "2022-01-14 17:38:24.717229Z",
       "sha": "96987e57a5813399b57b73c76ac675eee5894ab5"
+    },
+    "primis-covid19-vacc-uptake-eth2001.csv": {
+      "id": "primis-covid19-vacc-uptake/eth2001/v1",
+      "url": "https://codelists.opensafely.org/codelist/primis-covid19-vacc-uptake/eth2001/v1/",
+      "downloaded_at": "2022-02-02 16:32:15.622401Z",
+      "sha": "36e4eacba898e6ec72da8ff66e8c673bfd9aa8e4"
     }
   }
 }
