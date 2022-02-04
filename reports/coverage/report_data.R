@@ -20,12 +20,12 @@
 # Preliminaries ----
 
 ## Import libraries
-library('tidyverse')
-library('here')
-library('glue')
-library('gt')
-library('gtsummary')
-library('reshape2')
+library(tidyverse)
+library(here)
+library(glue)
+library(gt)
+library(gtsummary)
+library(reshape2)
 
 ## Import custom user functions
 source(here("analysis", "lib", "custom_functions.R"))
@@ -62,8 +62,8 @@ data_processed_eligible <- data_processed %>%
 data_processed_treated <- data_processed %>%
   filter(!(patient_id %in% unique(data_processed_eligible)),
          !is.na(treatment_date)) %>%
-  mutate(high_risk_group_nhsd = ifelse(is.na(high_risk_group_nhsd), "Non-digital", high_risk_group_nhsd),
-         elig_start = as.Date(ifelse(is.na(elig_start) & high_risk_group_nhsd == "Non-digital", treatment_date, elig_start), origin = "1970-01-01")) %>%
+  mutate(high_risk_group_nhsd = ifelse(is.na(high_risk_group_nhsd), "Not deemed eligible", high_risk_group_nhsd),
+         elig_start = as.Date(ifelse(is.na(elig_start), treatment_date, elig_start), origin = "1970-01-01")) %>%
   mutate(eligibility_status = "Treated") 
 
 data_processed_combined <- rbind(data_processed_eligible, data_processed_treated)
@@ -128,37 +128,45 @@ data_processed_clean <- data_processed_clean %>%
       TRUE ~ NA_character_),
     
     # High risk cohort
-    high_risk_group_nhsd = factor(high_risk_group_nhsd, levels = c("Down's syndrome", "Sickle cell disease", "Patients with a solid cancer",
-                                                                   "Patients with a haematological diseases and stem cell transplant recipients",
-                                                                   "Patients with renal disease", "Patients with liver disease",
-                                                                   "Patients with immune-mediated inflammatory disorders (IMID)",
-                                                                   "Primary immune deficiencies", "HIV/AIDS", "Solid organ transplant recipients", 
-                                                                   "Rare neurological conditions", "Non-digital"))
-    
+    high_risk_group_nhsd = as.character(high_risk_group_nhsd),
+    high_risk_group_nhsd = fct_case_when(
+      high_risk_group_nhsd == "Down's syndrome" ~ "Down's syndrome",
+      high_risk_group_nhsd == "Sickle cell disease" ~ "Sickle cell disease",
+      high_risk_group_nhsd == "Patients with a solid cancer" ~ "Solid cancer",
+      high_risk_group_nhsd == "Patients with a haematological diseases and stem cell transplant recipients" ~ "Haematological diseases and stem cell transplant recipients",
+      high_risk_group_nhsd == "Patients with renal disease" ~ "Renal disease",
+      high_risk_group_nhsd == "Patients with liver disease" ~ "Liver disease",
+      high_risk_group_nhsd == "Patients with immune-mediated inflammatory disorders (IMID)" ~ "Immune-mediated inflammatory disorders",
+      high_risk_group_nhsd == "Primary immune deficiencies" ~ "Primary immune deficiencies",
+      high_risk_group_nhsd == "HIV/AIDS" ~ "HIV or AIDS",
+      high_risk_group_nhsd == "Solid organ transplant recipients" ~ "Solid organ transplant recipients",
+      high_risk_group_nhsd == "Rare neurological conditions" ~ "Rare neurological conditions",
+      high_risk_group_nhsd == "Not deemed eligible" ~ "Not deemed eligible",
+      #TRUE ~ "Unknown"
+      TRUE ~ NA_character_)
+
   )
 
 
-
-
 # Numbers for text ----
-study_start <- as.Date(min(data_processed_clean$elig_start),format="%Y-%m-%d")
+study_start <- format(as.Date(min(data_processed_clean$elig_start),format="%Y-%m-%d"), format = "%d-%b-%Y")
 study_end <- format(as.Date(max(data_processed_clean$elig_start),format="%Y-%m-%d"), format = "%d-%b-%Y")
-eligible_patients <- format(data_processed_clean %>% nrow(), big.mark = ",", scientific = FALSE)
-treated_patients <- paste(format(data_processed_clean %>% filter(!is.na(treatment_date)) %>% nrow(), big.mark = ",", scientific = FALSE), 
+eligible_patients <- format(plyr::round_any(data_processed_clean %>% nrow(), 10), big.mark = ",", scientific = FALSE)
+treated_patients <- paste(format(plyr::round_any(data_processed_clean %>% filter(!is.na(treatment_date)) %>% nrow(), 10), big.mark = ",", scientific = FALSE), 
                           " (",
                           round(data_processed_clean %>% filter(!is.na(treatment_date)) %>% nrow()/nrow(data_processed_clean)*100, digits = 0),
                           "%)", sep = "")
-sotrovimab <- paste(format(data_processed_clean %>% filter(treatment_type == "sotrovimab") %>% nrow(), big.mark = ",", scientific = FALSE),
+sotrovimab <- paste(format(plyr::round_any(data_processed_clean %>% filter(treatment_type == "Sotrovimab") %>% nrow(), 10), big.mark = ",", scientific = FALSE),
                     " (",
-                    round(data_processed_clean %>% filter(treatment_type == "sotrovimab") %>% nrow()/nrow(data_processed_clean)*100, digits = 0),
+                    round(data_processed_clean %>% filter(treatment_type == "Sotrovimab") %>% nrow()/nrow(data_processed_clean)*100, digits = 0),
                     "%)", sep = "")
-molnupiravir <- paste(format(data_processed_clean %>% filter(treatment_type == "molnupiravir") %>% nrow(), big.mark = ",", scientific = FALSE),
+molnupiravir <- paste(format(plyr::round_any(data_processed_clean %>% filter(treatment_type == "Molnupiravir") %>% nrow(), 10), big.mark = ",", scientific = FALSE),
                       " (",
-                      round(data_processed_clean %>% filter(treatment_type == "molnupiravir") %>% nrow()/nrow(data_processed_clean)*100, digits = 0),
+                      round(data_processed_clean %>% filter(treatment_type == "Molnupiravir") %>% nrow()/nrow(data_processed_clean)*100, digits = 0),
                       "%)", sep = "")
-casirivimab <- paste(format(data_processed_clean %>% filter(treatment_type == "casirivimab") %>% nrow(), big.mark = ",", scientific = FALSE),
+casirivimab <- paste(format(plyr::round_any(data_processed_clean %>% filter(treatment_type == "Casirivimab") %>% nrow(), 10), big.mark = ",", scientific = FALSE),
                       " (",
-                      round(data_processed_clean %>% filter(treatment_type == "casirivimab") %>% nrow()/nrow(data_processed_clean)*100, digits = 0),
+                      round(data_processed_clean %>% filter(treatment_type == "Casirivimab") %>% nrow()/nrow(data_processed_clean)*100, digits = 0),
                       "%)", sep = "")
 
 
@@ -183,7 +191,7 @@ plot_data_coverage <- data_processed_clean %>%
   ungroup() %>%
   mutate(count = ifelse(is.na(count), 0, count),
          cum_count = cumsum(count),
-         cum_count_redacted =  plyr::round_any(cum_count, 5)) %>%
+         cum_count_redacted =  plyr::round_any(cum_count, 10)) %>%
   mutate(high_risk_group_nhsd = "All")
 
 plot_data_coverage_groups <- data_processed_clean %>%
@@ -200,15 +208,22 @@ plot_data_coverage_groups <- data_processed_clean %>%
   group_by(high_risk_group_nhsd) %>%
   mutate(count = ifelse(is.na(count), 0, count),
          cum_count = cumsum(count),
-         cum_count_redacted =  plyr::round_any(cum_count, 5))
+         cum_count_redacted =  plyr::round_any(cum_count, 10))
+
+plot_order <- rbind(plot_data_coverage, plot_data_coverage_groups) %>%
+  group_by(high_risk_group_nhsd) %>%
+  mutate(order = max(cum_count_redacted, na.rm = T)) %>%
+  arrange(desc(order)) %>%
+  filter(cum_count_redacted == order) %>%
+  select(high_risk_group_nhsd, order) %>%
+  distinct()
 
 coverage_plot <- rbind(plot_data_coverage, plot_data_coverage_groups) %>%
-  mutate(high_risk_group_nhsd = factor(high_risk_group_nhsd, levels = c("All", "Down's syndrome", "Sickle cell disease", "Patients with a solid cancer",
-                                                                        "Patients with a haematological diseases and stem cell transplant recipients",
-                                                                        "Patients with renal disease", "Patients with liver disease",
-                                                                        "Patients with immune-mediated inflammatory disorders (IMID)",
-                                                                        "Primary immune deficiencies", "HIV/AIDS",
-                                                                        "Solid organ transplant recipients", "Rare neurological conditions"))) %>%
+  mutate(high_risk_group_nhsd = factor(high_risk_group_nhsd, levels = plot_order$high_risk_group_nhsd))
+
+write_csv(coverage_plot, here::here("reports", "coverage", "figures", "cum_eligiblity_plot.csv"))
+
+coverage_plot %>%
   ggplot(aes(x = elig_start, y = cum_count_redacted, colour = high_risk_group_nhsd, group = high_risk_group_nhsd)) +
   geom_step(size = 1) +
   theme_classic(base_size = 8) +
@@ -251,7 +266,7 @@ plot_data_treatment <- data_processed_clean %>%
   ungroup() %>%
   mutate(count = ifelse(is.na(count), 0, count),
          cum_count = cumsum(count),
-         cum_count_redacted =  plyr::round_any(cum_count, 5)) %>%
+         cum_count_redacted =  plyr::round_any(cum_count, 10)) %>%
   mutate(high_risk_group_nhsd = "All")
 
 plot_data_treatment_groups <- data_processed_clean %>%
@@ -269,16 +284,23 @@ plot_data_treatment_groups <- data_processed_clean %>%
   group_by(high_risk_group_nhsd) %>%
   mutate(count = ifelse(is.na(count), 0, count),
          cum_count = cumsum(count),
-         cum_count_redacted =  plyr::round_any(cum_count, 5))
+         cum_count_redacted =  plyr::round_any(cum_count, 10))
 
 # Plot
+plot_order <- rbind(plot_data_treatment, plot_data_treatment_groups) %>%
+  group_by(high_risk_group_nhsd) %>%
+  mutate(order = max(cum_count_redacted, na.rm = T)) %>%
+  arrange(desc(order)) %>%
+  filter(cum_count_redacted == order) %>%
+  select(high_risk_group_nhsd, order) %>%
+  distinct()
+
 treatment_plot <- rbind(plot_data_treatment, plot_data_treatment_groups) %>%
-  mutate(high_risk_group_nhsd = factor(high_risk_group_nhsd, levels = c("All", "Down's syndrome", "Sickle cell disease", "Patients with a solid cancer",
-                                                                        "Patients with a haematological diseases and stem cell transplant recipients",
-                                                                        "Patients with renal disease", "Patients with liver disease",
-                                                                        "Patients with immune-mediated inflammatory disorders (IMID)",
-                                                                        "Primary immune deficiencies", "HIV/AIDS",
-                                                                        "Solid organ transplant recipients", "Rare neurological conditions"))) %>%
+  mutate(high_risk_group_nhsd = factor(high_risk_group_nhsd, levels = plot_order$high_risk_group_nhsd)) 
+
+write_csv(coverage_plot, here::here("reports", "coverage", "figures", "cum_treatment_plot.csv"))
+
+treatment_plot %>%
   ggplot(aes(x = treatment_date, y = cum_count_redacted, colour = high_risk_group_nhsd, group = high_risk_group_nhsd)) +
   geom_step(size = 1) +
   theme_classic(base_size = 8) +
@@ -347,12 +369,12 @@ tbl2 <- left_join(data_processed_clean %>% group_by(high_risk_group_nhsd) %>% su
 
 table_elig_treat_redacted <- rbind(tbl1, tbl2) %>%
   mutate(`High risk cohort` = factor(`High risk cohort`, 
-                                     levels = c( "All", "Down's syndrome", "Sickle cell disease", "Patients with a solid cancer", 
-                                                 "Patients with a haematological diseases and stem cell transplant recipients",
-                                                 "Patients with renal disease", "Patients with liver disease",
-                                                 "Patients with immune-mediated inflammatory disorders (IMID)",
-                                                 "Primary immune deficiencies", "HIV/AIDS",
-                                                 "Solid organ transplant recipients", "Rare neurological conditions", "Non-digital"))) 
+                                     levels = c( "All", "Down's syndrome", "Sickle cell disease", "Solid cancer", 
+                                                 "Haematological diseases and stem cell transplant recipients",
+                                                 "Renal disease", "Liver disease",
+                                                 "Immune-mediated inflammatory disorders",
+                                                 "Primary immune deficiencies", "HIV or AIDS",
+                                                 "Solid organ transplant recipients", "Rare neurological conditions", "Not deemed eligible"))) 
 
 write_csv(table_elig_treat_redacted, here::here("reports", "coverage", "tables", "table_elig_treat_redacted.csv"))
 
