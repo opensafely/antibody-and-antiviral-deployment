@@ -134,7 +134,7 @@ study = StudyDefinition(
   death_date = patients.died_from_any_cause(
     returning = "date_of_death",
     date_format = "YYYY-MM-DD",
-    on_or_after = "covid_test_date",
+    on_or_after = "covid_test_positive_date",
     return_expectations = {
       "date": {"earliest": "2021-12-20", "latest": "index_date"},
       "incidence": 0.1
@@ -143,7 +143,7 @@ study = StudyDefinition(
   
   ## De-registration
   dereg_date = patients.date_deregistered_from_all_supported_practices(
-    on_or_after = "covid_test_date",
+    on_or_after = "covid_test_positive_date",
     date_format = "YYYY-MM-DD",
     return_expectations = {
       "date": {"earliest": "2021-12-20", "latest": "index_date"},
@@ -152,7 +152,7 @@ study = StudyDefinition(
   ),
   
   ## Study start date for extracting variables
-  registered_eligible = patients.registered_as_of("covid_test_date"),
+  registered_eligible = patients.registered_as_of("covid_test_positive_date"),
   
   registered_treated = patients.registered_as_of(
     "date_treated",
@@ -173,7 +173,7 @@ study = StudyDefinition(
   
   ## Inclusion criteria variables
   
-  ### SARS-CoV-2 test
+  ### First positive SARS-CoV-2 test
   # Note patients are eligible for treatment if diagnosed <=5d ago
   # in the latest 5 days there may be patients identified as eligible who have not yet been treated
   covid_test_positive = patients.with_test_result_in_sgss(
@@ -188,7 +188,7 @@ study = StudyDefinition(
     },
   ),
   
-  covid_test_date = patients.with_test_result_in_sgss(
+  covid_test_positive_date = patients.with_test_result_in_sgss(
     pathogen = "SARS-CoV-2",
     test_result = "positive",
     find_first_match_in_period = True,
@@ -202,23 +202,27 @@ study = StudyDefinition(
     },
   ),
   
-  covid_positive_test_type = patients.with_test_result_in_sgss(
-    pathogen = "SARS-CoV-2",
-    test_result = "positive",
-    returning = "case_category",
-    on_or_after = "index_date - 5 days",
-    restrict_to_earliest_specimen_date = True,
-    return_expectations = {
-      "category": {"ratios": {"LFT_Only": 0.4, "PCR_Only": 0.4, "LFT_WithPCR": 0.2}},
-      "incidence": 0.2,
-    },
-  ),
+  ### Second positive SARS-CoV-2 test -- add in 
   
+  ### Covid test type - add in when avaliable 
+  # covid_positive_test_type = patients.with_test_result_in_sgss(
+  #   pathogen = "SARS-CoV-2",
+  #   test_result = "positive",
+  #   returning = "case_category",
+  #   on_or_after = "index_date - 5 days",
+  #   restrict_to_earliest_specimen_date = True,
+  #   return_expectations = {
+  #     "category": {"ratios": {"LFT_Only": 0.4, "PCR_Only": 0.4, "LFT_WithPCR": 0.2}},
+  #     "incidence": 0.2,
+  #   },
+  # ),
+  
+  ### Positive covid test last 30 days
   covid_positive_previous_30_days = patients.with_test_result_in_sgss(
     pathogen = "SARS-CoV-2",
     test_result = "positive",
     returning = "binary_flag",
-    between = ["covid_test_date - 31 days", "covid_test_date - 1 day"],
+    between = ["covid_test_positive_date - 31 days", "covid_test_positive_date - 1 day"],
     find_last_match_in_period = True,
     restrict_to_earliest_specimen_date = False,
     return_expectations = {
