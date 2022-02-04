@@ -12,7 +12,7 @@
 #         /reports/coverage/figures/cum_eligiblity_plot.png
 #
 # Author(s): M Green
-# Date last updated: 02/02/2022
+# Date last updated: 04/02/2022
 #
 ################################################################################
 
@@ -42,26 +42,53 @@ data_processed <- read_rds(here::here("output", "data", "data_processed.rds"))
 
 ## Apply eligibility and exclusion criteria
 data_processed_eligible <- data_processed %>%
-  # Temporary fix to include treated patients not flagged as eligible due to high risk cohort 
-  mutate(high_risk_group_nhsd = ifelse(is.na(high_risk_group_nhsd), "Non-digital", high_risk_group_nhsd),
-         elig_start = as.Date(ifelse(is.na(elig_start) & high_risk_group_nhsd == "Non-digital", treatment_date, elig_start), origin = "1970-01-01")) %>%
-  filter(
+   filter(
     # Apply eligibility criteria
     covid_test_positive == 1,
     covid_positive_previous_30_days != 1,
-    (tb_postest_treat <= 10 & tb_postest_treat >= 0) | is.na(tb_postest_treat),
+    (tb_postest_treat <= 5 & tb_postest_treat >= 0) | is.na(tb_postest_treat),
     !is.na(high_risk_group_nhsd),
     
     # Apply exclusion criteria
-    is.na(covid_hospital_admission_date) | covid_hospital_admission_date < (elig_start - 30) & covid_hospital_admission_date >= (elig_start + 1),
+    is.na(covid_hospital_admission_date) | covid_hospital_admission_date < (elig_start - 30) & covid_hospital_admission_date > (elig_start),
     age >= 12,
     
     # Only eligible patients
     !is.na(elig_start),
-  )
+  ) %>%
+  mutate(eligibility_status = "Eligible")
+
+## Include treated patients not flagged as eligible
+data_processed_treated <- data_processed %>%
+  filter(!(patient_id %in% unique(data_processed_eligible)),
+         !is.na(treatment_date)) %>%
+  mutate(high_risk_group_nhsd = ifelse(is.na(high_risk_group_nhsd), "Non-digital", high_risk_group_nhsd),
+         elig_start = as.Date(ifelse(is.na(elig_start) & high_risk_group_nhsd == "Non-digital", treatment_date, elig_start), origin = "1970-01-01")) %>%
+  mutate(eligibility_status = "Treated") 
+
+data_processed_combined <- rbind(data_processed_eligible, data_processed_treated)
+
+## Exclude patients issued more than one treatment within two weeks
+dup_ids <- data_processed_combined %>%
+  select(patient_id, treatment_date, sotrovimab_covid_therapeutics, molnupiravir_covid_therapeutics, casirivimab_covid_therapeutics) %>%
+  filter(!is.na(treatment_date)) %>%
+  mutate(sotrovimab_covid_therapeutics = as.Date(sotrovimab_covid_therapeutics, origin="1970-01-01"),
+         molnupiravir_covid_therapeutics = as.Date(molnupiravir_covid_therapeutics, origin="1970-01-01"),
+         casirivimab_covid_therapeutics = as.Date(casirivimab_covid_therapeutics, origin="1970-01-01"),
+         sot_mol_diff = as.numeric(sotrovimab_covid_therapeutics - molnupiravir_covid_therapeutics),
+         sot_cas_diff = as.numeric(sotrovimab_covid_therapeutics - casirivimab_covid_therapeutics),
+         mol_cas_diff = as.numeric(molnupiravir_covid_therapeutics - casirivimab_covid_therapeutics)) %>%
+  melt(id.var = "patient_id", measure.vars = c("sot_mol_diff", "sot_cas_diff", "mol_cas_diff")) %>%
+  filter(!is.na(value),
+         value <= 14 | value >= -14) %>%
+  group_by(patient_id) %>%
+  arrange(patient_id) 
+
+data_processed_clean <- data_processed_combined %>%
+  mutate(!(patient_id %in% dup_ids$patient_id))
 
 ## Formatting variables
-data_processed_eligible <- data_processed_eligible %>%
+data_processed_clean <- data_processed_clean %>%
   mutate(
     
     # Age groups
@@ -110,24 +137,7 @@ data_processed_eligible <- data_processed_eligible %>%
     
   )
 
-## Exclude duplicated patients issued more than one treatment within two weeks
-dup_ids <- data_processed_eligible %>%
-  select(patient_id, treatment_date, sotrovimab_covid_therapeutics, molnupiravir_covid_therapeutics, casirivimab_covid_therapeutics) %>%
-  filter(!is.na(treatment_date)) %>%
-  mutate(sotrovimab_covid_therapeutics = as.Date(sotrovimab_covid_therapeutics, origin="1970-01-01"),
-         molnupiravir_covid_therapeutics = as.Date(molnupiravir_covid_therapeutics, origin="1970-01-01"),
-         casirivimab_covid_therapeutics = as.Date(casirivimab_covid_therapeutics, origin="1970-01-01"),
-         sot_mol_diff = as.numeric(sotrovimab_covid_therapeutics - molnupiravir_covid_therapeutics),
-         sot_cas_diff = as.numeric(sotrovimab_covid_therapeutics - casirivimab_covid_therapeutics),
-         mol_cas_diff = as.numeric(molnupiravir_covid_therapeutics - casirivimab_covid_therapeutics)) %>%
-  melt(id.var = "patient_id", measure.vars = c("sot_mol_diff", "sot_cas_diff", "mol_cas_diff")) %>%
-  filter(!is.na(value),
-         value <= 14 | value >= -14) %>%
-  group_by(patient_id) %>%
-  arrange(patient_id) 
 
-data_processed_clean <- data_processed_eligible %>%
-  mutate(!(patient_id %in% dup_ids$patient_id))
 
 
 # Numbers for text ----
