@@ -57,8 +57,7 @@ study = StudyDefinition(
     """
     (registered_eligible OR registered_treated)
     AND
-    NOT
-    has_died
+    NOT has_died
     AND
     (sotrovimab_covid_therapeutics 
       OR 
