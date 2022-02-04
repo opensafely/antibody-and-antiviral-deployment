@@ -220,12 +220,12 @@ plot_order <- rbind(plot_data_coverage, plot_data_coverage_groups) %>%
   select(high_risk_group_nhsd, order) %>%
   distinct()
 
-coverage_plot <- rbind(plot_data_coverage, plot_data_coverage_groups) %>%
+coverage_plot_data <- rbind(plot_data_coverage, plot_data_coverage_groups) %>%
   mutate(high_risk_group_nhsd = factor(high_risk_group_nhsd, levels = plot_order$high_risk_group_nhsd))
 
-write_csv(coverage_plot, here::here("output", "reports", "coverage", "figures", "cum_eligiblity_plot.csv"))
+write_csv(coverage_plot_data, here::here("output", "reports", "coverage", "figures", "cum_eligiblity_plot.csv"))
 
-coverage_plot %>%
+coverage_plot <- coverage_plot_data %>%
   ggplot(aes(x = elig_start, y = cum_count_redacted, colour = high_risk_group_nhsd, group = high_risk_group_nhsd)) +
   geom_step(size = 1) +
   theme_classic(base_size = 8) +
@@ -297,12 +297,12 @@ plot_order <- rbind(plot_data_treatment, plot_data_treatment_groups) %>%
   select(high_risk_group_nhsd, order) %>%
   distinct()
 
-treatment_plot <- rbind(plot_data_treatment, plot_data_treatment_groups) %>%
+treatment_plot_data <- rbind(plot_data_treatment, plot_data_treatment_groups) %>%
   mutate(high_risk_group_nhsd = factor(high_risk_group_nhsd, levels = plot_order$high_risk_group_nhsd)) 
 
-write_csv(coverage_plot, here::here("output", "reports", "coverage", "figures", "cum_treatment_plot.csv"))
+write_csv(treatment_plot_data, here::here("output", "reports", "coverage", "figures", "cum_treatment_plot.csv"))
 
-treatment_plot %>%
+treatment_plot <- treatment_plot_data %>%
   ggplot(aes(x = treatment_date, y = cum_count_redacted, colour = high_risk_group_nhsd, group = high_risk_group_nhsd)) +
   geom_step(size = 1) +
   theme_classic(base_size = 8) +
@@ -344,6 +344,7 @@ eligibility_table <- eligibility_table$table_body %>%
   separate(stat_0, c("stat_0","perc0"), sep = " ([(])") %>%
   select(`High risk cohort` = label, 
          `Number of eligible patients` = stat_0) %>%
+  mutate(`Number of eligible patients` = as.numeric(gsub(",", "", `Number of eligible patients`))) %>%
   data.frame()
 
 treatment_table <- data_processed_clean %>%
@@ -363,8 +364,8 @@ treatment_table <- treatment_table$table_body %>%
          `Treated with Casirivimab` = stat_1,
          `Treated with Molnupiravir` = stat_2,
          `Treated with Sotrovimab` = stat_3) %>%
-  mutate(`High risk cohort` = as.numeric(gsub(",", "", `High risk cohort`)),
-         `Number of treated patients` = as.numeric(gsub(",", "", `Number of treated patients`)),
+  mutate(`Number of treated patients` = as.numeric(gsub(",", "", `Number of treated patients`)),
+         `Treated with Casirivimab` = as.numeric(gsub(",", "", `Treated with Casirivimab`)),
          `Treated with Molnupiravir` = as.numeric(gsub(",", "", `Treated with Molnupiravir`)),
          `Treated with Sotrovimab` = as.numeric(gsub(",", "", `Treated with Sotrovimab`))) %>%
   data.frame()
@@ -441,7 +442,7 @@ table_demo_clinc_breakdown_redacted <- table_demo_clinc_breakdown %>%
          Sotrovimab = plyr::round_any(Sotrovimab, 10))
 
 
-gt::gtsave(as_gt(table_demo_clinc_breakdown_redacted), here::here("output", "reports", "coverage", "tables", "table_demo_clinc_breakdown_redacted.html"))
+write_csv(table_demo_clinc_breakdown_redacted, here::here("output", "reports", "coverage", "tables", "table_demo_clinc_breakdown_redacted.csv"))
 
 
 

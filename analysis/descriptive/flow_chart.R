@@ -17,9 +17,10 @@
 # Preliminaries ----
 
 ## Import libraries
-library('tidyverse')
-library('here')
-library('glue')
+library(tidyverse)
+library(here)
+library(glue)
+library(reshape2)
 
 ## Import command-line arguments
 args <- commandArgs(trailingOnly = TRUE)
@@ -84,8 +85,8 @@ data_flowchart <- data_criteria %>%
     c6_treated_within_5_days = c0_all & has_positive_covid_test & no_positive_covid_test_previous_30_days & 
       high_risk_group & no_covid_hospital_admission_last_30_days & aged_over_12 & treated_within_5_days,
     c7_not_duplicated_entries = c0_all & has_positive_covid_test & no_positive_covid_test_previous_30_days & 
-      treated_within_10_days & high_risk_group & no_covid_hospital_admission_last_30_days & aged_over_12 & 
-      treated_within_10_days & not_duplicated_entries
+      high_risk_group & no_covid_hospital_admission_last_30_days & aged_over_12 & 
+      treated_within_5_days & not_duplicated_entries
   ) %>%
   summarise(
     across(.fns=sum, na.rm = T)

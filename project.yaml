@@ -57,15 +57,15 @@ actions:
   
   ## Data, figures and tables
   report_data:
-    run: r:latest reports/coverage/report_data.R
+    run: r:latest analysis/descriptive/coverage_report_data.R
     needs: [data_process]
     outputs:
       moderately_sensitive:
-        table1: reports/coverage/tables/report_stats.csv
-        table2: reports/coverage/tables/table_elig_treat_redacted.csv
-        table3: reports/coverage/tables/table_demo_clinc_breakdown_redacted.html
-        figure1: reports/coverage/figures/cum_treatment_plot.png
-        figure2: reports/coverage/figures/cum_eligiblity_plot.png
+        table1: output/reports/coverage/tables/report_stats.csv
+        table2: output/reports/coverage/tables/table_elig_treat_redacted.csv
+        table3: output/reports/coverage/tables/table_demo_clinc_breakdown_redacted.csv
+        figure1: output/reports/coverage/figures/cum_treatment_plot.png
+        figure2: output/reports/coverage/figures/cum_eligiblity_plot.png
 
 
 
