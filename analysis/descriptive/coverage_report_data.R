@@ -490,7 +490,7 @@ data_flowchart <- non_elig_treated %>%
       high_risk_group_nhsd & no_covid_hospital_admission_last_30_days & aged_over_12 & 
       treated_within_5_days & not_duplicated_entries,
     c9_high_risk_group = c0_all & alive & registered & has_positive_covid_test & no_positive_covid_test_previous_30_days & 
-      high_risk_group & no_covid_hospital_admission_last_30_days & aged_over_12 & 
+      high_risk_group_nhsd & no_covid_hospital_admission_last_30_days & aged_over_12 & 
       treated_within_5_days & not_duplicated_entries & high_risk_group
   )  %>%
   summarise(
