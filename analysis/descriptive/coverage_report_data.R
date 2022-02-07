@@ -438,10 +438,11 @@ table_demo_clinc_breakdown_base$inputs$data <- NULL
 
 table_demo_clinc_breakdown_base <- table_demo_clinc_breakdown_base$table_body %>%
   separate(stat_0, c("stat_0","perc0"), sep = " ([(])") %>%
-  select(Variable = label, 
+  select(Group = variable, Variable = label, 
          All = stat_0) %>%
   mutate(All = as.numeric(gsub(",", "", All))) %>%
-  data.frame()
+  data.frame() %>%
+  arrange(Group, Variable)
 
 table_demo_clinc_breakdown <- data_processed_clean %>%
   filter(!is.na(treatment_type)) %>%
@@ -462,7 +463,8 @@ table_demo_clinc_breakdown <- table_demo_clinc_breakdown$table_body %>%
   separate(stat_1, c("stat_1","perc1"), sep = " ([(])") %>%
   separate(stat_2, c("stat_2","perc2"), sep = " ([(])") %>%
   separate(stat_3, c("stat_3","perc3"), sep = " ([(])") %>%
-  select(Variable = label, 
+  select(Group = variable,
+         Variable = label, 
          Treated = stat_0,
          Casirivimab = stat_1,
          Molnupiravir = stat_2,
@@ -471,10 +473,10 @@ table_demo_clinc_breakdown <- table_demo_clinc_breakdown$table_body %>%
          Casirivimab = as.numeric(gsub(",", "", Casirivimab)),
          Molnupiravir = as.numeric(gsub(",", "", Molnupiravir)),
          Sotrovimab = as.numeric(gsub(",", "", Sotrovimab))) %>%
+  data.frame() %>%
+  arrange(Group, Variable)
 
-  data.frame()
-
-table_demo_clinc_breakdown_redacted <- left_join(table_demo_clinc_breakdown_base, table_demo_clinc_breakdown, by = "Variable") %>%
+table_demo_clinc_breakdown_redacted <- left_join(table_demo_clinc_breakdown_base, table_demo_clinc_breakdown, by = c("Group", "Variable")) %>%
   # Redact values < 8
   mutate(All = ifelse(All < threshold, NA, as.numeric(All)),
          Treated = ifelse(Treated < threshold, NA, as.numeric(Treated)),
@@ -500,7 +502,7 @@ non_elig_treated <-  data_processed_clean %>%
     patient_id,
     has_positive_covid_test = (covid_test_positive == 1),
     no_positive_covid_test_previous_30_days = (covid_positive_previous_30_days != 1),
-    high_risk_group = !is.na(high_risk_cohort_covid_therapeutics),
+    high_risk_group = !is.na(high_risk_group_nhsd),
     no_covid_hospital_admission_last_30_days = (is.na(covid_hospital_admission_date) | 
                                                   covid_hospital_admission_date < (elig_start - 30) & 
                                                   covid_hospital_admission_date > (elig_start)),
@@ -541,7 +543,9 @@ data_flowchart <- non_elig_treated %>%
     cols=everything(),
     names_to="criteria",
     values_to="n"
-  ) %>%
+  )  %>%
+  mutate(n = ifelse(n < 5, NA, n),
+         n = plyr::round_any(n, 5)) %>%
   mutate(
     n_exclude = lag(n) - n,
     pct_exclude = n_exclude/lag(n),
@@ -549,7 +553,7 @@ data_flowchart <- non_elig_treated %>%
     pct_step = n / lag(n),
   )
 
-write_csv(data_flowchart, here("output", "reports", "coverage", "tables", "data_flowchart_non_elig.csv"))
+write_csv(data_flowchart, here("output", "reports", "coverage", "tables", "data_flowchart_non_elig_redacted.csv"))
 
 
 ## High risk patient cohorts
@@ -566,7 +570,17 @@ high_risk_cohort_comparison <- data_processed_clean %>%
   group_by(high_risk_group_nhsd, high_risk_cohort_covid_therapeutics) %>%
   tally()
 
+high_risk_cohort_comparison_redacted <- data_processed_clean %>%
+  filter(Match == TRUE) %>%
+  select(high_risk_group_nhsd, high_risk_cohort_covid_therapeutics) %>%
+  group_by(high_risk_group_nhsd, high_risk_cohort_covid_therapeutics) %>%
+  tally()  %>%
+  mutate(n = ifelse(n < 5, 0, n),
+         n = plyr::round_any(n, 5),
+         n = ifelse(n == 0, "<5", n))
+
 write_csv(high_risk_cohort_comparison, here::here("output", "reports", "coverage", "tables", "high_risk_cohort_comparison_a.csv"))
+write_csv(high_risk_cohort_comparison_redacted, here::here("output", "reports", "coverage", "tables", "high_risk_cohort_comparison_a_redacted.csv"))
 
 high_risk_cohort_comparison <- data_processed_clean %>%
   filter(Match == FALSE) %>%
@@ -574,7 +588,17 @@ high_risk_cohort_comparison <- data_processed_clean %>%
   group_by(high_risk_group_nhsd, high_risk_cohort_covid_therapeutics) %>%
   tally()
 
+high_risk_cohort_comparison_redacted <- data_processed_clean %>%
+  filter(Match == FALSE) %>%
+  select(high_risk_group_nhsd, high_risk_cohort_covid_therapeutics) %>%
+  group_by(high_risk_group_nhsd, high_risk_cohort_covid_therapeutics) %>%
+  tally()  %>%
+  mutate(n = ifelse(n < 5, 0, n),
+         n = plyr::round_any(n, 5),
+         n = ifelse(n == 0, "<5", n))
+
 write_csv(high_risk_cohort_comparison, here::here("output", "reports", "coverage", "tables", "high_risk_cohort_comparison_b.csv"))
+write_csv(high_risk_cohort_comparison_redacted, here::here("output", "reports", "coverage", "tables", "high_risk_cohort_comparison_b_redacted.csv"))
 
 ## Time to treatment
 all <- data_processed_clean %>%
