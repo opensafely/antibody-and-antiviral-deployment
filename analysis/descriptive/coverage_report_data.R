@@ -69,7 +69,7 @@ data_processed_eligible <- data_processed %>%
 
 ## Include treated patients not flagged as eligible
 data_processed_treated <- data_processed %>%
-  filter(!(patient_id %in% unique(data_processed_eligible)),
+  subset(!(patient_id %in% unique(data_processed_eligible$patient_id)),
          !is.na(treatment_date)) %>%
   mutate(high_risk_group_nhsd = ifelse(is.na(high_risk_group_nhsd), "Not deemed eligible", high_risk_group_nhsd),
          elig_start = as.Date(ifelse(is.na(elig_start), treatment_date, elig_start), origin = "1970-01-01")) %>%
