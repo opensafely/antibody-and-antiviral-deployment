@@ -55,18 +55,19 @@ study = StudyDefinition(
   # POPULATION ----
   population = patients.satisfying(
     """
-    (registered_eligible OR registered_treated)
+    ((registered_eligible OR registered_treated)
     AND
     NOT has_died
     AND
+    covid_test_positive 
+    AND 
+    (age >= 12 AND age < 110))
+    OR
     (sotrovimab_covid_therapeutics 
       OR 
     molnupiravir_covid_therapeutics 
       OR
-    casirivimab_covid_therapeutics
-      OR
-    (covid_test_positive AND (age >= 12 AND age < 110))
-      )
+    casirivimab_covid_therapeutics)
     """,
     
     has_died = patients.died_from_any_cause(
