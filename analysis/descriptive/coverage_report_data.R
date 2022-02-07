@@ -5,15 +5,15 @@
 #
 # Input: /output/data/data_processed.rds
 #
-# Output: /output/reports/coverage/tables/report_stats.csv
+# Output: /output/reports/coverage/tables/table_report_stats.csv
 #         /output/reports/coverage/tables/table_elig_treat_redacted.csv
 #         /output/reports/coverage/tables/table_demo_clinc_breakdown_redacted.csv
-#         /output/reports/coverage/tables/high_risk_cohort_comparison.csv
-#         /output/reports/coverage/figures/cum_treatment_plot.png
-#         /output/reports/coverage/figures/cum_eligiblity_plot.png
+#         /output/reports/coverage/tables/table_high_risk_cohort_comparison.csv
+#         /output/reports/coverage/figures/figure_cum_treatment_plot.png
+#         /output/reports/coverage/figures/figure_cum_eligiblity_plot.png
 #
 # Author(s): M Green
-# Date last updated: 04/02/2022
+# Date last updated: 07/02/2022
 #
 ################################################################################
 
@@ -33,7 +33,6 @@ source(here("analysis", "lib", "custom_functions.R"))
 
 ## Create output directory
 fs::dir_create(here::here("output", "reports", "coverage", "tables"))
-fs::dir_create(here::here("output", "reports", "coverage", "figures"))
 
 ## Import data
 data_processed <- read_rds(here::here("output", "data", "data_processed.rds"))
@@ -215,12 +214,12 @@ text <- data.frame(study_start, study_end, eligible_patients, eligible_treated_p
                    eligible_molnupiravir, eligible_casirivimab, noneligible_treated_patients, noneligible_treated_patients, 
                    noneligible_sotrovimab, noneligible_molnupiravir, noneligible_casirivimab)
 
-write_csv(text, here::here("output", "reports", "coverage", "tables", "report_stats.csv"))
+write_csv(text, here::here("output", "reports", "coverage", "tables", "table_report_stats.csv"))
 
 
-# Plots ----
+# Coverage ----
 
-## Eligibility coverage
+## Eligibility
 plot_data_coverage <- data_processed_clean %>%
   mutate(patient_id = 1) %>%
   group_by(elig_start, treatment_date, treatment_type) %>%
@@ -264,38 +263,9 @@ plot_order <- rbind(plot_data_coverage, plot_data_coverage_groups) %>%
 coverage_plot_data <- rbind(plot_data_coverage, plot_data_coverage_groups) %>%
   mutate(high_risk_group_nhsd = factor(high_risk_group_nhsd, levels = plot_order$high_risk_group_nhsd))
 
-write_csv(coverage_plot_data, here::here("output", "reports", "coverage", "figures", "cum_eligiblity_plot.csv"))
+write_csv(coverage_plot_data, here::here("output", "reports", "coverage", "tables", "table_cum_eligiblity.csv"))
 
-coverage_plot <- coverage_plot_data %>%
-  ggplot(aes(x = elig_start, y = cum_count_redacted, colour = high_risk_group_nhsd, group = high_risk_group_nhsd)) +
-  geom_step(size = 1) +
-  theme_classic(base_size = 8) +
-  scale_x_date(date_breaks = "1 week", date_labels =  "%d %b %Y") +
-  labs(
-    x = "Date",
-    y = "Number of patients eligible for receiving treatment",
-    colour = "High risk cohort",
-    title = "") +
-  theme(
-    axis.text = element_text(size = 15),
-    axis.text.x = element_text(angle = 60, hjust = 1),
-    axis.title = element_text(size = 20),
-    legend.text = element_text(size = 10),
-    legend.position = c(0.2,0.75),
-    legend.background = element_rect(colour = "white"),
-    legend.box.background = element_rect(colour = "black"),
-    axis.line.x = element_line(colour = "black"),
-    panel.grid.minor.x = element_blank(),
-    legend.box.margin = margin(t = 1, l = 1, b = 1, r = 1))
-
-ggsave(
-  here::here("output", "reports", "coverage", "figures", "cum_eligiblity_plot.png"),
-  coverage_plot,
-  units = "cm", width = 35, height = 20
-)
-
-
-## Treatment coverage - nhsd
+## Treatment (nhsd high risk groups)
 plot_data_treatment <- data_processed_clean %>%
   mutate(patient_id = 1) %>%
   group_by(elig_start, treatment_date, treatment_type) %>%
@@ -330,7 +300,6 @@ plot_data_treatment_groups <- data_processed_clean %>%
          cum_count = cumsum(count),
          cum_count_redacted =  plyr::round_any(cum_count, 10))
 
-# Plot
 plot_order <- rbind(plot_data_treatment, plot_data_treatment_groups) %>%
   group_by(high_risk_group_nhsd) %>%
   mutate(order = max(cum_count_redacted, na.rm = T)) %>%
@@ -342,37 +311,9 @@ plot_order <- rbind(plot_data_treatment, plot_data_treatment_groups) %>%
 treatment_plot_data_nhsd <- rbind(plot_data_treatment, plot_data_treatment_groups) %>%
   mutate(high_risk_group_nhsd = factor(high_risk_group_nhsd, levels = plot_order$high_risk_group_nhsd)) 
 
-write_csv(treatment_plot_data_nhsd, here::here("output", "reports", "coverage", "figures", "cum_treatment_nhsd_plot.csv"))
+write_csv(treatment_plot_data_nhsd, here::here("output", "reports", "coverage", "tables", "table_cum_treatment_nhsd.csv"))
 
-treatment_plot_nhsd <- treatment_plot_data_nhsd %>%
-  ggplot(aes(x = treatment_date, y = cum_count_redacted, colour = high_risk_group_nhsd, group = high_risk_group_nhsd)) +
-  geom_step(size = 1) +
-  theme_classic(base_size = 8) +
-  scale_x_date(date_breaks = "1 week", date_labels =  "%d %b %Y") +
-  labs(
-    x = "Date",
-    y = "Number of eligible patient receiving treatment",
-    colour = "High risk cohort",
-    title = "") +
-  theme(
-    axis.text = element_text(size = 15),
-    axis.text.x = element_text(angle = 60, hjust = 1),
-    axis.title = element_text(size = 20),
-    legend.text = element_text(size = 10),
-    legend.position = c(0.2,0.75),
-    legend.background = element_rect(colour = "white"),
-    legend.box.background = element_rect(colour = "black"),
-    axis.line.x = element_line(colour = "black"),
-    panel.grid.minor.x = element_blank(),
-    legend.box.margin = margin(t = 1, l = 1, b = 1, r = 1))
-
-ggsave(
-  here::here("output", "reports", "coverage", "figures", "cum_treatment_nhsd_plot.png"),
-  treatment_plot_nhsd,
-  units = "cm", width = 35, height = 20
-)
-
-## Treatment coverage - therapeutics
+## Treatment (therapeutics high risk cohorts)
 plot_data_treatment <- data_processed_clean %>%
   mutate(patient_id = 1) %>%
   group_by(elig_start, treatment_date, treatment_type) %>%
@@ -407,7 +348,6 @@ plot_data_treatment_groups <- data_processed_clean %>%
          cum_count = cumsum(count),
          cum_count_redacted =  plyr::round_any(cum_count, 10))
 
-# Plot
 plot_order <- rbind(plot_data_treatment, plot_data_treatment_groups) %>%
   group_by(high_risk_group_combined) %>%
   mutate(order = max(cum_count_redacted, na.rm = T)) %>%
@@ -419,38 +359,11 @@ plot_order <- rbind(plot_data_treatment, plot_data_treatment_groups) %>%
 treatment_plot_data_therapeutics <- rbind(plot_data_treatment, plot_data_treatment_groups) %>%
   mutate(high_risk_group_combined = factor(high_risk_group_combined, levels = plot_order$high_risk_group_combined)) 
 
-write_csv(treatment_plot_data_therapeutics, here::here("output", "reports", "coverage", "figures", "cum_treatment_therapeutics_plot.csv"))
-
-treatment_plot_therapeutics <- treatment_plot_data_therapeutics %>%
-  ggplot(aes(x = treatment_date, y = cum_count_redacted, colour = high_risk_group_combined, group = high_risk_group_combined)) +
-  geom_step(size = 1) +
-  theme_classic(base_size = 8) +
-  scale_x_date(date_breaks = "1 week", date_labels =  "%d %b %Y") +
-  labs(
-    x = "Date",
-    y = "Number of eligible patient receiving treatment",
-    colour = "High risk cohort",
-    title = "") +
-  theme(
-    axis.text = element_text(size = 15),
-    axis.text.x = element_text(angle = 60, hjust = 1),
-    axis.title = element_text(size = 20),
-    legend.text = element_text(size = 10),
-    legend.position = c(0.2,0.75),
-    legend.background = element_rect(colour = "white"),
-    legend.box.background = element_rect(colour = "black"),
-    axis.line.x = element_line(colour = "black"),
-    panel.grid.minor.x = element_blank(),
-    legend.box.margin = margin(t = 1, l = 1, b = 1, r = 1))
-
-ggsave(
-  here::here("output", "reports", "coverage", "figures", "cum_treatment_therapeutics_plot.png"),
-  treatment_plot_therapeutics,
-  units = "cm", width = 35, height = 20
-)
+write_csv(treatment_plot_data_therapeutics, here::here("output", "reports", "coverage", "tables", "cum_treatment_therapeutics_plot.csv"))
 
 
-# Tables ---
+
+# Delivery ----
 
 ## Treatment table
 eligibility_table <- data_processed_clean %>%
@@ -581,7 +494,7 @@ table_demo_clinc_breakdown_redacted <- left_join(table_demo_clinc_breakdown_base
 write_csv(left_join(table_demo_clinc_breakdown_base, table_demo_clinc_breakdown, by = "Variable"), here::here("output", "reports", "coverage", "tables", "table_demo_clinc_breakdown.csv"))
 write_csv(table_demo_clinc_breakdown_redacted, here::here("output", "reports", "coverage", "tables", "table_demo_clinc_breakdown_redacted.csv"))
 
-## Concordance with guidance
+# Concordance with guidance ----
 non_elig_treated <-  data_processed_clean %>%
   filter(!is.na(treatment_date),
          eligibility_status == "Treated") %>%
@@ -649,10 +562,10 @@ data_flowchart <- non_elig_treated %>%
     pct_step = n / lag(n),
   )
 
-write_csv(data_flowchart, here("output", "reports", "coverage", "tables", "data_flowchart_non_elig_redacted.csv"))
+write_csv(data_flowchart, here("output", "reports", "coverage", "tables", "table_non_elig_flowchart_redacted.csv"))
 
 
-## High risk patient cohorts
+# High risk patient cohorts ----
 high_risk_cohort_des <-  data_processed_clean %>%
   mutate(hrc_therapeutics = str_count(high_risk_cohort_covid_therapeutics,",") + 1,
          hrc_nhsd = str_count(high_risk_group_nhsd_combined,",") + 1)
@@ -675,8 +588,8 @@ high_risk_cohort_comparison_redacted <- data_processed_clean %>%
          n = plyr::round_any(n, 5),
          n = ifelse(n == 0, "<5", n))
 
-write_csv(high_risk_cohort_comparison, here::here("output", "reports", "coverage", "tables", "high_risk_cohort_comparison_a.csv"))
-write_csv(high_risk_cohort_comparison_redacted, here::here("output", "reports", "coverage", "tables", "high_risk_cohort_comparison_a_redacted.csv"))
+write_csv(high_risk_cohort_comparison, here::here("output", "reports", "coverage", "tables", "table_high_risk_cohort_comparison_a.csv"))
+write_csv(high_risk_cohort_comparison_redacted, here::here("output", "reports", "coverage", "tables", "table_high_risk_cohort_comparison_a_redacted.csv"))
 
 high_risk_cohort_comparison <- data_processed_clean %>%
   filter(Match == FALSE) %>%
@@ -693,10 +606,10 @@ high_risk_cohort_comparison_redacted <- data_processed_clean %>%
          n = plyr::round_any(n, 5),
          n = ifelse(n == 0, "<5", n))
 
-write_csv(high_risk_cohort_comparison, here::here("output", "reports", "coverage", "tables", "high_risk_cohort_comparison_b.csv"))
-write_csv(high_risk_cohort_comparison_redacted, here::here("output", "reports", "coverage", "tables", "high_risk_cohort_comparison_b_redacted.csv"))
+write_csv(high_risk_cohort_comparison, here::here("output", "reports", "coverage", "tables", "table_high_risk_cohort_comparison_b.csv"))
+write_csv(high_risk_cohort_comparison_redacted, here::here("output", "reports", "coverage", "tables", "table_high_risk_cohort_comparison_b_redacted.csv"))
 
-## Time to treatment
+# Time to treatment ----
 all <- data_processed_clean %>%
   group_by(tb_postest_treat, treatment_type) %>%
   tally() %>%
@@ -712,7 +625,7 @@ groups <- data_processed_clean %>%
          n = plyr::round_any(n, 5),
          n = ifelse(n == 0, NA, n))
 
-write_csv(rbind(all, groups), here("output", "reports", "coverage", "tables", "data_time_between_redacted.csv"))
+write_csv(rbind(all, groups), here("output", "reports", "coverage", "tables", "table_time_to_treat_redacted.csv"))
 
 
 
