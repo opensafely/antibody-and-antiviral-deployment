@@ -240,7 +240,7 @@ data_processed <- data_extract %>%
          death_date, dereg_date,
          covid_test_positive, covid_positive_previous_30_days, tb_postest_treat, elig_start, elig_end,
          sotrovimab_covid_therapeutics, molnupiravir_covid_therapeutics, casirivimab_covid_therapeutics, treatment_date, treatment_type,
-         high_risk_cohort_covid_therapeutics, high_risk_group_nhsd, high_risk_group_nhsd_date = high_risk_group_date,
+         high_risk_cohort_covid_therapeutics, high_risk_group_nhsd, high_risk_group_nhsd_date = high_risk_group_date, high_risk_group_nhsd_combined,
          covid_hospital_admission_date, age, sex, ethnicity, imd, region_nhs, region_covid_therapeutics
   )
 

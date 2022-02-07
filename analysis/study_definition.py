@@ -314,15 +314,16 @@ study = StudyDefinition(
       "rate": "universal",
       "category": {
         "ratios": {
-          "Down's syndrome": 0.1,
-          "Sickle cell disease": 0.1,
+          "Downs syndrome": 0.1,
+          "sickle cell disease": 0.1,
           "solid cancer": 0.1,
-          "haematological diseases, stem cell transplant recipients": 0.1,
-          "renal disease": 0.1,
+          "haematological diseases,stem cell transplant recipients": 0.1,
+          "renal disease,sickle cell disease": 0.1,
           "liver disease": 0.1,
-          "immune-mediated inflammatory disorders (IMID)": 0.2,
-          "Primary immune deficiencies": 0.1,
-          "HIV/AIDS": 0.1,},},
+          "IMID": 0.1,
+          "IMID,solid cancer": 0.1,
+          "primary immune deficiencies": 0.1,
+          "HIV or AIDS": 0.1,},},
     },
   ),
   

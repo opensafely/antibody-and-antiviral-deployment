@@ -49,8 +49,15 @@ threshold = 8
 #   filter(elig_start <= end,
 #          treatment_date <= end)
 
+## High risk cohort matching
+data_processed_hrc_matched <- data_processed %>%
+  mutate(patterns = map_chr(strsplit(high_risk_cohort_covid_therapeutics, ","), paste,collapse="|"),
+       Match = str_detect(high_risk_group_nhsd_combined, patterns),
+       high_risk_group_nhsd = ifelse(Match = TRUE, high_risk_group_nhsd, NA)) %>% 
+  select(-patterns)
+
 ## Apply eligibility and exclusion criteria
-data_processed_eligible <- data_processed %>%
+data_processed_eligible <- data_processed_hrc_matched %>%
    filter(
     # Apply eligibility criteria
     covid_test_positive == 1,
@@ -68,7 +75,7 @@ data_processed_eligible <- data_processed %>%
   mutate(eligibility_status = "Eligible") 
 
 ## Include treated patients not flagged as eligible
-data_processed_treated <- data_processed %>%
+data_processed_treated <- data_processed_hrc_matched %>%
   subset(!(patient_id %in% unique(data_processed_eligible$patient_id)),
          !is.na(treatment_date)) %>%
   mutate(high_risk_group_nhsd = ifelse(is.na(high_risk_group_nhsd), "Not deemed eligible", high_risk_group_nhsd),
@@ -485,7 +492,77 @@ table_demo_clinc_breakdown_redacted <- left_join(table_demo_clinc_breakdown_base
 write_csv(left_join(table_demo_clinc_breakdown_base, table_demo_clinc_breakdown, by = "Variable"), here::here("output", "reports", "coverage", "tables", "table_demo_clinc_breakdown.csv"))
 write_csv(table_demo_clinc_breakdown_redacted, here::here("output", "reports", "coverage", "tables", "table_demo_clinc_breakdown_redacted.csv"))
 
+## Concordance with guidance
+non_elig_treated <-  data_processed_clean %>%
+  filter(!is.na(treatment_date),
+         eligibility_status == "Treated") %>%
+  mutate(
+    patient_id,
+    has_positive_covid_test = (covid_test_positive == 1),
+    no_positive_covid_test_previous_30_days = (covid_positive_previous_30_days != 1),
+    high_risk_group = !is.na(high_risk_cohort_covid_therapeutics),
+    no_covid_hospital_admission_last_30_days = (is.na(covid_hospital_admission_date) | 
+                                                  covid_hospital_admission_date < (elig_start - 30) & 
+                                                  covid_hospital_admission_date > (elig_start)),
+    aged_over_12 = (age >= 12),
+    treated_within_5_days = ((tb_postest_treat <= 5 & tb_postest_treat >= 0) | is.na(tb_postest_treat)),
+    not_duplicated_entries = !(patient_id %in% dup_ids$patient_id),
+    
+    include = (
+      has_positive_covid_test & 
+        no_positive_covid_test_previous_30_days & 
+        treated_within_5_days & 
+        high_risk_group & 
+        no_covid_hospital_admission_last_30_days &
+        aged_over_12 &
+        not_duplicated_entries)
+  )
+
+# Flowchart data
+data_flowchart <- non_elig_treated %>%
+  transmute(
+    c0_all = TRUE,
+    c1_has_positive_covid_test = c0_all & has_positive_covid_test,
+    c2_no_positive_covid_test_previous_30_days = c0_all & has_positive_covid_test & no_positive_covid_test_previous_30_days,
+    c3_high_risk_group = c0_all & has_positive_covid_test & no_positive_covid_test_previous_30_days & high_risk_group,
+    c4_no_covid_hospital_admission_last_30_days = c0_all & has_positive_covid_test & no_positive_covid_test_previous_30_days & 
+      high_risk_group & no_covid_hospital_admission_last_30_days,
+    c5_aged_over_12 = c0_all & has_positive_covid_test & no_positive_covid_test_previous_30_days & 
+      high_risk_group & no_covid_hospital_admission_last_30_days & aged_over_12,
+    c6_treated_within_5_days = c0_all & has_positive_covid_test & no_positive_covid_test_previous_30_days & 
+      high_risk_group & no_covid_hospital_admission_last_30_days & aged_over_12 & treated_within_5_days,
+    c7_not_duplicated_entries = c0_all & has_positive_covid_test & no_positive_covid_test_previous_30_days & 
+      high_risk_group & no_covid_hospital_admission_last_30_days & aged_over_12 & 
+      treated_within_5_days & not_duplicated_entries
+  ) %>%
+  summarise(
+    across(.fns=sum, na.rm = T)
+  ) %>%
+  pivot_longer(
+    cols=everything(),
+    names_to="criteria",
+    values_to="n"
+  ) %>%
+  mutate(
+    n_exclude = lag(n) - n,
+    pct_exclude = n_exclude/lag(n),
+    pct_all = n / first(n),
+    pct_step = n / lag(n),
+  )
+
+
+# Save dataset as .csv files ----
+write_csv(data_flowchart_non_elig, here("output", "reports", "coverage", "tables", "data_flowchart_non_elig.csv"))
+
+
 ## High risk patient cohorts
+high_risk_cohort_des <-  data_processed_clean %>%
+  mutate(hrc_therapeutics = str_count(high_risk_cohort_covid_therapeutics,",") + 1,
+         hrc_nhsd = str_count(high_risk_group_nhsd_combined,",") + 1)
+
+print(table(high_risk_cohort_des$hrc_therapeutics))
+print(table(high_risk_cohort_des$hrc_nhsd))
+
 high_risk_cohort_comparison <- data_processed_clean %>%
   select(high_risk_group_nhsd, high_risk_cohort_covid_therapeutics) %>%
   group_by(high_risk_group_nhsd, high_risk_cohort_covid_therapeutics) %>%
