@@ -70,15 +70,6 @@ study = StudyDefinition(
     casirivimab_covid_therapeutics)
     """,
     
-    has_died = patients.died_from_any_cause(
-      on_or_before = "index_date - 1 day",
-      returning = "binary_flag",
-    ),
-    
-    registered_eligible = patients.registered_as_of("covid_test_positive_date"),
-    
-    registered_treated = patients.registered_as_of("date_treated"),
-    
   ),
   
   
@@ -279,6 +270,11 @@ study = StudyDefinition(
     },
   ),
   
+  has_died = patients.died_from_any_cause(
+    on_or_before = "index_date - 1 day",
+    returning = "binary_flag",
+    ),
+  
   ## De-registration
   dereg_date = patients.date_deregistered_from_all_supported_practices(
     on_or_after = "start_date",
@@ -288,6 +284,9 @@ study = StudyDefinition(
       "incidence": 0.1
     },
   ),
+  
+  registered_eligible = patients.registered_as_of("covid_test_positive_date"),
+  registered_treated = patients.registered_as_of("date_treated"),
   
   
   
