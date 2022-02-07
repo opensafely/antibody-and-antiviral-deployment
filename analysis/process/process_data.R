@@ -157,6 +157,23 @@ data_processed <- data_extract %>%
       high_risk_group_date == rare_neurological_conditions_nhsd ~ "Rare neurological conditions",
       TRUE ~ NA_character_),
     
+    downs_syndrome_nhsd = ifelse(!is.na(downs_syndrome_nhsd), "Downs syndrome", NA),
+    sickle_cell_disease_nhsd = ifelse(!is.na(sickle_cell_disease_nhsd), "sickle cell disease", NA),
+    cancer_opensafely_snomed = ifelse(!is.na(cancer_opensafely_snomed), "solid cancer", NA),
+    haematological_disease_nhsd = ifelse(!is.na(haematological_disease_nhsd), "haematological diseases", NA),
+    ckd_stage_5_nhsd = ifelse(!is.na(ckd_stage_5_nhsd), "renal disease", NA),
+    liver_disease_nhsd = ifelse(!is.na(liver_disease_nhsd), "liver disease", NA),
+    imid_nhsd = ifelse(!is.na(imid_nhsd), "IMID", NA),
+    immunosupression_nhsd = ifelse(!is.na(immunosupression_nhsd), "primary immune deficiencies", NA),
+    hiv_aids_nhsd = ifelse(!is.na(hiv_aids_nhsd), "HIV or AIDS", NA),
+    solid_organ_transplant_nhsd = ifelse(!is.na(solid_organ_transplant_nhsd), "solid organ recipients", NA),
+    rare_neurological_conditions_nhsd = ifelse(!is.na(rare_neurological_conditions_nhsd), "rare neurological conditions", NA)
+    ) %>%
+  unite("high_risk_group_nhsd_combined", downs_syndrome_nhsd, sickle_cell_disease_nhsd, cancer_opensafely_snomed,
+      haematological_disease_nhsd, ckd_stage_5_nhsd, liver_disease_nhsd, imid_nhsd, immunosupression_nhsd, hiv_aids_nhsd, 
+      solid_organ_transplant_nhsd, rare_neurological_conditions_nhsd, sep = ",", na.rm = T) %>%
+  mutate(
+    
     # CLINICAL/DEMOGRAPHIC COVARIATES ----
     sex = fct_case_when(
       sex == "F" ~ "Female",
@@ -211,6 +228,7 @@ data_processed <- data_extract %>%
     ## Eligibility window
     elig_start = as.Date(ifelse(covid_test_positive == 1 & (covid_test_positive_date >= high_risk_group_date), covid_test_positive_date, NA), origin = "1970-01-01"),
     elig_end = as.Date(elig_start + 5, origin = "1970-01-01")
+
     
   ) %>%
   filter(
