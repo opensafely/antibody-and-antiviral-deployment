@@ -154,25 +154,43 @@ data_processed_clean <- data_processed_clean %>%
 study_start <- format(as.Date(min(data_processed_clean$elig_start),format="%Y-%m-%d"), format = "%d-%b-%Y")
 study_end <- format(as.Date(max(data_processed_clean$elig_start),format="%Y-%m-%d"), format = "%d-%b-%Y")
 eligible_patients <- format(plyr::round_any(data_processed_clean %>% nrow(), 10), big.mark = ",", scientific = FALSE)
-treated_patients <- paste(format(plyr::round_any(data_processed_clean %>% filter(!is.na(treatment_date)) %>% nrow(), 10), big.mark = ",", scientific = FALSE), 
+eligible_treated_patients <- paste(format(plyr::round_any(data_processed_clean %>% filter(!is.na(treatment_date), eligibility_status == "Eligible") %>% nrow(), 10), big.mark = ",", scientific = FALSE), 
                           " (",
-                          round(data_processed_clean %>% filter(!is.na(treatment_date)) %>% nrow()/nrow(data_processed_clean)*100, digits = 0),
+                          round(data_processed_clean %>% filter(!is.na(treatment_date), eligibility_status == "Eligible") %>% nrow()/nrow(data_processed_clean)*100, digits = 0),
                           "%)", sep = "")
-sotrovimab <- paste(format(plyr::round_any(data_processed_clean %>% filter(treatment_type == "Sotrovimab") %>% nrow(), 10), big.mark = ",", scientific = FALSE),
+eligible_sotrovimab <- paste(format(plyr::round_any(data_processed_clean %>% filter(treatment_type == "Sotrovimab",  eligibility_status == "Eligible") %>% nrow(), 10), big.mark = ",", scientific = FALSE),
                     " (",
-                    round(data_processed_clean %>% filter(treatment_type == "Sotrovimab") %>% nrow()/nrow(data_processed_clean)*100, digits = 0),
+                    round(data_processed_clean %>% filter(treatment_type == "Sotrovimab", eligibility_status == "Eligible") %>% nrow()/nrow(data_processed_clean)*100, digits = 0),
                     "%)", sep = "")
-molnupiravir <- paste(format(plyr::round_any(data_processed_clean %>% filter(treatment_type == "Molnupiravir") %>% nrow(), 10), big.mark = ",", scientific = FALSE),
+eligible_molnupiravir <- paste(format(plyr::round_any(data_processed_clean %>% filter(treatment_type == "Molnupiravir",  eligibility_status == "Eligible") %>% nrow(), 10), big.mark = ",", scientific = FALSE),
                       " (",
-                      round(data_processed_clean %>% filter(treatment_type == "Molnupiravir") %>% nrow()/nrow(data_processed_clean)*100, digits = 0),
+                      round(data_processed_clean %>% filter(treatment_type == "Molnupiravir", eligibility_status == "Eligible") %>% nrow()/nrow(data_processed_clean)*100, digits = 0),
                       "%)", sep = "")
-casirivimab <- paste(format(plyr::round_any(data_processed_clean %>% filter(treatment_type == "Casirivimab") %>% nrow(), 10), big.mark = ",", scientific = FALSE),
+eligible_casirivimab <- paste(format(plyr::round_any(data_processed_clean %>% filter(treatment_type == "Casirivimab",  eligibility_status == "Eligible") %>% nrow(), 10), big.mark = ",", scientific = FALSE),
                       " (",
-                      round(data_processed_clean %>% filter(treatment_type == "Casirivimab") %>% nrow()/nrow(data_processed_clean)*100, digits = 0),
+                      round(data_processed_clean %>% filter(treatment_type == "Casirivimab", eligibility_status == "Eligible") %>% nrow()/nrow(data_processed_clean)*100, digits = 0),
                       "%)", sep = "")
+noneligible_treated_patients <- paste(format(plyr::round_any(data_processed_clean %>% filter(!is.na(treatment_date), eligibility_status == "Treated") %>% nrow(), 10), big.mark = ",", scientific = FALSE), 
+                                   " (",
+                                   round(data_processed_clean %>% filter(!is.na(treatment_date), eligibility_status == "Treated") %>% nrow()/nrow(data_processed_clean)*100, digits = 0),
+                                   "%)", sep = "")
+noneligible_sotrovimab <- paste(format(plyr::round_any(data_processed_clean %>% filter(treatment_type == "Sotrovimab",  eligibility_status == "Treated") %>% nrow(), 10), big.mark = ",", scientific = FALSE),
+                             " (",
+                             round(data_processed_clean %>% filter(treatment_type == "Sotrovimab", eligibility_status == "Treated") %>% nrow()/nrow(data_processed_clean)*100, digits = 0),
+                             "%)", sep = "")
+noneligible_molnupiravir <- paste(format(plyr::round_any(data_processed_clean %>% filter(treatment_type == "Molnupiravir",  eligibility_status == "Treated") %>% nrow(), 10), big.mark = ",", scientific = FALSE),
+                               " (",
+                               round(data_processed_clean %>% filter(treatment_type == "Molnupiravir", eligibility_status == "Treated") %>% nrow()/nrow(data_processed_clean)*100, digits = 0),
+                               "%)", sep = "")
+noneligible_casirivimab <- paste(format(plyr::round_any(data_processed_clean %>% filter(treatment_type == "Casirivimab",  eligibility_status == "Treated") %>% nrow(), 10), big.mark = ",", scientific = FALSE),
+                              " (",
+                              round(data_processed_clean %>% filter(treatment_type == "Casirivimab", eligibility_status == "Treated") %>% nrow()/nrow(data_processed_clean)*100, digits = 0),
+                              "%)", sep = "")
 
 
-text <- data.frame(study_start, study_end, eligible_patients, treated_patients, sotrovimab, molnupiravir, casirivimab)
+text <- data.frame(study_start, study_end, eligible_patients, eligible_treated_patients, eligible_sotrovimab, 
+                   eligible_molnupiravir, eligible_casirivimab, noneligible_treated_patients, noneligible_treated_patients, 
+                   noneligible_sotrovimab, noneligible_molnupiravir, noneligible_casirivimab)
 
 write_csv(text, here::here("output", "reports", "coverage", "tables", "report_stats.csv"))
 
@@ -397,6 +415,19 @@ write_csv(table_elig_treat_redacted, here::here("output", "reports", "coverage",
 ## Clinical and demographics table
 variables <- c("ageband", "sex", "ethnicity", "imd", "region")
 
+table_demo_clinc_breakdown_base <- data_processed_clean %>%
+  select(all_of(variables)) %>%
+  tbl_summary()
+
+table_demo_clinc_breakdown_base$inputs$data <- NULL
+
+table_demo_clinc_breakdown_base <- table_demo_clinc_breakdown_base$table_body %>%
+  separate(stat_0, c("stat_0","perc0"), sep = " ([(])") %>%
+  select(Variable = label, 
+         All = stat_0) %>%
+  mutate(All = as.numeric(gsub(",", "", All))) %>%
+  data.frame()
+
 table_demo_clinc_breakdown <- data_processed_clean %>%
   filter(!is.na(treatment_type)) %>%
   select(treatment_type, all_of(variables)) %>%
@@ -417,26 +448,28 @@ table_demo_clinc_breakdown <- table_demo_clinc_breakdown$table_body %>%
   separate(stat_2, c("stat_2","perc2"), sep = " ([(])") %>%
   separate(stat_3, c("stat_3","perc3"), sep = " ([(])") %>%
   select(Variable = label, 
-         All = stat_0,
+         Treated = stat_0,
          Casirivimab = stat_1,
          Molnupiravir = stat_2,
          Sotrovimab = stat_3) %>%
-  mutate(All = as.numeric(gsub(",", "", All)),
+  mutate(Treated = as.numeric(gsub(",", "", Treated)),
          Casirivimab = as.numeric(gsub(",", "", Casirivimab)),
          Molnupiravir = as.numeric(gsub(",", "", Molnupiravir)),
          Sotrovimab = as.numeric(gsub(",", "", Sotrovimab))) %>%
 
   data.frame()
 
-table_demo_clinc_breakdown_redacted <- table_demo_clinc_breakdown %>%
+table_demo_clinc_breakdown_redacted <- left_join(table_demo_clinc_breakdown_base, table_demo_clinc_breakdown, by = "Variable") %>%
   # Redact values < 8
   mutate(All = ifelse(All < threshold, NA, as.numeric(All)),
+         Treated = ifelse(Treated < threshold, NA, as.numeric(Treated)),
          Casirivimab = ifelse(Casirivimab < threshold, NA, as.numeric(Casirivimab)),
          Molnupiravir = ifelse(Molnupiravir < threshold, NA, as.numeric(Molnupiravir)),
          Sotrovimab = ifelse(Sotrovimab < threshold, NA, as.numeric(Sotrovimab))
   ) %>%
   # Round to nearest 10
   mutate(All = plyr::round_any(All, 10),
+         Treated = plyr::round_any(Treated, 10),
          Casirivimab = plyr::round_any(Casirivimab, 10),
          Molnupiravir = plyr::round_any(Molnupiravir, 10),
          Sotrovimab = plyr::round_any(Sotrovimab, 10))
