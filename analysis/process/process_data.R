@@ -96,9 +96,9 @@ if(Sys.getenv("OPENSAFELY_BACKEND") %in% c("", "expectations")){
   data_extract0 <- data_extract0 %>%
     mutate(date = sample(seq(as.Date('2021/11/01'), as.Date('2022/02/01'), by="day"), nrow(data_extract0), replace = TRUE),
            covid_test_positive_date = as.Date(covid_test_positive_date, format = "%Y-%m-%d"),
-           covid_test_positive_date = ifelse(!is.na(covid_test_positive_date), date, NA),
+           covid_test_positive_date = as.Date(ifelse(!is.na(covid_test_positive_date), date, NA), origin = "1970-01-01"),
            
-           date2 = as.Date(covid_test_positive_date + sample(-1:10, 1, replace=TRUE), origin = "1970-01-01"),
+           date2 = as.Date(covid_test_positive_date + sample(-1:10, dim(data_extract0)[1], replace=TRUE), origin = "1970-01-01"),
            sotrovimab_covid_therapeutics = ifelse(!is.na(sotrovimab_covid_therapeutics), date2, NA),
            molnupiravir_covid_therapeutics = ifelse(!is.na(molnupiravir_covid_therapeutics), date2, NA),
            casirivimab_covid_therapeutics = ifelse(!is.na(casirivimab_covid_therapeutics), date2, NA))
@@ -134,7 +134,12 @@ data_processed <- data_extract %>%
                                    ifelse(!is.na(casirivimab_covid_therapeutics), "Casirivimab", NA))),
     
     
-    # HIGH RISK GROUPS ----
+    # ELIGIBILITY VARIABLES ----
+    
+    ## Time between positive test and treatment
+    tb_postest_treat = ifelse(covid_test_positive == 1, as.numeric(treatment_date - covid_test_positive_date), NA),
+    
+    ## Eligibility window
     rare_neurological_conditions_nhsd =  pmax(multiple_sclerosis_nhsd, motor_neurone_disease_nhsd, myasthenia_gravis_nhsd,
                                               huntingtons_disease_nhsd, na.rm = T),
     
@@ -143,6 +148,10 @@ data_processed <- data_extract %>%
                                 immunosupression_nhsd, hiv_aids_nhsd, solid_organ_transplant_nhsd, rare_neurological_conditions_nhsd,
                                 na.rm = TRUE),
     
+    elig_start = as.Date(ifelse(covid_test_positive == 1 & (covid_test_positive_date >= high_risk_group_date), covid_test_positive_date, NA), origin = "1970-01-01"),
+    elig_end = as.Date(elig_start + 5, origin = "1970-01-01"),
+    
+    # HIGH RISK GROUPS ----
     high_risk_group_nhsd = case_when(
       high_risk_group_date == downs_syndrome_nhsd ~ "Down's syndrome", 
       high_risk_group_date == sickle_cell_disease_nhsd ~ "Sickle cell disease", 
@@ -219,16 +228,6 @@ data_processed <- data_extract %>%
       region_nhs == "Yorkshire and The Humber" ~ "Yorkshire and the Humber",
       #TRUE ~ "Unknown",
       TRUE ~ NA_character_),
-    
-    # ELIGIBILITY VARIABLES ----
-    
-    ## Time between positive test and treatment
-    tb_postest_treat = ifelse(covid_test_positive == 1, as.numeric(treatment_date - covid_test_positive_date), NA),
-    
-    ## Eligibility window
-    elig_start = as.Date(ifelse(covid_test_positive == 1 & (covid_test_positive_date >= high_risk_group_date), covid_test_positive_date, NA), origin = "1970-01-01"),
-    elig_end = as.Date(elig_start + 5, origin = "1970-01-01")
-
     
   ) %>%
   filter(
