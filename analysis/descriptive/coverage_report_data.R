@@ -561,12 +561,20 @@ print(table((high_risk_cohort_des %>% filter(!is.na(high_risk_group_nhsd)))$hrc_
 print(table(high_risk_cohort_des$hrc_nhsd))
 
 high_risk_cohort_comparison <- data_processed_clean %>%
+  filter(Match == TRUE) %>%
+  select(high_risk_group_nhsd, high_risk_cohort_covid_therapeutics) %>%
+  group_by(high_risk_group_nhsd, high_risk_cohort_covid_therapeutics) %>%
+  tally()
+
+write_csv(high_risk_cohort_comparison, here::here("output", "reports", "coverage", "tables", "high_risk_cohort_comparison_a.csv"))
+
+high_risk_cohort_comparison <- data_processed_clean %>%
   filter(Match == FALSE) %>%
   select(high_risk_group_nhsd, high_risk_cohort_covid_therapeutics) %>%
   group_by(high_risk_group_nhsd, high_risk_cohort_covid_therapeutics) %>%
   tally()
 
-write_csv(high_risk_cohort_comparison, here::here("output", "reports", "coverage", "tables", "high_risk_cohort_comparison.csv"))
+write_csv(high_risk_cohort_comparison, here::here("output", "reports", "coverage", "tables", "high_risk_cohort_comparison_b.csv"))
 
 ## Time to treatment
 all <- data_processed_clean %>%
