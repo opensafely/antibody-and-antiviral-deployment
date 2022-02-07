@@ -53,7 +53,12 @@ threshold = 8
 data_processed_hrc_matched <- data_processed %>%
   mutate(patterns = map_chr(strsplit(high_risk_cohort_covid_therapeutics, ","), paste,collapse="|"),
        Match = str_detect(high_risk_group_nhsd_combined, patterns),
-       high_risk_group_nhsd = ifelse(Match == TRUE, high_risk_group_nhsd, NA)) %>% 
+       high_risk_group_nhsd = ifelse(Match == TRUE, high_risk_group_nhsd, NA),
+       high_risk_group_combined = ifelse((Match == TRUE & !is.na(high_risk_cohort_covid_therapeutics)) |
+                                           (Match == FALSE & !is.na(high_risk_cohort_covid_therapeutics)),
+                                         high_risk_cohort_covid_therapeutics, high_risk_group_nhsd),
+       hrc_groups = str_count(high_risk_group_combined,",") + 1,
+       high_risk_group_combined = ifelse(hrc_groups > 1, "2+ groups", high_risk_group_combined)) %>% 
   select(-patterns)
 
 ## Apply eligibility and exclusion criteria
@@ -289,7 +294,8 @@ ggsave(
   units = "cm", width = 35, height = 20
 )
 
-## Treatment coverage
+
+## Treatment coverage - nhsd
 plot_data_treatment <- data_processed_clean %>%
   mutate(patient_id = 1) %>%
   group_by(elig_start, treatment_date, treatment_type) %>%
@@ -333,12 +339,12 @@ plot_order <- rbind(plot_data_treatment, plot_data_treatment_groups) %>%
   select(high_risk_group_nhsd, order) %>%
   distinct()
 
-treatment_plot_data <- rbind(plot_data_treatment, plot_data_treatment_groups) %>%
+treatment_plot_data_nhsd <- rbind(plot_data_treatment, plot_data_treatment_groups) %>%
   mutate(high_risk_group_nhsd = factor(high_risk_group_nhsd, levels = plot_order$high_risk_group_nhsd)) 
 
-write_csv(treatment_plot_data, here::here("output", "reports", "coverage", "figures", "cum_treatment_plot.csv"))
+write_csv(treatment_plot_data_nhsd, here::here("output", "reports", "coverage", "figures", "cum_treatment_nhsd_plot.csv"))
 
-treatment_plot <- treatment_plot_data %>%
+treatment_plot_nhsd <- treatment_plot_data_nhsd %>%
   ggplot(aes(x = treatment_date, y = cum_count_redacted, colour = high_risk_group_nhsd, group = high_risk_group_nhsd)) +
   geom_step(size = 1) +
   theme_classic(base_size = 8) +
@@ -361,8 +367,85 @@ treatment_plot <- treatment_plot_data %>%
     legend.box.margin = margin(t = 1, l = 1, b = 1, r = 1))
 
 ggsave(
-  here::here("output", "reports", "coverage", "figures", "cum_treatment_plot.png"),
-  treatment_plot,
+  here::here("output", "reports", "coverage", "figures", "cum_treatment_nhsd_plot.png"),
+  treatment_plot_nhsd,
+  units = "cm", width = 35, height = 20
+)
+
+## Treatment coverage - therapeutics
+plot_data_treatment <- data_processed_clean %>%
+  mutate(patient_id = 1) %>%
+  group_by(elig_start, treatment_date, treatment_type) %>%
+  summarise(count = sum(patient_id, na.rm  = T)) %>%
+  arrange(elig_start, treatment_date, treatment_type) %>%
+  ungroup() %>%
+  filter(!is.na(treatment_date)) %>%
+  arrange(treatment_date) %>%
+  complete(treatment_date = seq.Date(min(treatment_date), max(treatment_date), by="day")) %>%
+  group_by(treatment_date) %>%
+  summarise(count = sum(count, na.rm = T)) %>%
+  ungroup() %>%
+  mutate(count = ifelse(is.na(count), 0, count),
+         cum_count = cumsum(count),
+         cum_count_redacted =  plyr::round_any(cum_count, 10)) %>%
+  mutate(high_risk_group_combined = "All")
+
+plot_data_treatment_groups <- data_processed_clean %>%
+  mutate(patient_id = 1) %>%
+  group_by(elig_start, treatment_date, treatment_type, high_risk_group_combined) %>%
+  summarise(count = sum(patient_id, na.rm  = T)) %>%
+  arrange(elig_start, treatment_date, treatment_type, high_risk_group_combined) %>%
+  ungroup() %>%
+  filter(!is.na(treatment_date)) %>%
+  arrange(high_risk_group_combined, treatment_date) %>%
+  group_by(high_risk_group_combined) %>%
+  complete(treatment_date = seq.Date(min(treatment_date), max(treatment_date), by="day")) %>%
+  group_by(high_risk_group_combined, treatment_date) %>%
+  summarise(count = sum(count, na.rm = T)) %>%
+  group_by(high_risk_group_combined) %>%
+  mutate(count = ifelse(is.na(count), 0, count),
+         cum_count = cumsum(count),
+         cum_count_redacted =  plyr::round_any(cum_count, 10))
+
+# Plot
+plot_order <- rbind(plot_data_treatment, plot_data_treatment_groups) %>%
+  group_by(high_risk_group_combined) %>%
+  mutate(order = max(cum_count_redacted, na.rm = T)) %>%
+  arrange(desc(order)) %>%
+  filter(cum_count_redacted == order) %>%
+  select(high_risk_group_combined, order) %>%
+  distinct()
+
+treatment_plot_data_therapeutics <- rbind(plot_data_treatment, plot_data_treatment_groups) %>%
+  mutate(high_risk_group_combined = factor(high_risk_group_combined, levels = plot_order$high_risk_group_combined)) 
+
+write_csv(treatment_plot_data_therapeutics, here::here("output", "reports", "coverage", "figures", "cum_treatment_therapeutics_plot.csv"))
+
+treatment_plot_therapeutics <- treatment_plot_data_therapeutics %>%
+  ggplot(aes(x = treatment_date, y = cum_count_redacted, colour = high_risk_group_combined, group = high_risk_group_combined)) +
+  geom_step(size = 1) +
+  theme_classic(base_size = 8) +
+  scale_x_date(date_breaks = "1 week", date_labels =  "%d %b %Y") +
+  labs(
+    x = "Date",
+    y = "Number of eligible patient receiving treatment",
+    colour = "High risk cohort",
+    title = "") +
+  theme(
+    axis.text = element_text(size = 15),
+    axis.text.x = element_text(angle = 60, hjust = 1),
+    axis.title = element_text(size = 20),
+    legend.text = element_text(size = 10),
+    legend.position = c(0.2,0.75),
+    legend.background = element_rect(colour = "white"),
+    legend.box.background = element_rect(colour = "black"),
+    axis.line.x = element_line(colour = "black"),
+    panel.grid.minor.x = element_blank(),
+    legend.box.margin = margin(t = 1, l = 1, b = 1, r = 1))
+
+ggsave(
+  here::here("output", "reports", "coverage", "figures", "cum_treatment_therapeutics_plot.png"),
+  treatment_plot_therapeutics,
   units = "cm", width = 35, height = 20
 )
 
@@ -371,7 +454,7 @@ ggsave(
 
 ## Treatment table
 eligibility_table <- data_processed_clean %>%
-  select(high_risk_group_nhsd) %>%
+  select(high_risk_group_combined) %>%
   tbl_summary()
 
 eligibility_table$inputs$data <- NULL
@@ -384,7 +467,7 @@ eligibility_table <- eligibility_table$table_body %>%
   data.frame()
 
 treatment_table <- data_processed_clean %>%
-  select(high_risk_group_nhsd, treatment_type) %>%
+  select(high_risk_group_combined, treatment_type) %>%
   tbl_summary(by = treatment_type) %>%
   add_overall()
 
@@ -508,7 +591,7 @@ non_elig_treated <-  data_processed_clean %>%
     registered = (registered_eligible == 1 | registered_treated == 1),
     has_positive_covid_test = (covid_test_positive == 1),
     no_positive_covid_test_previous_30_days = (covid_positive_previous_30_days != 1),
-    high_risk_group_nhsd = !is.na(high_risk_group_nhsd),
+    high_risk_group_combined = !is.na(high_risk_group_combined),
     no_covid_hospital_admission_last_30_days = (is.na(covid_hospital_admission_date) | 
                                                   covid_hospital_admission_date < (elig_start - 30) & 
                                                   covid_hospital_admission_date > (elig_start)),

@@ -67,8 +67,10 @@ actions:
         table4: output/reports/coverage/tables/data_flowchart_non_elig_redacted.csv
         table5: output/reports/coverage/tables/high_risk_cohort_comparison*.csv
         table6: output/reports/coverage/tables/data_time_between_redacted.csv
-        figure1: output/reports/coverage/figures/cum_treatment_plot.png
+        table7: output/reports/coverage/tables/cum_*.csv
+        figure1: output/reports/coverage/figures/cum_treatment_*.png
         figure2: output/reports/coverage/figures/cum_eligiblity_plot.png
+        figure3: output/reports/coverage/figures/cum_eligiblity_therapeutics_plot.png
 
 
 
