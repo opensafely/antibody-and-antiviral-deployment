@@ -410,6 +410,7 @@ table_elig_treat_redacted <- left_join(eligibility_table, treatment_table, by = 
          Treated.with.Molnupiravir = plyr::round_any(Treated.with.Molnupiravir, 10),
          Treated.with.Sotrovimab = plyr::round_any(Treated.with.Sotrovimab, 10))
 
+write_csv(left_join(eligibility_table, treatment_table, by = "High.risk.cohort") , here::here("output", "reports", "coverage", "tables", "table_elig_treat.csv"))
 write_csv(table_elig_treat_redacted, here::here("output", "reports", "coverage", "tables", "table_elig_treat_redacted.csv"))
 
 ## Clinical and demographics table
@@ -474,7 +475,7 @@ table_demo_clinc_breakdown_redacted <- left_join(table_demo_clinc_breakdown_base
          Molnupiravir = plyr::round_any(Molnupiravir, 10),
          Sotrovimab = plyr::round_any(Sotrovimab, 10))
 
-
+write_csv(left_join(table_demo_clinc_breakdown_base, table_demo_clinc_breakdown, by = "Variable"), here::here("output", "reports", "coverage", "tables", "table_demo_clinc_breakdown.csv"))
 write_csv(table_demo_clinc_breakdown_redacted, here::here("output", "reports", "coverage", "tables", "table_demo_clinc_breakdown_redacted.csv"))
 
 
