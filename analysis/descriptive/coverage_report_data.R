@@ -557,10 +557,11 @@ high_risk_cohort_des <-  data_processed_clean %>%
   mutate(hrc_therapeutics = str_count(high_risk_cohort_covid_therapeutics,",") + 1,
          hrc_nhsd = str_count(high_risk_group_nhsd_combined,",") + 1)
 
-print(table(high_risk_cohort_des$hrc_therapeutics))
+print(table((high_risk_cohort_des %>% filter(!is.na(high_risk_group_nhsd)))$hrc_therapeutics))
 print(table(high_risk_cohort_des$hrc_nhsd))
 
 high_risk_cohort_comparison <- data_processed_clean %>%
+  filter(Match == FALSE) %>%
   select(high_risk_group_nhsd, high_risk_cohort_covid_therapeutics) %>%
   group_by(high_risk_group_nhsd, high_risk_cohort_covid_therapeutics) %>%
   tally()
