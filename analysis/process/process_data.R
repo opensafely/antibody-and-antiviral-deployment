@@ -91,6 +91,12 @@ data_extract0 <- read_csv(
   ),
 )
 
+print(dim(data_extract0))
+print(dim(data_extract0 %>% 
+            filter(!is.na(sotrovimab_covid_therapeutics) |
+                     !is.na(molnupiravir_covid_therapeutics) |
+                     !is.na(casirivimab_covid_therapeutics))))
+
 ## Fix bad dummy data
 if(Sys.getenv("OPENSAFELY_BACKEND") %in% c("", "expectations")){
   data_extract0 <- data_extract0 %>%
