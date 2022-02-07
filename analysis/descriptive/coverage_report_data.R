@@ -53,7 +53,7 @@ threshold = 8
 data_processed_hrc_matched <- data_processed %>%
   mutate(patterns = map_chr(strsplit(high_risk_cohort_covid_therapeutics, ","), paste,collapse="|"),
        Match = str_detect(high_risk_group_nhsd_combined, patterns),
-       high_risk_group_nhsd = ifelse(Match = TRUE, high_risk_group_nhsd, NA)) %>% 
+       high_risk_group_nhsd = ifelse(Match == TRUE, high_risk_group_nhsd, NA)) %>% 
   select(-patterns)
 
 ## Apply eligibility and exclusion criteria
@@ -518,7 +518,6 @@ non_elig_treated <-  data_processed_clean %>%
         not_duplicated_entries)
   )
 
-# Flowchart data
 data_flowchart <- non_elig_treated %>%
   transmute(
     c0_all = TRUE,
@@ -550,9 +549,7 @@ data_flowchart <- non_elig_treated %>%
     pct_step = n / lag(n),
   )
 
-
-# Save dataset as .csv files ----
-write_csv(data_flowchart_non_elig, here("output", "reports", "coverage", "tables", "data_flowchart_non_elig.csv"))
+write_csv(data_flowchart, here("output", "reports", "coverage", "tables", "data_flowchart_non_elig.csv"))
 
 
 ## High risk patient cohorts
@@ -569,6 +566,23 @@ high_risk_cohort_comparison <- data_processed_clean %>%
   tally()
 
 write_csv(high_risk_cohort_comparison, here::here("output", "reports", "coverage", "tables", "high_risk_cohort_comparison.csv"))
+
+## Time to treatment
+all <- data_processed_clean %>%
+  group_by(tb_postest_treat) %>%
+  tally() %>%
+  mutate(high_risk_group_nhsd = "All",
+         n = ifelse(n < 5, NA, n),
+         n = plyr::round_any(n, 5))
+
+groups <- data_processed_clean %>%
+  group_by(high_risk_group_nhsd, tb_postest_treat) %>%
+  tally() %>%
+  mutate(n = ifelse(n < 5, NA, n),
+         n = plyr::round_any(n, 5))
+
+write_csv(rbind(all, groups), here("output", "reports", "coverage", "tables", "data_time_between_redacted.csv"))
+
 
 
 

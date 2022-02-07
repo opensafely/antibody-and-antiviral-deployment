@@ -39,9 +39,19 @@ library(png)
 library(readr)
 library(htmltools)
 
+# Input directory ----
+#input_dir_os <- here("released_outputs")
+input_dir_os <- here("output")
+
+# Output directory ----
+output_dir_rmd <- here("manuscript", "figures")
+fs::dir_create(output_dir_rmd)
+
 # Import data ----
-report_stats <- read_csv(here::here("reports", "coverage", "tables", "report_stats.csv"))
-table_elig_treat_redacted <- read_csv(here::here("reports", "coverage", "tables", "table_elig_treat_redacted.csv"))
+report_stats <- read_csv(fs::path(input_dir_os, "reports", "coverage", "tables", "report_stats.csv"))
+table_elig_treat_redacted <- read_csv(fs::path(input_dir_os, "reports", "coverage", "tables", "table_elig_treat_redacted.csv"))
+table_demo_clinc_breakdown_redacted <- read_csv(fs::path(input_dir_os, "reports", "coverage", "tables", "table_demo_clinc_breakdown_redacted.csv"))
+
 ```
 
 # Overview
@@ -78,15 +88,16 @@ The code and data for this report can be found at the OpenSafely [antibody-and-a
 # Results <a name="results"></a>
       
 ## Coverage of COVID-19 treatment <a name="coverage"></a>
-Between `r format(report_stats$study_start, format = "%d-%b-%Y")` and `r format(report_stats$study_end, format = "%d-%b-%Y")`, `r format(report_stats$eligible_patients, format = "%d-%b-%Y")` patients registered at a TPP practice in England were eligible for receiving a nMABs or antiviral for treating COVID-19 (Figure 1). Of these patients, a total of `r format(report_stats$treated_patients, format = "%d-%b-%Y")` patients had received treatment for COVID-19 within the same time period (Figure 2); `r format(report_stats$sotrovimab, format = "%d-%b-%Y")` received sotrovimab and `r format(report_stats$molnupiravir, format = "%d-%b-%Y")` received molnupiravir. 
+Between `r format(report_stats$study_start, format = "%d-%b-%Y")` and `r format(report_stats$study_end, format = "%d-%b-%Y")`, a total of `r format(report_stats$eligible_patients, big.mark = ",", scientific = FALSE)` patients registered at a TPP practice in England were eligible for receiving a nMABs or antiviral for treating COVID-19 (Figure 1). Of these patients, a total of `r format(report_stats$eligible_treated_patients, format = "%d-%b-%Y")` patients had received treatment for COVID-19 within the same time period (Figure 2); `r format(report_stats$eligible_sotrovimab, format = "%d-%b-%Y")` received Sotrovimab, `r format(report_stats$eligible_molnupiravir, format = "%d-%b-%Y")` received Molnupiravir and `r format(report_stats$eligible_casirivimab, format = "%d-%b-%Y")` received Casirivimab. An additional `r format(report_stats$noneligible_treated_patients, format = "%d-%b-%Y")` (possibly non-eligible) patients also received treatment for COVID-19 within the same time period; `r format(report_stats$noneligible_sotrovimab, format = "%d-%b-%Y")` received sotrovimab, `r format(report_stats$noneligible_molnupiravir, format = "%d-%b-%Y")` received Molnupiravir and `r format(report_stats$noneligible_casirivimab, format = "%d-%b-%Y")` received Casirivimab.
 
 $$\\[0.5cm]$$
 ```{r, coverage plot, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '80%', fig.align = 'center', fig.cap = "Figure 1: Cumulative total of patients eligible for receiving a nMABs or antiviral for treating COVID-19 since 20th December 2021, stratified by high risk cohort."}
-include_graphics("figures/cum_eligiblity_plot.png")
+include_graphics(fs::path(input_dir_os, "reports", "coverage", "figures", "cum_eligiblity_plot.png"))
+
 ```
 $$\\[0.5cm]$$
 ```{r, treatment plot, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '80%', fig.align = 'center', fig.cap = "Figure 2: Cumulative total of eligible patients who received a nMABs or antiviral for treating COVID-19 since 20th December 2021, stratified by high risk cohort."}
-include_graphics("figures/cum_treatment_plot.png")
+include_graphics(fs::path(input_dir_os, "reports", "coverage", "figures", "cum_treatment_plot.png"))
 ```
 
 ## Delivery of nMAB and antiviral treatment <a name="delivery"></a>
@@ -103,10 +114,16 @@ table_elig_treat_redacted %>%
 ```
 
 ## Key demographic and clinical characteristics of treated patients <a name="demographic"></a>
-The proportion of eligible patients who had received treatment by `r format(report_stats$study_end, format = "%d-%b-%Y")`, broken down by demographic and clinical categories, is presented in Table 2. 
+The count and rate of eligible patients who had received treatment by `r format(report_stats$study_end, format = "%d-%b-%Y")`, broken down by demographic and clinical categories, is presented in Table 2. 
 
 ```{r, echo=FALSE}
-htmltools::includeHTML("tables/table_demo_clinc_breakdown_redacted.html")
+table_demo_clinc_breakdown_redacted %>%
+  kable(caption = "Table 1: Proportion of eligible patients receiving treatment for COVID-19, broken down by the high risk cohort", 
+        row.names = FALSE, 
+        align = c("l", rep("c", 4)),
+        booktabs=TRUE, 
+        table.attr = "style='width:30%;'") %>%
+  kable_styling(position = "center", full_width = F)
 ```
 
 
@@ -117,5 +134,3 @@ htmltools::includeHTML("tables/table_demo_clinc_breakdown_redacted.html")
 ## Time to treatment <a name="time"></a>
 
 ## COVID-19-related events <a name="events"></a>
-
-      

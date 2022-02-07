@@ -66,6 +66,7 @@ actions:
         table3: output/reports/coverage/tables/table_demo_clinc_breakdown*.csv
         table4: output/reports/coverage/tables/data_flowchart_non_elig.csv
         table5: output/reports/coverage/tables/high_risk_cohort_comparison.csv
+        table6: output/reports/coverage/tables/data_time_between_redacted.csv
         figure1: output/reports/coverage/figures/cum_treatment_plot.png
         figure2: output/reports/coverage/figures/cum_eligiblity_plot.png
 
