@@ -51,6 +51,8 @@ dup_ids <- data_processed %>%
 data_criteria <- data_processed %>%
   mutate(
     patient_id,
+    alive = (has_died == 0),
+    registered = (registered_eligible == 1 | registered_treated == 1),
     has_positive_covid_test = (covid_test_positive == 1),
     no_positive_covid_test_previous_30_days = (covid_positive_previous_30_days != 1),
     high_risk_group = !is.na(high_risk_group_nhsd),
@@ -62,7 +64,9 @@ data_criteria <- data_processed %>%
     not_duplicated_entries = !(patient_id %in% dup_ids$patient_id),
     
     include = (
-      has_positive_covid_test & 
+      alive &
+        registered & 
+        has_positive_covid_test & 
         no_positive_covid_test_previous_30_days & 
         treated_within_5_days & 
         high_risk_group & 
@@ -75,16 +79,17 @@ data_criteria <- data_processed %>%
 data_flowchart <- data_criteria %>%
   transmute(
     c0_all = TRUE,
-    c1_has_positive_covid_test = c0_all & has_positive_covid_test,
-    c2_no_positive_covid_test_previous_30_days = c0_all & has_positive_covid_test & no_positive_covid_test_previous_30_days,
-    c3_high_risk_group = c0_all & has_positive_covid_test & no_positive_covid_test_previous_30_days & high_risk_group,
-    c4_no_covid_hospital_admission_last_30_days = c0_all & has_positive_covid_test & no_positive_covid_test_previous_30_days & 
+    c1_alive_and_registered = c0_all & alive & registered,
+    c2_has_positive_covid_test = c0_all & alive & registered & has_positive_covid_test,
+    c3_no_positive_covid_test_previous_30_days = c0_all & alive & registered & has_positive_covid_test & no_positive_covid_test_previous_30_days,
+    c4_high_risk_group = c0_all & alive & registered & has_positive_covid_test & no_positive_covid_test_previous_30_days & high_risk_group,
+    c5_no_covid_hospital_admission_last_30_days = c0_all & alive & registered & has_positive_covid_test & no_positive_covid_test_previous_30_days & 
       high_risk_group & no_covid_hospital_admission_last_30_days,
-    c5_aged_over_12 = c0_all & has_positive_covid_test & no_positive_covid_test_previous_30_days & 
+    c6_aged_over_12 = c0_all & alive & registered & has_positive_covid_test & no_positive_covid_test_previous_30_days & 
       high_risk_group & no_covid_hospital_admission_last_30_days & aged_over_12,
-    c6_treated_within_5_days = c0_all & has_positive_covid_test & no_positive_covid_test_previous_30_days & 
+    c7_treated_within_5_days = c0_all & alive & registered & has_positive_covid_test & no_positive_covid_test_previous_30_days & 
       high_risk_group & no_covid_hospital_admission_last_30_days & aged_over_12 & treated_within_5_days,
-    c7_not_duplicated_entries = c0_all & has_positive_covid_test & no_positive_covid_test_previous_30_days & 
+    c8_not_duplicated_entries = c0_all & alive & registered & has_positive_covid_test & no_positive_covid_test_previous_30_days & 
       high_risk_group & no_covid_hospital_admission_last_30_days & aged_over_12 & 
       treated_within_5_days & not_duplicated_entries
   ) %>%

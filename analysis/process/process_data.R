@@ -46,7 +46,10 @@ data_extract0 <- read_csv(
     
     # CENSORING ----
     death_date = col_date(format = "%Y-%m-%d"),
+    has_died = col_logical(),
     dereg_date = col_date(format = "%Y-%m-%d"),
+    registered_eligible = col_logical(),
+    registered_treated = col_logical(),
     
     # NEUTRALISING MONOCLONAL ANTIBODIES OR ANTIVIRALS ----
     sotrovimab_covid_therapeutics = col_date(format = "%Y-%m-%d"),
@@ -90,12 +93,6 @@ data_extract0 <- read_csv(
     
   ),
 )
-
-print(dim(data_extract0))
-print(dim(data_extract0 %>% 
-            filter(!is.na(sotrovimab_covid_therapeutics) |
-                     !is.na(molnupiravir_covid_therapeutics) |
-                     !is.na(casirivimab_covid_therapeutics))))
 
 ## Fix bad dummy data
 if(Sys.getenv("OPENSAFELY_BACKEND") %in% c("", "expectations")){
@@ -236,13 +233,9 @@ data_processed <- data_extract %>%
       TRUE ~ NA_character_),
     
   ) %>%
-  filter(
-    # Exclude patients not classed as eligible or receiving treatment
-    !is.na(elig_start) | !is.na(treatment_date)
-  ) %>%
   droplevels() %>%
   select(patient_id,
-         death_date, dereg_date,
+         has_died, death_date, dereg_date, registered_eligible, registered_treated,
          covid_test_positive, covid_positive_previous_30_days, tb_postest_treat, elig_start, elig_end,
          sotrovimab_covid_therapeutics, molnupiravir_covid_therapeutics, casirivimab_covid_therapeutics, treatment_date, treatment_type,
          high_risk_cohort_covid_therapeutics, high_risk_group_nhsd, high_risk_group_nhsd_date = high_risk_group_date, high_risk_group_nhsd_combined,

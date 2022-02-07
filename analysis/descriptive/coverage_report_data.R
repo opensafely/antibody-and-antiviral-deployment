@@ -59,6 +59,10 @@ data_processed_hrc_matched <- data_processed %>%
 ## Apply eligibility and exclusion criteria
 data_processed_eligible <- data_processed_hrc_matched %>%
    filter(
+    # Alive and registered
+    has_died == 0,
+    registered_eligible == 1 | registered_treated == 1,
+     
     # Apply eligibility criteria
     covid_test_positive == 1,
     covid_positive_previous_30_days != 1,
@@ -219,7 +223,7 @@ plot_data_coverage <- data_processed_clean %>%
   arrange(elig_start, treatment_date, treatment_type) %>%
   ungroup() %>%
   arrange(elig_start, treatment_date) %>%
-  complete(elig_start = seq.Date(min(elig_start), max(elig_start), by="day")) %>%
+  complete(elig_start = seq.Date(min(elig_start, na.rm = T), max(elig_start, na.rm = T), by="day")) %>%
   group_by(elig_start) %>%
   summarise(count = sum(count, na.rm = T)) %>%
   ungroup() %>%
@@ -236,7 +240,7 @@ plot_data_coverage_groups <- data_processed_clean %>%
   ungroup() %>%
   arrange(high_risk_group_nhsd, elig_start) %>%
   group_by(high_risk_group_nhsd) %>%
-  complete(elig_start = seq.Date(min(elig_start), max(elig_start), by="day")) %>%
+  complete(elig_start = seq.Date(min(elig_start, na.rm = T), max(elig_start, na.rm = T), by="day")) %>%
   group_by(high_risk_group_nhsd, elig_start) %>%
   summarise(count = sum(count, na.rm = T)) %>%
   group_by(high_risk_group_nhsd) %>%
@@ -500,21 +504,26 @@ non_elig_treated <-  data_processed_clean %>%
          eligibility_status == "Treated") %>%
   mutate(
     patient_id,
+    alive = (has_died == 0),
+    registered = (registered_eligible == 1 | registered_treated == 1),
     has_positive_covid_test = (covid_test_positive == 1),
     no_positive_covid_test_previous_30_days = (covid_positive_previous_30_days != 1),
-    high_risk_group = !is.na(high_risk_group_nhsd),
+    high_risk_group_nhsd = !is.na(high_risk_group_nhsd),
     no_covid_hospital_admission_last_30_days = (is.na(covid_hospital_admission_date) | 
                                                   covid_hospital_admission_date < (elig_start - 30) & 
                                                   covid_hospital_admission_date > (elig_start)),
     aged_over_12 = (age >= 12),
     treated_within_5_days = ((tb_postest_treat <= 5 & tb_postest_treat >= 0) | is.na(tb_postest_treat)),
     not_duplicated_entries = !(patient_id %in% dup_ids$patient_id),
+    high_risk_group = !is.na(high_risk_cohort_covid_therapeutics),
     
     include = (
-      has_positive_covid_test & 
+      alive &
+        registered & 
+        has_positive_covid_test & 
         no_positive_covid_test_previous_30_days & 
         treated_within_5_days & 
-        high_risk_group & 
+        high_risk_group_nhsd & 
         no_covid_hospital_admission_last_30_days &
         aged_over_12 &
         not_duplicated_entries)
@@ -523,19 +532,23 @@ non_elig_treated <-  data_processed_clean %>%
 data_flowchart <- non_elig_treated %>%
   transmute(
     c0_all = TRUE,
-    c1_has_positive_covid_test = c0_all & has_positive_covid_test,
-    c2_no_positive_covid_test_previous_30_days = c0_all & has_positive_covid_test & no_positive_covid_test_previous_30_days,
-    c3_high_risk_group = c0_all & has_positive_covid_test & no_positive_covid_test_previous_30_days & high_risk_group,
-    c4_no_covid_hospital_admission_last_30_days = c0_all & has_positive_covid_test & no_positive_covid_test_previous_30_days & 
-      high_risk_group & no_covid_hospital_admission_last_30_days,
-    c5_aged_over_12 = c0_all & has_positive_covid_test & no_positive_covid_test_previous_30_days & 
-      high_risk_group & no_covid_hospital_admission_last_30_days & aged_over_12,
-    c6_treated_within_5_days = c0_all & has_positive_covid_test & no_positive_covid_test_previous_30_days & 
-      high_risk_group & no_covid_hospital_admission_last_30_days & aged_over_12 & treated_within_5_days,
-    c7_not_duplicated_entries = c0_all & has_positive_covid_test & no_positive_covid_test_previous_30_days & 
+    c1_alive_and_registered = c0_all & alive & registered,
+    c2_has_positive_covid_test = c0_all & alive & registered & has_positive_covid_test,
+    c3_no_positive_covid_test_previous_30_days = c0_all & alive & registered & has_positive_covid_test & no_positive_covid_test_previous_30_days,
+    c4_high_risk_group_nhsd = c0_all & alive & registered & has_positive_covid_test & no_positive_covid_test_previous_30_days & high_risk_group_nhsd,
+    c5_no_covid_hospital_admission_last_30_days = c0_all & alive & registered & has_positive_covid_test & no_positive_covid_test_previous_30_days & 
+      high_risk_group_nhsd & no_covid_hospital_admission_last_30_days,
+    c6_aged_over_12 = c0_all & alive & registered & has_positive_covid_test & no_positive_covid_test_previous_30_days & 
+      high_risk_group_nhsd & no_covid_hospital_admission_last_30_days & aged_over_12,
+    c7_treated_within_5_days = c0_all & alive & registered & has_positive_covid_test & no_positive_covid_test_previous_30_days & 
+      high_risk_group_nhsd & no_covid_hospital_admission_last_30_days & aged_over_12 & treated_within_5_days,
+    c8_not_duplicated_entries = c0_all & alive & registered & has_positive_covid_test & no_positive_covid_test_previous_30_days & 
+      high_risk_group_nhsd & no_covid_hospital_admission_last_30_days & aged_over_12 & 
+      treated_within_5_days & not_duplicated_entries,
+    c9_high_risk_group = c0_all & alive & registered & has_positive_covid_test & no_positive_covid_test_previous_30_days & 
       high_risk_group & no_covid_hospital_admission_last_30_days & aged_over_12 & 
-      treated_within_5_days & not_duplicated_entries
-  ) %>%
+      treated_within_5_days & not_duplicated_entries & high_risk_group
+  )  %>%
   summarise(
     across(.fns=sum, na.rm = T)
   ) %>%
