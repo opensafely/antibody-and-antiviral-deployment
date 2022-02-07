@@ -64,6 +64,7 @@ actions:
         table1: output/reports/coverage/tables/report_stats.csv
         table2: output/reports/coverage/tables/table_elig_treat_redacted.csv
         table3: output/reports/coverage/tables/table_demo_clinc_breakdown_redacted.csv
+        table4: output/reports/coverage/tables/high_risk_cohort_comparison.csv
         figure1: output/reports/coverage/figures/cum_treatment_plot.png
         figure2: output/reports/coverage/figures/cum_eligiblity_plot.png
 

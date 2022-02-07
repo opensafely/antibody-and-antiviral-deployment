@@ -8,6 +8,7 @@
 # Output: /output/reports/coverage/tables/report_stats.csv
 #         /output/reports/coverage/tables/table_elig_treat_redacted.csv
 #         /output/reports/coverage/tables/table_demo_clinc_breakdown_redacted.csv
+#         /output/reports/coverage/tables/high_risk_cohort_comparison.csv
 #         /output/reports/coverage/figures/cum_treatment_plot.png
 #         /output/reports/coverage/figures/cum_eligiblity_plot.png
 #
@@ -484,7 +485,15 @@ table_demo_clinc_breakdown_redacted <- left_join(table_demo_clinc_breakdown_base
 write_csv(left_join(table_demo_clinc_breakdown_base, table_demo_clinc_breakdown, by = "Variable"), here::here("output", "reports", "coverage", "tables", "table_demo_clinc_breakdown.csv"))
 write_csv(table_demo_clinc_breakdown_redacted, here::here("output", "reports", "coverage", "tables", "table_demo_clinc_breakdown_redacted.csv"))
 
-## High risk patient cohorting
+## High risk patient cohorts
+high_risk_cohort_comparison <- data_processed_clean %>%
+  select(high_risk_group_nhsd, high_risk_cohort_covid_therapeutics) %>%
+  group_by(high_risk_group_nhsd, high_risk_cohort_covid_therapeutics) %>%
+  tally()
+
+write_csv(high_risk_cohort_comparison, here::here("output", "reports", "coverage", "tables", "high_risk_cohort_comparison.csv"))
+
+
 
 
 
