@@ -42,6 +42,12 @@ threshold = 8
 
 # Format data ----
 
+## Same end data
+# end <- min(data_processed$elig_start, data_processed$treatment_date)
+# data_processed_censored <- data_processed %>%
+#   filter(elig_start <= end,
+#          treatment_date <= end)
+
 ## Apply eligibility and exclusion criteria
 data_processed_eligible <- data_processed %>%
    filter(
@@ -87,7 +93,7 @@ dup_ids <- data_processed_combined %>%
   arrange(patient_id) 
 
 data_processed_clean <- data_processed_combined %>%
-  mutate(!(patient_id %in% dup_ids$patient_id))
+  filter(!(patient_id %in% dup_ids$patient_id))
 
 ## Formatting variables
 data_processed_clean <- data_processed_clean %>%
@@ -478,7 +484,7 @@ table_demo_clinc_breakdown_redacted <- left_join(table_demo_clinc_breakdown_base
 write_csv(left_join(table_demo_clinc_breakdown_base, table_demo_clinc_breakdown, by = "Variable"), here::here("output", "reports", "coverage", "tables", "table_demo_clinc_breakdown.csv"))
 write_csv(table_demo_clinc_breakdown_redacted, here::here("output", "reports", "coverage", "tables", "table_demo_clinc_breakdown_redacted.csv"))
 
-
+## High risk patient cohorting
 
 
 
