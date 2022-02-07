@@ -569,17 +569,19 @@ write_csv(high_risk_cohort_comparison, here::here("output", "reports", "coverage
 
 ## Time to treatment
 all <- data_processed_clean %>%
-  group_by(tb_postest_treat) %>%
+  group_by(tb_postest_treat, treatment_type) %>%
   tally() %>%
   mutate(high_risk_group_nhsd = "All",
-         n = ifelse(n < 5, NA, n),
-         n = plyr::round_any(n, 5))
+         n = ifelse(n < 5, 0, n),
+         n = plyr::round_any(n, 5),
+         n = ifelse(n == 0, NA, n))
 
 groups <- data_processed_clean %>%
-  group_by(high_risk_group_nhsd, tb_postest_treat) %>%
+  group_by(high_risk_group_nhsd, tb_postest_treat, treatment_type = "Any") %>%
   tally() %>%
-  mutate(n = ifelse(n < 5, NA, n),
-         n = plyr::round_any(n, 5))
+  mutate(n = ifelse(n < 5, 0, n),
+         n = plyr::round_any(n, 5),
+         n = ifelse(n == 0, NA, n))
 
 write_csv(rbind(all, groups), here("output", "reports", "coverage", "tables", "data_time_between_redacted.csv"))
 
