@@ -158,24 +158,6 @@ data_processed_clean <- data_processed_clean %>%
 
 
 # Numbers for text ----
-print(dim(data_processed_combined))
-length(unique(data_processed_combined$patient_id))
-print(dim(data_processed_combined %>% filter(!is.na(treatment_date))))
-print(data_processed_combined %>% filter(!is.na(treatment_date)) %>% group_by(eligibility_status) %>% summarise(count = n()))
-print(table(data_processed_combined$eligibility_status))
-
-duplicates <- data_processed_combined %>%
-  group_by(patient_id) %>%
-  summarise(count = n()) %>%
-  filter(count>1)
-
-duplicated_data <- data_processed_combined %>%
-  filter(patient_id %in% duplicates$patient_id) %>%
-  arrange(patient_id)
-
-print(dim(duplicated_data))
-print(length(unique(duplicated_data$patient_id)))
-
 study_start <- format(as.Date(min(data_processed_clean$elig_start),format="%Y-%m-%d"), format = "%d-%b-%Y")
 study_end <- format(as.Date(max(data_processed_clean$elig_start),format="%Y-%m-%d"), format = "%d-%b-%Y")
 eligible_patients <- format(plyr::round_any(data_processed_clean %>% nrow(), 10), big.mark = ",", scientific = FALSE)
@@ -217,7 +199,7 @@ text <- data.frame(study_start, study_end, eligible_patients, eligible_treated_p
                    eligible_molnupiravir, eligible_casirivimab, noneligible_treated_patients, noneligible_treated_patients, 
                    noneligible_sotrovimab, noneligible_molnupiravir, noneligible_casirivimab)
 
-write_csv(duplicated_data, here::here("output", "reports", "coverage", "tables", "report_stats.csv"))
+write_csv(text, here::here("output", "reports", "coverage", "tables", "report_stats.csv"))
 
 
 # Plots ----
