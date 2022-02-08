@@ -325,7 +325,7 @@ write_csv(treatment_plot_data_therapeutics, here::here("output", "reports", "cov
 # Delivery ----
 
 ## Treatment table
-eligibility_table <- high_risk_group_combined %>%
+eligibility_table <- data_processed_clean %>%
   select(high_risk_group_eligible) %>%
   tbl_summary()
 
@@ -339,7 +339,7 @@ eligibility_table <- eligibility_table$table_body %>%
   data.frame()
 
 treatment_table <- data_processed_clean %>%
-  select(high_risk_group_combined, treatment_type) %>%
+  select(high_risk_group_eligible, treatment_type) %>%
   tbl_summary(by = treatment_type) %>%
   add_overall()
 
