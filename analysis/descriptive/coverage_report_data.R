@@ -539,8 +539,7 @@ high_risk_cohort_comparison_redacted <- data_processed_clean %>%
   group_by(high_risk_group_nhsd, high_risk_cohort_covid_therapeutics) %>%
   tally()  %>%
   mutate(n = ifelse(n < 5, 0, n),
-         n = plyr::round_any(n, 5),
-         n = ifelse(n == 0, "<5", n))
+         n = plyr::round_any(n, 5))
 
 write_csv(high_risk_cohort_comparison, here::here("output", "reports", "coverage", "tables", "table_high_risk_cohort_comparison_a.csv"))
 write_csv(high_risk_cohort_comparison_redacted, here::here("output", "reports", "coverage", "tables", "table_high_risk_cohort_comparison_a_redacted.csv"))
@@ -557,8 +556,7 @@ high_risk_cohort_comparison_redacted <- data_processed_clean %>%
   group_by(high_risk_group_nhsd, high_risk_cohort_covid_therapeutics) %>%
   tally()  %>%
   mutate(n = ifelse(n < 5, 0, n),
-         n = plyr::round_any(n, 5),
-         n = ifelse(n == 0, "<5", n))
+         n = plyr::round_any(n, 5))
 
 write_csv(high_risk_cohort_comparison, here::here("output", "reports", "coverage", "tables", "table_high_risk_cohort_comparison_b.csv"))
 write_csv(high_risk_cohort_comparison_redacted, here::here("output", "reports", "coverage", "tables", "table_high_risk_cohort_comparison_b_redacted.csv"))
