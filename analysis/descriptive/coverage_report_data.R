@@ -320,7 +320,8 @@ plot_order <- rbind(plot_data_treatment, plot_data_treatment_groups) %>%
 treatment_plot_data_therapeutics <- rbind(plot_data_treatment, plot_data_treatment_groups) %>%
   mutate(high_risk_group_combined = factor(high_risk_group_combined, levels = plot_order$high_risk_group_combined)) 
 
-write_csv(treatment_plot_data_therapeutics, here::here("output", "reports", "coverage", "tables", "cum_treatment_therapeutics_plot.csv"))
+write_csv(treatment_plot_data_therapeutics, here::here("output", "reports", "coverage", "tables", "table_cum_treatment.csv"))
+write_csv(treatment_plot_data_therapeutics %>% selec(treatment_date, cum_count_redacted, high_risk_group_combined), here::here("output", "reports", "coverage", "tables", "table_cum_treatment_redacted.csv"))
 
 
 # Delivery ----
