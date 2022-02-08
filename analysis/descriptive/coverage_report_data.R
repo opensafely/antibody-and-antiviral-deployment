@@ -50,14 +50,18 @@ threshold = 8
 
 ## High risk cohort matching
 data_processed_hrc_matched <- data_processed %>%
-  mutate(patterns = map_chr(strsplit(high_risk_cohort_covid_therapeutics, ","), paste,collapse="|"),
-       Match = str_detect(high_risk_group_nhsd_combined, patterns),
-       high_risk_group_nhsd = ifelse(Match == TRUE, high_risk_group_nhsd, NA),
-       high_risk_group_combined = ifelse((Match == TRUE & !is.na(high_risk_cohort_covid_therapeutics)) |
+  mutate(high_risk_cohort_covid_therapeutics = ifelse(high_risk_cohort_covid_therapeutics == "other", NA, high_risk_cohort_covid_therapeutics),
+         high_risk_cohort_covid_therapeutics = ifelse((high_risk_cohort_covid_therapeutics == "haematological diseases,stem cell transplant recipients") |
+                                                        (high_risk_cohort_covid_therapeutics == "stem cell transplant recipients,haematological diseases"), 
+                                                      "haematological diseases and stem cell transplant recipients", high_risk_cohort_covid_therapeutics),
+         patterns = map_chr(strsplit(high_risk_cohort_covid_therapeutics, ","), paste,collapse="|"),
+         Match = str_detect(high_risk_group_nhsd_combined, patterns),
+         high_risk_group_nhsd = ifelse(Match == TRUE, high_risk_group_nhsd, NA),
+         high_risk_group_combined = ifelse((Match == TRUE & !is.na(high_risk_cohort_covid_therapeutics)) |
                                            (Match == FALSE & !is.na(high_risk_cohort_covid_therapeutics)),
                                          high_risk_cohort_covid_therapeutics, high_risk_group_nhsd),
-       hrc_groups = str_count(high_risk_group_combined,",") + 1,
-       high_risk_group_combined = ifelse(hrc_groups > 1, "2+ groups", high_risk_group_combined)) %>% 
+         hrc_groups = str_count(high_risk_group_combined,",") + 1,
+         high_risk_group_combined = ifelse(hrc_groups > 1, "2+ groups", high_risk_group_combined)) %>% 
   select(-patterns)
 
 ## Apply eligibility and exclusion criteria
@@ -80,15 +84,16 @@ data_processed_eligible <- data_processed_hrc_matched %>%
     # Only eligible patients
     !is.na(elig_start),
   ) %>%
-  mutate(eligibility_status = "Eligible") 
+  mutate(eligibility_status = "Eligible",
+         high_risk_group_eligible = high_risk_group_combined) 
 
 ## Include treated patients not flagged as eligible
 data_processed_treated <- data_processed_hrc_matched %>%
   subset(!(patient_id %in% unique(data_processed_eligible$patient_id)),
          !is.na(treatment_date)) %>%
-  mutate(high_risk_group_combined = ifelse(is.na(high_risk_group_combined), "Not deemed eligible", high_risk_group_combined),
-         elig_start = as.Date(ifelse(is.na(elig_start), treatment_date, elig_start), origin = "1970-01-01")) %>%
-  mutate(eligibility_status = "Treated") 
+  mutate(elig_start = as.Date(ifelse(is.na(elig_start), treatment_date, elig_start), origin = "1970-01-01"),
+         eligibility_status = "Treated",
+         high_risk_group_eligible = "Not deemed eligible") 
 
 data_processed_combined <- rbind(data_processed_eligible, data_processed_treated)
 
@@ -173,8 +178,8 @@ data_processed_clean <- data_processed_clean %>%
 
 
 # Numbers for text ----
-study_start <- format(as.Date(min(data_processed_clean$elig_start),format="%Y-%m-%d"), format = "%d-%b-%Y")
-study_end <- format(as.Date(max(data_processed_clean$elig_start),format="%Y-%m-%d"), format = "%d-%b-%Y")
+study_start <- format(as.Date(min(data_processed_clean$elig_start, na.rm = T),format="%Y-%m-%d"), format = "%d-%b-%Y")
+study_end <- format(as.Date(max(data_processed_clean$elig_start, na.rm = T),format="%Y-%m-%d"), format = "%d-%b-%Y")
 eligible_patients <- format(plyr::round_any(data_processed_clean %>% nrow(), 10), big.mark = ",", scientific = FALSE)
 eligible_treated_patients <- paste(format(plyr::round_any(data_processed_clean %>% filter(!is.na(treatment_date), eligibility_status == "Eligible") %>% nrow(), 10), big.mark = ",", scientific = FALSE), 
                           " (",
@@ -210,9 +215,9 @@ noneligible_casirivimab <- paste(format(plyr::round_any(data_processed_clean %>%
                               "%)", sep = "")
 
 
-text <- data.frame(study_start, study_end, eligible_patients, eligible_treated_patients, eligible_sotrovimab, 
-                   eligible_molnupiravir, eligible_casirivimab, noneligible_treated_patients, noneligible_treated_patients, 
-                   noneligible_sotrovimab, noneligible_molnupiravir, noneligible_casirivimab)
+text <- data.frame(study_start, study_end, 
+                   eligible_patients, eligible_treated_patients, eligible_sotrovimab, eligible_molnupiravir, eligible_casirivimab, 
+                   noneligible_treated_patients, noneligible_sotrovimab, noneligible_molnupiravir, noneligible_casirivimab)
 
 write_csv(text, here::here("output", "reports", "coverage", "tables", "table_report_stats.csv"))
 
@@ -239,8 +244,9 @@ plot_data_coverage <- data_processed_clean %>%
 
 plot_data_coverage_groups <- data_processed_clean %>%
   mutate(patient_id = 1) %>%
-  filter(!is.na(elig_start)) %>%
-  group_by(elig_start, treatment_date, treatment_type, high_risk_group_combined) %>%
+  filter(!is.na(elig_start),
+         high_risk_group_eligible != "Not deemed eligible") %>%
+  group_by(elig_start, treatment_date, treatment_type, high_risk_group_eligible) %>%
   summarise(count = sum(patient_id, na.rm  = T)) %>%
   arrange(elig_start, treatment_date, treatment_type, high_risk_group_combined) %>%
   ungroup() %>%
@@ -320,7 +326,7 @@ write_csv(treatment_plot_data_therapeutics, here::here("output", "reports", "cov
 
 ## Treatment table
 eligibility_table <- data_processed_clean %>%
-  select(high_risk_group_combined) %>%
+  select(high_risk_group_eligible) %>%
   tbl_summary()
 
 eligibility_table$inputs$data <- NULL
@@ -333,7 +339,7 @@ eligibility_table <- eligibility_table$table_body %>%
   data.frame()
 
 treatment_table <- data_processed_clean %>%
-  select(high_risk_group_combined, treatment_type) %>%
+  select(high_risk_group_eligible, treatment_type) %>%
   tbl_summary(by = treatment_type) %>%
   add_overall()
 
@@ -501,7 +507,7 @@ data_flowchart <- non_elig_treated %>%
     names_to="criteria",
     values_to="n"
   )  %>%
-  mutate(n = ifelse(n < 5, NA, n),
+  mutate(n = ifelse(n < 5, 0, n),
          n = plyr::round_any(n, 5)) %>%
   mutate(
     n_exclude = lag(n) - n,
