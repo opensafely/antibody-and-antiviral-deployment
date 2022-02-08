@@ -75,21 +75,21 @@ data_processed_hrc_matched <- data_processed %>%
   mutate(
     # Combined elig and treated high risk cohorts
     high_risk_group_combined = ifelse(Match == TRUE,
-                                      paste(high_risk_group_nhsd_combined, high_risk_cohort_covid_therapeutics, sep = ","), NA),
+                                      paste(high_risk_group_nhsd_combined, high_risk_cohort_covid_therapeutics, sep = ","), ""),
     high_risk_group_combined = paste(unique(strsplit(high_risk_group_combined, ",|\\n")[[1]]), collapse = ","),
-    high_risk_group_combined_count = ifelse(!is.na(high_risk_group_combined), str_count(high_risk_group_combined,",") + 1, NA),
+    high_risk_group_combined_count = ifelse(high_risk_group_combined != "", str_count(high_risk_group_combined,",") + 1, NA),
     
     ## Eligible high risk cohorts
     high_risk_group_elig = ifelse((Match == FALSE & !is.na(high_risk_group_nhsd_combined)), 
                                   high_risk_group_nhsd_combined, high_risk_group_combined),
     high_risk_group_elig = paste(unique(strsplit(high_risk_group_elig, ",|\\n")[[1]]), collapse = ","),
-    high_risk_group_elig_count = ifelse(!is.na(high_risk_group_elig), str_count(high_risk_group_elig,",") + 1, NA),
+    high_risk_group_elig_count = ifelse(high_risk_group_elig != "", str_count(high_risk_group_elig,",") + 1, NA),
     
     ## Treated high risk cohorts
     high_risk_group_treated = ifelse((Match == FALSE & !is.na(high_risk_cohort_covid_therapeutics)), 
                                      high_risk_cohort_covid_therapeutics, high_risk_group_combined),
     high_risk_group_treated = paste(unique(strsplit(high_risk_group_treated, ",|\\n")[[1]]), collapse = ","),
-    high_risk_group_treated_count = ifelse(!is.na(high_risk_group_treated), str_count(high_risk_group_treated,",") + 1, NA)
+    high_risk_group_treated_count = ifelse(high_risk_group_treated != "", str_count(high_risk_group_treated,",") + 1, NA)
     ) %>%
   select(-ind_therapeutic_groups)
 
@@ -291,7 +291,7 @@ plot_data_coverage_groups <- data_processed_clean %>%
   filter(eligibility_status == "Eligible") %>%
   select(patient_id, elig_start, high_risk_group_elig) %>%
   separate(high_risk_group_elig, 
-           c(paste("Group_", 1:max(subset(data_processed_clean, eligibility_status == "Eligible")$high_risk_group_elig_count), sep = "")),
+           c(paste("Group_", 1:max(subset(data_processed_clean, eligibility_status == "Eligible")$high_risk_group_elig_count, na.rm = T), sep = "")),
            sep = ",") %>%
   reshape2::melt(id.var = c("patient_id", "elig_start")) %>%
   filter(!is.na(value)) %>%
@@ -343,7 +343,7 @@ plot_data_treatment_groups <- data_processed_clean %>%
          !is.na(treatment_date)) %>%
   select(patient_id, treatment_date, high_risk_group_treated) %>%
   separate(high_risk_group_treated, 
-           c(paste("Group_", 1:max(subset(data_processed_clean, eligibility_status == "Eligible")$high_risk_group_elig_count), sep = "")),
+           c(paste("Group_", 1:max(subset(data_processed_clean, eligibility_status == "Eligible")$high_risk_group_elig_count, na.rm = T), sep = "")),
            sep = ",") %>%
   reshape2::melt(id.var = c("patient_id", "treatment_date")) %>%
   filter(!is.na(value)) %>%
@@ -395,7 +395,7 @@ plot_data_treatment2_groups <- data_processed_clean %>%
          !is.na(treatment_date)) %>%
   select(patient_id, treatment_date, high_risk_group_treated) %>%
   separate(high_risk_group_treated, 
-           c(paste("Group_", 1:max(subset(data_processed_clean, eligibility_status == "Eligible")$high_risk_group_elig_count), sep = "")),
+           c(paste("Group_", 1:max(subset(data_processed_clean, eligibility_status == "Eligible")$high_risk_group_elig_count, na.rm = T), sep = "")),
            sep = ",") %>%
   reshape2::melt(id.var = c("patient_id", "treatment_date")) %>%
   filter(!is.na(value)) %>%
@@ -431,7 +431,7 @@ eligibility_table <- data_processed_clean %>%
   filter(eligibility_status == "Eligible") %>%
   select(patient_id, high_risk_group_elig) %>%
   separate(high_risk_group_elig, 
-           c(paste("Group_", 1:max(subset(data_processed_clean, !is.na(treatment_date))$high_risk_group_elig_count), sep = "")),
+           c(paste("Group_", 1:max(subset(data_processed_clean, !is.na(treatment_date))$high_risk_group_elig_count, na.rm = T), sep = "")),
            sep = ",") %>%
   reshape2::melt(id.var = c("patient_id")) %>%
   mutate(value = as.character(value)) %>%
@@ -693,8 +693,8 @@ data_flowchart <- non_elig_treated %>%
     names_to="criteria",
     values_to="n"
   )  %>%
-  mutate(n = ifelse(n < 5, 0, n),
-         n = plyr::round_any(n, 5)) %>%
+  mutate(n = ifelse(n < 5, NA, n),
+         n = plyr::round_any(as.numeric(n), 5)) %>%
   mutate(
     n_exclude = lag(n) - n,
     pct_exclude = n_exclude/lag(n),
@@ -726,8 +726,8 @@ data_flowchart2 <- non_elig_treated %>%
     names_to="criteria",
     values_to="n"
   )  %>%
-  mutate(n = ifelse(n < 5, 0, n),
-         n = plyr::round_any(n, 5))
+  mutate(n = ifelse(n < 5, NA, n),
+         n = plyr::round_any(as.numeric(n), 5))
 
 write_csv(data_flowchart2, here("output", "reports", "coverage", "tables", "table_non_elig_flowchart2_redacted.csv"))
 
@@ -740,7 +740,7 @@ high_risk_cohort_comparison_redacted <- data_processed_clean %>%
   tally() %>%
   arrange(desc(n)) %>%
   mutate(n = ifelse(n < 5, NA, n),
-         n = plyr::round_any(n, 5))
+         n = plyr::round_any(as.numeric(n), 5))
 
 write_csv(high_risk_cohort_comparison_redacted, here::here("output", "reports", "coverage", "tables", "table_non_elig_high_risk_cohort_comparison_redacted.csv"))
 
@@ -753,17 +753,15 @@ all <- data_processed_clean %>%
   group_by(tb_postest_treat, treatment_type) %>%
   tally() %>%
   mutate(high_risk_group_combined = "All",
-         n = ifelse(n < 5, 0, n),
-         n = plyr::round_any(n, 5),
-         n = ifelse(n == 0, NA, n))
+         n = ifelse(n < 5, NA, n),
+         n = plyr::round_any(as.numeric(n), 5))
 
 groups <- data_processed_clean %>%
   filter(eligibility_status == "Eligible") %>%
   group_by(high_risk_group_combined, tb_postest_treat, treatment_type = "Any") %>%
   tally() %>%
-  mutate(n = ifelse(n < 5, 0, n),
-         n = plyr::round_any(n, 5),
-         n = ifelse(n == 0, NA, n))
+  mutate(n = ifelse(n < 5, NA, n),
+         n = plyr::round_any(as.numeric(n), 5))
 
 write_csv(rbind(all, groups), here("output", "reports", "coverage", "tables", "table_time_to_treat_redacted.csv"))
 
