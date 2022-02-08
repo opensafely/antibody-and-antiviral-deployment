@@ -520,6 +520,32 @@ data_flowchart <- non_elig_treated %>%
 
 write_csv(data_flowchart, here("output", "reports", "coverage", "tables", "table_non_elig_flowchart_redacted.csv"))
 
+data_flowchart2 <- non_elig_treated %>%
+  transmute(
+    c0_all = TRUE,
+    c1_alive_and_registered = c0_all & alive & registered,
+    c2_has_positive_covid_test = c0_all & has_positive_covid_test,
+    c3_no_positive_covid_test_previous_30_days = c0_all & no_positive_covid_test_previous_30_days,
+    c4_high_risk_group_nhsd = c0_all & high_risk_group_nhsd,
+    c5_no_covid_hospital_admission_last_30_days = c0_all & no_covid_hospital_admission_last_30_days,
+    c6_aged_over_12 = c0_all & aged_over_12,
+    c7_treated_within_5_days = c0_all & treated_within_5_days,
+    c8_not_duplicated_entries = c0_all & not_duplicated_entries,
+    c9_high_risk_group = c0_all & high_risk_group
+  )  %>%
+  summarise(
+    across(.fns=sum, na.rm = T)
+  ) %>%
+  pivot_longer(
+    cols=everything(),
+    names_to="criteria",
+    values_to="n"
+  )  %>%
+  mutate(n = ifelse(n < 5, 0, n),
+         n = plyr::round_any(n, 5))
+
+write_csv(data_flowchart2, here("output", "reports", "coverage", "tables", "table_non_elig_flowchart2_redacted.csv"))
+
 
 # High risk patient cohorts ----
 high_risk_cohort_des <-  data_processed_clean %>%
