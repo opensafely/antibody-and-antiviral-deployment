@@ -172,7 +172,7 @@ data_processed <- data_extract %>%
     downs_syndrome_nhsd = ifelse(!is.na(downs_syndrome_nhsd), "Downs syndrome", NA),
     sickle_cell_disease_nhsd = ifelse(!is.na(sickle_cell_disease_nhsd), "sickle cell disease", NA),
     cancer_opensafely_snomed = ifelse(!is.na(cancer_opensafely_snomed), "solid cancer", NA),
-    haematological_disease_nhsd = ifelse(!is.na(haematological_disease_nhsd), "haematological diseases", NA),
+    haematological_disease_nhsd = ifelse(!is.na(haematological_disease_nhsd), "haematological diseases and stem cell transplant recipients", NA),
     ckd_stage_5_nhsd = ifelse(!is.na(ckd_stage_5_nhsd), "renal disease", NA),
     liver_disease_nhsd = ifelse(!is.na(liver_disease_nhsd), "liver disease", NA),
     imid_nhsd = ifelse(!is.na(imid_nhsd), "IMID", NA),

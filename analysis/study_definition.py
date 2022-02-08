@@ -46,7 +46,7 @@ study = StudyDefinition(
   default_expectations = {
     "date": {"earliest": "2021-11-01", "latest": "today"},
     "rate": "uniform",
-    "incidence": 0.4,
+    "incidence": 0.05,
   },
   
   ## Define index date
@@ -87,7 +87,7 @@ study = StudyDefinition(
     date_format = "YYYY-MM-DD",
     return_expectations = {
       "date": {"earliest": "2021-12-16"},
-      "incidence": 0.4
+      "incidence": 0.2
     },
   ),
   
@@ -102,7 +102,7 @@ study = StudyDefinition(
     date_format = "YYYY-MM-DD",
     return_expectations = {
       "date": {"earliest": "2021-12-16"},
-      "incidence": 0.4
+      "incidence": 0.2
     },
   ),
   
@@ -117,7 +117,7 @@ study = StudyDefinition(
     date_format = "YYYY-MM-DD",
     return_expectations = {
       "date": {"earliest": "2021-12-16"},
-      "incidence": 0.4
+      "incidence": 0.05
     },
   ), 
   
@@ -319,9 +319,9 @@ study = StudyDefinition(
           "solid cancer": 0.1,
           "haematological diseases,stem cell transplant recipients": 0.1,
           "renal disease,sickle cell disease": 0.1,
-          "liver disease": 0.1,
+          "liver disease": 0.05,
           "IMID": 0.1,
-          "IMID,solid cancer": 0.05,
+          "IMID,solid cancer": 0.1,
           "haematological malignancies": 0.05,
           "primary immune deficiencies": 0.1,
           "HIV or AIDS": 0.1,},},
@@ -472,7 +472,7 @@ study = StudyDefinition(
   liver_disease_nhsd = patients.minimum_of("liver_disease_nhsd_snomed", "liver_disease_nhsd_icd10"), 
   
   ## Immune-mediated inflammatory disorders (IMID)
-  imid_nhsd = patients.with_these_clinical_events(
+  imid_nhsd = patients.with_these_medications(
     codelist = combine_codelists(immunosuppresant_drugs_dmd_codes, immunosuppresant_drugs_snomed_codes, 
                                  oral_steroid_drugs_dmd_codes, 
                                  oral_steroid_drugs_snomed_codes),
