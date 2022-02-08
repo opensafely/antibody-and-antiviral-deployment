@@ -240,7 +240,7 @@ plot_data_coverage <- data_processed_clean %>%
   mutate(count = ifelse(is.na(count), 0, count),
          cum_count = cumsum(count),
          cum_count_redacted =  plyr::round_any(cum_count, 10)) %>%
-  mutate(high_risk_group_combined = "All")
+  mutate(high_risk_group_eligible = "All")
 
 plot_data_coverage_groups <- data_processed_clean %>%
   mutate(patient_id = 1) %>%
@@ -248,28 +248,28 @@ plot_data_coverage_groups <- data_processed_clean %>%
          high_risk_group_eligible != "Not deemed eligible") %>%
   group_by(elig_start, treatment_date, treatment_type, high_risk_group_eligible) %>%
   summarise(count = sum(patient_id, na.rm  = T)) %>%
-  arrange(elig_start, treatment_date, treatment_type, high_risk_group_combined) %>%
+  arrange(elig_start, treatment_date, treatment_type, high_risk_group_eligible) %>%
   ungroup() %>%
-  arrange(high_risk_group_combined, elig_start) %>%
-  group_by(high_risk_group_combined) %>%
+  arrange(high_risk_group_eligible, elig_start) %>%
+  group_by(high_risk_group_eligible) %>%
   complete(elig_start = seq.Date(min(elig_start, na.rm = T), max(elig_start, na.rm = T), by="day")) %>%
-  group_by(high_risk_group_combined, elig_start) %>%
+  group_by(high_risk_group_eligible, elig_start) %>%
   summarise(count = sum(count, na.rm = T)) %>%
-  group_by(high_risk_group_combined) %>%
+  group_by(high_risk_group_eligible) %>%
   mutate(count = ifelse(is.na(count), 0, count),
          cum_count = cumsum(count),
          cum_count_redacted =  plyr::round_any(cum_count, 10))
 
 plot_order <- rbind(plot_data_coverage, plot_data_coverage_groups) %>%
-  group_by(high_risk_group_combined) %>%
+  group_by(high_risk_group_eligible) %>%
   mutate(order = max(cum_count_redacted, na.rm = T)) %>%
   arrange(desc(order)) %>%
   filter(cum_count_redacted == order) %>%
-  select(high_risk_group_combined, order) %>%
+  select(high_risk_group_eligible, order) %>%
   distinct()
 
 coverage_plot_data <- rbind(plot_data_coverage, plot_data_coverage_groups) %>%
-  mutate(high_risk_group_combined = factor(high_risk_group_combined, levels = plot_order$high_risk_group_combined))
+  mutate(high_risk_group_eligible = factor(high_risk_group_eligible, levels = plot_order$high_risk_group_eligible))
 
 write_csv(coverage_plot_data, here::here("output", "reports", "coverage", "tables", "table_cum_eligiblity.csv"))
 
@@ -325,7 +325,7 @@ write_csv(treatment_plot_data_therapeutics, here::here("output", "reports", "cov
 # Delivery ----
 
 ## Treatment table
-eligibility_table <- data_processed_clean %>%
+eligibility_table <- high_risk_group_combined %>%
   select(high_risk_group_eligible) %>%
   tbl_summary()
 
@@ -339,7 +339,7 @@ eligibility_table <- eligibility_table$table_body %>%
   data.frame()
 
 treatment_table <- data_processed_clean %>%
-  select(high_risk_group_eligible, treatment_type) %>%
+  select(high_risk_group_combined, treatment_type) %>%
   tbl_summary(by = treatment_type) %>%
   add_overall()
 
