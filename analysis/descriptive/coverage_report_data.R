@@ -272,6 +272,7 @@ coverage_plot_data <- rbind(plot_data_coverage, plot_data_coverage_groups) %>%
   mutate(high_risk_group_eligible = factor(high_risk_group_eligible, levels = plot_order$high_risk_group_eligible))
 
 write_csv(coverage_plot_data, here::here("output", "reports", "coverage", "tables", "table_cum_eligiblity.csv"))
+write_csv(coverage_plot_data %>% select(elig_start, cum_count_redacted, high_risk_group_eligible), here::here("output", "reports", "coverage", "tables", "table_cum_eligiblity_redacted.csv"))
 
 ## Treatment (therapeutics high risk cohorts)
 plot_data_treatment <- data_processed_clean %>%
