@@ -39,7 +39,7 @@ fs::dir_create(here::here("output", "reports", "coverage", "tables"))
 data_processed <- read_rds(here::here("output", "data", "data_processed.rds"))
 
 ## Redaction threshold
-threshold = 8
+threshold = 5
 
 # Format data ----
 
@@ -237,10 +237,32 @@ high_risk_cohort_2plus <- plyr::round_any(sum(subset(hrc_groups, high_risk_group
 high_risk_cohort_lower <- min(hrc_groups$high_risk_group_combined_count)
 high_risk_cohort_upper <- max(hrc_groups$high_risk_group_combined_count)
 
+died_dereg <- data_processed_hrc_matched %>%
+  filter(!(patient_id %in% unique(data_processed_eligible$patient_id)),
+         !is.na(treatment_date),
+         has_died == 1 | registered_eligible == 0 | registered_treated == 0) %>%
+  nrow() %>%
+  plyr::round_any(.,10)
+
+died <- data_processed_hrc_matched %>%
+  filter(!(patient_id %in% unique(data_processed_eligible$patient_id)),
+         !is.na(treatment_date),
+         has_died == 1) %>%
+  nrow()  %>%
+  plyr::round_any(.,10)
+
+dereg <- data_processed_hrc_matched %>%
+  filter(!(patient_id %in% unique(data_processed_eligible$patient_id)),
+         !is.na(treatment_date),
+         registered_eligible == 0 | registered_treated == 0) %>%
+  nrow()  %>%
+  plyr::round_any(.,10)
+
 text <- data.frame(study_start, study_end, 
                    eligible_patients, eligible_treated_patients, eligible_sotrovimab, eligible_molnupiravir, eligible_casirivimab, 
                    noneligible_treated_patients, noneligible_sotrovimab, noneligible_molnupiravir, noneligible_casirivimab,
-                   high_risk_cohort_2plus, high_risk_cohort_lower, high_risk_cohort_upper)
+                   high_risk_cohort_2plus, high_risk_cohort_lower, high_risk_cohort_upper,
+                   died_dereg, died, dereg)
 
 write_csv(text, here::here("output", "reports", "coverage", "tables", "table_report_stats_redacted.csv"))
 
@@ -643,6 +665,7 @@ non_elig_treated <-  data_processed_clean %>%
   )
 
 data_flowchart <- non_elig_treated %>%
+  ungroup() %>%
   transmute(
     c0_all = TRUE,
     c1_alive_and_registered = c0_all & alive & registered,
@@ -682,6 +705,7 @@ data_flowchart <- non_elig_treated %>%
 write_csv(data_flowchart, here("output", "reports", "coverage", "tables", "table_non_elig_flowchart_redacted.csv"))
 
 data_flowchart2 <- non_elig_treated %>%
+  ungroup() %>%
   transmute(
     c0_all = TRUE,
     c1_alive_and_registered = c0_all & alive & registered,
@@ -707,51 +731,25 @@ data_flowchart2 <- non_elig_treated %>%
 
 write_csv(data_flowchart2, here("output", "reports", "coverage", "tables", "table_non_elig_flowchart2_redacted.csv"))
 
+high_risk_cohort_comparison_redacted <- data_processed_clean %>%
+  filter(!is.na(treatment_date),
+         eligibility_status == "Treated") %>%
+  filter(Match == FALSE) %>%
+  select(high_risk_group_nhsd_combined, high_risk_cohort_covid_therapeutics) %>%
+  group_by(high_risk_group_nhsd_combined, high_risk_cohort_covid_therapeutics) %>%
+  tally() %>%
+  arrange(desc(n)) %>%
+  mutate(n = ifelse(n < 5, NA, n),
+         n = plyr::round_any(n, 5))
+
+write_csv(high_risk_cohort_comparison_redacted, here::here("output", "reports", "coverage", "tables", "table_non_elig_high_risk_cohort_comparison_redacted.csv"))
+
 
 # High risk patient cohorts ----
-high_risk_cohort_des <-  data_processed_clean %>%
-  mutate(hrc_therapeutics = str_count(high_risk_cohort_covid_therapeutics,",") + 1,
-         hrc_nhsd = str_count(high_risk_group_nhsd_combined,",") + 1)
-
-print(table((high_risk_cohort_des %>% filter(!is.na(high_risk_group_nhsd)))$hrc_therapeutics))
-print(table(high_risk_cohort_des$hrc_nhsd))
-
-high_risk_cohort_comparison <- data_processed_clean %>%
-  filter(Match == TRUE) %>%
-  select(high_risk_group_nhsd, high_risk_cohort_covid_therapeutics) %>%
-  group_by(high_risk_group_nhsd, high_risk_cohort_covid_therapeutics) %>%
-  tally()
-
-high_risk_cohort_comparison_redacted <- data_processed_clean %>%
-  filter(Match == TRUE) %>%
-  select(high_risk_group_nhsd, high_risk_cohort_covid_therapeutics) %>%
-  group_by(high_risk_group_nhsd, high_risk_cohort_covid_therapeutics) %>%
-  tally()  %>%
-  mutate(n = ifelse(n < 5, 0, n),
-         n = plyr::round_any(n, 5))
-
-write_csv(high_risk_cohort_comparison, here::here("output", "reports", "coverage", "tables", "table_high_risk_cohort_comparison_a.csv"))
-write_csv(high_risk_cohort_comparison_redacted, here::here("output", "reports", "coverage", "tables", "table_high_risk_cohort_comparison_a_redacted.csv"))
-
-high_risk_cohort_comparison <- data_processed_clean %>%
-  filter(Match == FALSE) %>%
-  select(high_risk_group_nhsd, high_risk_cohort_covid_therapeutics) %>%
-  group_by(high_risk_group_nhsd, high_risk_cohort_covid_therapeutics) %>%
-  tally()
-
-high_risk_cohort_comparison_redacted <- data_processed_clean %>%
-  filter(Match == FALSE) %>%
-  select(high_risk_group_nhsd, high_risk_cohort_covid_therapeutics) %>%
-  group_by(high_risk_group_nhsd, high_risk_cohort_covid_therapeutics) %>%
-  tally()  %>%
-  mutate(n = ifelse(n < 5, 0, n),
-         n = plyr::round_any(n, 5))
-
-write_csv(high_risk_cohort_comparison, here::here("output", "reports", "coverage", "tables", "table_high_risk_cohort_comparison_b.csv"))
-write_csv(high_risk_cohort_comparison_redacted, here::here("output", "reports", "coverage", "tables", "table_high_risk_cohort_comparison_b_redacted.csv"))
 
 # Time to treatment ----
 all <- data_processed_clean %>%
+  filter(eligibility_status == "Eligible") %>%
   group_by(tb_postest_treat, treatment_type) %>%
   tally() %>%
   mutate(high_risk_group_combined = "All",
@@ -760,6 +758,7 @@ all <- data_processed_clean %>%
          n = ifelse(n == 0, NA, n))
 
 groups <- data_processed_clean %>%
+  filter(eligibility_status == "Eligible") %>%
   group_by(high_risk_group_combined, tb_postest_treat, treatment_type = "Any") %>%
   tally() %>%
   mutate(n = ifelse(n < 5, 0, n),
