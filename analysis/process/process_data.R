@@ -251,11 +251,7 @@ data_processed <- data_extract %>%
     covid_hospitalisation_critical_care = ifelse(covid_hospitalisation_critical_care > 0 & covid_hospital_admission == 1, 1, 0),
     
     covid_death = ifelse(!is.na(death_with_covid_on_the_death_certificate_date) |
-                           death_with_28_days_of_covid_positive_test == 1, 1, 0),
-    
-    
-    # OTHER COVARIATES ----
-    vaccination_status = col_character()
+                           death_with_28_days_of_covid_positive_test == 1, 1, 0)
     
   ) %>%
   droplevels() %>%
