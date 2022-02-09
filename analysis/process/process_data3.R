@@ -41,12 +41,7 @@ print(table(is.na(data_processed$high_risk_group_nhsd)))
 
 ## Define high risk cohorts
 data_processed_hrc_matched <- data_processed %>%
-  mutate(high_risk_cohort_covid_therapeutics = ifelse(is.na(treatment_date), NA, high_risk_cohort_covid_therapeutics)) 
-
-print(unique(data_processed_hrc_matched$high_risk_cohort_covid_therapeutics))
-print(table(is.na(data_processed_hrc_matched$high_risk_cohort_covid_therapeutics)))
-
-data_processed_hrc_matched <- data_processed_hrc_matched %>%
+  mutate(high_risk_cohort_covid_therapeutics = ifelse(is.na(treatment_date), NA, high_risk_cohort_covid_therapeutics)) %>%
   filter(!is.na(high_risk_group_nhsd_date) | !is.na(high_risk_cohort_covid_therapeutics)) %>%
   mutate(
     # Sort naming conventions
@@ -61,14 +56,19 @@ data_processed_hrc_matched <- data_processed_hrc_matched %>%
                                                       "haematological diseases and stem cell transplant recipients"),
     high_risk_cohort_covid_therapeutics = str_replace(high_risk_cohort_covid_therapeutics,
                                                       "haematological malignancies",
-                                                      "haematological diseases and stem cell transplant recipients"))
+                                                      "haematological diseases and stem cell transplant recipients"),
+    
+    # Find matches between elig and treated high risk cohorts
+    ind_therapeutic_groups = map_chr(strsplit(high_risk_cohort_covid_therapeutics, ","), paste,collapse="|"),
+    Match = str_detect(high_risk_group_nhsd_combined, ind_therapeutic_groups)
+    ) 
 
 print(dim(data_processed_hrc_matched))
+print(table(data_processed_hrc_matched$Match))
 
-#     # Find matches between elig and treated high risk cohorts
-#     ind_therapeutic_groups = map_chr(strsplit(high_risk_cohort_covid_therapeutics, ","), paste,collapse="|"),
-#     Match = str_detect(high_risk_group_nhsd_combined, ind_therapeutic_groups)
-#     ) %>%
+
+
+#%>%
 #   rowwise() %>%
 #   mutate(
 #     # Combined elig and treated high risk cohorts
