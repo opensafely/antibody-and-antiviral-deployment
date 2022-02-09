@@ -129,7 +129,16 @@ data_processed_treated <- data_processed_hrc_matched %>%
 print(dim(data_processed_treated))
 print(table(data_processed_treated$Match))
 
-# data_processed_combined <- rbind(data_processed_eligible, data_processed_treated)
+rm(data_processed_hrc_matched)
+
+data_processed_combined <- rbind(data_processed_eligible, data_processed_treated)
+
+rm(data_processed_eligible)
+rm(data_processed_treated)
+
+print(dim(data_processed_combined))
+print(table(data_processed_combined$eligibility_status))
+
 # 
 # ## Exclude patients issued more than one treatment within two weeks
 # dup_ids <- data_processed_combined %>%
@@ -152,7 +161,7 @@ print(table(data_processed_treated$Match))
 
 
 # Save dataset(s) ----
-write_rds(data_processed_hrc_matched, here::here("output", "data", "data_processed_clean_test.rds"), compress = "gz")
+write_rds(data_processed_combined, here::here("output", "data", "data_processed_clean_test.rds"), compress = "gz")
 #write_rds(data_processed_clean, here::here("output", "data", "data_processed_clean_test.rds"), compress = "gz")
 
 
