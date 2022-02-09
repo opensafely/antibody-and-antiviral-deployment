@@ -572,13 +572,21 @@ all <- data_processed_clean %>%
   filter(eligibility_status == "Eligible") %>%
   group_by(tb_postest_treat, treatment_type) %>%
   tally() %>%
-  mutate(high_risk_group_combined = "All",
+  mutate(high_risk_group_elig = "All",
          n = ifelse(n < 5, NA, n),
          n = plyr::round_any(as.numeric(n), 5))
 
 groups <- data_processed_clean %>%
   filter(eligibility_status == "Eligible") %>%
-  group_by(high_risk_group_combined, tb_postest_treat, treatment_type = "Any") %>%
+  select(patient_id, high_risk_group_elig, tb_postest_treat) %>%
+  separate(high_risk_group_elig, 
+           c(paste("Group_", 1:max(subset(data_processed_clean, !is.na(treatment_date))$high_risk_group_elig_count, na.rm = T), sep = "")),
+           sep = ",") %>%
+  reshape2::melt(id.var = c("patient_id", "tb_postest_treat")) %>%
+  mutate(value = as.character(value)) %>%
+  filter(!is.na(value),
+         value != "") %>%
+  group_by(high_risk_group_elig = value, tb_postest_treat) %>%
   tally() %>%
   mutate(n = ifelse(n < 5, NA, n),
          n = plyr::round_any(as.numeric(n), 5))
