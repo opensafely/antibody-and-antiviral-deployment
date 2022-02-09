@@ -41,8 +41,13 @@ print(table(is.na(data_processed$high_risk_group_nhsd)))
 
 ## Define high risk cohorts
 data_processed_hrc_matched <- data_processed %>%
-  mutate(high_risk_cohort_covid_therapeutics = ifelse(high_risk_cohort_covid_therapeutics == "other", NA, high_risk_cohort_covid_therapeutics)) %>%
-  filter(!is.na(high_risk_group_nhsd_date) | high_risk_cohort_covid_therapeutics == "NA" | is.na(high_risk_cohort_covid_therapeutics)) %>%
+  mutate(high_risk_cohort_covid_therapeutics = ifelse(is.na(treatment_date), NA, high_risk_cohort_covid_therapeutics)) 
+
+print(unique(data_processed_hrc_matched$high_risk_cohort_covid_therapeutics))
+print(table(is.na(data_processed_hrc_matched$high_risk_cohort_covid_therapeutics)))
+
+data_processed_hrc_matched <- data_processed_hrc_matched %>%
+  filter(!is.na(high_risk_group_nhsd_date) | !is.na(high_risk_cohort_covid_therapeutics)) %>%
   mutate(
     # Sort naming conventions
     high_risk_cohort_covid_therapeutics = str_replace(high_risk_cohort_covid_therapeutics,
