@@ -273,7 +273,7 @@ study = StudyDefinition(
   has_died = patients.died_from_any_cause(
     on_or_before = "index_date - 1 day",
     returning = "binary_flag",
-    ),
+  ),
   
   ## De-registration
   dereg_date = patients.date_deregistered_from_all_supported_practices(
@@ -851,13 +851,127 @@ study = StudyDefinition(
   
   
   
+  # OTHER COVARIATES ----
+  
+  ## Vaccination status
+  vaccination_status = patients.categorised_as(
+    {
+      "Un-vaccinated": "DEFAULT",
+      "One vaccination": """ covid_vax_1 AND NOT covid_vax_2 """,
+      "Two vaccinations": """ covid_vax_2 AND NOT covid_vax_3 """,
+      "Three or more vaccinations": """ covid_vax_3 """,
+    },
+    
+    covid_vax_1 = patients.with_tpp_vaccination_record(
+      target_disease_matches = "SARS-2 CORONAVIRUS",
+      between = ["2020-12-08", end_date],
+      find_first_match_in_period = True,
+      returning = "date",
+      date_format = "YYYY-MM-DD"
+    ),
+    
+    covid_vax_2 = patients.with_tpp_vaccination_record(
+      target_disease_matches = "SARS-2 CORONAVIRUS",
+      between = ["covid_vax_1 + 19 days", end_date],
+      find_first_match_in_period = True,
+      returning = "date",
+      date_format = "YYYY-MM-DD"
+    ),
+    
+    covid_vax_3 = patients.with_tpp_vaccination_record(
+      target_disease_matches = "SARS-2 CORONAVIRUS",
+      between = ["covid_vax_2 + 56 days", end_date],
+      find_first_match_in_period = True,
+      returning = "date",
+      date_format = "YYYY-MM-DD"
+    ),
+    
+    return_expectations = {
+      "rate": "universal",
+      "category": {
+        "ratios": {
+          "Un-vaccinated": 0.1,
+          "One vaccination": 0.1,
+          "Two vaccinations": 0.2,
+          "Three or more vaccinations": 0.6,
+        }
+      },
+    },
+  ),
   
   
   
   
+  # OUTCOMES ----
+  
+  ## COVID re-infection
+  covid_positive_test_30_days_post_elig_or_treat = patients.with_test_result_in_sgss(
+    pathogen = "SARS-CoV-2",
+    test_result = "positive",
+    returning = "date",
+    date_format = "YYYY-MM-DD",
+    on_or_after = "start_date + 30 days",
+    find_first_match_in_period = True,
+    restrict_to_earliest_specimen_date = False,
+    return_expectations = {
+      "date": {"earliest": "2021-12-01"},
+      "rate": "exponential_increase",
+      "incidence": 0.4
+    },
+  ),
+  
+  ## Critical care days for COVID-related hospitalisation 
+  covid_hospitalisation_critical_care = patients.admitted_to_hospital(
+    returning = "days_in_critical_care",
+    with_these_diagnoses = covid_icd10_codes,
+    on_or_after = "start_date + 30 days",
+    find_first_match_in_period = True,
+    return_expectations = {
+      "category": {"ratios": {"20": 0.5, "40": 0.5}},
+      "incidence": 0.2,
+    },
+  ),
+  
+  ## COVID related death
+  death_with_covid_on_the_death_certificate_date = patients.with_these_codes_on_death_certificate(
+    covid_icd10_codes,
+    returning = "date_of_death",
+    date_format = "YYYY-MM-DD",
+    on_or_after = "start_date + 30 days",
+    return_expectations = {
+      "date": {"earliest": "2021-01-01", "latest" : end_date},
+      "rate": "uniform",
+      "incidence": 0.3},
+  ),
   
   
-  
+  death_with_28_days_of_covid_positive_test = patients.satisfying(
+    
+    """
+    death_date
+    AND 
+    positive_covid_test_prior_28_days
+    """, 
+    
+    return_expectations = {
+      "incidence": 0.2,
+    },
+    
+    positive_covid_test_prior_28_days = patients.with_test_result_in_sgss(
+      pathogen = "SARS-CoV-2",
+      test_result = "positive",
+      returning = "binary_flag",
+      date_format = "YYYY-MM-DD",
+      between = ["death_date - 28 days", "death_date"],
+      find_first_match_in_period = True,
+      restrict_to_earliest_specimen_date = False,
+      return_expectations = {
+        "date": {"earliest": "2020-02-01"},
+        "rate": "exponential_increase",
+        "incidence": 0.1
+      },
+    ),
+  ),
   
   
   
