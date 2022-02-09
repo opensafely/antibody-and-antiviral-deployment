@@ -39,26 +39,24 @@ print(dim(data_processed))
 ## Define high risk cohorts
 data_processed_hrc_matched <- data_processed %>%
   mutate(high_risk_cohort_covid_therapeutics = ifelse(high_risk_cohort_covid_therapeutics == "other", NA, high_risk_cohort_covid_therapeutics)) %>%
-  filter(!is.na(high_risk_group_nhsd_date) | high_risk_cohort_covid_therapeutics == "NA" | is.na(high_risk_cohort_covid_therapeutics))
+  filter(!is.na(high_risk_group_nhsd_date) | high_risk_cohort_covid_therapeutics == "NA" | is.na(high_risk_cohort_covid_therapeutics)) %>%
+  mutate(
+    # Sort naming conventions
+    high_risk_cohort_covid_therapeutics = str_replace(high_risk_cohort_covid_therapeutics,
+                                                      "haematological diseases,stem cell transplant recipients",
+                                                      "haematological diseases and stem cell transplant recipients"),
+    high_risk_cohort_covid_therapeutics = str_replace(high_risk_cohort_covid_therapeutics,
+                                                      "stem cell transplant recipients,haematological diseases",
+                                                      "haematological diseases and stem cell transplant recipients"),
+    high_risk_cohort_covid_therapeutics = str_replace(high_risk_cohort_covid_therapeutics,
+                                                      "stem cell transplant recipients,haematological diseases",
+                                                      "haematological diseases and stem cell transplant recipients"),
+    high_risk_cohort_covid_therapeutics = str_replace(high_risk_cohort_covid_therapeutics,
+                                                      "haematological malignancies",
+                                                      "haematological diseases and stem cell transplant recipients"))
 
 print(dim(data_processed_hrc_matched))
-# 
-# %>%
-#   mutate(
-#     # Sort naming conventions
-#     high_risk_cohort_covid_therapeutics = str_replace(high_risk_cohort_covid_therapeutics, 
-#                                                       "haematological diseases,stem cell transplant recipients", 
-#                                                       "haematological diseases and stem cell transplant recipients"),
-#     high_risk_cohort_covid_therapeutics = str_replace(high_risk_cohort_covid_therapeutics, 
-#                                                       "stem cell transplant recipients,haematological diseases", 
-#                                                       "haematological diseases and stem cell transplant recipients"),
-#     high_risk_cohort_covid_therapeutics = str_replace(high_risk_cohort_covid_therapeutics, 
-#                                                       "stem cell transplant recipients,haematological diseases", 
-#                                                       "haematological diseases and stem cell transplant recipients"),
-#     high_risk_cohort_covid_therapeutics = str_replace(high_risk_cohort_covid_therapeutics, 
-#                                                       "haematological malignancies", 
-#                                                       "haematological diseases and stem cell transplant recipients"),
-#     
+
 #     # Find matches between elig and treated high risk cohorts
 #     ind_therapeutic_groups = map_chr(strsplit(high_risk_cohort_covid_therapeutics, ","), paste,collapse="|"),
 #     Match = str_detect(high_risk_group_nhsd_combined, ind_therapeutic_groups)
