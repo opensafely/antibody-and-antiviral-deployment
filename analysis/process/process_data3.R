@@ -114,23 +114,20 @@ data_processed_eligible <- data_processed_hrc_matched %>%
   ) %>%
   mutate(eligibility_status = "Eligible")
 
-print(dim(data_processed_hrc_matched))
 print(dim(data_processed_eligible))
 print(table(data_processed_eligible$Match))
 
-# ## Include treated patients not flagged as eligible
-# data_processed_treated <- data_processed_hrc_matched %>%
-#   filter(
-#     # Treated but non-eligible patients
-#     !is.na(treatment_date),
-#     !(patient_id %in% unique(data_processed_eligible$patient_id)),
-# 
-#     # Alive and registered
-#     has_died == 0,
-#     registered_eligible == 1 | registered_treated == 1
-#     ) %>%
-#   mutate(elig_start = as.Date(ifelse(is.na(elig_start), treatment_date, elig_start), origin = "1970-01-01"),
-#          eligibility_status = "Treated")
+## Include treated patients not flagged as eligible
+data_processed_treated <- data_processed_hrc_matched %>%
+  filter(
+    # Treated but non-eligible patients
+    !is.na(treatment_date),
+    !(patient_id %in% unique(data_processed_eligible$patient_id)),
+    ) %>%
+  mutate(eligibility_status = "Treated")
+
+print(dim(data_processed_treated))
+print(table(data_processed_treated$Match))
 
 # data_processed_combined <- rbind(data_processed_eligible, data_processed_treated)
 # 
