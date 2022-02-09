@@ -30,7 +30,7 @@ actions:
     needs: [extract_data]
     outputs:
       highly_sensitive:
-        data: output/data/data_processed.rds
+        data: output/data/data_processed_*.rds
   
   # Data summaries ----
   flow_chart:
@@ -54,7 +54,7 @@ actions:
     needs: [data_process]
     outputs:
       moderately_sensitive:
-        tables: output/reports/coverage/tables/table_*.csv
+        tables: output/reports/coverage/table_*.csv
 
 
 

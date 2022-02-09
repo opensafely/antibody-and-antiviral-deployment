@@ -36,38 +36,11 @@ source(here("analysis", "lib", "custom_functions.R"))
 output_dir <- here::here("output", "reports", "coverage")
 fs::dir_create(output_dir)
 
-## Import data
-data_processed_combined <- read_rds(here::here("output", "data", "data_processed_clean_test.rds"))
-
 ## Redaction threshold
 threshold = 5
 
-# Format data ----
-
-## Exclude patients issued more than one treatment within two weeks
-dup_ids <- data_processed_combined %>%
-  select(patient_id, treatment_date, sotrovimab_covid_therapeutics, molnupiravir_covid_therapeutics, casirivimab_covid_therapeutics) %>%
-  filter(!is.na(treatment_date)) %>%
-  mutate(sotrovimab_covid_therapeutics = as.Date(sotrovimab_covid_therapeutics, origin="1970-01-01"),
-         molnupiravir_covid_therapeutics = as.Date(molnupiravir_covid_therapeutics, origin="1970-01-01"),
-         casirivimab_covid_therapeutics = as.Date(casirivimab_covid_therapeutics, origin="1970-01-01"),
-         sot_mol_diff = as.numeric(sotrovimab_covid_therapeutics - molnupiravir_covid_therapeutics),
-         sot_cas_diff = as.numeric(sotrovimab_covid_therapeutics - casirivimab_covid_therapeutics),
-         mol_cas_diff = as.numeric(molnupiravir_covid_therapeutics - casirivimab_covid_therapeutics)) %>%
-  melt(id.var = "patient_id", measure.vars = c("sot_mol_diff", "sot_cas_diff", "mol_cas_diff")) %>%
-  filter(!is.na(value),
-         value <= 14 | value >= -14) %>%
-  group_by(patient_id) %>%
-  arrange(patient_id) 
-
-print(length(dup_ids$patient_id))
-
-data_processed_clean <- data_processed_combined %>%
-  subset(!(patient_id %in% unique(dup_ids$patient_id)))
-
-rm(data_processed_combined)
-print(dim(data_processed_clean))
-print(table(data_processed_clean$eligibility_status))
+## Import data
+data_processed_clean <- read_rds(here::here("output", "data", "data_processed_clean.rds"))
 
 ## Formatting variables
 data_processed_clean <- data_processed_clean %>%
@@ -97,15 +70,9 @@ noneligible_sotrovimab <- plyr::round_any(data_processed_clean %>% filter(treatm
 noneligible_molnupiravir <- plyr::round_any(data_processed_clean %>% filter(treatment_type == "Molnupiravir",  eligibility_status == "Treated") %>% nrow(), 10)
 noneligible_casirivimab <- plyr::round_any(data_processed_clean %>% filter(treatment_type == "Casirivimab",  eligibility_status == "Treated") %>% nrow(), 10)
 
-hrc_groups <- data_processed_clean %>% 
-  group_by(high_risk_group_combined_count) %>% 
-  summarise(count = n()) %>%
-  filter(count > 4)
-
 high_risk_cohort_2plus <- plyr::round_any(subset(data_processed_clean, high_risk_group_elig_count > 1) %>% nrow(), 10)
 high_risk_cohort_lower <- min(data_processed_clean$high_risk_group_elig_count, na.rm = T)
 high_risk_cohort_upper <- max(data_processed_clean$high_risk_group_elig_count, na.rm = T)
-
 
 text <- data.frame(study_start, study_end, 
                    eligible_patients, eligible_treated_patients, eligible_sotrovimab, eligible_molnupiravir, eligible_casirivimab, 
@@ -341,7 +308,7 @@ treatment_table <- treatment_table$table_body %>%
   data.frame()  %>%
   mutate(High.risk.cohort = ifelse(High.risk.cohort == "high_risk_group", "All", High.risk.cohort),
          Number.of.treated.patients = ifelse(High.risk.cohort == "All", 
-                                              length(unique(subset(data_processed_clean, eligibility_status == "Eligible" & !is.na(treatment_date))$patient_id)),
+                                             length(unique(subset(data_processed_clean, eligibility_status == "Eligible" & !is.na(treatment_date))$patient_id)),
                                              Number.of.treated.patients),
          Treated.with.Casirivimab = ifelse(High.risk.cohort == "All", eligible_casirivimab, Treated.with.Casirivimab),
          Treated.with.Molnupiravir = ifelse(High.risk.cohort == "All", eligible_molnupiravir, Treated.with.Casirivimab),
@@ -354,7 +321,7 @@ table_elig_treat_redacted <- left_join(eligibility_table, treatment_table, by = 
          Treated.with.Casirivimab = ifelse(Treated.with.Casirivimab < threshold, NA, as.numeric(Treated.with.Casirivimab)),
          Treated.with.Molnupiravir = ifelse(Treated.with.Molnupiravir < threshold, NA, as.numeric(Treated.with.Molnupiravir)),
          Treated.with.Sotrovimab = ifelse(Treated.with.Sotrovimab < threshold, NA, as.numeric(Treated.with.Sotrovimab))
-         ) %>%
+  ) %>%
   # Round to nearest 10
   mutate(Number.of.eligible.patients = plyr::round_any(Number.of.eligible.patients, 10),
          Number.of.treated.patients = plyr::round_any(Number.of.treated.patients, 10),
@@ -504,7 +471,6 @@ non_elig_treated <-  data_processed_clean %>%
                                                   covid_hospital_admission_date > (elig_start)),
     aged_over_12 = (age >= 12),
     treated_within_5_days = ((tb_postest_treat <= 5 & tb_postest_treat >= 0) | is.na(tb_postest_treat)),
-    not_duplicated_entries = !(patient_id %in% dup_ids$patient_id),
     high_risk_group = !is.na(high_risk_cohort_covid_therapeutics),
     
     include = (
@@ -516,7 +482,6 @@ non_elig_treated <-  data_processed_clean %>%
         high_risk_group_nhsd & 
         no_covid_hospital_admission_last_30_days &
         aged_over_12 &
-        not_duplicated_entries &
         high_risk_group)
   )
 
@@ -533,7 +498,6 @@ data_flowchart <- non_elig_treated %>%
     c5_no_covid_hospital_admission_last_30_days = c0_all & no_covid_hospital_admission_last_30_days,
     c6_aged_over_12 = c0_all & aged_over_12,
     c7_treated_within_5_days = c0_all & treated_within_5_days,
-    c8_not_duplicated_entries = c0_all & not_duplicated_entries,
     c9_high_risk_group = c0_all & high_risk_group
   )  %>%
   summarise(
@@ -592,9 +556,4 @@ groups <- data_processed_clean %>%
          n = plyr::round_any(as.numeric(n), 5))
 
 write_csv(rbind(all, groups), fs::path(output_dir, "table_time_to_treat_redacted.csv"))
-
-
-
-
-
 
