@@ -74,22 +74,21 @@ data_processed_hrc_matched <- data_processed %>%
     high_risk_group_elig = ifelse((Match == FALSE & !is.na(high_risk_group_nhsd_combined)),
                                   high_risk_group_nhsd_combined, high_risk_group_combined),
     high_risk_group_elig = paste(unique(strsplit(high_risk_group_elig, ",|\\n")[[1]]), collapse = ","),
-    high_risk_group_elig_count = ifelse(high_risk_group_elig != "", str_count(high_risk_group_elig,",") + 1, NA))
+    high_risk_group_elig_count = ifelse(high_risk_group_elig != "", str_count(high_risk_group_elig,",") + 1, NA),
+
+    ## Treated high risk cohorts
+    high_risk_group_treated = ifelse((Match == FALSE & !is.na(high_risk_cohort_covid_therapeutics)),
+                                     high_risk_cohort_covid_therapeutics, high_risk_group_combined),
+    high_risk_group_treated = paste(unique(strsplit(high_risk_group_treated, ",|\\n")[[1]]), collapse = ","),
+    high_risk_group_treated_count = ifelse(high_risk_group_treated != "", str_count(high_risk_group_treated,",") + 1, NA)
+    ) %>%
+  select(-ind_therapeutic_groups)
 
 print(dim(data_processed_hrc_matched))
 print(table(data_processed_hrc_matched$high_risk_group_combined_count))
 print(table(data_processed_hrc_matched$high_risk_group_elig_count))
+print(table(data_processed_hrc_matched$high_risk_group_treated_count))
 
-
-#     ## Treated high risk cohorts
-#     high_risk_group_treated = ifelse((Match == FALSE & !is.na(high_risk_cohort_covid_therapeutics)), 
-#                                      high_risk_cohort_covid_therapeutics, high_risk_group_combined),
-#     high_risk_group_treated = paste(unique(strsplit(high_risk_group_treated, ",|\\n")[[1]]), collapse = ","),
-#     high_risk_group_treated_count = ifelse(high_risk_group_treated != "", str_count(high_risk_group_treated,",") + 1, NA)
-#     ) %>%
-#   select(-ind_therapeutic_groups)
-# 
-# print(dim(data_processed_hrc_matched))
 # 
 # ## Apply eligibility and exclusion criteria
 # data_processed_eligible <- data_processed_hrc_matched %>%
@@ -102,7 +101,7 @@ print(table(data_processed_hrc_matched$high_risk_group_elig_count))
 #     covid_test_positive == 1,
 #     covid_positive_previous_30_days != 1,
 #     (tb_postest_treat <= 5 & tb_postest_treat >= 0) | is.na(tb_postest_treat),
-#     !is.na(high_risk_group_combined),
+#     !is.na(high_risk_group_elig),
 #     
 #     # Apply exclusion criteria
 #     is.na(covid_hospital_admission_date) | covid_hospital_admission_date < (elig_start - 30) & covid_hospital_admission_date > (elig_start),
