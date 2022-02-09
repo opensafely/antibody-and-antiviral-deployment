@@ -1,16 +1,11 @@
 ################################################################################
 #
-# Description: This script produces metadata, figurs and tables to go into the
-#              mabs_and_antivirvals_coverage_report.rmd 
+# Description: This script cleans up the processed data, filtering out non eligible 
+#              patients but keeping treated patients and combining high risk cohorts
 #
 # Input: /output/data/data_processed.rds
 #
-# Output: /output/reports/coverage/tables/table_report_stats.csv
-#         /output/reports/coverage/tables/table_elig_treat_redacted.csv
-#         /output/reports/coverage/tables/table_demo_clinc_breakdown_redacted.csv
-#         /output/reports/coverage/tables/table_high_risk_cohort_comparison.csv
-#         /output/reports/coverage/figures/figure_cum_treatment_plot.png
-#         /output/reports/coverage/figures/figure_cum_eligiblity_plot.png
+# Output: /output/data/data_processed_clean.rds
 #
 # Author(s): M Green
 # Date last updated: 07/02/2022
@@ -115,10 +110,9 @@ data_processed_eligible <- data_processed_hrc_matched %>%
 ## Include treated patients not flagged as eligible
 data_processed_treated <- data_processed_hrc_matched %>%
   filter(
-    
-    # Treat but non-eligible patients
-    !(patient_id %in% unique(data_processed_eligible$patient_id)),
+    # Treated but non-eligible patients
     !is.na(treatment_date),
+    !(patient_id %in% unique(data_processed_eligible$patient_id)),
     
     # Alive and registered
     has_died == 0,
@@ -145,69 +139,9 @@ dup_ids <- data_processed_combined %>%
   group_by(patient_id) %>%
   arrange(patient_id) 
 
-
 data_processed_clean <- data_processed_combined %>%
   subset(!(patient_id %in% unique(dup_ids$patient_id)))
 
-## Formatting variables
-data_processed_clean <- data_processed_clean %>%
-  mutate(
-    
-    # Age groups
-    ageband = cut(
-      age,
-      breaks = c(12, 30, 40, 50, 60, 70, 80, Inf),
-      labels = c("12-29", "30-39", "40-49", "50-59", "60-69", "70-79", "80+"),
-      right = FALSE),
-    
-    #IMD
-    imd = as.character(imd),
-    imd = ifelse(imd %in% c("1 most deprived", 2:4, "5 least deprived"), imd, "Unknown"),
-    imd = fct_case_when(
-      imd == "1 most deprived" ~ "1 most deprived",
-      imd == 2 ~ "2",
-      imd == 3 ~ "3",
-      imd == 4 ~ "4",
-      imd == "5 least deprived" ~ "5 least deprived",
-      imd == "Unknown" ~ "Unknown",
-      #TRUE ~ "Unknown",
-      TRUE ~ NA_character_
-    ),
-    
-    # Region
-    region = as.character(region_nhs),
-    region = fct_case_when(
-      region == "London" ~ "London",
-      region == "East of England" ~ "East of England",
-      region == "East Midlands" ~ "East Midlands",
-      region == "North East" ~ "North East",
-      region == "North West" ~ "North West",
-      region == "South East" ~ "South East",
-      region == "South West" ~ "South West",
-      region == "West Midlands" ~ "West Midlands",
-      region == "Yorkshire and the Humber" ~ "Yorkshire and the Humber",
-      #TRUE ~ "Unknown"
-      TRUE ~ NA_character_)
-    
-    # # High risk cohort
-    # high_risk_group_nhsd = as.character(high_risk_group_nhsd),
-    # high_risk_group_nhsd = fct_case_when(
-    #   high_risk_group_nhsd == "Down's syndrome" ~ "Down's syndrome",
-    #   high_risk_group_nhsd == "Sickle cell disease" ~ "Sickle cell disease",
-    #   high_risk_group_nhsd == "Patients with a solid cancer" ~ "Solid cancer",
-    #   high_risk_group_nhsd == "Patients with a haematological diseases and stem cell transplant recipients" ~ "Haematological diseases and stem cell transplant recipients",
-    #   high_risk_group_nhsd == "Patients with renal disease" ~ "Renal disease",
-    #   high_risk_group_nhsd == "Patients with liver disease" ~ "Liver disease",
-    #   high_risk_group_nhsd == "Patients with immune-mediated inflammatory disorders (IMID)" ~ "Immune-mediated inflammatory disorders",
-    #   high_risk_group_nhsd == "Primary immune deficiencies" ~ "Primary immune deficiencies",
-    #   high_risk_group_nhsd == "HIV/AIDS" ~ "HIV or AIDS",
-    #   high_risk_group_nhsd == "Solid organ transplant recipients" ~ "Solid organ transplant recipients",
-    #   high_risk_group_nhsd == "Rare neurological conditions" ~ "Rare neurological conditions",
-    #   high_risk_group_nhsd == "Not deemed eligible" ~ "Not deemed eligible",
-    #   #TRUE ~ "Unknown"
-    #   TRUE ~ NA_character_)
-
-  )
 
 # Save dataset(s) ----
 write_rds(data_processed_clean, here::here("output", "data", "data_processed_clean.rds"), compress = "gz")
