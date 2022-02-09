@@ -30,7 +30,7 @@ actions:
     needs: [extract_data]
     outputs:
       highly_sensitive:
-        data: output/data/data_processed_*.rds
+        data: output/data/data_processed*.rds
   
   # Data summaries ----
   flow_chart:
