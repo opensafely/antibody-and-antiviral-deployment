@@ -1,0 +1,98 @@
+tb_postest_treat,treatment_type,n,high_risk_group_elig
+0,Molnupiravir,15,All
+0,Sotrovimab,25,All
+1,Casirivimab,NA,All
+1,Molnupiravir,220,All
+1,Sotrovimab,155,All
+2,Casirivimab,15,All
+2,Molnupiravir,715,All
+2,Sotrovimab,560,All
+3,Casirivimab,10,All
+3,Molnupiravir,480,All
+3,Sotrovimab,510,All
+4,Molnupiravir,230,All
+4,Sotrovimab,220,All
+5,Casirivimab,NA,All
+5,Molnupiravir,65,All
+5,Sotrovimab,80,All
+NA,NA,272465,All
+0,NA,NA,Downs syndrome
+1,NA,10,Downs syndrome
+2,NA,25,Downs syndrome
+3,NA,25,Downs syndrome
+4,NA,10,Downs syndrome
+5,NA,NA,Downs syndrome
+NA,NA,690,Downs syndrome
+1,NA,NA,HIV or AIDS
+2,NA,5,HIV or AIDS
+3,NA,5,HIV or AIDS
+4,NA,NA,HIV or AIDS
+NA,NA,100,HIV or AIDS
+0,NA,10,IMID
+1,NA,125,IMID
+2,NA,490,IMID
+3,NA,365,IMID
+4,NA,170,IMID
+5,NA,65,IMID
+NA,NA,34660,IMID
+2,NA,NA,haematologic malignancy
+2,NA,NA,haematological diseases
+3,NA,NA,haematological diseases
+0,NA,5,haematological diseases and stem cell transplant recipients
+1,NA,40,haematological diseases and stem cell transplant recipients
+2,NA,95,haematological diseases and stem cell transplant recipients
+3,NA,85,haematological diseases and stem cell transplant recipients
+4,NA,40,haematological diseases and stem cell transplant recipients
+5,NA,10,haematological diseases and stem cell transplant recipients
+NA,NA,1920,haematological diseases and stem cell transplant recipients
+0,NA,NA,liver disease
+1,NA,10,liver disease
+2,NA,55,liver disease
+3,NA,40,liver disease
+4,NA,15,liver disease
+5,NA,5,liver disease
+NA,NA,2160,liver disease
+0,NA,5,primary immune deficiencies
+1,NA,40,primary immune deficiencies
+2,NA,115,primary immune deficiencies
+3,NA,85,primary immune deficiencies
+4,NA,45,primary immune deficiencies
+5,NA,15,primary immune deficiencies
+NA,NA,6800,primary immune deficiencies
+0,NA,NA,rare neurological conditions
+1,NA,45,rare neurological conditions
+2,NA,190,rare neurological conditions
+3,NA,165,rare neurological conditions
+4,NA,65,rare neurological conditions
+5,NA,15,rare neurological conditions
+NA,NA,3735,rare neurological conditions
+0,NA,NA,renal disease
+1,NA,40,renal disease
+2,NA,140,renal disease
+3,NA,115,renal disease
+4,NA,55,renal disease
+5,NA,25,renal disease
+NA,NA,1865,renal disease
+0,NA,NA,sickle cell disease
+1,NA,5,sickle cell disease
+2,NA,10,sickle cell disease
+3,NA,5,sickle cell disease
+4,NA,5,sickle cell disease
+5,NA,NA,sickle cell disease
+NA,NA,580,sickle cell disease
+0,NA,NA,solid cancer
+1,NA,35,solid cancer
+2,NA,110,solid cancer
+3,NA,75,solid cancer
+4,NA,30,solid cancer
+5,NA,5,solid cancer
+NA,NA,5530,solid cancer
+0,NA,15,solid organ recipients
+1,NA,150,solid organ recipients
+2,NA,550,solid organ recipients
+3,NA,400,solid organ recipients
+4,NA,200,solid organ recipients
+5,NA,55,solid organ recipients
+NA,NA,237615,solid organ recipients
+2,NA,NA,stem cell transplant recipients
+3,NA,NA,stem cell transplant recipients

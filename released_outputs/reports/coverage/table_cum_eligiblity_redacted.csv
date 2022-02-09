@@ -1,0 +1,623 @@
+elig_start,cum_count_redacted,high_risk_group_elig
+2021-12-11,1630,All
+2021-12-12,3310,All
+2021-12-13,5980,All
+2021-12-14,9180,All
+2021-12-15,12850,All
+2021-12-16,16340,All
+2021-12-17,19650,All
+2021-12-18,22640,All
+2021-12-19,25790,All
+2021-12-20,30680,All
+2021-12-21,36460,All
+2021-12-22,43010,All
+2021-12-23,49660,All
+2021-12-24,55820,All
+2021-12-25,59160,All
+2021-12-26,64670,All
+2021-12-27,73420,All
+2021-12-28,83790,All
+2021-12-29,97770,All
+2021-12-30,110090,All
+2021-12-31,120060,All
+2022-01-01,126390,All
+2022-01-02,135490,All
+2022-01-03,147280,All
+2022-01-04,161780,All
+2022-01-05,172580,All
+2022-01-06,181560,All
+2022-01-07,188000,All
+2022-01-08,192810,All
+2022-01-09,197640,All
+2022-01-10,204360,All
+2022-01-11,209840,All
+2022-01-12,214980,All
+2022-01-13,219690,All
+2022-01-14,223720,All
+2022-01-15,227160,All
+2022-01-16,231170,All
+2022-01-17,236790,All
+2022-01-18,241920,All
+2022-01-19,246900,All
+2022-01-20,251320,All
+2022-01-21,255320,All
+2022-01-22,258700,All
+2022-01-23,263040,All
+2022-01-24,268460,All
+2022-01-25,273090,All
+2022-01-26,275770,All
+2021-12-13,0,
+2021-12-14,10,
+2021-12-15,10,
+2021-12-16,30,
+2021-12-17,40,
+2021-12-18,50,
+2021-12-19,70,
+2021-12-20,90,
+2021-12-21,110,
+2021-12-22,130,
+2021-12-23,140,
+2021-12-24,160,
+2021-12-25,170,
+2021-12-26,190,
+2021-12-27,220,
+2021-12-28,240,
+2021-12-29,280,
+2021-12-30,320,
+2021-12-31,340,
+2022-01-01,360,
+2022-01-02,390,
+2022-01-03,420,
+2022-01-04,450,
+2022-01-05,470,
+2022-01-06,490,
+2022-01-07,510,
+2022-01-08,540,
+2022-01-09,560,
+2022-01-10,590,
+2022-01-11,610,
+2022-01-12,640,
+2022-01-13,650,
+2022-01-14,670,
+2022-01-15,680,
+2022-01-16,700,
+2022-01-17,720,
+2022-01-18,730,
+2022-01-19,750,
+2022-01-20,770,
+2022-01-21,780,
+2022-01-22,790,
+2022-01-23,790,
+2021-12-11,0,Downs syndrome
+2021-12-12,0,Downs syndrome
+2021-12-13,10,Downs syndrome
+2021-12-14,20,Downs syndrome
+2021-12-15,20,Downs syndrome
+2021-12-16,20,Downs syndrome
+2021-12-17,30,Downs syndrome
+2021-12-18,40,Downs syndrome
+2021-12-19,40,Downs syndrome
+2021-12-20,50,Downs syndrome
+2021-12-21,60,Downs syndrome
+2021-12-22,80,Downs syndrome
+2021-12-23,90,Downs syndrome
+2021-12-24,100,Downs syndrome
+2021-12-25,100,Downs syndrome
+2021-12-26,120,Downs syndrome
+2021-12-27,140,Downs syndrome
+2021-12-28,150,Downs syndrome
+2021-12-29,180,Downs syndrome
+2021-12-30,210,Downs syndrome
+2021-12-31,240,Downs syndrome
+2022-01-01,240,Downs syndrome
+2022-01-02,260,Downs syndrome
+2022-01-03,290,Downs syndrome
+2022-01-04,320,Downs syndrome
+2022-01-05,360,Downs syndrome
+2022-01-06,380,Downs syndrome
+2022-01-07,400,Downs syndrome
+2022-01-08,410,Downs syndrome
+2022-01-09,430,Downs syndrome
+2022-01-10,450,Downs syndrome
+2022-01-11,470,Downs syndrome
+2022-01-12,490,Downs syndrome
+2022-01-13,500,Downs syndrome
+2022-01-14,520,Downs syndrome
+2022-01-15,540,Downs syndrome
+2022-01-16,550,Downs syndrome
+2022-01-17,580,Downs syndrome
+2022-01-18,610,Downs syndrome
+2022-01-19,640,Downs syndrome
+2022-01-20,650,Downs syndrome
+2022-01-21,670,Downs syndrome
+2022-01-22,680,Downs syndrome
+2022-01-23,700,Downs syndrome
+2022-01-24,740,Downs syndrome
+2022-01-25,750,Downs syndrome
+2022-01-26,760,Downs syndrome
+2021-12-11,0,HIV or AIDS
+2021-12-12,0,HIV or AIDS
+2021-12-13,0,HIV or AIDS
+2021-12-14,0,HIV or AIDS
+2021-12-15,0,HIV or AIDS
+2021-12-16,0,HIV or AIDS
+2021-12-17,10,HIV or AIDS
+2021-12-18,10,HIV or AIDS
+2021-12-19,10,HIV or AIDS
+2021-12-20,10,HIV or AIDS
+2021-12-21,10,HIV or AIDS
+2021-12-22,10,HIV or AIDS
+2021-12-23,20,HIV or AIDS
+2021-12-24,20,HIV or AIDS
+2021-12-25,20,HIV or AIDS
+2021-12-26,20,HIV or AIDS
+2021-12-27,30,HIV or AIDS
+2021-12-28,30,HIV or AIDS
+2021-12-29,40,HIV or AIDS
+2021-12-30,50,HIV or AIDS
+2021-12-31,50,HIV or AIDS
+2022-01-01,50,HIV or AIDS
+2022-01-02,50,HIV or AIDS
+2022-01-03,60,HIV or AIDS
+2022-01-04,60,HIV or AIDS
+2022-01-05,70,HIV or AIDS
+2022-01-06,70,HIV or AIDS
+2022-01-07,80,HIV or AIDS
+2022-01-08,80,HIV or AIDS
+2022-01-09,80,HIV or AIDS
+2022-01-10,90,HIV or AIDS
+2022-01-11,90,HIV or AIDS
+2022-01-12,100,HIV or AIDS
+2022-01-13,100,HIV or AIDS
+2022-01-14,100,HIV or AIDS
+2022-01-15,100,HIV or AIDS
+2022-01-16,100,HIV or AIDS
+2022-01-17,100,HIV or AIDS
+2022-01-18,100,HIV or AIDS
+2022-01-19,100,HIV or AIDS
+2022-01-20,110,HIV or AIDS
+2022-01-21,110,HIV or AIDS
+2022-01-22,110,HIV or AIDS
+2022-01-23,110,HIV or AIDS
+2022-01-24,110,HIV or AIDS
+2022-01-25,120,HIV or AIDS
+2021-12-11,190,IMID
+2021-12-12,350,IMID
+2021-12-13,640,IMID
+2021-12-14,960,IMID
+2021-12-15,1350,IMID
+2021-12-16,1740,IMID
+2021-12-17,2090,IMID
+2021-12-18,2420,IMID
+2021-12-19,2740,IMID
+2021-12-20,3230,IMID
+2021-12-21,3860,IMID
+2021-12-22,4640,IMID
+2021-12-23,5360,IMID
+2021-12-24,6070,IMID
+2021-12-25,6460,IMID
+2021-12-26,7120,IMID
+2021-12-27,8220,IMID
+2021-12-28,9540,IMID
+2021-12-29,11370,IMID
+2021-12-30,12950,IMID
+2021-12-31,14290,IMID
+2022-01-01,15130,IMID
+2022-01-02,16310,IMID
+2022-01-03,17860,IMID
+2022-01-04,19720,IMID
+2022-01-05,21120,IMID
+2022-01-06,22330,IMID
+2022-01-07,23200,IMID
+2022-01-08,23860,IMID
+2022-01-09,24500,IMID
+2022-01-10,25430,IMID
+2022-01-11,26230,IMID
+2022-01-12,26980,IMID
+2022-01-13,27680,IMID
+2022-01-14,28280,IMID
+2022-01-15,28750,IMID
+2022-01-16,29340,IMID
+2022-01-17,30160,IMID
+2022-01-18,30880,IMID
+2022-01-19,31680,IMID
+2022-01-20,32320,IMID
+2022-01-21,32890,IMID
+2022-01-22,33410,IMID
+2022-01-23,34010,IMID
+2022-01-24,34840,IMID
+2022-01-25,35500,IMID
+2022-01-26,35880,IMID
+2021-12-20,0,haematologic malignancy
+2022-01-01,0,haematological diseases
+2022-01-02,0,haematological diseases
+2022-01-03,0,haematological diseases
+2022-01-04,0,haematological diseases
+2022-01-05,0,haematological diseases
+2022-01-06,0,haematological diseases
+2022-01-07,0,haematological diseases
+2022-01-08,0,haematological diseases
+2021-12-11,10,haematological diseases and stem cell transplant recipients
+2021-12-12,30,haematological diseases and stem cell transplant recipients
+2021-12-13,40,haematological diseases and stem cell transplant recipients
+2021-12-14,50,haematological diseases and stem cell transplant recipients
+2021-12-15,70,haematological diseases and stem cell transplant recipients
+2021-12-16,80,haematological diseases and stem cell transplant recipients
+2021-12-17,110,haematological diseases and stem cell transplant recipients
+2021-12-18,130,haematological diseases and stem cell transplant recipients
+2021-12-19,140,haematological diseases and stem cell transplant recipients
+2021-12-20,160,haematological diseases and stem cell transplant recipients
+2021-12-21,190,haematological diseases and stem cell transplant recipients
+2021-12-22,230,haematological diseases and stem cell transplant recipients
+2021-12-23,260,haematological diseases and stem cell transplant recipients
+2021-12-24,290,haematological diseases and stem cell transplant recipients
+2021-12-25,320,haematological diseases and stem cell transplant recipients
+2021-12-26,360,haematological diseases and stem cell transplant recipients
+2021-12-27,430,haematological diseases and stem cell transplant recipients
+2021-12-28,510,haematological diseases and stem cell transplant recipients
+2021-12-29,620,haematological diseases and stem cell transplant recipients
+2021-12-30,710,haematological diseases and stem cell transplant recipients
+2021-12-31,790,haematological diseases and stem cell transplant recipients
+2022-01-01,850,haematological diseases and stem cell transplant recipients
+2022-01-02,930,haematological diseases and stem cell transplant recipients
+2022-01-03,1020,haematological diseases and stem cell transplant recipients
+2022-01-04,1160,haematological diseases and stem cell transplant recipients
+2022-01-05,1230,haematological diseases and stem cell transplant recipients
+2022-01-06,1310,haematological diseases and stem cell transplant recipients
+2022-01-07,1370,haematological diseases and stem cell transplant recipients
+2022-01-08,1420,haematological diseases and stem cell transplant recipients
+2022-01-09,1480,haematological diseases and stem cell transplant recipients
+2022-01-10,1550,haematological diseases and stem cell transplant recipients
+2022-01-11,1610,haematological diseases and stem cell transplant recipients
+2022-01-12,1650,haematological diseases and stem cell transplant recipients
+2022-01-13,1700,haematological diseases and stem cell transplant recipients
+2022-01-14,1750,haematological diseases and stem cell transplant recipients
+2022-01-15,1770,haematological diseases and stem cell transplant recipients
+2022-01-16,1810,haematological diseases and stem cell transplant recipients
+2022-01-17,1860,haematological diseases and stem cell transplant recipients
+2022-01-18,1910,haematological diseases and stem cell transplant recipients
+2022-01-19,1950,haematological diseases and stem cell transplant recipients
+2022-01-20,1990,haematological diseases and stem cell transplant recipients
+2022-01-21,2030,haematological diseases and stem cell transplant recipients
+2022-01-22,2050,haematological diseases and stem cell transplant recipients
+2022-01-23,2080,haematological diseases and stem cell transplant recipients
+2022-01-24,2130,haematological diseases and stem cell transplant recipients
+2022-01-25,2180,haematological diseases and stem cell transplant recipients
+2022-01-26,2190,haematological diseases and stem cell transplant recipients
+2021-12-11,10,liver disease
+2021-12-12,20,liver disease
+2021-12-13,40,liver disease
+2021-12-14,50,liver disease
+2021-12-15,80,liver disease
+2021-12-16,100,liver disease
+2021-12-17,130,liver disease
+2021-12-18,150,liver disease
+2021-12-19,160,liver disease
+2021-12-20,200,liver disease
+2021-12-21,220,liver disease
+2021-12-22,270,liver disease
+2021-12-23,300,liver disease
+2021-12-24,350,liver disease
+2021-12-25,370,liver disease
+2021-12-26,420,liver disease
+2021-12-27,480,liver disease
+2021-12-28,570,liver disease
+2021-12-29,700,liver disease
+2021-12-30,810,liver disease
+2021-12-31,900,liver disease
+2022-01-01,960,liver disease
+2022-01-02,1020,liver disease
+2022-01-03,1110,liver disease
+2022-01-04,1220,liver disease
+2022-01-05,1310,liver disease
+2022-01-06,1390,liver disease
+2022-01-07,1450,liver disease
+2022-01-08,1500,liver disease
+2022-01-09,1540,liver disease
+2022-01-10,1600,liver disease
+2022-01-11,1660,liver disease
+2022-01-12,1720,liver disease
+2022-01-13,1770,liver disease
+2022-01-14,1800,liver disease
+2022-01-15,1840,liver disease
+2022-01-16,1880,liver disease
+2022-01-17,1940,liver disease
+2022-01-18,1990,liver disease
+2022-01-19,2040,liver disease
+2022-01-20,2080,liver disease
+2022-01-21,2130,liver disease
+2022-01-22,2160,liver disease
+2022-01-23,2180,liver disease
+2022-01-24,2240,liver disease
+2022-01-25,2270,liver disease
+2022-01-26,2290,liver disease
+2021-12-11,40,primary immune deficiencies
+2021-12-12,80,primary immune deficiencies
+2021-12-13,140,primary immune deficiencies
+2021-12-14,210,primary immune deficiencies
+2021-12-15,290,primary immune deficiencies
+2021-12-16,370,primary immune deficiencies
+2021-12-17,440,primary immune deficiencies
+2021-12-18,510,primary immune deficiencies
+2021-12-19,580,primary immune deficiencies
+2021-12-20,710,primary immune deficiencies
+2021-12-21,850,primary immune deficiencies
+2021-12-22,990,primary immune deficiencies
+2021-12-23,1170,primary immune deficiencies
+2021-12-24,1320,primary immune deficiencies
+2021-12-25,1400,primary immune deficiencies
+2021-12-26,1540,primary immune deficiencies
+2021-12-27,1770,primary immune deficiencies
+2021-12-28,2050,primary immune deficiencies
+2021-12-29,2460,primary immune deficiencies
+2021-12-30,2790,primary immune deficiencies
+2021-12-31,3050,primary immune deficiencies
+2022-01-01,3220,primary immune deficiencies
+2022-01-02,3450,primary immune deficiencies
+2022-01-03,3780,primary immune deficiencies
+2022-01-04,4140,primary immune deficiencies
+2022-01-05,4390,primary immune deficiencies
+2022-01-06,4610,primary immune deficiencies
+2022-01-07,4770,primary immune deficiencies
+2022-01-08,4910,primary immune deficiencies
+2022-01-09,5040,primary immune deficiencies
+2022-01-10,5230,primary immune deficiencies
+2022-01-11,5390,primary immune deficiencies
+2022-01-12,5520,primary immune deficiencies
+2022-01-13,5650,primary immune deficiencies
+2022-01-14,5750,primary immune deficiencies
+2022-01-15,5840,primary immune deficiencies
+2022-01-16,5940,primary immune deficiencies
+2022-01-17,6090,primary immune deficiencies
+2022-01-18,6210,primary immune deficiencies
+2022-01-19,6340,primary immune deficiencies
+2022-01-20,6460,primary immune deficiencies
+2022-01-21,6560,primary immune deficiencies
+2022-01-22,6640,primary immune deficiencies
+2022-01-23,6760,primary immune deficiencies
+2022-01-24,6890,primary immune deficiencies
+2022-01-25,7030,primary immune deficiencies
+2022-01-26,7100,primary immune deficiencies
+2021-12-11,30,rare neurological conditions
+2021-12-12,60,rare neurological conditions
+2021-12-13,90,rare neurological conditions
+2021-12-14,120,rare neurological conditions
+2021-12-15,170,rare neurological conditions
+2021-12-16,220,rare neurological conditions
+2021-12-17,270,rare neurological conditions
+2021-12-18,300,rare neurological conditions
+2021-12-19,340,rare neurological conditions
+2021-12-20,400,rare neurological conditions
+2021-12-21,480,rare neurological conditions
+2021-12-22,550,rare neurological conditions
+2021-12-23,630,rare neurological conditions
+2021-12-24,720,rare neurological conditions
+2021-12-25,760,rare neurological conditions
+2021-12-26,840,rare neurological conditions
+2021-12-27,960,rare neurological conditions
+2021-12-28,1110,rare neurological conditions
+2021-12-29,1320,rare neurological conditions
+2021-12-30,1550,rare neurological conditions
+2021-12-31,1710,rare neurological conditions
+2022-01-01,1800,rare neurological conditions
+2022-01-02,1930,rare neurological conditions
+2022-01-03,2130,rare neurological conditions
+2022-01-04,2330,rare neurological conditions
+2022-01-05,2490,rare neurological conditions
+2022-01-06,2610,rare neurological conditions
+2022-01-07,2710,rare neurological conditions
+2022-01-08,2790,rare neurological conditions
+2022-01-09,2880,rare neurological conditions
+2022-01-10,3000,rare neurological conditions
+2022-01-11,3080,rare neurological conditions
+2022-01-12,3160,rare neurological conditions
+2022-01-13,3240,rare neurological conditions
+2022-01-14,3310,rare neurological conditions
+2022-01-15,3350,rare neurological conditions
+2022-01-16,3420,rare neurological conditions
+2022-01-17,3530,rare neurological conditions
+2022-01-18,3610,rare neurological conditions
+2022-01-19,3700,rare neurological conditions
+2022-01-20,3780,rare neurological conditions
+2022-01-21,3860,rare neurological conditions
+2022-01-22,3910,rare neurological conditions
+2022-01-23,3990,rare neurological conditions
+2022-01-24,4100,rare neurological conditions
+2022-01-25,4180,rare neurological conditions
+2022-01-26,4220,rare neurological conditions
+2021-12-11,10,renal disease
+2021-12-12,20,renal disease
+2021-12-13,30,renal disease
+2021-12-14,50,renal disease
+2021-12-15,70,renal disease
+2021-12-16,90,renal disease
+2021-12-17,100,renal disease
+2021-12-18,110,renal disease
+2021-12-19,120,renal disease
+2021-12-20,160,renal disease
+2021-12-21,210,renal disease
+2021-12-22,260,renal disease
+2021-12-23,300,renal disease
+2021-12-24,340,renal disease
+2021-12-25,360,renal disease
+2021-12-26,400,renal disease
+2021-12-27,480,renal disease
+2021-12-28,600,renal disease
+2021-12-29,710,renal disease
+2021-12-30,800,renal disease
+2021-12-31,890,renal disease
+2022-01-01,940,renal disease
+2022-01-02,1010,renal disease
+2022-01-03,1090,renal disease
+2022-01-04,1210,renal disease
+2022-01-05,1290,renal disease
+2022-01-06,1350,renal disease
+2022-01-07,1420,renal disease
+2022-01-08,1460,renal disease
+2022-01-09,1490,renal disease
+2022-01-10,1560,renal disease
+2022-01-11,1630,renal disease
+2022-01-12,1670,renal disease
+2022-01-13,1720,renal disease
+2022-01-14,1770,renal disease
+2022-01-15,1800,renal disease
+2022-01-16,1830,renal disease
+2022-01-17,1890,renal disease
+2022-01-18,1960,renal disease
+2022-01-19,2000,renal disease
+2022-01-20,2040,renal disease
+2022-01-21,2080,renal disease
+2022-01-22,2100,renal disease
+2022-01-23,2130,renal disease
+2022-01-24,2190,renal disease
+2022-01-25,2230,renal disease
+2022-01-26,2240,renal disease
+2021-12-11,10,sickle cell disease
+2021-12-12,10,sickle cell disease
+2021-12-13,20,sickle cell disease
+2021-12-14,30,sickle cell disease
+2021-12-15,30,sickle cell disease
+2021-12-16,40,sickle cell disease
+2021-12-17,60,sickle cell disease
+2021-12-18,70,sickle cell disease
+2021-12-19,70,sickle cell disease
+2021-12-20,90,sickle cell disease
+2021-12-21,110,sickle cell disease
+2021-12-22,130,sickle cell disease
+2021-12-23,150,sickle cell disease
+2021-12-24,160,sickle cell disease
+2021-12-25,170,sickle cell disease
+2021-12-26,180,sickle cell disease
+2021-12-27,200,sickle cell disease
+2021-12-28,220,sickle cell disease
+2021-12-29,260,sickle cell disease
+2021-12-30,280,sickle cell disease
+2021-12-31,300,sickle cell disease
+2022-01-01,310,sickle cell disease
+2022-01-02,320,sickle cell disease
+2022-01-03,340,sickle cell disease
+2022-01-04,380,sickle cell disease
+2022-01-05,390,sickle cell disease
+2022-01-06,410,sickle cell disease
+2022-01-07,430,sickle cell disease
+2022-01-08,440,sickle cell disease
+2022-01-09,450,sickle cell disease
+2022-01-10,460,sickle cell disease
+2022-01-11,470,sickle cell disease
+2022-01-12,480,sickle cell disease
+2022-01-13,490,sickle cell disease
+2022-01-14,500,sickle cell disease
+2022-01-15,510,sickle cell disease
+2022-01-16,510,sickle cell disease
+2022-01-17,530,sickle cell disease
+2022-01-18,530,sickle cell disease
+2022-01-19,540,sickle cell disease
+2022-01-20,560,sickle cell disease
+2022-01-21,570,sickle cell disease
+2022-01-22,580,sickle cell disease
+2022-01-23,590,sickle cell disease
+2022-01-24,600,sickle cell disease
+2022-01-25,610,sickle cell disease
+2022-01-26,610,sickle cell disease
+2021-12-11,20,solid cancer
+2021-12-12,50,solid cancer
+2021-12-13,110,solid cancer
+2021-12-14,160,solid cancer
+2021-12-15,210,solid cancer
+2021-12-16,270,solid cancer
+2021-12-17,340,solid cancer
+2021-12-18,390,solid cancer
+2021-12-19,440,solid cancer
+2021-12-20,540,solid cancer
+2021-12-21,650,solid cancer
+2021-12-22,750,solid cancer
+2021-12-23,860,solid cancer
+2021-12-24,980,solid cancer
+2021-12-25,1050,solid cancer
+2021-12-26,1140,solid cancer
+2021-12-27,1310,solid cancer
+2021-12-28,1530,solid cancer
+2021-12-29,1850,solid cancer
+2021-12-30,2100,solid cancer
+2021-12-31,2320,solid cancer
+2022-01-01,2470,solid cancer
+2022-01-02,2670,solid cancer
+2022-01-03,2880,solid cancer
+2022-01-04,3190,solid cancer
+2022-01-05,3420,solid cancer
+2022-01-06,3610,solid cancer
+2022-01-07,3780,solid cancer
+2022-01-08,3920,solid cancer
+2022-01-09,4040,solid cancer
+2022-01-10,4210,solid cancer
+2022-01-11,4340,solid cancer
+2022-01-12,4460,solid cancer
+2022-01-13,4560,solid cancer
+2022-01-14,4660,solid cancer
+2022-01-15,4750,solid cancer
+2022-01-16,4830,solid cancer
+2022-01-17,4940,solid cancer
+2022-01-18,5070,solid cancer
+2022-01-19,5170,solid cancer
+2022-01-20,5270,solid cancer
+2022-01-21,5360,solid cancer
+2022-01-22,5430,solid cancer
+2022-01-23,5520,solid cancer
+2022-01-24,5640,solid cancer
+2022-01-25,5740,solid cancer
+2022-01-26,5790,solid cancer
+2021-12-11,1430,solid organ recipients
+2021-12-12,2920,solid organ recipients
+2021-12-13,5270,solid organ recipients
+2021-12-14,8080,solid organ recipients
+2021-12-15,11330,solid organ recipients
+2021-12-16,14390,solid organ recipients
+2021-12-17,17290,solid organ recipients
+2021-12-18,19910,solid organ recipients
+2021-12-19,22710,solid organ recipients
+2021-12-20,26990,solid organ recipients
+2021-12-21,32060,solid organ recipients
+2021-12-22,37780,solid organ recipients
+2021-12-23,43670,solid organ recipients
+2021-12-24,49080,solid organ recipients
+2021-12-25,52050,solid organ recipients
+2021-12-26,56860,solid organ recipients
+2021-12-27,64540,solid organ recipients
+2021-12-28,73510,solid organ recipients
+2021-12-29,85640,solid organ recipients
+2021-12-30,96330,solid organ recipients
+2021-12-31,104980,solid organ recipients
+2022-01-01,110470,solid organ recipients
+2022-01-02,118400,solid organ recipients
+2022-01-03,128640,solid organ recipients
+2022-01-04,141290,solid organ recipients
+2022-01-05,150670,solid organ recipients
+2022-01-06,158450,solid organ recipients
+2022-01-07,164000,solid organ recipients
+2022-01-08,168140,solid organ recipients
+2022-01-09,172340,solid organ recipients
+2022-01-10,178070,solid organ recipients
+2022-01-11,182740,solid organ recipients
+2022-01-12,187130,solid organ recipients
+2022-01-13,191160,solid organ recipients
+2022-01-14,194580,solid organ recipients
+2022-01-15,197540,solid organ recipients
+2022-01-16,200960,solid organ recipients
+2022-01-17,205730,solid organ recipients
+2022-01-18,210110,solid organ recipients
+2022-01-19,214320,solid organ recipients
+2022-01-20,218110,solid organ recipients
+2022-01-21,221520,solid organ recipients
+2022-01-22,224400,solid organ recipients
+2022-01-23,228120,solid organ recipients
+2022-01-24,232730,solid organ recipients
+2022-01-25,236670,solid organ recipients
+2022-01-26,238980,solid organ recipients
+2022-01-01,0,stem cell transplant recipients
+2022-01-02,0,stem cell transplant recipients
+2022-01-03,0,stem cell transplant recipients
+2022-01-04,0,stem cell transplant recipients
+2022-01-05,0,stem cell transplant recipients
+2022-01-06,0,stem cell transplant recipients
+2022-01-07,0,stem cell transplant recipients
+2022-01-08,0,stem cell transplant recipients
