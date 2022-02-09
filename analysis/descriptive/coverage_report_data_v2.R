@@ -33,8 +33,8 @@ library(stringr)
 source(here("analysis", "lib", "custom_functions.R"))
 
 ## Create output directory
-output_dir_rmd <- here::here("output", "reports", "coverage")
-fs::dir_create(output_dir_rmd)
+output_dir <- here::here("output", "reports", "coverage")
+fs::dir_create(output_dir)
 
 ## Import data
 data_processed_combined <- read_rds(here::here("output", "data", "data_processed_clean_test.rds"))
@@ -112,7 +112,7 @@ text <- data.frame(study_start, study_end,
                    noneligible_treated_patients, noneligible_sotrovimab, noneligible_molnupiravir, noneligible_casirivimab,
                    high_risk_cohort_2plus, high_risk_cohort_lower, high_risk_cohort_upper)
 
-write_csv(text, here::here(output_dir_rmd, "table_report_stats_redacted.csv"))
+write_csv(text, fs::path(output_dir, "table_report_stats_redacted.csv"))
 
 print(text)
 
@@ -166,7 +166,7 @@ plot_order <- rbind(plot_data_coverage, plot_data_coverage_groups) %>%
 coverage_plot_data <- rbind(plot_data_coverage, plot_data_coverage_groups) %>%
   mutate(high_risk_group_elig = factor(high_risk_group_elig, levels = plot_order$high_risk_group_elig))
 
-write_csv(coverage_plot_data %>% select(elig_start, cum_count_redacted, high_risk_group_elig), here::here(output_dir_rmd, "table_cum_eligiblity_redacted.csv"))
+write_csv(coverage_plot_data %>% select(elig_start, cum_count_redacted, high_risk_group_elig), fs::path(output_dir, "table_cum_eligiblity_redacted.csv"))
 
 print("coverage_plot_data saved")
 
@@ -220,7 +220,7 @@ plot_order <- rbind(plot_data_treatment, plot_data_treatment_groups) %>%
 treatment_plot_data_therapeutics <- rbind(plot_data_treatment, plot_data_treatment_groups) %>%
   mutate(high_risk_group_treated = factor(high_risk_group_treated, levels = plot_order$high_risk_group_treated))
 
-write_csv(treatment_plot_data_therapeutics %>% select(treatment_date, cum_count_redacted, high_risk_group_treated), here::here(output_dir_rmd, "table_cum_treatment_redacted.csv"))
+write_csv(treatment_plot_data_therapeutics %>% select(treatment_date, cum_count_redacted, high_risk_group_treated), fs::path(output_dir, "table_cum_treatment_redacted.csv"))
 
 print("treatment_plot_data_therapeutics saved")
 
@@ -274,7 +274,7 @@ plot_order <- rbind(plot_data_treatment2, plot_data_treatment2_groups) %>%
 treatment_plot_data_therapeutics2 <- rbind(plot_data_treatment2, plot_data_treatment2_groups) %>%
   mutate(high_risk_group_treated = factor(high_risk_group_treated, levels = plot_order$high_risk_group_treated))
 
-write_csv(treatment_plot_data_therapeutics2 %>% select(treatment_date, cum_count_redacted, high_risk_group_treated), here::here(output_dir_rmd, "table_cum_treatment2_redacted.csv"))
+write_csv(treatment_plot_data_therapeutics2 %>% select(treatment_date, cum_count_redacted, high_risk_group_treated), fs::path(output_dir, "table_cum_treatment2_redacted.csv"))
 
 print("treatment_plot_data_therapeutics2 saved")
 
@@ -362,7 +362,7 @@ table_elig_treat_redacted <- left_join(eligibility_table, treatment_table, by = 
          Treated.with.Molnupiravir = plyr::round_any(Treated.with.Molnupiravir, 10),
          Treated.with.Sotrovimab = plyr::round_any(Treated.with.Sotrovimab, 10))
 
-write_csv(table_elig_treat_redacted, here::here(output_dir_rmd, "table_elig_treat_redacted.csv"))
+write_csv(table_elig_treat_redacted, fs::path(output_dir, "table_elig_treat_redacted.csv"))
 
 ## Non-eligible and treated table
 treatment_table <- data_processed_clean %>%
@@ -415,7 +415,7 @@ treatment_table <- treatment_table$table_body %>%
          Treated.with.Molnupiravir = plyr::round_any(Treated.with.Molnupiravir, 10),
          Treated.with.Sotrovimab = plyr::round_any(Treated.with.Sotrovimab, 10))
 
-write_csv(treatment_table, here::here(output_dir_rmd, "table_elig_treat_redacted2.csv"))
+write_csv(treatment_table, fs::path(output_dir, "table_elig_treat_redacted2.csv"))
 
 print("treatment_table saved")
 
@@ -485,7 +485,7 @@ table_demo_clinc_breakdown_redacted <- left_join(table_demo_clinc_breakdown_base
          Molnupiravir = plyr::round_any(Molnupiravir, 10),
          Sotrovimab = plyr::round_any(Sotrovimab, 10))
 
-write_csv(table_demo_clinc_breakdown_redacted, here::here(output_dir_rmd, "table_demo_clinc_breakdown_redacted.csv"))
+write_csv(table_demo_clinc_breakdown_redacted, fs::path(output_dir, "table_demo_clinc_breakdown_redacted.csv"))
 
 
 # Concordance with guidance ----
@@ -547,7 +547,7 @@ data_flowchart <- non_elig_treated %>%
   mutate(n = ifelse(n < 5, NA, n),
          n = plyr::round_any(as.numeric(n), 5))
 
-write_csv(data_flowchart, here(output_dir_rmd, "table_non_elig_flowchart_redacted.csv"))
+write_csv(data_flowchart, fs::path(output_dir, "table_non_elig_flowchart_redacted.csv"))
 
 print("data_flowchart saved")
 
@@ -562,7 +562,7 @@ high_risk_cohort_comparison_redacted <- data_processed_clean %>%
   mutate(n = ifelse(n < 5, NA, n),
          n = plyr::round_any(as.numeric(n), 5))
 
-write_csv(high_risk_cohort_comparison_redacted, here::here(output_dir_rmd, "table_non_elig_high_risk_cohort_comparison_redacted.csv"))
+write_csv(high_risk_cohort_comparison_redacted, fs::path(output_dir, "table_non_elig_high_risk_cohort_comparison_redacted.csv"))
 
 
 # High risk patient cohorts ----
@@ -583,7 +583,7 @@ groups <- data_processed_clean %>%
   mutate(n = ifelse(n < 5, NA, n),
          n = plyr::round_any(as.numeric(n), 5))
 
-write_csv(rbind(all, groups), here(output_dir_rmd, "table_time_to_treat_redacted.csv"))
+write_csv(rbind(all, groups), fs::path(output_dir, "table_time_to_treat_redacted.csv"))
 
 
 
