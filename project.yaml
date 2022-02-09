@@ -42,6 +42,13 @@ actions:
     outputs:
       highly_sensitive:
         data: output/data/data_processed_clean.rds
+        
+  data_process3:
+    run: r:latest analysis/process/process_data3.R
+    needs: [data_process]
+    outputs:
+      highly_sensitive:
+        data: output/data/data_processed_clean_test.rds
   
   
   # Data summaries ----
