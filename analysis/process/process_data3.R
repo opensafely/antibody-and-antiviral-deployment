@@ -32,11 +32,7 @@ fs::dir_create(here::here("output", "reports", "coverage", "tables"))
 
 ## Import data
 data_processed <- read_rds(here::here("output", "data", "data_processed.rds"))
-print(dim(data_processed))
-print(unique(data_processed$high_risk_cohort_covid_therapeutics))
-print(table(is.na(data_processed$high_risk_group_nhsd_date)))
-print(table(is.na(data_processed$high_risk_group_nhsd)))
-            
+   
 # Format data ----
 
 ## Define high risk cohorts
@@ -61,32 +57,35 @@ data_processed_hrc_matched <- data_processed %>%
     # Find matches between elig and treated high risk cohorts
     ind_therapeutic_groups = map_chr(strsplit(high_risk_cohort_covid_therapeutics, ","), paste,collapse="|"),
     Match = str_detect(high_risk_group_nhsd_combined, ind_therapeutic_groups)
-    ) %>%
-  rowwise() %>%
-  mutate(
-    # Combined elig and treated high risk cohorts
-    high_risk_group_combined = ifelse(Match == TRUE,
-                                      paste(high_risk_group_nhsd_combined, high_risk_cohort_covid_therapeutics, sep = ","), ""),
-    high_risk_group_combined = paste(unique(strsplit(high_risk_group_combined, ",|\\n")[[1]]), collapse = ","),
-    high_risk_group_combined_count = ifelse(high_risk_group_combined != "", str_count(high_risk_group_combined,",") + 1, NA),
-
-    ## Eligible high risk cohorts
-    high_risk_group_elig = ifelse((Match == FALSE & high_risk_group_nhsd_combined != "" & high_risk_cohort_covid_therapeutics == ""),
-                                  high_risk_group_nhsd_combined, high_risk_group_combined),
-    high_risk_group_elig = paste(unique(strsplit(high_risk_group_elig, ",|\\n")[[1]]), collapse = ","),
-    high_risk_group_elig_count = ifelse(high_risk_group_elig != "", str_count(high_risk_group_elig,",") + 1, NA),
-
-    ## Treated high risk cohorts
-    high_risk_group_treated = ifelse((Match == FALSE & high_risk_cohort_covid_therapeutics != ""),
-                                     high_risk_cohort_covid_therapeutics, high_risk_group_combined),
-    high_risk_group_treated = paste(unique(strsplit(high_risk_group_treated, ",|\\n")[[1]]), collapse = ","),
-    high_risk_group_treated_count = ifelse(high_risk_group_treated != "", str_count(high_risk_group_treated,",") + 1, NA)
-    ) %>%
-  select(-ind_therapeutic_groups) %>%
+    )  %>%
   mutate(across(
     .cols = where(is.character),
     .fns = ~na_if(.x, "")
-  ))
+  )) %>%
+  rowwise() %>%
+  mutate(
+    
+    # Combined elig and treated high risk cohorts
+    high_risk_group_combined = as.character(ifelse(Match == TRUE,
+                                      paste(high_risk_group_nhsd_combined, high_risk_cohort_covid_therapeutics, sep = ","), "")),
+    high_risk_group_combined = ifelse(high_risk_group_combined == "NA", "", high_risk_group_combined),
+    high_risk_group_combined = as.character(paste(unique(unlist(strsplit(high_risk_group_combined, ","))), collapse = ",")),
+    high_risk_group_combined_count = ifelse(high_risk_group_combined != "", str_count(high_risk_group_combined,",") + 1, NA),
+    
+    ## Eligible high risk cohorts
+    high_risk_group_elig = as.character(ifelse((Match == FALSE & !is.na(high_risk_group_nhsd_combined) & is.na(high_risk_cohort_covid_therapeutics)),
+                                  high_risk_group_nhsd_combined, high_risk_group_combined)),
+    high_risk_group_combined = ifelse(high_risk_group_elig == "NA", "", high_risk_group_elig),
+    high_risk_group_elig = as.character(paste(unique(unlist(strsplit(high_risk_group_elig, ","))), collapse = ",")),
+    high_risk_group_elig_count = ifelse(high_risk_group_elig != "", str_count(high_risk_group_elig,",") + 1, NA),
+
+    ## Treated high risk cohorts
+    high_risk_group_treated = as.character(ifelse((Match == FALSE & !is.na(high_risk_cohort_covid_therapeutics)),
+                                     high_risk_cohort_covid_therapeutics, high_risk_group_combined)),
+    high_risk_group_treated = ifelse(high_risk_group_treated == "NA", "", high_risk_group_treated),
+    high_risk_group_treated = as.character(paste(unique(unlist(strsplit(high_risk_group_treated, ","))), collapse = ",")),
+    high_risk_group_treated_count = ifelse(high_risk_group_treated != "", str_count(high_risk_group_treated,",") + 1, NA)
+    )
 
 print(dim(data_processed_hrc_matched))
 print(table(data_processed_hrc_matched$high_risk_group_combined_count))
@@ -125,14 +124,14 @@ print(table(data_processed_eligible$Match))
 #     # Treated but non-eligible patients
 #     !is.na(treatment_date),
 #     !(patient_id %in% unique(data_processed_eligible$patient_id)),
-#     
+# 
 #     # Alive and registered
 #     has_died == 0,
 #     registered_eligible == 1 | registered_treated == 1
 #     ) %>%
 #   mutate(elig_start = as.Date(ifelse(is.na(elig_start), treatment_date, elig_start), origin = "1970-01-01"),
-#          eligibility_status = "Treated") 
-# 
+#          eligibility_status = "Treated")
+
 # data_processed_combined <- rbind(data_processed_eligible, data_processed_treated)
 # 
 # ## Exclude patients issued more than one treatment within two weeks
