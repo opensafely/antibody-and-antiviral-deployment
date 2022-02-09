@@ -74,6 +74,13 @@ actions:
     outputs:
       moderately_sensitive:
         tables: output/reports/coverage/tables/table_*.csv
+        
+  report_data2:
+    run: r:latest analysis/descriptive/coverage_report_data2.R
+    needs: [data_process3]
+    outputs:
+      moderately_sensitive:
+        tables: output/reports/coverage/table_*.csv
 
 
 
