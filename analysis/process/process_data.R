@@ -7,9 +7,10 @@
 # Input: /output/data/input.csv.gz
 #
 # Output: /output/data/data_processed.csv
+#         /output/data/data_processed_clean.csv
 #
 # Author(s): M Green
-# Date last updated: 04/02/2022
+# Date last updated: 09/02/2022
 #
 ################################################################################
 
@@ -35,6 +36,7 @@ source(here("analysis", "lib", "custom_functions.R"))
 
 
 # Process data ----
+cat("#### process data ####\n")
 
 ## Read in data (don't rely on defaults)
 data_extract0 <- read_csv(
@@ -89,8 +91,16 @@ data_extract0 <- read_csv(
     ethnicity_sus = col_character(),
     imd = col_character(),
     region_nhs = col_character(),
-    region_covid_therapeutics = col_character()
+    region_covid_therapeutics = col_character(),
     
+    # OUTCOMES ----
+    covid_positive_test_30_days_post_elig_or_treat = col_date(format = "%Y-%m-%d"),
+    covid_hospitalisation_critical_care = col_integer(),
+    death_with_covid_on_the_death_certificate_date = col_date(format = "%Y-%m-%d"),
+    death_with_28_days_of_covid_positive_test = col_logical(),
+    
+    # OTHER COVARIATES ----
+    vaccination_status = col_character()
   ),
 )
 
@@ -232,6 +242,21 @@ data_processed <- data_extract %>%
       #TRUE ~ "Unknown",
       TRUE ~ NA_character_),
     
+    # OUTCOMES ----
+    covid_positive_test_30_days_post_elig_or_treat_date = covid_positive_test_30_days_post_elig_or_treat, 
+    covid_positive_test_30_days_post_elig_or_treat = ifelse(!is.na(covid_positive_test_30_days_post_elig_or_treat_date), 1, 0),
+
+    start_date = pmin(covid_test_positive_date, treatment_date, na.rm = T),
+    covid_hospital_admission = ifelse(covid_hospital_admission_date > start_date, 1, 0),
+    covid_hospitalisation_critical_care = ifelse(covid_hospitalisation_critical_care > 0 & covid_hospital_admission == 1, 1, 0),
+    
+    covid_death = ifelse(!is.na(death_with_covid_on_the_death_certificate_date) |
+                           death_with_28_days_of_covid_positive_test == 1, 1, 0),
+    
+    
+    # OTHER COVARIATES ----
+    vaccination_status = col_character()
+    
   ) %>%
   droplevels() %>%
   select(patient_id,
@@ -239,11 +264,145 @@ data_processed <- data_extract %>%
          covid_test_positive, covid_positive_previous_30_days, tb_postest_treat, elig_start, elig_end,
          sotrovimab_covid_therapeutics, molnupiravir_covid_therapeutics, casirivimab_covid_therapeutics, treatment_date, treatment_type,
          high_risk_cohort_covid_therapeutics, high_risk_group_nhsd, high_risk_group_nhsd_date = high_risk_group_date, high_risk_group_nhsd_combined,
-         covid_hospital_admission_date, age, sex, ethnicity, imd, region_nhs, region_covid_therapeutics
+         covid_hospital_admission_date, age, sex, ethnicity, imd, region_nhs, region_covid_therapeutics,
+         covid_positive_test_30_days_post_elig_or_treat, covid_hospital_admission, covid_hospitalisation_critical_care, covid_death
   )
 
 
 # Save dataset(s) ----
 write_rds(data_processed, here::here("output", "data", "data_processed.rds"), compress = "gz")
+
+
+# Process clean data ----
+cat("#### process clean data ####\n")
+
+## Define high risk cohorts
+data_processed_hrc_matched <- data_processed %>%
+  mutate(high_risk_cohort_covid_therapeutics = ifelse(is.na(treatment_date), NA, high_risk_cohort_covid_therapeutics)) %>%
+  filter(!is.na(high_risk_group_nhsd_date) | !is.na(high_risk_cohort_covid_therapeutics)) %>%
+  mutate(
+    # Sort naming conventions
+    high_risk_cohort_covid_therapeutics = str_replace(high_risk_cohort_covid_therapeutics,
+                                                      "haematological diseases,stem cell transplant recipients",
+                                                      "haematological diseases and stem cell transplant recipients"),
+    high_risk_cohort_covid_therapeutics = str_replace(high_risk_cohort_covid_therapeutics,
+                                                      "stem cell transplant recipients,haematological diseases",
+                                                      "haematological diseases and stem cell transplant recipients"),
+    high_risk_cohort_covid_therapeutics = str_replace(high_risk_cohort_covid_therapeutics,
+                                                      "stem cell transplant recipients,haematological diseases",
+                                                      "haematological diseases and stem cell transplant recipients"),
+    high_risk_cohort_covid_therapeutics = str_replace(high_risk_cohort_covid_therapeutics,
+                                                      "haematological malignancies",
+                                                      "haematological diseases and stem cell transplant recipients"),
+    
+    # Find matches between elig and treated high risk cohorts
+    ind_therapeutic_groups = map_chr(strsplit(high_risk_cohort_covid_therapeutics, ","), paste,collapse="|"),
+    Match = str_detect(high_risk_group_nhsd_combined, ind_therapeutic_groups)
+  )  %>%
+  mutate(across(
+    .cols = where(is.character),
+    .fns = ~na_if(.x, "")
+  )) %>%
+  rowwise() %>%
+  mutate(
+    
+    # Combined elig and treated high risk cohorts
+    high_risk_group_combined = as.character(ifelse(Match == TRUE,
+                                                   paste(high_risk_group_nhsd_combined, high_risk_cohort_covid_therapeutics, sep = ","), "")),
+    high_risk_group_combined = ifelse(high_risk_group_combined == "NA", "", high_risk_group_combined),
+    high_risk_group_combined = as.character(paste(unique(unlist(strsplit(high_risk_group_combined, ","))), collapse = ",")),
+    high_risk_group_combined_count = ifelse(high_risk_group_combined != "", str_count(high_risk_group_combined,",") + 1, NA),
+    
+    ## Eligible high risk cohorts
+    high_risk_group_elig = as.character(ifelse((Match == FALSE & !is.na(high_risk_group_nhsd_combined) & is.na(high_risk_cohort_covid_therapeutics)),
+                                               high_risk_group_nhsd_combined, high_risk_group_combined)),
+    high_risk_group_combined = ifelse(high_risk_group_elig == "NA", "", high_risk_group_elig),
+    high_risk_group_elig = as.character(paste(unique(unlist(strsplit(high_risk_group_elig, ","))), collapse = ",")),
+    high_risk_group_elig_count = ifelse(high_risk_group_elig != "", str_count(high_risk_group_elig,",") + 1, NA),
+    
+    ## Treated high risk cohorts
+    high_risk_group_treated = as.character(ifelse((Match == FALSE & !is.na(high_risk_cohort_covid_therapeutics)),
+                                                  high_risk_cohort_covid_therapeutics, high_risk_group_combined)),
+    high_risk_group_treated = ifelse(high_risk_group_treated == "NA", "", high_risk_group_treated),
+    high_risk_group_treated = as.character(paste(unique(unlist(strsplit(high_risk_group_treated, ","))), collapse = ",")),
+    high_risk_group_treated_count = ifelse(high_risk_group_treated != "", str_count(high_risk_group_treated,",") + 1, NA)
+  )
+
+print(dim(data_processed_hrc_matched))
+
+## Apply eligibility and exclusion criteria
+data_processed_eligible <- data_processed_hrc_matched %>%
+  filter(
+    # Alive and registered
+    has_died == 0,
+    registered_eligible == 1 | registered_treated == 1,
+    
+    # Apply eligibility criteria
+    covid_test_positive == 1,
+    covid_positive_previous_30_days != 1,
+    (tb_postest_treat <= 5 & tb_postest_treat >= 0) | is.na(tb_postest_treat),
+    !is.na(high_risk_group_elig),
+    
+    # Apply exclusion criteria
+    is.na(covid_hospital_admission_date) | covid_hospital_admission_date < (elig_start - 30) & covid_hospital_admission_date > (elig_start),
+    age >= 12,
+    
+    # Only eligible patients
+    !is.na(elig_start),
+  ) %>%
+  mutate(eligibility_status = "Eligible")
+
+print(dim(data_processed_eligible))
+print(table(data_processed_eligible$Match))
+
+## Include treated patients not flagged as eligible
+data_processed_treated <- data_processed_hrc_matched %>%
+  filter(
+    # Treated but non-eligible patients
+    !is.na(treatment_date),
+    !(patient_id %in% unique(data_processed_eligible$patient_id)),
+  ) %>%
+  mutate(eligibility_status = "Treated")
+
+print(dim(data_processed_treated))
+print(table(data_processed_treated$Match))
+
+## Remove and save
+rm(data_processed_hrc_matched)
+
+data_processed_combined <- rbind(data_processed_eligible, data_processed_treated)
+
+rm(data_processed_eligible)
+rm(data_processed_treated)
+
+print(dim(data_processed_combined))
+print(table(data_processed_combined$eligibility_status))
+
+## Exclude patients issued more than one treatment within two weeks
+dup_ids <- data_processed_combined %>%
+  select(patient_id, treatment_date, sotrovimab_covid_therapeutics, molnupiravir_covid_therapeutics, casirivimab_covid_therapeutics) %>%
+  filter(!is.na(treatment_date)) %>%
+  mutate(sotrovimab_covid_therapeutics = as.Date(sotrovimab_covid_therapeutics, origin="1970-01-01"),
+         molnupiravir_covid_therapeutics = as.Date(molnupiravir_covid_therapeutics, origin="1970-01-01"),
+         casirivimab_covid_therapeutics = as.Date(casirivimab_covid_therapeutics, origin="1970-01-01"),
+         sot_mol_diff = as.numeric(sotrovimab_covid_therapeutics - molnupiravir_covid_therapeutics),
+         sot_cas_diff = as.numeric(sotrovimab_covid_therapeutics - casirivimab_covid_therapeutics),
+         mol_cas_diff = as.numeric(molnupiravir_covid_therapeutics - casirivimab_covid_therapeutics)) %>%
+  melt(id.var = "patient_id", measure.vars = c("sot_mol_diff", "sot_cas_diff", "mol_cas_diff")) %>%
+  filter(!is.na(value),
+         value <= 14 | value >= -14) %>%
+  group_by(patient_id) %>%
+  arrange(patient_id)
+
+data_processed_clean <- data_processed_combined %>%
+  subset(!(patient_id %in% unique(dup_ids$patient_id)))
+
+rm(data_processed_combined)
+
+# Save dataset(s) ----
+write_rds(data_processed_clean, here::here("output", "data", "data_processed_clean.rds"), compress = "gz")
+
+
+
 
 

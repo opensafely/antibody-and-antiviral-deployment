@@ -901,7 +901,6 @@ study = StudyDefinition(
   
   
   
-  
   # OUTCOMES ----
   
   ## COVID re-infection

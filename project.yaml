@@ -17,8 +17,6 @@ expectations:
 actions:
   
   # Extract data ----
-
-  ## Cohort data
   extract_data:
     run: cohortextractor:latest generate_cohort --study-definition study_definition --output-dir=output/data --output-format=csv.gz
     outputs:
@@ -27,29 +25,12 @@ actions:
   
   
   # Data processing ----
-
-  ## Process data
   data_process:
     run: r:latest analysis/process/process_data.R
     needs: [extract_data]
     outputs:
       highly_sensitive:
         data: output/data/data_processed.rds
-  
-  data_process2:
-    run: r:latest analysis/process/process_data2.R
-    needs: [data_process]
-    outputs:
-      highly_sensitive:
-        data: output/data/data_processed_clean.rds
-        
-  data_process3:
-    run: r:latest analysis/process/process_data3.R
-    needs: [data_process]
-    outputs:
-      highly_sensitive:
-        data: output/data/data_processed_clean_test.rds
-  
   
   # Data summaries ----
   flow_chart:
@@ -74,13 +55,6 @@ actions:
     outputs:
       moderately_sensitive:
         tables: output/reports/coverage/tables/table_*.csv
-        
-  report_data2:
-    run: r:latest analysis/descriptive/coverage_report_data_v2.R
-    needs: [data_process3]
-    outputs:
-      moderately_sensitive:
-        tables: output/reports/coverage/table_*.csv
 
 
 
