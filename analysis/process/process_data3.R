@@ -33,7 +33,10 @@ fs::dir_create(here::here("output", "reports", "coverage", "tables"))
 ## Import data
 data_processed <- read_rds(here::here("output", "data", "data_processed.rds"))
 print(dim(data_processed))
-
+print(unique(data_processed$high_risk_cohort_covid_therapeutics))
+print(table(is.na(data_processed$high_risk_group_nhsd_date)))
+print(table(is.na(data_processed$high_risk_group_nhsd)))
+            
 # Format data ----
 
 ## Define high risk cohorts
