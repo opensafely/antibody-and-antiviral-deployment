@@ -9,7 +9,7 @@
 # Output: /output/data_properties/data_processed*.txt
 #
 # Author(s): M. Green
-# Date last updated: 02/02/2022
+# Date last updated: 10/02/2022
 #
 ################################################################################
 
@@ -56,9 +56,9 @@ data_criteria <- data_processed %>%
     has_positive_covid_test = (covid_test_positive == 1),
     no_positive_covid_test_previous_30_days = (covid_positive_previous_30_days != 1),
     high_risk_group = !is.na(high_risk_group_nhsd),
-    no_covid_hospital_admission_last_30_days = (is.na(covid_hospital_admission_date) | 
-                                                   covid_hospital_admission_date < (elig_start - 30) & 
-                                                   covid_hospital_admission_date > (elig_start)),
+    no_covid_hospital_admission_last_30_days = (is.na(covid_hospital_discharge_date) | 
+                                                  (covid_hospital_discharge_date < (elig_start - 30) & 
+                                                  covid_hospital_discharge_date > (elig_start))),
     aged_over_12 = (age >= 12),
     treated_within_5_days = ((tb_postest_treat <= 5 & tb_postest_treat >= 0) | is.na(tb_postest_treat)),
     not_duplicated_entries = !(patient_id %in% dup_ids$patient_id),
