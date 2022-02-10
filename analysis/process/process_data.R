@@ -357,7 +357,7 @@ data_processed_eligible <- data_processed_hrc_matched %>%
     !is.na(high_risk_group_elig),
     
     # Apply exclusion criteria
-    is.na(covid_hospital_admission_date) | covid_hospital_admission_date < (elig_start - 30) & covid_hospital_admission_date > (elig_start),
+    is.na(covid_hospital_discharge_date) | (covid_hospital_discharge_date < (elig_start - 30) & covid_hospital_discharge_date > (elig_start)),
     age >= 12,
     
     # Only eligible patients
