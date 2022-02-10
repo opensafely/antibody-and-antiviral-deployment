@@ -108,6 +108,7 @@ data_extract0 <- read_csv(
     
     # OUTCOMES ----
     covid_positive_test_30_days_post_elig_or_treat = col_date(format = "%Y-%m-%d"),
+    covid_hospitalisation_outcome_date = col_date(format = "%Y-%m-%d"),
     covid_hospitalisation_critical_care = col_integer(),
     death_with_covid_on_the_death_certificate_date = col_date(format = "%Y-%m-%d"),
     death_with_28_days_of_covid_positive_test = col_logical(),
@@ -273,9 +274,12 @@ data_processed <- data_extract %>%
          covid_test_positive, covid_positive_previous_30_days, tb_postest_treat, elig_start, elig_end,
          sotrovimab_covid_therapeutics, molnupiravir_covid_therapeutics, casirivimab_covid_therapeutics, treatment_date, treatment_type,
          high_risk_cohort_covid_therapeutics, high_risk_group_nhsd, high_risk_group_nhsd_date = high_risk_group_date, high_risk_group_nhsd_combined,
-         covid_hospital_admission_date, age, sex, ethnicity, imd, region_nhs, region_covid_therapeutics,
-         covid_positive_test_30_days_post_elig_or_treat, covid_hospital_admission, covid_hospitalisation_critical_care, covid_death
-  )
+         covid_hospital_discharge_date, age, sex, ethnicity, imd, region_nhs, region_covid_therapeutics,
+         covid_positive_test_30_days_post_elig_or_treat, covid_hospital_admission, covid_hospitalisation_critical_care, covid_death,
+         solid_organ_transplant_nhsd_snomed, solid_organ_transplant_nhsd_opcs4, transplant_all_y_codes_opcs4, transplant_thymus_opcs4, 
+         transplant_conjunctiva_y_code_opcs4, transplant_conjunctiva_opcs4, transplant_stomach_opcs4, transplant_ileum_1_Y_codes_opcs4,
+         transplant_ileum_2_Y_codes_opcs4, transplant_ileum_1_opcs4, transplant_ileum_2_opcs4
+         )
 
 
 # Save dataset(s) ----
