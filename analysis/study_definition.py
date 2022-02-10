@@ -220,7 +220,8 @@ study = StudyDefinition(
 
   ## Study start date for extracting variables
   start_date = patients.minimum_of(
-    "covid_test_positive_date", "date_treated"
+    "covid_test_positive_date", "sotrovimab_covid_therapeutics",
+                                   "molnupiravir_covid_therapeutics", "casirivimab_covid_therapeutics"
   ),
   
 
@@ -237,11 +238,11 @@ study = StudyDefinition(
     with_patient_classification = ["1"], # ordinary admissions only - exclude day cases and regular attenders
     # see https://docs.opensafely.org/study-def-variables/#sus for more info
     with_admission_method=["21", "22", "23", "24", "25", "2A", "2B", "2C", "2D", "28"], # emergency admissions only to exclude incidental COVID
-    between = ["start_date - 30 days", "start_date - 1 day"],
+    on_or_before = "start_date - 1 day",
     date_format = "YYYY-MM-DD",
     find_first_match_in_period = False,
     return_expectations = {
-      "date": {"earliest": "index_date - 5 days", "latest": "index_date"},
+      "date": {"earliest": "2021-12-20", "latest": "index_date - 1 day"},
       "rate": "uniform",
       "incidence": 0.05
     },
@@ -923,12 +924,29 @@ study = StudyDefinition(
       "incidence": 0.4
     },
   ),
-  
+
+  ## COVID-related hospitalisation 
+  covid_hospitalisation_outcome_date = patients.admitted_to_hospital(
+    returning = "date_admitted",
+    with_these_diagnoses = covid_icd10_codes,
+    with_patient_classification = ["1"], # ordinary admissions only - exclude day cases and regular attenders
+    # see https://docs.opensafely.org/study-def-variables/#sus for more info
+    with_admission_method=["21", "22", "23", "24", "25", "2A", "2B", "2C", "2D", "28"], # emergency admissions only to exclude incidental COVID
+    between = ["start_date", "start_date + 30 days"],
+    find_first_match_in_period = True,
+    date_format = "YYYY-MM-DD",
+    return_expectations = {
+      "date": {"earliest": "2021-12-16", "latest": "index_date"},
+      "rate": "uniform",
+      "incidence": 0.05
+    },
+  ),
+    
   ## Critical care days for COVID-related hospitalisation 
   covid_hospitalisation_critical_care = patients.admitted_to_hospital(
     returning = "days_in_critical_care",
     with_these_diagnoses = covid_icd10_codes,
-    on_or_after = "start_date + 30 days",
+    on_or_after = "covid_hospitalisation_outcome_date",
     find_first_match_in_period = True,
     return_expectations = {
       "category": {"ratios": {"20": 0.5, "40": 0.5}},
@@ -977,9 +995,5 @@ study = StudyDefinition(
     ),
   ),
   
-  
-  
-  
+
 )
-
-
