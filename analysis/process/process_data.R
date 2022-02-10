@@ -66,8 +66,21 @@ data_extract0 <- read_csv(
     symptomatic_covid_test = col_character(),
     covid_symptoms_snomed = col_date(format = "%Y-%m-%d"),
     high_risk_cohort_covid_therapeutics = col_character(),
-    covid_hospital_admission_date = col_date(format = "%Y-%m-%d"),
+    covid_hospital_discharge_date = col_date(format = "%Y-%m-%d"),
     age = col_integer(),
+    
+    # SOLID ORGAN TRANSPLANT - FOR INVESTIGATION ----
+    solid_organ_transplant_nhsd_snomed = col_date(format = "%Y-%m-%d"),
+    solid_organ_transplant_nhsd_opcs4 = col_date(format = "%Y-%m-%d"),
+    transplant_all_y_codes_opcs4 = col_date(format = "%Y-%m-%d"),
+    transplant_thymus_opcs4 = col_date(format = "%Y-%m-%d"),
+    transplant_conjunctiva_y_code_opcs4 = col_date(format = "%Y-%m-%d"),
+    transplant_conjunctiva_opcs4 = col_date(format = "%Y-%m-%d"),
+    transplant_stomach_opcs4 = col_date(format = "%Y-%m-%d"),
+    transplant_ileum_1_Y_codes_opcs4  = col_date(format = "%Y-%m-%d"),
+    transplant_ileum_2_Y_codes_opcs4  = col_date(format = "%Y-%m-%d"),
+    transplant_ileum_1_opcs4 = col_date(format = "%Y-%m-%d"),
+    transplant_ileum_2_opcs4 = col_date(format = "%Y-%m-%d"),
     
     # HIGH RISK GROUPS ----
     downs_syndrome_nhsd = col_date(format = "%Y-%m-%d"),
@@ -247,7 +260,7 @@ data_processed <- data_extract %>%
     covid_positive_test_30_days_post_elig_or_treat = ifelse(!is.na(covid_positive_test_30_days_post_elig_or_treat_date), 1, 0),
 
     start_date = pmin(covid_test_positive_date, treatment_date, na.rm = T),
-    covid_hospital_admission = ifelse(covid_hospital_admission_date > start_date, 1, 0),
+    covid_hospital_admission = ifelse(covid_hospitalisation_outcome_date > start_date, 1, 0),
     covid_hospitalisation_critical_care = ifelse(covid_hospitalisation_critical_care > 0 & covid_hospital_admission == 1, 1, 0),
     
     covid_death = ifelse(!is.na(death_with_covid_on_the_death_certificate_date) |
