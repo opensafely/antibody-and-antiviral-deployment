@@ -11,7 +11,7 @@ nhsd/haematopoietic-stem-cell-transplant-snomed/3ec3ac16
 nhsd/haematopoietic-stem-cell-transplant-icd-10/395e2c2a
 nhsd/haematopoietic-stem-cell-transplant-opcs4/204eb8f5
 nhsd/haematological-malignancies-icd-10/073f45c0
-nhsd/haematological-malignancies-snomed/1583b91d
+nhsd/haematological-malignancies-snomed/31a49191/
 nhsd/ckd-stage-5-snomed-ct/2808538e
 nhsd/ckd-stage-5-icd-10/7bad9258
 nhsd/liver-cirrhosis/64f239d0
