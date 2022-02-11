@@ -79,10 +79,10 @@
       "sha": "4ba51c56e9dfb0ab05161da4b381b9cbb0337003"
     },
     "nhsd-haematological-malignancies-snomed.csv": {
-      "id": "nhsd/haematological-malignancies-snomed/1583b91d",
-      "url": "https://codelists.opensafely.org/codelist/nhsd/haematological-malignancies-snomed/1583b91d/",
-      "downloaded_at": "2022-01-28 14:58:57.130117Z",
-      "sha": "b1294df28507599466e68691864434d79affb788"
+      "id": "nhsd/haematological-malignancies-snomed/31a49191",
+      "url": "https://codelists.opensafely.org/codelist/nhsd/haematological-malignancies-snomed/31a49191/",
+      "downloaded_at": "2022-02-11 11:59:42.695085Z",
+      "sha": "a9eb86b02ec26884f2e26508e699bdcf5ea783aa"
     },
     "nhsd-ckd-stage-5-snomed-ct.csv": {
       "id": "nhsd/ckd-stage-5-snomed-ct/2808538e",
@@ -157,10 +157,10 @@
       "sha": "512bf4922c32d3826e17eeb0870e465825ec2e21"
     },
     "nhsd-transplant-spl-hes-opcs4.csv": {
-      "id": "nhsd/transplant-spl-hes-opcs4/5b4c92d0",
-      "url": "https://codelists.opensafely.org/codelist/nhsd/transplant-spl-hes-opcs4/5b4c92d0/",
-      "downloaded_at": "2022-01-28 15:40:11.004235Z",
-      "sha": "8b5d6d8d7d65d39cd5749cd262b583a1aa8515fe"
+      "id": "nhsd/transplant-spl-hes-opcs4/1b47de52",
+      "url": "https://codelists.opensafely.org/codelist/nhsd/transplant-spl-hes-opcs4/1b47de52/",
+      "downloaded_at": "2022-02-11 11:59:44.342889Z",
+      "sha": "01602bfebd47489f5d14b4aa16fabe8c4655d1d6"
     },
     "nhsd-transplant-thymus-gland-spl-hes-opcs4.csv": {
       "id": "nhsd/transplant-thymus-gland-spl-hes-opcs4/5feb5f2d",
