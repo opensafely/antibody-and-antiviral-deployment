@@ -6,7 +6,7 @@
 # Output: output/data/input.csv.gz
 #
 # Author(s): M Green, H Curtis)
-# Date last updated: 04/02/2022
+# Date last updated: 11/02/2022
 #
 ################################################################################
 
@@ -217,14 +217,14 @@ study = StudyDefinition(
     on_or_after = "index_date - 5 days",
   ),
   
-
+  
   ## Study start date for extracting variables
   start_date = patients.minimum_of(
     "covid_test_positive_date", "sotrovimab_covid_therapeutics",
-                                   "molnupiravir_covid_therapeutics", "casirivimab_covid_therapeutics"
+    "molnupiravir_covid_therapeutics", "casirivimab_covid_therapeutics"
   ),
   
-
+  
   ## Exclusion criteria variables
   
   ### Pattern of clinical presentation indicates that there is recovery rather than risk of deterioration from infection
@@ -265,7 +265,7 @@ study = StudyDefinition(
       "incidence": 0.05
     },
   ),
-
+  
   ### New supplemental oxygen requirement specifically for the management of COVID-19 symptoms
   #   (not currently possible to define/code)
   
@@ -282,7 +282,7 @@ study = StudyDefinition(
   
   # CENSORING ----
   
-
+  
   ## Death of any cause
   death_date = patients.died_from_any_cause(
     returning = "date_of_death",
@@ -779,7 +779,7 @@ study = StudyDefinition(
   
   ## Ethnicity
   ethnicity_primis = patients.with_these_clinical_events(
-    ethnicity_primis_codes,
+    ethnicity_primis_snomed_codes,
     returning = "category",
     on_or_after = "start_date",
     find_first_match_in_period = True,
@@ -870,12 +870,188 @@ study = StudyDefinition(
     },
   ),
   
-  ## CMDUs/ICS
+  # STP (NHS administration region based on geography, currenty closest match to CMDU)
+  stp = patients.registered_practice_as_of(
+    "start_date",
+    returning = "stp_code",
+    return_expectations = {
+      "rate": "universal",
+      "category": {
+        "ratios": {
+          "STP1": 0.1,
+          "STP2": 0.1,
+          "STP3": 0.1,
+          "STP4": 0.1,
+          "STP5": 0.1,
+          "STP6": 0.1,
+          "STP7": 0.1,
+          "STP8": 0.1,
+          "STP9": 0.1,
+          "STP10": 0.1,
+        }
+      },
+    },
+  ),
   
   
   
+  # CLINICAL GROUPS ----
   
-  # OTHER COVARIATES ----
+  ## Autism
+  autism = patients.with_these_clinical_events(
+    autism_nhsd_snomed_codes,
+    on_or_before = "start_date",
+    returning = "binary_flag",
+    return_expectations = {"incidence": 0.3}
+  ),
+  
+  ## Care home 
+  care_home_primis = patients.with_these_clinical_events(
+    care_home_primis_snomed_codes,
+    returning = "binary_flag",
+    on_or_before = "start_date",
+    return_expectations = {"incidence": 0.15,}
+  ),
+  
+  ## Dementia
+  dementia = patients.satisfying(
+    
+    """
+    dementia_all
+    AND
+    age > 39
+    """, 
+    
+    return_expectations = {
+      "incidence": 0.01,
+    },
+    
+    dementia_all = patients.with_these_clinical_events(
+      dementia_nhsd_snomed_codes,
+      on_or_before = "start_date",
+      returning = "binary_flag",
+      return_expectations = {"incidence": 0.05}
+    ),
+    
+  ),
+  
+  
+  ## Housebound
+  housebound = patients.satisfying(
+    """housebound_date
+                AND NOT no_longer_housebound
+                AND NOT moved_into_care_home""",
+    return_expectations={
+      "incidence": 0.01,
+    },
+    
+    housebound_date = patients.with_these_clinical_events( 
+      housebound_opensafely_snomed_codes, 
+      on_or_before = "start_date",
+      find_last_match_in_period = True,
+      returning = "date",
+      date_format = "YYYY-MM-DD",
+    ),   
+    
+    no_longer_housebound = patients.with_these_clinical_events( 
+      no_longer_housebound_opensafely_snomed_codes, 
+      on_or_after = "housebound_date",
+    ),
+    
+    moved_into_care_home = patients.with_these_clinical_events(
+      care_home_primis_snomed_codes,
+      on_or_after = "housebound_date",
+    ),
+    
+  ),
+  
+  ## Learning disability
+  learning_disability = patients.with_these_clinical_events(
+    wider_ld_primis_snomed_codes,
+    on_or_before = "start_date",
+    returning = "binary_flag",
+    return_expectations = {"incidence": 0.2}
+  ),
+  
+  ## Shielded
+  shielded = patients.satisfying(
+    """ 
+    severely_clinically_vulnerable
+    AND 
+    NOT less_vulnerable 
+    """, 
+    return_expectations = {
+      "incidence": 0.01,
+    },
+    
+    ### SHIELDED GROUP - first flag all patients with "high risk" codes
+    severely_clinically_vulnerable = patients.with_these_clinical_events(
+      high_risk_primis_snomed_codes, # note no date limits set
+      find_last_match_in_period = True,
+      return_expectations = {"incidence": 0.02,},
+    ),
+    
+    # find date at which the high risk code was added
+    date_severely_clinically_vulnerable = patients.date_of(
+      "severely_clinically_vulnerable", 
+      date_format  ="YYYY-MM-DD",   
+    ),
+    
+    ### NOT SHIELDED GROUP (medium and low risk) - only flag if later than 'shielded'
+    less_vulnerable = patients.with_these_clinical_events(
+      not_high_risk_primis_snomed_codes, 
+      on_or_after = "date_severely_clinically_vulnerable",
+      return_expectations = {"incidence": 0.01,},
+    ),
+  ),
+  
+  # flag the newly expanded shielding group as of 15 feb (should be a subset of the previous flag)
+  shielded_since_feb_15 = patients.satisfying(
+    """severely_clinically_vulnerable_since_feb_15
+                AND NOT new_shielding_status_reduced
+                AND NOT previous_flag
+            """,
+    return_expectations={
+      "incidence": 0.01,
+    },
+    
+    ### SHIELDED GROUP - first flag all patients with "high risk" codes
+    severely_clinically_vulnerable_since_feb_15 = patients.with_these_clinical_events(
+      high_risk_primis_snomed_codes, 
+      on_or_after = "2021-02-15",
+      find_last_match_in_period = False,
+      return_expectations = {"incidence": 0.02,},
+    ),
+    
+    # find date at which the high risk code was added
+    date_vulnerable_since_feb_15 = patients.date_of(
+      "severely_clinically_vulnerable_since_feb_15", 
+      date_format = "YYYY-MM-DD",   
+    ),
+    
+    ### check that patient's shielding status has not since been reduced to a lower risk level 
+    # e.g. due to improved clinical condition of patient
+    new_shielding_status_reduced = patients.with_these_clinical_events(
+      not_high_risk_primis_snomed_codes,
+      on_or_after = "date_vulnerable_since_feb_15",
+      return_expectations = {"incidence": 0.01,},
+    ),
+    
+    # anyone with a previous flag of any risk level will not be added to the new shielding group
+    previous_flag = patients.with_these_clinical_events(
+      combine_codelists(high_risk_primis_snomed_codes, not_high_risk_primis_snomed_codes),
+      on_or_before = "2021-02-14",
+      return_expectations = {"incidence": 0.01,},
+    ),
+  ),
+  
+  ### Serious Mental Illness
+  serious_mental_illness = patients.with_these_clinical_events(
+    serious_mental_illness_nhsd_snomed_codes,
+    on_or_before = "index_date",
+    returning = "binary_flag",
+    return_expectations = {"incidence": 0.1}
+  ),
   
   ## Vaccination status
   vaccination_status = patients.categorised_as(
@@ -925,6 +1101,10 @@ study = StudyDefinition(
   
   
   
+  # CLINICAL CO-MORBIDITIES TBC ----
+  
+  
+  
   # OUTCOMES ----
   
   ## COVID re-infection
@@ -942,7 +1122,7 @@ study = StudyDefinition(
       "incidence": 0.4
     },
   ),
-
+  
   ## COVID-related hospitalisation 
   covid_hospitalisation_outcome_date = patients.admitted_to_hospital(
     returning = "date_admitted",
@@ -959,7 +1139,7 @@ study = StudyDefinition(
       "incidence": 0.05
     },
   ),
-    
+  
   ## Critical care days for COVID-related hospitalisation 
   covid_hospitalisation_critical_care = patients.admitted_to_hospital(
     returning = "days_in_critical_care",
@@ -1013,5 +1193,5 @@ study = StudyDefinition(
     ),
   ),
   
-
+  
 )

@@ -98,11 +98,11 @@ haematopoietic_stem_cell_transplant_nhsd_opcs4_codes = codelist_from_csv(
   column = "code"
 )
 
-# haematological_malignancies_nhsd_snomed_codes = codelist_from_csv(
-#   "codelists/nhsd-haematological-malignancies-snomed.csv", 
-#   system = "snomed", 
-#   column = "code"
-# )
+haematological_malignancies_nhsd_snomed_codes = codelist_from_csv(
+  "codelists/nhsd-haematological-malignancies-snomed.csv",
+  system = "snomed",
+  column = "code"
+)
 
 haematological_malignancies_nhsd_icd10_codes = codelist_from_csv(
   "codelists/nhsd-haematological-malignancies-icd-10.csv", 
@@ -307,11 +307,74 @@ huntingtons_disease_nhsd_icd10_codes = codelist_from_csv(
 ## CLINICAL/DEMOGRAPHIC COVARIATES ----
 
 ### Ethnicity
-ethnicity_primis_codes = codelist_from_csv(
+ethnicity_primis_snomed_codes = codelist_from_csv(
   "codelists/primis-covid19-vacc-uptake-eth2001.csv",
   system = "snomed",
   column = "code",
   category_column="grouping_6_id",
 )
+
+
+# OTHER COVARIATES ----
+ 
+## Autism
+autism_nhsd_snomed_codes = codelist_from_csv(
+  "codelists/nhsd-primary-care-domain-refsets-autism_cod.csv",
+  system = "snomed",
+  column = "code",
+)
+
+## Care home 
+care_home_primis_snomed_codes = codelist_from_csv(
+    "codelists/primis-covid19-vacc-uptake-longres.csv", 
+    system = "snomed", 
+    column = "code")
+
+## Dementia
+dementia_nhsd_snomed_codes = codelist_from_csv(
+  "codelists/nhsd-primary-care-domain-refsets-dem_cod.csv", 
+  system = "snomed", 
+  column = "code",
+)
+
+## Housebound
+housebound_opensafely_snomed_codes = codelist_from_csv(
+    "codelists/opensafely-housebound.csv", 
+    system = "snomed", 
+    column = "code"
+)
+
+no_longer_housebound_opensafely_snomed_codes = codelist_from_csv(
+    "codelists/opensafely-no-longer-housebound.csv", 
+    system = "snomed", 
+    column = "code"
+)
+
+## Learning disabilities
+wider_ld_primis_snomed_codes = codelist_from_csv(
+    "codelists/primis-covid19-vacc-uptake-learndis.csv", 
+    system = "snomed", 
+    column = "code"
+)
+
+## Shielded
+high_risk_primis_snomed_codes = codelist_from_csv(
+    "codelists/primis-covid19-vacc-uptake-shield.csv", 
+    system = "snomed", 
+    column = "code")
+
+not_high_risk_primis_snomed_codes = codelist_from_csv(
+    "codelists/primis-covid19-vacc-uptake-nonshield.csv", 
+    system = "snomed", 
+    column = "code")
+    
+## Serious mental illness
+serious_mental_illness_nhsd_snomed_codes = codelist_from_csv(
+  "codelists/nhsd-primary-care-domain-refsets-mh_cod.csv",
+  system = "snomed",
+  column = "code",
+)
+    
+
 
 

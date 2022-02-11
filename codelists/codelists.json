@@ -79,10 +79,10 @@
       "sha": "4ba51c56e9dfb0ab05161da4b381b9cbb0337003"
     },
     "nhsd-haematological-malignancies-snomed.csv": {
-      "id": "nhsd/haematological-malignancies-snomed/1583b91d",
-      "url": "https://codelists.opensafely.org/codelist/nhsd/haematological-malignancies-snomed/1583b91d/",
-      "downloaded_at": "2022-01-28 14:58:57.130117Z",
-      "sha": "b1294df28507599466e68691864434d79affb788"
+      "id": "nhsd/haematological-malignancies-snomed/31a49191",
+      "url": "https://codelists.opensafely.org/codelist/nhsd/haematological-malignancies-snomed/31a49191/",
+      "downloaded_at": "2022-02-11 12:14:30.075501Z",
+      "sha": "a9eb86b02ec26884f2e26508e699bdcf5ea783aa"
     },
     "nhsd-ckd-stage-5-snomed-ct.csv": {
       "id": "nhsd/ckd-stage-5-snomed-ct/2808538e",
@@ -157,10 +157,10 @@
       "sha": "512bf4922c32d3826e17eeb0870e465825ec2e21"
     },
     "nhsd-transplant-spl-hes-opcs4.csv": {
-      "id": "nhsd/transplant-spl-hes-opcs4/5b4c92d0",
-      "url": "https://codelists.opensafely.org/codelist/nhsd/transplant-spl-hes-opcs4/5b4c92d0/",
-      "downloaded_at": "2022-01-28 15:40:11.004235Z",
-      "sha": "8b5d6d8d7d65d39cd5749cd262b583a1aa8515fe"
+      "id": "nhsd/transplant-spl-hes-opcs4/1b47de52",
+      "url": "https://codelists.opensafely.org/codelist/nhsd/transplant-spl-hes-opcs4/1b47de52/",
+      "downloaded_at": "2022-02-11 12:14:33.295640Z",
+      "sha": "01602bfebd47489f5d14b4aa16fabe8c4655d1d6"
     },
     "nhsd-transplant-thymus-gland-spl-hes-opcs4.csv": {
       "id": "nhsd/transplant-thymus-gland-spl-hes-opcs4/5feb5f2d",
@@ -269,6 +269,60 @@
       "url": "https://codelists.opensafely.org/codelist/primis-covid19-vacc-uptake/eth2001/v1/",
       "downloaded_at": "2022-02-02 16:32:15.622401Z",
       "sha": "36e4eacba898e6ec72da8ff66e8c673bfd9aa8e4"
+    },
+    "nhsd-primary-care-domain-refsets-autism_cod.csv": {
+      "id": "nhsd-primary-care-domain-refsets/autism_cod/20210127",
+      "url": "https://codelists.opensafely.org/codelist/nhsd-primary-care-domain-refsets/autism_cod/20210127/",
+      "downloaded_at": "2022-02-11 13:52:03.610248Z",
+      "sha": "5e1a00fd89401955f0ebd09af105cf9748dbcc73"
+    },
+    "nhsd-primary-care-domain-refsets-dem_cod.csv": {
+      "id": "nhsd-primary-care-domain-refsets/dem_cod/20210127",
+      "url": "https://codelists.opensafely.org/codelist/nhsd-primary-care-domain-refsets/dem_cod/20210127/",
+      "downloaded_at": "2022-02-11 13:53:16.340903Z",
+      "sha": "96defdd5b5345aaed6c6e2e71188c966288e4731"
+    },
+    "primis-covid19-vacc-uptake-longres.csv": {
+      "id": "primis-covid19-vacc-uptake/longres/v1",
+      "url": "https://codelists.opensafely.org/codelist/primis-covid19-vacc-uptake/longres/v1/",
+      "downloaded_at": "2022-02-11 13:28:16.339454Z",
+      "sha": "4d4c94b9c6aa267c6a60657150bbc5ec7d2d7625"
+    },
+    "opensafely-housebound.csv": {
+      "id": "opensafely/housebound/5bc77310",
+      "url": "https://codelists.opensafely.org/codelist/opensafely/housebound/5bc77310/",
+      "downloaded_at": "2022-02-11 13:28:16.605811Z",
+      "sha": "4408752ee525151741ce050f1a20c51cd5c0116a"
+    },
+    "opensafely-no-longer-housebound.csv": {
+      "id": "opensafely/no-longer-housebound/29a88ca6",
+      "url": "https://codelists.opensafely.org/codelist/opensafely/no-longer-housebound/29a88ca6/",
+      "downloaded_at": "2022-02-11 13:28:16.838474Z",
+      "sha": "cedcdcc0354885c1aa08224072718ff6bdae7450"
+    },
+    "primis-covid19-vacc-uptake-learndis.csv": {
+      "id": "primis-covid19-vacc-uptake/learndis/v1",
+      "url": "https://codelists.opensafely.org/codelist/primis-covid19-vacc-uptake/learndis/v1/",
+      "downloaded_at": "2022-02-11 13:28:17.161581Z",
+      "sha": "41f81fcb9fadb082a77cadd6cf60614d7c8d860f"
+    },
+    "primis-covid19-vacc-uptake-shield.csv": {
+      "id": "primis-covid19-vacc-uptake/shield/v1",
+      "url": "https://codelists.opensafely.org/codelist/primis-covid19-vacc-uptake/shield/v1/",
+      "downloaded_at": "2022-02-11 13:28:17.453890Z",
+      "sha": "7edf08877d201478d4f794edb4d4dfe1353cb095"
+    },
+    "primis-covid19-vacc-uptake-nonshield.csv": {
+      "id": "primis-covid19-vacc-uptake/nonshield/v1",
+      "url": "https://codelists.opensafely.org/codelist/primis-covid19-vacc-uptake/nonshield/v1/",
+      "downloaded_at": "2022-02-11 13:28:17.733288Z",
+      "sha": "fb1e019781d5a58c5512d71e9cd6cf47c05e72c5"
+    },
+    "nhsd-primary-care-domain-refsets-mh_cod.csv": {
+      "id": "nhsd-primary-care-domain-refsets/mh_cod/20210127",
+      "url": "https://codelists.opensafely.org/codelist/nhsd-primary-care-domain-refsets/mh_cod/20210127/",
+      "downloaded_at": "2022-02-11 13:28:18.018626Z",
+      "sha": "6e98da3c8765354b47ab74d1bef4679966a337f3"
     }
   }
 }
