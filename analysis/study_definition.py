@@ -232,7 +232,7 @@ study = StudyDefinition(
   
   ### Require hospitalisation for COVID-19- within 30 days before treatment -- PRIMARY DIAGNOSIS
   ## NB this data lags behind the therapeutics/testing data so may be missing
-  covid_hospital_discharge_date = patients.admitted_to_hospital(
+  primary_covid_hospital_discharge_date = patients.admitted_to_hospital(
     returning = "date_discharged",
     with_these_primary_diagnoses = covid_icd10_codes,
     with_patient_classification = ["1"], # ordinary admissions only - exclude day cases and regular attenders
@@ -250,7 +250,7 @@ study = StudyDefinition(
   
   ### Require hospitalisation for COVID-19- within 30 days before treatment -- ANY DIAGNOSIS POSITION
   ## NB this data lags behind the therapeutics/testing data so may be missing
-  covid_hospital_discharge_date_any = patients.admitted_to_hospital(
+  any_covid_hospital_discharge_date = patients.admitted_to_hospital(
     returning = "date_discharged",
     with_these_diagnoses = covid_icd10_codes,
     with_patient_classification = ["1"], # ordinary admissions only - exclude day cases and regular attenders
@@ -898,7 +898,7 @@ study = StudyDefinition(
   # CLINICAL GROUPS ----
   
   ## Autism
-  autism = patients.with_these_clinical_events(
+  autism_nhsd = patients.with_these_clinical_events(
     autism_nhsd_snomed_codes,
     on_or_before = "start_date",
     returning = "binary_flag",
@@ -914,7 +914,7 @@ study = StudyDefinition(
   ),
   
   ## Dementia
-  dementia = patients.satisfying(
+  dementia_nhsd = patients.satisfying(
     
     """
     dementia_all
@@ -937,7 +937,7 @@ study = StudyDefinition(
   
   
   ## Housebound
-  housebound = patients.satisfying(
+  housebound_opensafely = patients.satisfying(
     """housebound_date
                 AND NOT no_longer_housebound
                 AND NOT moved_into_care_home""",
@@ -966,7 +966,7 @@ study = StudyDefinition(
   ),
   
   ## Learning disability
-  learning_disability = patients.with_these_clinical_events(
+  learning_disability_primis = patients.with_these_clinical_events(
     wider_ld_primis_snomed_codes,
     on_or_before = "start_date",
     returning = "binary_flag",
@@ -974,7 +974,7 @@ study = StudyDefinition(
   ),
   
   ## Shielded
-  shielded = patients.satisfying(
+  shielded_primis = patients.satisfying(
     """ 
     severely_clinically_vulnerable
     AND 
@@ -1046,7 +1046,7 @@ study = StudyDefinition(
   ),
   
   ### Serious Mental Illness
-  serious_mental_illness = patients.with_these_clinical_events(
+  serious_mental_illness_nhsd = patients.with_these_clinical_events(
     serious_mental_illness_nhsd_snomed_codes,
     on_or_before = "index_date",
     returning = "binary_flag",
