@@ -33,13 +33,6 @@ actions:
         data: output/data/data_processed*.rds
   
   # Data summaries ----
-  flow_chart:
-    run: r:latest analysis/descriptive/flow_chart.R
-    needs: [data_process]
-    outputs:
-      moderately_sensitive:
-        data: output/data/flowchart.csv
-
   data_properties:
     run: r:latest analysis/descriptive/data_properties.R output/data/data_processed.rds output/data_properties
     needs: [data_process]

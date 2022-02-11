@@ -10,7 +10,7 @@
 #         /output/data/data_processed_clean.csv
 #
 # Author(s): M Green
-# Date last updated: 09/02/2022
+# Date last updated: 11/02/2022
 #
 ################################################################################
 
@@ -65,24 +65,15 @@ data_extract0 <- read_csv(
     covid_positive_previous_30_days = col_logical(),
     symptomatic_covid_test = col_character(),
     covid_symptoms_snomed = col_date(format = "%Y-%m-%d"),
-    high_risk_cohort_covid_therapeutics = col_character(),
-    covid_hospital_discharge_date = col_date(format = "%Y-%m-%d"),
+    primary_covid_hospital_discharge_date = col_date(format = "%Y-%m-%d"),
+    any_covid_hospital_discharge_date = col_date(format = "%Y-%m-%d"),
     age = col_integer(),
     
     # SOLID ORGAN TRANSPLANT - FOR INVESTIGATION ----
-    solid_organ_transplant_nhsd_snomed = col_date(format = "%Y-%m-%d"),
-    solid_organ_transplant_nhsd_opcs4 = col_date(format = "%Y-%m-%d"),
-    transplant_all_y_codes_opcs4 = col_date(format = "%Y-%m-%d"),
-    transplant_thymus_opcs4 = col_date(format = "%Y-%m-%d"),
-    transplant_conjunctiva_y_code_opcs4 = col_date(format = "%Y-%m-%d"),
-    transplant_conjunctiva_opcs4 = col_date(format = "%Y-%m-%d"),
-    transplant_stomach_opcs4 = col_date(format = "%Y-%m-%d"),
-    transplant_ileum_1_Y_codes_opcs4  = col_date(format = "%Y-%m-%d"),
-    transplant_ileum_2_Y_codes_opcs4  = col_date(format = "%Y-%m-%d"),
-    transplant_ileum_1_opcs4 = col_date(format = "%Y-%m-%d"),
-    transplant_ileum_2_opcs4 = col_date(format = "%Y-%m-%d"),
+    solid_organ_transplant_nhsd = col_date(format = "%Y-%m-%d"),
     
     # HIGH RISK GROUPS ----
+    high_risk_cohort_covid_therapeutics = col_character(),
     downs_syndrome_nhsd = col_date(format = "%Y-%m-%d"),
     sickle_cell_disease_nhsd = col_date(format = "%Y-%m-%d"),
     cancer_opensafely_snomed = col_date(format = "%Y-%m-%d"),
@@ -105,16 +96,26 @@ data_extract0 <- read_csv(
     imd = col_character(),
     region_nhs = col_character(),
     region_covid_therapeutics = col_character(),
+    stp = col_character(),
+    
+    
+    # CLINICAL GROUPS ----
+    autism_nhsd = col_logical(),
+    care_home_primis = col_logical(),
+    dementia_nhsd = col_logical(),
+    housebound_opensafely = col_logical(),
+    learning_disability_primis = col_logical(),
+    shielded_primis = col_logical(),
+    serious_mental_illness_nhsd = col_logical(),
+    vaccination_status = col_character(),
     
     # OUTCOMES ----
     covid_positive_test_30_days_post_elig_or_treat = col_date(format = "%Y-%m-%d"),
     covid_hospitalisation_outcome_date = col_date(format = "%Y-%m-%d"),
     covid_hospitalisation_critical_care = col_integer(),
     death_with_covid_on_the_death_certificate_date = col_date(format = "%Y-%m-%d"),
-    death_with_28_days_of_covid_positive_test = col_logical(),
+    death_with_28_days_of_covid_positive_test = col_logical()
     
-    # OTHER COVARIATES ----
-    vaccination_status = col_character()
   ),
 )
 
@@ -170,47 +171,77 @@ data_processed <- data_extract %>%
     rare_neurological_conditions_nhsd =  pmax(multiple_sclerosis_nhsd, motor_neurone_disease_nhsd, myasthenia_gravis_nhsd,
                                               huntingtons_disease_nhsd, na.rm = T),
     
-    high_risk_group_date = pmax(downs_syndrome_nhsd, sickle_cell_disease_nhsd, cancer_opensafely_snomed,
+    high_risk_group_nhsd_date = pmax(downs_syndrome_nhsd, sickle_cell_disease_nhsd, cancer_opensafely_snomed,
                                 haematological_disease_nhsd, ckd_stage_5_nhsd, liver_disease_nhsd, imid_nhsd,
                                 immunosupression_nhsd, hiv_aids_nhsd, solid_organ_transplant_nhsd, rare_neurological_conditions_nhsd,
                                 na.rm = TRUE),
     
-    elig_start = as.Date(ifelse(covid_test_positive == 1 & (covid_test_positive_date >= high_risk_group_date), covid_test_positive_date, NA), origin = "1970-01-01"),
+    elig_start = as.Date(ifelse(covid_test_positive == 1 & (covid_test_positive_date >= high_risk_group_nhsd_date), covid_test_positive_date, NA), origin = "1970-01-01"),
     elig_end = as.Date(elig_start + 5, origin = "1970-01-01"),
     
     # HIGH RISK GROUPS ----
-    high_risk_group_nhsd = case_when(
-      high_risk_group_date == downs_syndrome_nhsd ~ "Down's syndrome", 
-      high_risk_group_date == sickle_cell_disease_nhsd ~ "Sickle cell disease", 
-      high_risk_group_date == cancer_opensafely_snomed ~ "Patients with a solid cancer", 
-      high_risk_group_date == haematological_disease_nhsd ~ "Patients with a haematological diseases and stem cell transplant recipients", 
-      high_risk_group_date == ckd_stage_5_nhsd ~ "Patients with renal disease", 
-      high_risk_group_date == liver_disease_nhsd ~ "Patients with liver disease", 
-      high_risk_group_date == imid_nhsd ~ "Patients with immune-mediated inflammatory disorders (IMID)", 
-      high_risk_group_date == immunosupression_nhsd ~ "Primary immune deficiencies", 
-      high_risk_group_date == hiv_aids_nhsd ~ "HIV/AIDS", 
-      high_risk_group_date == solid_organ_transplant_nhsd ~ "Solid organ transplant recipients",
-      high_risk_group_date == rare_neurological_conditions_nhsd ~ "Rare neurological conditions",
-      TRUE ~ NA_character_),
+    downs_syndrome_nhsd_name = ifelse(!is.na(downs_syndrome_nhsd), "Down's syndrome", NA),
+    sickle_cell_disease_nhsd_name = ifelse(!is.na(sickle_cell_disease_nhsd), "sickle cell disease", NA),
+    cancer_opensafely_name = ifelse(!is.na(cancer_opensafely_snomed), "solid cancer", NA),
+    haematological_disease_nhsd_name = ifelse(!is.na(haematological_disease_nhsd), "haematological diseases and stem cell transplant recipients", NA),
+    ckd_stage_5_nhsd_name = ifelse(!is.na(ckd_stage_5_nhsd), "renal disease", NA),
+    liver_disease_nhsd_name = ifelse(!is.na(liver_disease_nhsd), "liver disease", NA),
+    imid_nhsd_name = ifelse(!is.na(imid_nhsd), "IMID", NA),
+    immunosupression_nhsd_name = ifelse(!is.na(immunosupression_nhsd), "primary immune deficiencies", NA),
+    hiv_aids_nhsd_name = ifelse(!is.na(hiv_aids_nhsd), "HIV or AIDS immunosupression", NA),
+    solid_organ_transplant_nhsd_name = ifelse(!is.na(solid_organ_transplant_nhsd), "solid organ recipients", NA),
+    rare_neurological_conditions_nhsd_name = ifelse(!is.na(rare_neurological_conditions_nhsd), "rare neurological conditions", NA),
     
-    downs_syndrome_nhsd = ifelse(!is.na(downs_syndrome_nhsd), "Downs syndrome", NA),
-    sickle_cell_disease_nhsd = ifelse(!is.na(sickle_cell_disease_nhsd), "sickle cell disease", NA),
-    cancer_opensafely_snomed = ifelse(!is.na(cancer_opensafely_snomed), "solid cancer", NA),
-    haematological_disease_nhsd = ifelse(!is.na(haematological_disease_nhsd), "haematological diseases and stem cell transplant recipients", NA),
-    ckd_stage_5_nhsd = ifelse(!is.na(ckd_stage_5_nhsd), "renal disease", NA),
-    liver_disease_nhsd = ifelse(!is.na(liver_disease_nhsd), "liver disease", NA),
-    imid_nhsd = ifelse(!is.na(imid_nhsd), "IMID", NA),
-    immunosupression_nhsd = ifelse(!is.na(immunosupression_nhsd), "primary immune deficiencies", NA),
-    hiv_aids_nhsd = ifelse(!is.na(hiv_aids_nhsd), "HIV or AIDS", NA),
-    solid_organ_transplant_nhsd = ifelse(!is.na(solid_organ_transplant_nhsd), "solid organ recipients", NA),
-    rare_neurological_conditions_nhsd = ifelse(!is.na(rare_neurological_conditions_nhsd), "rare neurological conditions", NA)
+    downs_syndrome_nhsd = ifelse(!is.na(downs_syndrome_nhsd), 1, NA),
+    sickle_cell_disease_nhsd = ifelse(!is.na(sickle_cell_disease_nhsd), 1, NA),
+    cancer_opensafely = ifelse(!is.na(cancer_opensafely_snomed), 1, NA),
+    haematological_disease_nhsd = ifelse(!is.na(haematological_disease_nhsd), 1, NA),
+    ckd_stage_5_nhsd = ifelse(!is.na(ckd_stage_5_nhsd), 1, NA),
+    liver_disease_nhsd = ifelse(!is.na(liver_disease_nhsd), 1, NA),
+    imid_nhsd = ifelse(!is.na(imid_nhsd), 1, NA),
+    immunosupression_nhsd = ifelse(!is.na(immunosupression_nhsd), 1, NA),
+    hiv_aids_nhsd = ifelse(!is.na(hiv_aids_nhsd), 1, NA),
+    solid_organ_transplant_nhsd = ifelse(!is.na(solid_organ_transplant_nhsd), 1, NA),
+    rare_neurological_conditions_nhsd = ifelse(!is.na(rare_neurological_conditions_nhsd), 1, NA),
+    
+    downs_syndrome_therapeutics = ifelse(str_detect(high_risk_cohort_covid_therapeutics, "Downs syndrome") == TRUE, 1, NA),
+    sickle_cell_disease_therapeutics = ifelse(str_detect(high_risk_cohort_covid_therapeutics, "sickle cell disease") == TRUE, 1, NA),
+    cancer_therapeutics = ifelse(str_detect(high_risk_cohort_covid_therapeutics, "solid cancer") == TRUE, 1, NA),
+    haematological_disease_therapeutics = ifelse(str_detect(high_risk_cohort_covid_therapeutics, "haematological diseases and stem cell transplant recipients") == TRUE, 1, NA),
+    haematological_disease_therapeutics = ifelse(str_detect(high_risk_cohort_covid_therapeutics, "haematological diseases") == TRUE, 1, haematological_disease_therapeutics),
+    haematological_disease_therapeutics = ifelse(str_detect(high_risk_cohort_covid_therapeutics, "haematologic malignancy") == TRUE, 1, haematological_disease_therapeutics),
+    haematological_disease_therapeutics = ifelse(str_detect(high_risk_cohort_covid_therapeutics, "stem cell transplant recipients") == TRUE, 1, haematological_disease_therapeutics),
+    ckd_stage_5_therapeutics = ifelse(str_detect(high_risk_cohort_covid_therapeutics, "renal disease") == TRUE, 1, NA),
+    liver_disease_therapeutics = ifelse(str_detect(high_risk_cohort_covid_therapeutics, "liver disease") == TRUE, 1, NA),
+    imid_therapeutics = ifelse(str_detect(high_risk_cohort_covid_therapeutics, "IMID") == TRUE, 1, NA),
+    immunosupression_therapeutics = ifelse(str_detect(high_risk_cohort_covid_therapeutics, "primary immune deficiencies") == TRUE, 1, NA),
+    hiv_aids_therapeutics = ifelse(str_detect(high_risk_cohort_covid_therapeutics, "HIV or AIDS") == TRUE, 1, NA),
+    solid_organ_transplant_therapeutics = ifelse(str_detect(high_risk_cohort_covid_therapeutics, "solid organ recipients") == TRUE, 1, NA),
+    rare_neurological_conditions_therapeutics = ifelse(str_detect(high_risk_cohort_covid_therapeutics, "rare neurological conditions") == TRUE, 1, NA),   
+    
+    downs_syndrome = ifelse(downs_syndrome_nhsd == downs_syndrome_therapeutics, 1, NA),
+    sickle_cell_disease = ifelse(sickle_cell_disease_nhsd == sickle_cell_disease_therapeutics, 1, NA),
+    solid_cancer = ifelse(cancer_opensafely == cancer_therapeutics, 1, NA),
+    haematological_disease = ifelse(haematological_disease_nhsd == haematological_disease_therapeutics, 1, NA),
+    renal_disease = ifelse(ckd_stage_5_nhsd == ckd_stage_5_therapeutics, 1, NA),
+    liver_disease = ifelse(liver_disease_nhsd == liver_disease_therapeutics, 1, NA),
+    imid = ifelse(imid_nhsd == imid_therapeutics, 1, NA),
+    immunosupression = ifelse(immunosupression_nhsd == immunosupression_therapeutics, 1, NA),
+    hiv_aids = ifelse(hiv_aids_nhsd == hiv_aids_therapeutics, 1, NA),
+    solid_organ_transplant = ifelse(solid_organ_transplant_nhsd == solid_organ_transplant_therapeutics, 1, NA),
+    rare_neurological_conditions = ifelse(rare_neurological_conditions_nhsd == rare_neurological_conditions_therapeutics, 1, NA)
+    
     ) %>%
-  unite("high_risk_group_nhsd_combined", downs_syndrome_nhsd, sickle_cell_disease_nhsd, cancer_opensafely_snomed,
-      haematological_disease_nhsd, ckd_stage_5_nhsd, liver_disease_nhsd, imid_nhsd, immunosupression_nhsd, hiv_aids_nhsd, 
-      solid_organ_transplant_nhsd, rare_neurological_conditions_nhsd, sep = ",", na.rm = T) %>%
+  unite("high_risk_group_nhsd_combined", downs_syndrome_nhsd_name, sickle_cell_disease_nhsd_name, cancer_opensafely_name,
+        haematological_disease_nhsd_name, ckd_stage_5_nhsd_name, liver_disease_nhsd_name, imid_nhsd_name, immunosupression_nhsd_name, 
+        hiv_aids_nhsd_name, solid_organ_transplant_nhsd_name, rare_neurological_conditions_nhsd_name, sep = ",", na.rm = T) %>%
   mutate(
     
-    # CLINICAL/DEMOGRAPHIC COVARIATES ----
+    ## Combine nhsd group names to get list of all groups
+    ind_therapeutic_groups = map_chr(strsplit(high_risk_cohort_covid_therapeutics, ","), paste,collapse="|"),
+    match = str_detect(high_risk_group_nhsd_combined, ind_therapeutic_groups),
+    
+    # Cinic/demo variables
     sex = fct_case_when(
       sex == "F" ~ "Female",
       sex == "M" ~ "Male",
@@ -267,20 +298,7 @@ data_processed <- data_extract %>%
     covid_death = ifelse(!is.na(death_with_covid_on_the_death_certificate_date) |
                            death_with_28_days_of_covid_positive_test == 1, 1, 0)
     
-  ) %>%
-  droplevels() %>%
-  select(patient_id,
-         has_died, death_date, dereg_date, registered_eligible, registered_treated,
-         covid_test_positive, covid_positive_previous_30_days, tb_postest_treat, elig_start, elig_end,
-         sotrovimab_covid_therapeutics, molnupiravir_covid_therapeutics, casirivimab_covid_therapeutics, treatment_date, treatment_type,
-         high_risk_cohort_covid_therapeutics, high_risk_group_nhsd, high_risk_group_nhsd_date = high_risk_group_date, high_risk_group_nhsd_combined,
-         covid_hospital_discharge_date, age, sex, ethnicity, imd, region_nhs, region_covid_therapeutics,
-         covid_positive_test_30_days_post_elig_or_treat, covid_hospital_admission, covid_hospitalisation_critical_care, covid_death,
-         solid_organ_transplant_nhsd_snomed, solid_organ_transplant_nhsd_opcs4, transplant_all_y_codes_opcs4, transplant_thymus_opcs4, 
-         transplant_conjunctiva_y_code_opcs4, transplant_conjunctiva_opcs4, transplant_stomach_opcs4, transplant_ileum_1_Y_codes_opcs4,
-         transplant_ileum_2_Y_codes_opcs4, transplant_ileum_1_opcs4, transplant_ileum_2_opcs4
-         )
-
+  )
 
 # Save dataset(s) ----
 write_rds(data_processed, here::here("output", "data", "data_processed.rds"), compress = "gz")
@@ -289,62 +307,8 @@ write_rds(data_processed, here::here("output", "data", "data_processed.rds"), co
 # Process clean data ----
 cat("#### process clean data ####\n")
 
-## Define high risk cohorts
-data_processed_hrc_matched <- data_processed %>%
-  mutate(high_risk_cohort_covid_therapeutics = ifelse(is.na(treatment_date), NA, high_risk_cohort_covid_therapeutics)) %>%
-  filter(!is.na(high_risk_group_nhsd_date) | !is.na(high_risk_cohort_covid_therapeutics)) %>%
-  mutate(
-    # Sort naming conventions
-    high_risk_cohort_covid_therapeutics = str_replace(high_risk_cohort_covid_therapeutics,
-                                                      "haematological diseases,stem cell transplant recipients",
-                                                      "haematological diseases and stem cell transplant recipients"),
-    high_risk_cohort_covid_therapeutics = str_replace(high_risk_cohort_covid_therapeutics,
-                                                      "stem cell transplant recipients,haematological diseases",
-                                                      "haematological diseases and stem cell transplant recipients"),
-    high_risk_cohort_covid_therapeutics = str_replace(high_risk_cohort_covid_therapeutics,
-                                                      "stem cell transplant recipients,haematological diseases",
-                                                      "haematological diseases and stem cell transplant recipients"),
-    high_risk_cohort_covid_therapeutics = str_replace(high_risk_cohort_covid_therapeutics,
-                                                      "haematological malignancies",
-                                                      "haematological diseases and stem cell transplant recipients"),
-    
-    # Find matches between elig and treated high risk cohorts
-    ind_therapeutic_groups = map_chr(strsplit(high_risk_cohort_covid_therapeutics, ","), paste,collapse="|"),
-    Match = str_detect(high_risk_group_nhsd_combined, ind_therapeutic_groups)
-  )  %>%
-  mutate(across(
-    .cols = where(is.character),
-    .fns = ~na_if(.x, "")
-  )) %>%
-  rowwise() %>%
-  mutate(
-    
-    # Combined elig and treated high risk cohorts
-    high_risk_group_combined = as.character(ifelse(Match == TRUE,
-                                                   paste(high_risk_group_nhsd_combined, high_risk_cohort_covid_therapeutics, sep = ","), "")),
-    high_risk_group_combined = ifelse(high_risk_group_combined == "NA", "", high_risk_group_combined),
-    high_risk_group_combined = as.character(paste(unique(unlist(strsplit(high_risk_group_combined, ","))), collapse = ",")),
-    high_risk_group_combined_count = ifelse(high_risk_group_combined != "", str_count(high_risk_group_combined,",") + 1, NA),
-    
-    ## Eligible high risk cohorts
-    high_risk_group_elig = as.character(ifelse((Match == FALSE & !is.na(high_risk_group_nhsd_combined) & is.na(high_risk_cohort_covid_therapeutics)),
-                                               high_risk_group_nhsd_combined, high_risk_group_combined)),
-    high_risk_group_combined = ifelse(high_risk_group_elig == "NA", "", high_risk_group_elig),
-    high_risk_group_elig = as.character(paste(unique(unlist(strsplit(high_risk_group_elig, ","))), collapse = ",")),
-    high_risk_group_elig_count = ifelse(high_risk_group_elig != "", str_count(high_risk_group_elig,",") + 1, NA),
-    
-    ## Treated high risk cohorts
-    high_risk_group_treated = as.character(ifelse((Match == FALSE & !is.na(high_risk_cohort_covid_therapeutics)),
-                                                  high_risk_cohort_covid_therapeutics, high_risk_group_combined)),
-    high_risk_group_treated = ifelse(high_risk_group_treated == "NA", "", high_risk_group_treated),
-    high_risk_group_treated = as.character(paste(unique(unlist(strsplit(high_risk_group_treated, ","))), collapse = ",")),
-    high_risk_group_treated_count = ifelse(high_risk_group_treated != "", str_count(high_risk_group_treated,",") + 1, NA)
-  )
-
-print(dim(data_processed_hrc_matched))
-
 ## Apply eligibility and exclusion criteria
-data_processed_eligible <- data_processed_hrc_matched %>%
+data_processed_eligible <- data_processed %>%
   filter(
     # Alive and registered
     has_died == 0,
@@ -354,10 +318,10 @@ data_processed_eligible <- data_processed_hrc_matched %>%
     covid_test_positive == 1,
     covid_positive_previous_30_days != 1,
     (tb_postest_treat <= 5 & tb_postest_treat >= 0) | is.na(tb_postest_treat),
-    !is.na(high_risk_group_elig),
+    !is.na(high_risk_group_nhsd_date),
     
     # Apply exclusion criteria
-    is.na(covid_hospital_discharge_date) | (covid_hospital_discharge_date < (elig_start - 30) & covid_hospital_discharge_date > (elig_start)),
+    is.na(primary_covid_hospital_discharge_date) | (primary_covid_hospital_discharge_date < (elig_start - 30) & primary_covid_hospital_discharge_date > (elig_start)),
     age >= 12,
     
     # Only eligible patients
@@ -365,11 +329,12 @@ data_processed_eligible <- data_processed_hrc_matched %>%
   ) %>%
   mutate(eligibility_status = "Eligible")
 
+cat("#### eligible patients ####\n")
 print(dim(data_processed_eligible))
-print(table(data_processed_eligible$Match))
+print(table(data_processed_eligible$match))
 
 ## Include treated patients not flagged as eligible
-data_processed_treated <- data_processed_hrc_matched %>%
+data_processed_treated <- data_processed %>%
   filter(
     # Treated but non-eligible patients
     !is.na(treatment_date),
@@ -377,11 +342,12 @@ data_processed_treated <- data_processed_hrc_matched %>%
   ) %>%
   mutate(eligibility_status = "Treated")
 
+cat("#### treated patients ####\n")
 print(dim(data_processed_treated))
-print(table(data_processed_treated$Match))
+print(table(data_processed_treated$match))
 
-## Remove and save
-rm(data_processed_hrc_matched)
+## Free up space and combine
+rm(data_processed)
 
 data_processed_combined <- rbind(data_processed_eligible, data_processed_treated)
 
@@ -390,6 +356,7 @@ rm(data_processed_treated)
 
 print(dim(data_processed_combined))
 print(table(data_processed_combined$eligibility_status))
+print(table(data_processed_combined$eligibility_status, data_processed_combined$match))
 
 ## Exclude patients issued more than one treatment within two weeks
 dup_ids <- data_processed_combined %>%
@@ -407,8 +374,40 @@ dup_ids <- data_processed_combined %>%
   group_by(patient_id) %>%
   arrange(patient_id)
 
+cat("#### patients with more than one treatment ####\n")
+print(dim(dup_ids))
+
 data_processed_clean <- data_processed_combined %>%
-  subset(!(patient_id %in% unique(dup_ids$patient_id)))
+  subset(!(patient_id %in% unique(dup_ids$patient_id))) %>%
+  select(
+    
+    # ID
+    patient_id,
+    
+    # Censoring
+    has_died, death_date, dereg_date, registered_eligible, registered_treated,
+    
+    # Eligibility
+    covid_test_positive, covid_positive_previous_30_days, tb_postest_treat, elig_start, elig_end,
+    
+    # Treatment
+    sotrovimab_covid_therapeutics, molnupiravir_covid_therapeutics, casirivimab_covid_therapeutics, treatment_date, treatment_type,
+    
+    # High risk cohort
+    downs_syndrome, sickle_cell_disease, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
+    hiv_aids, solid_organ_transplant, rare_neurological_conditions, high_risk_group_nhsd_combined, high_risk_cohort_covid_therapeutics, 
+    match, primary_covid_hospital_discharge_date, any_covid_hospital_discharge_date, 
+    
+    # Clinical and demographic variables
+    age, sex, ethnicity, imd, region_nhs, region_covid_therapeutics, stp,
+    
+    # Clinical groups
+    autism_nhsd, care_home_primis, dementia_nhsd, housebound_opensafely, learning_disability_primis, shielded_primis, 
+    serious_mental_illness_nhsd, vaccination_status,
+    
+    # Outcomes
+    covid_positive_test_30_days_post_elig_or_treat, covid_hospitalisation_outcome_date, covid_hospitalisation_critical_care, covid_death)
+
 
 rm(data_processed_combined)
 
