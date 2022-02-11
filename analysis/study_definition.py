@@ -230,9 +230,27 @@ study = StudyDefinition(
   ### Pattern of clinical presentation indicates that there is recovery rather than risk of deterioration from infection
   #   (not currently possible to define/code)
   
-  ### Require hospitalisation for COVID-19- within 30 days before treatment
+  ### Require hospitalisation for COVID-19- within 30 days before treatment -- PRIMARY DIAGNOSIS
   ## NB this data lags behind the therapeutics/testing data so may be missing
   covid_hospital_discharge_date = patients.admitted_to_hospital(
+    returning = "date_discharged",
+    with_these_primary_diagnoses = covid_icd10_codes,
+    with_patient_classification = ["1"], # ordinary admissions only - exclude day cases and regular attenders
+    # see https://docs.opensafely.org/study-def-variables/#sus for more info
+    #with_admission_method=["21", "22", "23", "24", "25", "2A", "2B", "2C", "2D", "28"], # emergency admissions only to exclude incidental COVID
+    on_or_before = "start_date - 1 day",
+    date_format = "YYYY-MM-DD",
+    find_first_match_in_period = False,
+    return_expectations = {
+      "date": {"earliest": "2021-12-20", "latest": "index_date - 1 day"},
+      "rate": "uniform",
+      "incidence": 0.05
+    },
+  ),
+  
+  ### Require hospitalisation for COVID-19- within 30 days before treatment -- ANY DIAGNOSIS POSITION
+  ## NB this data lags behind the therapeutics/testing data so may be missing
+  covid_hospital_discharge_date_any = patients.admitted_to_hospital(
     returning = "date_discharged",
     with_these_diagnoses = covid_icd10_codes,
     with_patient_classification = ["1"], # ordinary admissions only - exclude day cases and regular attenders
@@ -247,7 +265,7 @@ study = StudyDefinition(
       "incidence": 0.05
     },
   ),
-  
+
   ### New supplemental oxygen requirement specifically for the management of COVID-19 symptoms
   #   (not currently possible to define/code)
   
@@ -928,10 +946,10 @@ study = StudyDefinition(
   ## COVID-related hospitalisation 
   covid_hospitalisation_outcome_date = patients.admitted_to_hospital(
     returning = "date_admitted",
-    with_these_diagnoses = covid_icd10_codes,
+    with_these_primary_diagnoses = covid_icd10_codes,
     with_patient_classification = ["1"], # ordinary admissions only - exclude day cases and regular attenders
     # see https://docs.opensafely.org/study-def-variables/#sus for more info
-    with_admission_method=["21", "22", "23", "24", "25", "2A", "2B", "2C", "2D", "28"], # emergency admissions only to exclude incidental COVID
+    # with_admission_method=["21", "22", "23", "24", "25", "2A", "2B", "2C", "2D", "28"], # emergency admissions only to exclude incidental COVID
     between = ["start_date", "start_date + 30 days"],
     find_first_match_in_period = True,
     date_format = "YYYY-MM-DD",
