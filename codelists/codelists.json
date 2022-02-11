@@ -81,7 +81,9 @@
     "nhsd-haematological-malignancies-snomed.csv": {
       "id": "nhsd/haematological-malignancies-snomed/31a49191",
       "url": "https://codelists.opensafely.org/codelist/nhsd/haematological-malignancies-snomed/31a49191/",
+
       "downloaded_at": "2022-02-11 11:59:42.695085Z",
+
       "sha": "a9eb86b02ec26884f2e26508e699bdcf5ea783aa"
     },
     "nhsd-ckd-stage-5-snomed-ct.csv": {
