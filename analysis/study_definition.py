@@ -336,6 +336,7 @@ study = StudyDefinition(
     date_format = "YYYY-MM-DD",
     return_expectations = {
       "rate": "universal",
+      "incidence": 0.4,
       "category": {
         "ratios": {
           "Downs syndrome": 0.1,
@@ -348,7 +349,8 @@ study = StudyDefinition(
           "IMID,solid cancer": 0.1,
           "haematological malignancies": 0.05,
           "primary immune deficiencies": 0.1,
-          "HIV or AIDS": 0.1,},},
+          "HIV or AIDS": 0.05,
+          "NA":0.05,},},
     },
   ),
   
