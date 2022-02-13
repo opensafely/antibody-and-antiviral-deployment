@@ -237,9 +237,16 @@ data_processed <- data_extract %>%
         hiv_aids_nhsd_name, solid_organ_transplant_nhsd_name, rare_neurological_conditions_nhsd_name, sep = ",", na.rm = T) %>%
   mutate(
     
-    ## Combine nhsd group names to get list of all groups
+    ## Find matches between nhsd high risk cohorts and theraputics high risk cohorts 
     ind_therapeutic_groups = map_chr(strsplit(high_risk_cohort_covid_therapeutics, ","), paste,collapse="|"),
     match = str_detect(high_risk_group_nhsd_combined, ind_therapeutic_groups),
+    
+    ## Combine nhsd cohorts with theraputics cohorts to get list of all cohorts
+    high_risk_group_combined = as.character(ifelse(match == TRUE,
+                                                   paste(high_risk_group_nhsd_combined, high_risk_cohort_covid_therapeutics, sep = ","), "")),
+    high_risk_group_combined = ifelse(high_risk_group_combined == "NA", "", high_risk_group_combined),
+    high_risk_group_combined = as.character(paste(unique(unlist(strsplit(high_risk_group_combined, ","))), collapse = ",")),
+    high_risk_group_combined_count = ifelse(high_risk_group_combined != "", str_count(high_risk_group_combined,",") + 1, NA),
     
     # Cinic/demo variables
     sex = fct_case_when(
@@ -382,13 +389,14 @@ data_processed_clean <- data_processed_combined %>%
   select(
     
     # ID
-    patient_id,
+    patient_id, eligibility_status,
     
     # Censoring
     has_died, death_date, dereg_date, registered_eligible, registered_treated,
     
     # Eligibility
-    covid_test_positive, covid_positive_previous_30_days, tb_postest_treat, elig_start, elig_end,
+    covid_test_positive, covid_test_positive_date, covid_positive_previous_30_days, tb_postest_treat, elig_start, elig_end, primary_covid_hospital_discharge_date, 
+    any_covid_hospital_discharge_date,
     
     # Treatment
     sotrovimab_covid_therapeutics, molnupiravir_covid_therapeutics, casirivimab_covid_therapeutics, treatment_date, treatment_type,
@@ -396,7 +404,7 @@ data_processed_clean <- data_processed_combined %>%
     # High risk cohort
     downs_syndrome, sickle_cell_disease, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
     hiv_aids, solid_organ_transplant, rare_neurological_conditions, high_risk_group_nhsd_combined, high_risk_cohort_covid_therapeutics, 
-    match, primary_covid_hospital_discharge_date, any_covid_hospital_discharge_date, 
+    match, high_risk_group_combined, high_risk_group_combined_count, 
     
     # Clinical and demographic variables
     age, sex, ethnicity, imd, region_nhs, region_covid_therapeutics, stp,

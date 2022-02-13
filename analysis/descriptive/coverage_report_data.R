@@ -40,10 +40,12 @@ fs::dir_create(output_dir)
 threshold = 5
 
 ## Import data
-data_processed_clean <- read_rds(here::here("output", "data", "data_processed_clean.rds"))
+data_processed <- read_rds(here::here("output", "data", "data_processed_clean.rds"))
 
 ## Formatting variables
-data_processed_clean <- data_processed_clean %>%
+data_processed_clean <- data_processed %>%
+  filter(has_died == 0,
+         registered_eligible == 1 | registered_treated == 1) %>%
   mutate(
     
     # Age groups
@@ -59,338 +61,216 @@ data_processed_clean <- data_processed_clean %>%
 study_start <- min(data_processed_clean$elig_start, na.rm = T)
 study_end <- max(data_processed_clean$elig_start, na.rm = T)
 eligible_patients <- plyr::round_any(data_processed_clean %>% filter(eligibility_status == "Eligible") %>% nrow(), 10)
+treated_patients <- plyr::round_any(data_processed_clean %>% filter(!is.na(treatment_date), eligibility_status == "Treated") %>% nrow(), 10)
 
-eligible_treated_patients <- plyr::round_any(data_processed_clean %>% filter(!is.na(treatment_date), eligibility_status == "Eligible") %>% nrow(), 10)
-eligible_sotrovimab <- plyr::round_any(data_processed_clean %>% filter(treatment_type == "Sotrovimab",  eligibility_status == "Eligible") %>% nrow(), 10)
-eligible_molnupiravir <- plyr::round_any(data_processed_clean %>% filter(treatment_type == "Molnupiravir",  eligibility_status == "Eligible") %>% nrow(), 10)
-eligible_casirivimab <- plyr::round_any(data_processed_clean %>% filter(treatment_type == "Casirivimab",  eligibility_status == "Eligible") %>% nrow(), 10)
+treated_sotrovimab <- plyr::round_any(data_processed_clean %>% filter(treatment_type == "Sotrovimab",  eligibility_status == "Treated") %>% nrow(), 10)
+treated_molnupiravir <- plyr::round_any(data_processed_clean %>% filter(treatment_type == "Molnupiravir",  eligibility_status == "Treated") %>% nrow(), 10)
+treated_casirivimab <- plyr::round_any(data_processed_clean %>% filter(treatment_type == "Casirivimab",  eligibility_status == "Treated") %>% nrow(), 10)
 
-noneligible_treated_patients <- plyr::round_any(data_processed_clean %>% filter(!is.na(treatment_date), eligibility_status == "Treated") %>% nrow(), 10)
-noneligible_sotrovimab <- plyr::round_any(data_processed_clean %>% filter(treatment_type == "Sotrovimab",  eligibility_status == "Treated") %>% nrow(), 10)
-noneligible_molnupiravir <- plyr::round_any(data_processed_clean %>% filter(treatment_type == "Molnupiravir",  eligibility_status == "Treated") %>% nrow(), 10)
-noneligible_casirivimab <- plyr::round_any(data_processed_clean %>% filter(treatment_type == "Casirivimab",  eligibility_status == "Treated") %>% nrow(), 10)
+high_risk_cohort_2plus <- plyr::round_any(subset(data_processed_clean, high_risk_group_combined_count > 1) %>% nrow(), 10)
+high_risk_cohort_lower <- min(data_processed_clean$high_risk_group_combined_count, na.rm = T)
+high_risk_cohort_upper <- max(data_processed_clean$high_risk_group_combined_count, na.rm = T)
 
-high_risk_cohort_2plus <- plyr::round_any(subset(data_processed_clean, high_risk_group_elig_count > 1) %>% nrow(), 10)
-high_risk_cohort_lower <- min(data_processed_clean$high_risk_group_elig_count, na.rm = T)
-high_risk_cohort_upper <- max(data_processed_clean$high_risk_group_elig_count, na.rm = T)
+deregistered <- plyr::round_any(print(length(unique(subset(data_processed, !is.na(treatment_date))$patient_id)) -
+                        length(unique(subset(data_processed_clean, !is.na(treatment_date))$patient_id))), 10)
 
 text <- data.frame(study_start, study_end, 
-                   eligible_patients, eligible_treated_patients, eligible_sotrovimab, eligible_molnupiravir, eligible_casirivimab, 
-                   noneligible_treated_patients, noneligible_sotrovimab, noneligible_molnupiravir, noneligible_casirivimab,
-                   high_risk_cohort_2plus, high_risk_cohort_lower, high_risk_cohort_upper)
+                   eligible_patients, treated_patients, treated_sotrovimab, treated_molnupiravir, treated_casirivimab, 
+                   high_risk_cohort_2plus, high_risk_cohort_lower, high_risk_cohort_upper, deregistered)
 
 write_csv(text, fs::path(output_dir, "table_report_stats_redacted.csv"))
 
 print(text)
 
+
 # Coverage ----
 
 ## Eligibility
 plot_data_coverage <- data_processed_clean %>%
-  mutate(patient_id = 1) %>%
-  filter(eligibility_status == "Eligible") %>%
+  select(elig_start, downs_syndrome, sickle_cell_disease, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
+         hiv_aids, solid_organ_transplant, rare_neurological_conditions)  %>%
   group_by(elig_start) %>%
-  summarise(count = sum(patient_id, na.rm  = T)) %>%
-  arrange(elig_start) %>%
+  summarise(
+    across(.fns=sum, na.rm = T)
+  ) %>%
+  pivot_longer(
+    cols=c(downs_syndrome, sickle_cell_disease, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
+           hiv_aids, solid_organ_transplant, rare_neurological_conditions),
+    names_to="high_risk_cohort",
+    values_to="n"
+  ) %>%
+  group_by(elig_start) %>%
+  summarise(n = sum(n, na.rm = T)) %>%
   ungroup() %>%
   arrange(elig_start) %>%
-  complete(elig_start = seq.Date(min(elig_start, na.rm = T), max(elig_start, na.rm = T), by="day")) %>%
-  group_by(elig_start) %>%
-  summarise(count = sum(count, na.rm = T)) %>%
-  ungroup() %>%
-  mutate(count = ifelse(is.na(count), 0, count),
+  complete(elig_start = seq.Date(min(elig_start, na.rm = T), max(elig_start, na.rm = T), by="day"))  %>%
+  mutate(count = ifelse(is.na(n), 0, n),
          cum_count = cumsum(count),
-         cum_count_redacted =  plyr::round_any(cum_count, 10)) %>%
-  mutate(high_risk_group_elig = "All")
+         cum_count_redacted =  plyr::round_any(cum_count, 10),
+         high_risk_cohort = "All") %>%
+  select(-n)
 
 plot_data_coverage_groups <- data_processed_clean %>%
-  filter(eligibility_status == "Eligible") %>%
-  select(patient_id, elig_start, high_risk_group_elig) %>%
-  separate(high_risk_group_elig, 
-           c(paste("Group_", 1:max(subset(data_processed_clean, eligibility_status == "Eligible")$high_risk_group_elig_count, na.rm = T), sep = "")),
-           sep = ",") %>%
-  reshape2::melt(id.var = c("patient_id", "elig_start")) %>%
-  filter(!is.na(value)) %>%
-  mutate(patient_id = 1) %>%
-  select(patient_id, elig_start, high_risk_group_elig = value) %>%
-  group_by(elig_start, high_risk_group_elig) %>%
-  summarise(count = sum(patient_id, na.rm  = T)) %>%
-  arrange(elig_start, high_risk_group_elig) %>%
-  group_by(high_risk_group_elig) %>%
-  complete(elig_start = seq.Date(min(elig_start, na.rm = T), max(elig_start, na.rm = T), by="day")) %>%
-  mutate(count = ifelse(is.na(count), 0, count),
+  select(elig_start, downs_syndrome, sickle_cell_disease, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
+         hiv_aids, solid_organ_transplant, rare_neurological_conditions)  %>%
+  group_by(elig_start) %>%
+  summarise(
+    across(.fns=sum, na.rm = T)
+  ) %>%
+  pivot_longer(
+    cols=c(downs_syndrome, sickle_cell_disease, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
+           hiv_aids, solid_organ_transplant, rare_neurological_conditions),
+    names_to = "high_risk_cohort",
+    values_to = "n"
+  ) %>%
+  group_by(high_risk_cohort) %>%
+  arrange(high_risk_cohort, elig_start) %>%
+  complete(elig_start = seq.Date(min(elig_start, na.rm = T), max(elig_start, na.rm = T), by="day"))  %>%
+  mutate(count = ifelse(is.na(n), 0, n),
          cum_count = cumsum(count),
-         cum_count_redacted =  plyr::round_any(cum_count, 10))
+         cum_count_redacted =  plyr::round_any(cum_count, 10)) %>%
+  select(-n)
 
 plot_order <- rbind(plot_data_coverage, plot_data_coverage_groups) %>%
-  group_by(high_risk_group_elig) %>%
+  group_by(high_risk_cohort) %>%
   mutate(order = max(cum_count_redacted, na.rm = T)) %>%
   arrange(desc(order)) %>%
   filter(cum_count_redacted == order) %>%
-  select(high_risk_group_elig, order) %>%
+  select(high_risk_cohort, order) %>%
   distinct()
 
 coverage_plot_data <- rbind(plot_data_coverage, plot_data_coverage_groups) %>%
-  mutate(high_risk_group_elig = factor(high_risk_group_elig, levels = plot_order$high_risk_group_elig))
+  mutate(high_risk_cohort = factor(high_risk_cohort, levels = plot_order$high_risk_cohort))
 
-write_csv(coverage_plot_data %>% select(elig_start, cum_count_redacted, high_risk_group_elig), fs::path(output_dir, "table_cum_eligiblity_redacted.csv"))
+write_csv(coverage_plot_data %>% select(elig_start, cum_count_redacted, high_risk_cohort), fs::path(output_dir, "table_cum_eligiblity_redacted.csv"))
 
 print("coverage_plot_data saved")
 
-## Treatment - eligible
+## Treatment (all)
 plot_data_treatment <- data_processed_clean %>%
-  mutate(patient_id = 1) %>%
-  filter(eligibility_status == "Eligible",
-         !is.na(treatment_date)) %>%
+  select(treatment_date, downs_syndrome, sickle_cell_disease, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
+         hiv_aids, solid_organ_transplant, rare_neurological_conditions)  %>%
   group_by(treatment_date) %>%
-  summarise(count = sum(patient_id, na.rm  = T)) %>%
-  arrange(treatment_date) %>%
+  summarise(
+    across(.fns=sum, na.rm = T)
+  ) %>%
+  pivot_longer(
+    cols=c(downs_syndrome, sickle_cell_disease, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
+           hiv_aids, solid_organ_transplant, rare_neurological_conditions),
+    names_to = "high_risk_cohort",
+    values_to = "n"
+  ) %>%
+  group_by(treatment_date) %>%
+  summarise(n = sum(n, na.rm = T)) %>%
   ungroup() %>%
   arrange(treatment_date) %>%
-  complete(treatment_date = seq.Date(min(treatment_date, na.rm = T), max(treatment_date, na.rm = T), by="day")) %>%
-  group_by(treatment_date) %>%
-  summarise(count = sum(count, na.rm = T)) %>%
-  ungroup() %>%
-  mutate(count = ifelse(is.na(count), 0, count),
+  complete(treatment_date = seq.Date(min(treatment_date, na.rm = T), max(treatment_date, na.rm = T), by="day"))  %>%
+  mutate(count = ifelse(is.na(n), 0, n),
          cum_count = cumsum(count),
-         cum_count_redacted =  plyr::round_any(cum_count, 10)) %>%
-  mutate(high_risk_group_treated = "All")
+         cum_count_redacted =  plyr::round_any(cum_count, 10),
+         high_risk_cohort = "All") %>%
+  select(-n)
 
 plot_data_treatment_groups <- data_processed_clean %>%
-  filter(eligibility_status == "Eligible",
-         !is.na(treatment_date)) %>%
-  select(patient_id, treatment_date, high_risk_group_treated) %>%
-  separate(high_risk_group_treated, 
-           c(paste("Group_", 1:max(subset(data_processed_clean, eligibility_status == "Eligible")$high_risk_group_elig_count, na.rm = T), sep = "")),
-           sep = ",") %>%
-  reshape2::melt(id.var = c("patient_id", "treatment_date")) %>%
-  filter(!is.na(value)) %>%
-  mutate(patient_id = 1) %>%
-  select(patient_id, treatment_date, high_risk_group_treated = value) %>%
-  group_by(treatment_date, high_risk_group_treated) %>%
-  summarise(count = sum(patient_id, na.rm  = T)) %>%
-  arrange(treatment_date, high_risk_group_treated) %>%
-  group_by(high_risk_group_treated) %>%
-  complete(treatment_date = seq.Date(min(treatment_date, na.rm = T), max(treatment_date, na.rm = T), by="day")) %>%
-  mutate(count = ifelse(is.na(count), 0, count),
-         cum_count = cumsum(count),
-         cum_count_redacted =  plyr::round_any(cum_count, 10))
-
-plot_order <- rbind(plot_data_treatment, plot_data_treatment_groups) %>%
-  group_by(high_risk_group_treated) %>%
-  mutate(order = max(cum_count_redacted, na.rm = T)) %>%
-  arrange(desc(order)) %>%
-  filter(cum_count_redacted == order) %>%
-  select(high_risk_group_treated, order) %>%
-  distinct()
-
-treatment_plot_data_therapeutics <- rbind(plot_data_treatment, plot_data_treatment_groups) %>%
-  mutate(high_risk_group_treated = factor(high_risk_group_treated, levels = plot_order$high_risk_group_treated))
-
-write_csv(treatment_plot_data_therapeutics %>% select(treatment_date, cum_count_redacted, high_risk_group_treated), fs::path(output_dir, "table_cum_treatment_redacted.csv"))
-
-print("treatment_plot_data_therapeutics saved")
-
-## Treatment - non eligble
-plot_data_treatment2 <- data_processed_clean %>%
-  mutate(patient_id = 1) %>%
-  filter(eligibility_status == "Treated",
-         !is.na(treatment_date)) %>%
+  select(treatment_date, downs_syndrome, sickle_cell_disease, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
+         hiv_aids, solid_organ_transplant, rare_neurological_conditions)  %>%
   group_by(treatment_date) %>%
-  summarise(count = sum(patient_id, na.rm  = T)) %>%
-  arrange(treatment_date) %>%
-  ungroup() %>%
-  arrange(treatment_date) %>%
-  complete(treatment_date = seq.Date(min(treatment_date, na.rm = T), max(treatment_date, na.rm = T), by="day")) %>%
-  group_by(treatment_date) %>%
-  summarise(count = sum(count, na.rm = T)) %>%
-  ungroup() %>%
-  mutate(count = ifelse(is.na(count), 0, count),
+  summarise(
+    across(.fns=sum, na.rm = T)
+  ) %>%
+  pivot_longer(
+    cols=c(downs_syndrome, sickle_cell_disease, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
+           hiv_aids, solid_organ_transplant, rare_neurological_conditions),
+    names_to = "high_risk_cohort",
+    values_to = "n"
+  ) %>%
+  group_by(high_risk_cohort) %>%
+  arrange(high_risk_cohort, treatment_date) %>%
+  complete(treatment_date = seq.Date(min(treatment_date, na.rm = T), max(treatment_date, na.rm = T), by="day"))  %>%
+  mutate(count = ifelse(is.na(n), 0, n),
          cum_count = cumsum(count),
          cum_count_redacted =  plyr::round_any(cum_count, 10)) %>%
-  mutate(high_risk_group_treated = "All")
+  select(-n)
 
-plot_data_treatment2_groups <- data_processed_clean %>%
-  filter(eligibility_status == "Treated",
-         !is.na(treatment_date)) %>%
-  select(patient_id, treatment_date, high_risk_group_treated) %>%
-  separate(high_risk_group_treated, 
-           c(paste("Group_", 1:max(subset(data_processed_clean, eligibility_status == "Eligible")$high_risk_group_elig_count, na.rm = T), sep = "")),
-           sep = ",") %>%
-  reshape2::melt(id.var = c("patient_id", "treatment_date")) %>%
-  filter(!is.na(value)) %>%
-  mutate(patient_id = 1) %>%
-  select(patient_id, treatment_date, high_risk_group_treated = value) %>%
-  group_by(treatment_date, high_risk_group_treated) %>%
-  summarise(count = sum(patient_id, na.rm  = T)) %>%
-  arrange(treatment_date, high_risk_group_treated) %>%
-  group_by(high_risk_group_treated) %>%
-  complete(treatment_date = seq.Date(min(treatment_date, na.rm = T), max(treatment_date, na.rm = T), by="day")) %>%
-  mutate(count = ifelse(is.na(count), 0, count),
-         cum_count = cumsum(count),
-         cum_count_redacted =  plyr::round_any(cum_count, 10))
-
-plot_order <- rbind(plot_data_treatment2, plot_data_treatment2_groups) %>%
-  group_by(high_risk_group_treated) %>%
+plot_order <- rbind(plot_data_treatment, plot_data_treatment_groups) %>%
+  group_by(high_risk_cohort) %>%
   mutate(order = max(cum_count_redacted, na.rm = T)) %>%
   arrange(desc(order)) %>%
   filter(cum_count_redacted == order) %>%
-  select(high_risk_group_treated, order) %>%
+  select(high_risk_cohort, order) %>%
   distinct()
 
-treatment_plot_data_therapeutics2 <- rbind(plot_data_treatment2, plot_data_treatment2_groups) %>%
-  mutate(high_risk_group_treated = factor(high_risk_group_treated, levels = plot_order$high_risk_group_treated))
+treatment_plot_data <- rbind(plot_data_treatment, plot_data_treatment_groups) %>%
+  mutate(high_risk_cohort = factor(high_risk_cohort, levels = plot_order$high_risk_cohort))
 
-write_csv(treatment_plot_data_therapeutics2 %>% select(treatment_date, cum_count_redacted, high_risk_group_treated), fs::path(output_dir, "table_cum_treatment2_redacted.csv"))
+write_csv(treatment_plot_data %>% select(treatment_date, cum_count_redacted, high_risk_cohort), fs::path(output_dir, "table_cum_treatment_redacted.csv"))
 
-print("treatment_plot_data_therapeutics2 saved")
+print("treatment_plot_data saved")
+
 
 # Delivery ----
 
 ## Eligible and treated table
 eligibility_table <- data_processed_clean %>%
-  filter(eligibility_status == "Eligible") %>%
-  select(patient_id, high_risk_group_elig) %>%
-  separate(high_risk_group_elig, 
-           c(paste("Group_", 1:max(subset(data_processed_clean, !is.na(treatment_date))$high_risk_group_elig_count, na.rm = T), sep = "")),
-           sep = ",") %>%
-  reshape2::melt(id.var = c("patient_id")) %>%
-  mutate(value = as.character(value)) %>%
-  filter(!is.na(value),
-         value != "") %>%
-  select(high_risk_group = value) %>%
-  tbl_summary()
-
-eligibility_table$inputs$data <- NULL
-
-eligibility_table <- eligibility_table$table_body %>%
-  separate(stat_0, c("stat_0","perc0"), sep = " ([(])") %>%
-  select(`High risk cohort` = label, 
-         `Number of eligible patients` = stat_0) %>%
-  mutate(`Number of eligible patients` = as.numeric(gsub(",", "", `Number of eligible patients`))) %>%
-  data.frame() %>%
-  mutate(High.risk.cohort = ifelse(High.risk.cohort == "high_risk_group", "All", High.risk.cohort),
-         Number.of.eligible.patients = ifelse(High.risk.cohort == "All", 
-                                              length(unique(subset(data_processed_clean, eligibility_status == "Eligible")$patient_id)),
-                                              Number.of.eligible.patients)) %>%
-  arrange(desc(Number.of.eligible.patients))
+  select(downs_syndrome, sickle_cell_disease, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
+         hiv_aids, solid_organ_transplant, rare_neurological_conditions)  %>%
+  summarise(
+    across(.fns=sum, na.rm = T)
+  ) %>%
+  pivot_longer(
+    cols = c(downs_syndrome, sickle_cell_disease, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
+           hiv_aids, solid_organ_transplant, rare_neurological_conditions),
+    names_to = "high_risk_cohort",
+    values_to = "Eligibile"
+  ) %>%
+  add_row(high_risk_cohort = "All", Eligibile = (data_processed_clean %>% filter(!is.na(elig_start)) %>% nrow())) %>%
+  arrange(desc(Eligibile))
 
 treatment_table <- data_processed_clean %>%
-  filter(eligibility_status == "Eligible") %>%
-  select(patient_id, high_risk_group_treated, treatment_type) %>%
-  separate(high_risk_group_treated, 
-           c(paste("Group_", 1:max(subset(data_processed_clean, !is.na(treatment_date))$high_risk_group_treated_count, na.rm = T), sep = "")),
-           sep = ",") %>%
-  reshape2::melt(id.var = c("patient_id", "treatment_type")) %>%
-  mutate(value = as.character(value)) %>%
-  filter(!is.na(value),
-         value != "") %>%
-  select(high_risk_group = value, treatment_type) %>%
-  tbl_summary(by = treatment_type) %>%
-  add_overall()
-
-treatment_table$inputs$data <- NULL
-
-treatment_table <- treatment_table$table_body %>%
-  separate(stat_0, c("stat_0","perc0"), sep = " ([(])") %>%
-  separate(stat_1, c("stat_1","perc1"), sep = " ([(])") %>%
-  separate(stat_2, c("stat_2","perc2"), sep = " ([(])") %>%
-  separate(stat_3, c("stat_3","perc3"), sep = " ([(])") %>%
-  select(`High risk cohort` = label, 
-         `Number of treated patients` = stat_0,
-         `Treated with Casirivimab` = stat_1,
-         `Treated with Molnupiravir` = stat_2,
-         `Treated with Sotrovimab` = stat_3) %>%
-  mutate(`Number of treated patients` = as.numeric(gsub(",", "", `Number of treated patients`)),
-         `Treated with Casirivimab` = as.numeric(gsub(",", "", `Treated with Casirivimab`)),
-         `Treated with Molnupiravir` = as.numeric(gsub(",", "", `Treated with Molnupiravir`)),
-         `Treated with Sotrovimab` = as.numeric(gsub(",", "", `Treated with Sotrovimab`))) %>%
-  data.frame()  %>%
-  mutate(High.risk.cohort = ifelse(High.risk.cohort == "high_risk_group", "All", High.risk.cohort),
-         Number.of.treated.patients = ifelse(High.risk.cohort == "All", 
-                                             length(unique(subset(data_processed_clean, eligibility_status == "Eligible" & !is.na(treatment_date))$patient_id)),
-                                             Number.of.treated.patients),
-         Treated.with.Casirivimab = ifelse(High.risk.cohort == "All", eligible_casirivimab, Treated.with.Casirivimab),
-         Treated.with.Molnupiravir = ifelse(High.risk.cohort == "All", eligible_molnupiravir, Treated.with.Casirivimab),
-         Treated.with.Sotrovimab = ifelse(High.risk.cohort == "All", eligible_sotrovimab, Treated.with.Casirivimab))
-
-table_elig_treat_redacted <- left_join(eligibility_table, treatment_table, by = "High.risk.cohort") %>%
-  # Redact values < 8
-  mutate(Number.of.eligible.patients = ifelse(Number.of.eligible.patients < threshold, NA, as.numeric(Number.of.eligible.patients)),
-         Number.of.treated.patients = ifelse(Number.of.treated.patients < threshold, NA, as.numeric(Number.of.treated.patients)),
-         Treated.with.Casirivimab = ifelse(Treated.with.Casirivimab < threshold, NA, as.numeric(Treated.with.Casirivimab)),
-         Treated.with.Molnupiravir = ifelse(Treated.with.Molnupiravir < threshold, NA, as.numeric(Treated.with.Molnupiravir)),
-         Treated.with.Sotrovimab = ifelse(Treated.with.Sotrovimab < threshold, NA, as.numeric(Treated.with.Sotrovimab))
+  mutate(All = ifelse(!is.na(high_risk_group_combined), 1, 0)) %>%
+  select(treatment_type, All, downs_syndrome, sickle_cell_disease, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
+         hiv_aids, solid_organ_transplant, rare_neurological_conditions)  %>%
+  group_by(treatment_type) %>%
+  summarise(
+    across(.fns=sum, na.rm = T)
   ) %>%
-  # Round to nearest 10
-  mutate(Number.of.eligible.patients = plyr::round_any(Number.of.eligible.patients, 10),
-         Number.of.treated.patients = plyr::round_any(Number.of.treated.patients, 10),
-         Treated.with.Casirivimab = plyr::round_any(as.numeric(Treated.with.Casirivimab), 10),
-         Treated.with.Molnupiravir = plyr::round_any(Treated.with.Molnupiravir, 10),
-         Treated.with.Sotrovimab = plyr::round_any(Treated.with.Sotrovimab, 10))
+  pivot_longer(
+    cols = c(All, downs_syndrome, sickle_cell_disease, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
+           hiv_aids, solid_organ_transplant, rare_neurological_conditions),
+    names_to = "high_risk_cohort",
+    values_to = "Treated"
+  ) %>%
+  pivot_wider(
+    id_cols = high_risk_cohort,
+    names_from = treatment_type,
+    values_from = Treated)
+
+table_elig_treat_redacted <- left_join(eligibility_table, treatment_table, by = "high_risk_cohort") %>%
+  mutate(Treated = Casirivimab + Molnupiravir + Sotrovimab) %>%
+  select(high_risk_cohort, Eligibile, Treated, Sotrovimab, Molnupiravir, Casirivimab) %>%
+  mutate(
+  # Redact values < 8
+    Eligibile = ifelse(Eligibile < threshold, NA, as.numeric(Eligibile)),
+    Treated = ifelse(Treated < threshold, NA, as.numeric(Treated)),
+    Sotrovimab = ifelse(Sotrovimab < threshold, NA, as.numeric(Sotrovimab)),
+    Molnupiravir = ifelse(Molnupiravir < threshold, NA, as.numeric(Molnupiravir)),
+    Casirivimab = ifelse(Casirivimab < threshold, NA, as.numeric(Casirivimab)),
+    # Round to nearest 10
+    Eligibile = plyr::round_any(Eligibile, 10),
+    Treated = plyr::round_any(Treated, 10),
+    Sotrovimab = plyr::round_any(as.numeric(Sotrovimab), 10),
+    Molnupiravir = plyr::round_any(Molnupiravir, 10),
+    Casirivimab = plyr::round_any(Casirivimab, 10))
 
 write_csv(table_elig_treat_redacted, fs::path(output_dir, "table_elig_treat_redacted.csv"))
 
-## Non-eligible and treated table
-treatment_table <- data_processed_clean %>%
-  filter(eligibility_status == "Treated") %>%
-  select(patient_id, high_risk_group_treated, treatment_type) %>%
-  separate(high_risk_group_treated, 
-           c(paste("Group_", 1:max(subset(data_processed_clean, !is.na(treatment_date))$high_risk_group_treated_count, na.rm = T), sep = "")),
-           sep = ",") %>%
-  reshape2::melt(id.var = c("patient_id", "treatment_type")) %>%
-  mutate(value = as.character(value)) %>%
-  filter(!is.na(value),
-         value != "") %>%
-  select(high_risk_group = value, treatment_type) %>%
-  tbl_summary(by = treatment_type) %>%
-  add_overall()
-
-treatment_table$inputs$data <- NULL
-
-treatment_table <- treatment_table$table_body %>%
-  separate(stat_0, c("stat_0","perc0"), sep = " ([(])") %>%
-  separate(stat_1, c("stat_1","perc1"), sep = " ([(])") %>%
-  separate(stat_2, c("stat_2","perc2"), sep = " ([(])") %>%
-  separate(stat_3, c("stat_3","perc3"), sep = " ([(])") %>%
-  select(`High risk cohort` = label, 
-         `Number of treated patients` = stat_0,
-         `Treated with Casirivimab` = stat_1,
-         `Treated with Molnupiravir` = stat_2,
-         `Treated with Sotrovimab` = stat_3) %>%
-  mutate(`Number of treated patients` = as.numeric(gsub(",", "", `Number of treated patients`)),
-         `Treated with Casirivimab` = as.numeric(gsub(",", "", `Treated with Casirivimab`)),
-         `Treated with Molnupiravir` = as.numeric(gsub(",", "", `Treated with Molnupiravir`)),
-         `Treated with Sotrovimab` = as.numeric(gsub(",", "", `Treated with Sotrovimab`))) %>%
-  data.frame()  %>%
-  mutate(High.risk.cohort = ifelse(High.risk.cohort == "high_risk_group", "All", High.risk.cohort),
-         Number.of.treated.patients = ifelse(High.risk.cohort == "All", 
-                                             length(unique(subset(data_processed_clean, eligibility_status == "Treated" & !is.na(treatment_date))$patient_id)),
-                                             Number.of.treated.patients),
-         Treated.with.Casirivimab = ifelse(High.risk.cohort == "All", noneligible_casirivimab, Treated.with.Casirivimab),
-         Treated.with.Molnupiravir = ifelse(High.risk.cohort == "All", noneligible_molnupiravir, Treated.with.Casirivimab),
-         Treated.with.Sotrovimab = ifelse(High.risk.cohort == "All", noneligible_sotrovimab, Treated.with.Casirivimab)) %>%
-  # Redact values < 8
-  mutate(Number.of.treated.patients = ifelse(Number.of.treated.patients < threshold, NA, as.numeric(Number.of.treated.patients)),
-         Treated.with.Casirivimab = ifelse(Treated.with.Casirivimab < threshold, NA, as.numeric(Treated.with.Casirivimab)),
-         Treated.with.Molnupiravir = ifelse(Treated.with.Molnupiravir < threshold, NA, as.numeric(Treated.with.Molnupiravir)),
-         Treated.with.Sotrovimab = ifelse(Treated.with.Sotrovimab < threshold, NA, as.numeric(Treated.with.Sotrovimab))
-  ) %>%
-  # Round to nearest 10
-  mutate(Number.of.treated.patients = plyr::round_any(Number.of.treated.patients, 10),
-         Treated.with.Casirivimab = plyr::round_any(as.numeric(Treated.with.Casirivimab), 10),
-         Treated.with.Molnupiravir = plyr::round_any(Treated.with.Molnupiravir, 10),
-         Treated.with.Sotrovimab = plyr::round_any(Treated.with.Sotrovimab, 10))
-
-write_csv(treatment_table, fs::path(output_dir, "table_elig_treat_redacted2.csv"))
-
-print("treatment_table saved")
 
 ## Clinical and demographics table
-variables <- c("ageband", "sex", "ethnicity", "imd", "region_nhs")
+variables <- c("ageband", "sex", "ethnicity", "imd", "region_nhs", "autism_nhsd", "care_home_primis",
+               "dementia_nhsd", "learning_disability_primis", "serious_mental_illness_nhsd", 
+               "housebound_opensafely", "shielded_primis", "vaccination_status")
 
 table_demo_clinc_breakdown_base <- data_processed_clean %>%
-  filter(eligibility_status == "Eligible") %>%
   select(all_of(variables)) %>%
   tbl_summary()
 
@@ -405,8 +285,7 @@ table_demo_clinc_breakdown_base <- table_demo_clinc_breakdown_base$table_body %>
   arrange(Group, Variable)
 
 table_demo_clinc_breakdown <- data_processed_clean %>%
-  filter(eligibility_status == "Eligible",
-         !is.na(treatment_type)) %>%
+  filter(!is.na(treatment_type)) %>%
   select(treatment_type, all_of(variables)) %>%
   tbl_summary(by = treatment_type) %>%
   add_overall() %>%
@@ -465,10 +344,13 @@ non_elig_treated <-  data_processed_clean %>%
     registered = (registered_eligible == 1 | registered_treated == 1),
     has_positive_covid_test = (covid_test_positive == 1),
     no_positive_covid_test_previous_30_days = (covid_positive_previous_30_days != 1),
-    high_risk_group_nhsd = !is.na(high_risk_group_nhsd),
-    no_covid_hospital_admission_last_30_days = (is.na(covid_hospital_discharge_date) | 
-                                                  covid_hospital_discharge_date < (elig_start - 30) & 
-                                                  covid_hospital_discharge_date > (elig_start)),
+    high_risk_group_nhsd = !is.na(high_risk_group_nhsd_combined),
+    no_primary_covid_hospital_admission_last_30_days = (is.na(primary_covid_hospital_discharge_date) | 
+                                                  primary_covid_hospital_discharge_date < (treatment_date - 30) & 
+                                                  primary_covid_hospital_discharge_date > (treatment_date)),
+    no_covid_hospital_admission_last_30_days = (is.na(any_covid_hospital_discharge_date) | 
+                                                  any_covid_hospital_discharge_date < (treatment_date - 30) & 
+                                                  any_covid_hospital_discharge_date > (treatment_date)),
     aged_over_12 = (age >= 12),
     treated_within_5_days = ((tb_postest_treat <= 5 & tb_postest_treat >= 0) | is.na(tb_postest_treat)),
     high_risk_group = !is.na(high_risk_cohort_covid_therapeutics),
@@ -480,6 +362,7 @@ non_elig_treated <-  data_processed_clean %>%
         no_positive_covid_test_previous_30_days & 
         treated_within_5_days & 
         high_risk_group_nhsd & 
+        no_primary_covid_hospital_admission_last_30_days &
         no_covid_hospital_admission_last_30_days &
         aged_over_12 &
         high_risk_group)
@@ -495,6 +378,7 @@ data_flowchart <- non_elig_treated %>%
     c2_has_positive_covid_test = c0_all & has_positive_covid_test,
     c3_no_positive_covid_test_previous_30_days = c0_all & no_positive_covid_test_previous_30_days,
     c4_high_risk_group_nhsd = c0_all & high_risk_group_nhsd,
+    c5_no_primary_covid_hospital_admission_last_30_days = c0_all & no_primary_covid_hospital_admission_last_30_days,
     c5_no_covid_hospital_admission_last_30_days = c0_all & no_covid_hospital_admission_last_30_days,
     c6_aged_over_12 = c0_all & aged_over_12,
     c7_treated_within_5_days = c0_all & treated_within_5_days,
@@ -515,10 +399,14 @@ write_csv(data_flowchart, fs::path(output_dir, "table_non_elig_flowchart_redacte
 
 print("data_flowchart saved")
 
+
+# High risk patient cohorts ----
+print(table(data_processed_clean$match))
+
 high_risk_cohort_comparison_redacted <- data_processed_clean %>%
   filter(!is.na(treatment_date),
          eligibility_status == "Treated") %>%
-  filter(Match == FALSE) %>%
+  filter(match == FALSE) %>%
   select(high_risk_group_nhsd_combined, high_risk_cohort_covid_therapeutics) %>%
   group_by(high_risk_group_nhsd_combined, high_risk_cohort_covid_therapeutics) %>%
   tally() %>%
@@ -529,11 +417,9 @@ high_risk_cohort_comparison_redacted <- data_processed_clean %>%
 write_csv(high_risk_cohort_comparison_redacted, fs::path(output_dir, "table_non_elig_high_risk_cohort_comparison_redacted.csv"))
 
 
-# High risk patient cohorts ----
-
 # Time to treatment ----
 all <- data_processed_clean %>%
-  filter(eligibility_status == "Eligible") %>%
+  filter(!is.na(treatment_type)) %>%
   group_by(tb_postest_treat, treatment_type) %>%
   tally() %>%
   mutate(high_risk_group_elig = "All",
@@ -541,19 +427,52 @@ all <- data_processed_clean %>%
          n = plyr::round_any(as.numeric(n), 5))
 
 groups <- data_processed_clean %>%
-  filter(eligibility_status == "Eligible") %>%
-  select(patient_id, high_risk_group_elig, tb_postest_treat) %>%
-  separate(high_risk_group_elig, 
-           c(paste("Group_", 1:max(subset(data_processed_clean, !is.na(treatment_date))$high_risk_group_elig_count, na.rm = T), sep = "")),
-           sep = ",") %>%
-  reshape2::melt(id.var = c("patient_id", "tb_postest_treat")) %>%
-  mutate(value = as.character(value)) %>%
-  filter(!is.na(value),
-         value != "") %>%
-  group_by(high_risk_group_elig = value, tb_postest_treat) %>%
-  tally() %>%
-  mutate(n = ifelse(n < 5, NA, n),
-         n = plyr::round_any(as.numeric(n), 5))
+  filter(!is.na(treatment_type)) %>%
+  select(tb_postest_treat, downs_syndrome, sickle_cell_disease, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
+         hiv_aids, solid_organ_transplant, rare_neurological_conditions) %>%
+  group_by(tb_postest_treat) %>%
+  filter(!is.na(tb_postest_treat)) %>%
+  summarise(
+    across(.fns=sum, na.rm = T)
+  ) %>%
+  pivot_longer(
+    cols = c(downs_syndrome, sickle_cell_disease, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
+             hiv_aids, solid_organ_transplant, rare_neurological_conditions),
+    names_to = "high_risk_cohort",
+    values_to = "Count"
+  ) %>%
+  mutate(Count = ifelse(Count < 5, NA, Count),
+         Count = plyr::round_any(as.numeric(Count), 5))
 
 write_csv(rbind(all, groups), fs::path(output_dir, "table_time_to_treat_redacted.csv"))
+
+
+# COVID-19 related events ----
+all <- data_processed_clean %>%
+  mutate(treated_status = ifelse(!is.na(treatment_type), "treated", "not treated"),
+         covid_hospitalisation_outcome = ifelse(covid_hospitalisation_outcome_date > covid_test_positive_date, 1, 0),
+         covid_hospitalisation_outcome = ifelse(is.na(covid_hospitalisation_outcome), 0, covid_hospitalisation_outcome),
+         covid_hospitalisation_critical_care = ifelse(!is.na(covid_hospitalisation_critical_care), 1, 0)) %>%
+  select(covid_positive_test_30_days_post_elig_or_treat, covid_hospitalisation_outcome, covid_hospitalisation_critical_care, 
+         covid_death, treated_status) %>%
+  tibble() %>%
+  group_by(treated_status) %>%
+  summarise(
+    across(.fns=sum, na.rm = T)
+  ) %>%
+  pivot_longer(
+    cols = c(covid_positive_test_30_days_post_elig_or_treat, covid_hospitalisation_outcome, covid_hospitalisation_critical_care,
+             covid_death),
+    names_to = "Outcome",
+    values_to = "Count"
+  ) %>%
+  mutate(Count = ifelse(Count < 5, NA, Count),
+         Count = plyr::round_any(as.numeric(Count), 5))
+
+
+write_csv(all, fs::path(output_dir, "covid_outcomes_redacted.csv"))
+
+
+
+
 

@@ -1132,11 +1132,11 @@ study = StudyDefinition(
     with_patient_classification = ["1"], # ordinary admissions only - exclude day cases and regular attenders
     # see https://docs.opensafely.org/study-def-variables/#sus for more info
     # with_admission_method=["21", "22", "23", "24", "25", "2A", "2B", "2C", "2D", "28"], # emergency admissions only to exclude incidental COVID
-    between = ["start_date", "start_date + 30 days"],
+    on_or_after = "start_date + 1 day",
     find_first_match_in_period = True,
     date_format = "YYYY-MM-DD",
     return_expectations = {
-      "date": {"earliest": "2021-12-16", "latest": "index_date"},
+      "date": {"earliest": "2022-02-28"},
       "rate": "uniform",
       "incidence": 0.05
     },
@@ -1159,7 +1159,7 @@ study = StudyDefinition(
     covid_icd10_codes,
     returning = "date_of_death",
     date_format = "YYYY-MM-DD",
-    on_or_after = "start_date + 30 days",
+    on_or_after = "start_date + 1 day",
     return_expectations = {
       "date": {"earliest": "2021-01-01", "latest" : end_date},
       "rate": "uniform",
