@@ -335,6 +335,7 @@ non_elig_treated <-  data_processed_clean %>%
     has_positive_covid_test = (covid_test_positive == 1),
     no_positive_covid_test_previous_30_days = (covid_positive_previous_30_days != 1),
     high_risk_group_nhsd = high_risk_group_nhsd_combined != "",
+    high_risk_group_match = high_risk_group_nhsd_combined != "" & match == TRUE,
     no_primary_covid_hospital_admission_last_30_days = (is.na(primary_covid_hospital_discharge_date) | 
                                                   primary_covid_hospital_discharge_date < (treatment_date - 30) & 
                                                   primary_covid_hospital_discharge_date > (treatment_date)),
@@ -348,6 +349,7 @@ non_elig_treated <-  data_processed_clean %>%
         no_positive_covid_test_previous_30_days & 
         treated_within_5_days & 
         high_risk_group_nhsd & 
+        high_risk_group_match &
         no_primary_covid_hospital_admission_last_30_days &
         no_covid_hospital_admission_last_30_days &
         aged_over_12)
@@ -360,6 +362,7 @@ data_flowchart <- non_elig_treated %>%
     c2_has_positive_covid_test = c0_all & has_positive_covid_test,
     c3_no_positive_covid_test_previous_30_days = c0_all & no_positive_covid_test_previous_30_days,
     c4_high_risk_group_nhsd = c0_all & high_risk_group_nhsd,
+    c4_high_risk_group_match = c0_all & high_risk_group_match,
     c5_no_primary_covid_hospital_admission_last_30_days = c0_all & no_primary_covid_hospital_admission_last_30_days,
     c5_no_covid_hospital_admission_last_30_days = c0_all & no_covid_hospital_admission_last_30_days,
     c6_aged_over_12 = c0_all & aged_over_12,
