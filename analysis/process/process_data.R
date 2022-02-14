@@ -219,17 +219,17 @@ data_processed <- data_extract %>%
     solid_organ_transplant_therapeutics = ifelse(str_detect(high_risk_cohort_covid_therapeutics, "solid organ recipients") == TRUE, 1, NA),
     rare_neurological_conditions_therapeutics = ifelse(str_detect(high_risk_cohort_covid_therapeutics, "rare neurological conditions") == TRUE, 1, NA),   
     
-    downs_syndrome = ifelse(downs_syndrome_nhsd == downs_syndrome_therapeutics, 1, NA),
-    sickle_cell_disease = ifelse(sickle_cell_disease_nhsd == sickle_cell_disease_therapeutics, 1, NA),
-    solid_cancer = ifelse(cancer_opensafely == cancer_therapeutics, 1, NA),
-    haematological_disease = ifelse(haematological_disease_nhsd == haematological_disease_therapeutics, 1, NA),
-    renal_disease = ifelse(ckd_stage_5_nhsd == ckd_stage_5_therapeutics, 1, NA),
-    liver_disease = ifelse(liver_disease_nhsd == liver_disease_therapeutics, 1, NA),
-    imid = ifelse(imid_nhsd == imid_therapeutics, 1, NA),
-    immunosupression = ifelse(immunosupression_nhsd == immunosupression_therapeutics, 1, NA),
-    hiv_aids = ifelse(hiv_aids_nhsd == hiv_aids_therapeutics, 1, NA),
-    solid_organ_transplant = ifelse(solid_organ_transplant_nhsd == solid_organ_transplant_therapeutics, 1, NA),
-    rare_neurological_conditions = ifelse(rare_neurological_conditions_nhsd == rare_neurological_conditions_therapeutics, 1, NA)
+    downs_syndrome = ifelse(downs_syndrome_nhsd == 1 | downs_syndrome_therapeutics == 1, 1, NA),
+    sickle_cell_disease = ifelse(sickle_cell_disease_nhsd == 1 | sickle_cell_disease_therapeutics== 1, 1, NA),
+    solid_cancer = ifelse(cancer_opensafely == 1 | cancer_therapeutics == 1, 1, NA),
+    haematological_disease = ifelse(haematological_disease_nhsd == 1 | haematological_disease_therapeutics == 1, 1, NA),
+    renal_disease = ifelse(ckd_stage_5_nhsd == 1 | ckd_stage_5_therapeutics == 1, 1, NA),
+    liver_disease = ifelse(liver_disease_nhsd == 1 | liver_disease_therapeutics == 1, 1, NA),
+    imid = ifelse(imid_nhsd == 1 | imid_therapeutics == 1, 1, NA),
+    immunosupression = ifelse(immunosupression_nhsd == 1 | immunosupression_therapeutics == 1, 1, NA),
+    hiv_aids = ifelse(hiv_aids_nhsd == 1 | hiv_aids_therapeutics == 1, 1, NA),
+    solid_organ_transplant = ifelse(solid_organ_transplant_nhsd == 1 | solid_organ_transplant_therapeutics == 1, 1, NA),
+    rare_neurological_conditions = ifelse(rare_neurological_conditions_nhsd == 1 | rare_neurological_conditions_therapeutics == 1, 1, NA)
     
     ) %>%
   unite("high_risk_group_nhsd_combined", downs_syndrome_nhsd_name, sickle_cell_disease_nhsd_name, cancer_opensafely_name,
