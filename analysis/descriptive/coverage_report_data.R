@@ -65,6 +65,7 @@ print(summary(data_processed_clean$high_risk_group_combined_count))
 study_start <- min(data_processed_clean$elig_start, na.rm = T)
 study_end <- max(data_processed_clean$elig_start, na.rm = T)
 eligible_patients <- plyr::round_any(data_processed_clean %>% filter(eligibility_status == "Eligible") %>% nrow(), 10)
+non_eligible_patients <- plyr::round_any(data_processed_clean %>% filter(eligibility_status == "Treated") %>% nrow(), 10)
 treated_patients <- plyr::round_any(data_processed_clean %>% filter(!is.na(treatment_date)) %>% nrow(), 10)
 
 treated_sotrovimab <- plyr::round_any(data_processed_clean %>% filter(treatment_type == "Sotrovimab") %>% nrow(), 10)
@@ -80,7 +81,7 @@ deregistered <- plyr::round_any(print(length(unique(subset(data_processed, !is.n
 
 text <- data.frame(study_start, study_end, 
                    eligible_patients, treated_patients, treated_sotrovimab, treated_molnupiravir, treated_casirivimab, 
-                   high_risk_cohort_2plus, high_risk_cohort_lower, high_risk_cohort_upper, deregistered)
+                   high_risk_cohort_2plus, high_risk_cohort_lower, high_risk_cohort_upper, non_eligible_patients, deregistered)
 
 write_csv(text, fs::path(output_dir, "table_report_stats_redacted.csv"))
 
@@ -90,23 +91,13 @@ print(text)
 # Coverage ----
 
 ## Eligibility
-print(length(unique(subset(data_processed_clean, !is.na(elig_start)$patient_id))))
+print(length(unique(subset(data_processed_clean, !is.na(elig_start))$patient_id)))
+print(length(unique(subset(data_processed_clean, eligibility_status == "Eligible")$patient_id)))
 
 plot_data_coverage <- data_processed_clean %>%
-  select(elig_start, downs_syndrome, sickle_cell_disease, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
-         hiv_aids, solid_organ_transplant, rare_neurological_conditions)  %>%
+  select(elig_start)  %>%
   group_by(elig_start) %>%
-  summarise(
-    across(.fns=sum, na.rm = T)
-  ) %>%
-  pivot_longer(
-    cols=c(downs_syndrome, sickle_cell_disease, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
-           hiv_aids, solid_organ_transplant, rare_neurological_conditions),
-    names_to="high_risk_cohort",
-    values_to="n"
-  ) %>%
-  group_by(elig_start) %>%
-  summarise(n = sum(n, na.rm = T)) %>%
+  tally() %>%
   ungroup() %>%
   arrange(elig_start) %>%
   complete(elig_start = seq.Date(min(elig_start, na.rm = T), max(elig_start, na.rm = T), by="day"))  %>%
@@ -117,6 +108,7 @@ plot_data_coverage <- data_processed_clean %>%
   select(-n)
 
 plot_data_coverage_groups <- data_processed_clean %>%
+  filter(!is.na(elig_start)) %>%
   select(elig_start, downs_syndrome, sickle_cell_disease, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
          hiv_aids, solid_organ_transplant, rare_neurological_conditions)  %>%
   group_by(elig_start) %>%
@@ -129,13 +121,16 @@ plot_data_coverage_groups <- data_processed_clean %>%
     names_to = "high_risk_cohort",
     values_to = "n"
   ) %>%
-  group_by(high_risk_cohort) %>%
+  group_by(high_risk_cohort, elig_start) %>%
+  summarise(n = sum(n, na.rm = T)) %>%
   arrange(high_risk_cohort, elig_start) %>%
+  group_by(high_risk_cohort) %>%
   complete(elig_start = seq.Date(min(elig_start, na.rm = T), max(elig_start, na.rm = T), by="day"))  %>%
   mutate(count = ifelse(is.na(n), 0, n),
          cum_count = cumsum(count),
          cum_count_redacted =  plyr::round_any(cum_count, 10)) %>%
   select(-n)
+
 
 plot_order <- rbind(plot_data_coverage, plot_data_coverage_groups) %>%
   group_by(high_risk_cohort) %>%
@@ -154,20 +149,9 @@ print("coverage_plot_data saved")
 
 ## Treatment (all)
 plot_data_treatment <- data_processed_clean %>%
-  select(treatment_date, downs_syndrome, sickle_cell_disease, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
-         hiv_aids, solid_organ_transplant, rare_neurological_conditions)  %>%
+  select(treatment_date)  %>%
   group_by(treatment_date) %>%
-  summarise(
-    across(.fns=sum, na.rm = T)
-  ) %>%
-  pivot_longer(
-    cols=c(downs_syndrome, sickle_cell_disease, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
-           hiv_aids, solid_organ_transplant, rare_neurological_conditions),
-    names_to = "high_risk_cohort",
-    values_to = "n"
-  ) %>%
-  group_by(treatment_date) %>%
-  summarise(n = sum(n, na.rm = T)) %>%
+  tally() %>%
   ungroup() %>%
   arrange(treatment_date) %>%
   complete(treatment_date = seq.Date(min(treatment_date, na.rm = T), max(treatment_date, na.rm = T), by="day"))  %>%
@@ -476,7 +460,7 @@ all <- data_processed_clean %>%
          Count = plyr::round_any(as.numeric(Count), 5))
 
 
-write_csv(all, fs::path(output_dir, "covid_outcomes_redacted.csv"))
+write_csv(all, fs::path(output_dir, "table_covid_outcomes_redacted.csv"))
 
 
 
