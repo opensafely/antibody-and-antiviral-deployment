@@ -237,16 +237,20 @@ data_processed <- data_extract %>%
         hiv_aids_nhsd_name, solid_organ_transplant_nhsd_name, rare_neurological_conditions_nhsd_name, sep = ",", na.rm = T) %>%
   mutate(
     
-    ## Find matches between nhsd high risk cohorts and theraputics high risk cohorts 
+    ## Find matches between nhsd high risk cohorts and therapeutics high risk cohorts 
     ind_therapeutic_groups = map_chr(strsplit(high_risk_cohort_covid_therapeutics, ","), paste,collapse="|"),
-    match = str_detect(high_risk_group_nhsd_combined, ind_therapeutic_groups),
+    match = str_detect(high_risk_group_nhsd_combined, ind_therapeutic_groups)) %>%
+  rowwise() %>%
+  mutate(
     
     ## Combine nhsd cohorts with theraputics cohorts to get list of all cohorts
     high_risk_group_combined = as.character(ifelse(match == TRUE,
                                                    paste(high_risk_group_nhsd_combined, high_risk_cohort_covid_therapeutics, sep = ","), "")),
     high_risk_group_combined = ifelse(high_risk_group_combined == "NA", "", high_risk_group_combined),
     high_risk_group_combined = as.character(paste(unique(unlist(strsplit(high_risk_group_combined, ","))), collapse = ",")),
-    high_risk_group_combined_count = ifelse(high_risk_group_combined != "", str_count(high_risk_group_combined,",") + 1, NA),
+    high_risk_group_combined_count = ifelse(high_risk_group_combined != "", str_count(high_risk_group_combined,",") + 1, NA)) %>%
+  ungroup() %>%
+  mutate(
     
     # Cinic/demo variables
     sex = fct_case_when(
