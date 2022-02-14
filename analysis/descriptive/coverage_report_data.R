@@ -327,14 +327,14 @@ write_csv(table_demo_clinc_breakdown_redacted, fs::path(output_dir, "table_demo_
 # Concordance with guidance ----
 non_elig_treated <-  data_processed_clean %>%
   filter(!is.na(treatment_date),
-         eligibility_status == "Treated") %>%
+         eligibility_status == "Treated",
+         has_died == 0,
+         registered_eligible == 1 | registered_treated == 1) %>%
   mutate(
     patient_id,
-    alive = (has_died == 0),
-    registered = (registered_eligible == 1 | registered_treated == 1),
     has_positive_covid_test = (covid_test_positive == 1),
     no_positive_covid_test_previous_30_days = (covid_positive_previous_30_days != 1),
-    high_risk_group_nhsd = !is.na(high_risk_group_nhsd_combined),
+    high_risk_group_nhsd = high_risk_group_nhsd_combined != "",
     no_primary_covid_hospital_admission_last_30_days = (is.na(primary_covid_hospital_discharge_date) | 
                                                   primary_covid_hospital_discharge_date < (treatment_date - 30) & 
                                                   primary_covid_hospital_discharge_date > (treatment_date)),
@@ -343,37 +343,27 @@ non_elig_treated <-  data_processed_clean %>%
                                                   any_covid_hospital_discharge_date > (treatment_date)),
     aged_over_12 = (age >= 12),
     treated_within_5_days = ((tb_postest_treat <= 5 & tb_postest_treat >= 0) | is.na(tb_postest_treat)),
-    high_risk_group = !is.na(high_risk_cohort_covid_therapeutics),
-    
     include = (
-      alive &
-        registered & 
-        has_positive_covid_test & 
+       has_positive_covid_test & 
         no_positive_covid_test_previous_30_days & 
         treated_within_5_days & 
         high_risk_group_nhsd & 
         no_primary_covid_hospital_admission_last_30_days &
         no_covid_hospital_admission_last_30_days &
-        aged_over_12 &
-        high_risk_group)
+        aged_over_12)
   )
 
 data_flowchart <- non_elig_treated %>%
   ungroup() %>%
   transmute(
     c0_all = TRUE,
-    c1_alive_and_registered = c0_all & alive & registered,
-    c1_alive = c0_all & alive,
-    c1_registered = c0_all & registered,
     c2_has_positive_covid_test = c0_all & has_positive_covid_test,
     c3_no_positive_covid_test_previous_30_days = c0_all & no_positive_covid_test_previous_30_days,
     c4_high_risk_group_nhsd = c0_all & high_risk_group_nhsd,
     c5_no_primary_covid_hospital_admission_last_30_days = c0_all & no_primary_covid_hospital_admission_last_30_days,
     c5_no_covid_hospital_admission_last_30_days = c0_all & no_covid_hospital_admission_last_30_days,
     c6_aged_over_12 = c0_all & aged_over_12,
-    c7_treated_within_5_days = c0_all & treated_within_5_days,
-    c9_high_risk_group = c0_all & high_risk_group
-  )  %>%
+    c7_treated_within_5_days = c0_all & treated_within_5_days  )  %>%
   summarise(
     across(.fns=sum, na.rm = T)
   ) %>%
