@@ -1,16 +1,13 @@
-High.risk.cohort,Number.of.eligible.patients,Number.of.treated.patients,Treated.with.Casirivimab,Treated.with.Molnupiravir,Treated.with.Sotrovimab
-All,275770,3300,20,1730,1550
-solid organ recipients,238980,1370,10,10,10
-IMID,35880,1400,10,10,10
-primary immune deficiencies,7100,340,NA,NA,NA
-solid cancer,5790,460,10,10,10
-rare neurological conditions,4220,500,NA,NA,NA
-liver disease,2290,170,NA,NA,NA
-renal disease,2240,440,NA,NA,NA
-haematological diseases and stem cell transplant recipients,2190,380,NA,NA,NA
-Downs syndrome,760,70,NA,NA,NA
-sickle cell disease,610,30,NA,NA,NA
-HIV or AIDS,120,120,NA,NA,NA
-haematological diseases,NA,NA,NA,NA,NA
-stem cell transplant recipients,NA,NA,NA,NA,NA
-haematologic malignancy,NA,30,NA,NA,NA
+high_risk_cohort,Eligibile,Treated,Sotrovimab,Molnupiravir,Casirivimab
+All,67640,5370,2870,2450,50
+imid,42500,2600,1390,1180,20
+immunosupression,8870,1020,510,500,10
+solid_cancer,7240,790,440,340,10
+rare_neurological_conditions,5070,780,390,380,10
+solid_organ_transplant,3100,730,440,280,10
+haematological_disease,2950,710,380,320,10
+liver_disease,2790,270,130,130,NA
+renal_disease,2780,700,450,240,10
+downs_syndrome,950,120,40,80,NA
+sickle_cell_disease,710,50,20,30,NA
+hiv_aids,300,170,70,110,NA

@@ -1,2 +1,2 @@
-study_start,study_end,eligible_patients,eligible_treated_patients,eligible_sotrovimab,eligible_molnupiravir,eligible_casirivimab,noneligible_treated_patients,noneligible_sotrovimab,noneligible_molnupiravir,noneligible_casirivimab,high_risk_cohort_2plus,high_risk_cohort_lower,high_risk_cohort_upper
-2021-12-11,2022-01-26,275770,3300,1550,1730,20,1120,630,470,30,22050,1,6
+study_start,study_end,eligible_patients,treated_patients,treated_sotrovimab,treated_molnupiravir,treated_casirivimab,high_risk_cohort_2plus,high_risk_cohort_lower,high_risk_cohort_upper,non_eligible_patients,deregistered
+2021-12-11,2022-02-05,67440,5370,2870,2450,50,1200,1,7,1050,650

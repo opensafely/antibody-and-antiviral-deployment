@@ -1,98 +1,568 @@
-tb_postest_treat,treatment_type,n,high_risk_group_elig
-0,Molnupiravir,15,All
-0,Sotrovimab,25,All
-1,Casirivimab,NA,All
-1,Molnupiravir,220,All
-1,Sotrovimab,155,All
-2,Casirivimab,15,All
-2,Molnupiravir,715,All
-2,Sotrovimab,560,All
-3,Casirivimab,10,All
-3,Molnupiravir,480,All
-3,Sotrovimab,510,All
-4,Molnupiravir,230,All
-4,Sotrovimab,220,All
-5,Casirivimab,NA,All
-5,Molnupiravir,65,All
-5,Sotrovimab,80,All
-NA,NA,272465,All
-0,NA,NA,Downs syndrome
-1,NA,10,Downs syndrome
-2,NA,25,Downs syndrome
-3,NA,25,Downs syndrome
-4,NA,10,Downs syndrome
-5,NA,NA,Downs syndrome
-NA,NA,690,Downs syndrome
-1,NA,NA,HIV or AIDS
-2,NA,5,HIV or AIDS
-3,NA,5,HIV or AIDS
-4,NA,NA,HIV or AIDS
-NA,NA,100,HIV or AIDS
-0,NA,10,IMID
-1,NA,125,IMID
-2,NA,490,IMID
-3,NA,365,IMID
-4,NA,170,IMID
-5,NA,65,IMID
-NA,NA,34660,IMID
-2,NA,NA,haematologic malignancy
-2,NA,NA,haematological diseases
-3,NA,NA,haematological diseases
-0,NA,5,haematological diseases and stem cell transplant recipients
-1,NA,40,haematological diseases and stem cell transplant recipients
-2,NA,95,haematological diseases and stem cell transplant recipients
-3,NA,85,haematological diseases and stem cell transplant recipients
-4,NA,40,haematological diseases and stem cell transplant recipients
-5,NA,10,haematological diseases and stem cell transplant recipients
-NA,NA,1920,haematological diseases and stem cell transplant recipients
-0,NA,NA,liver disease
-1,NA,10,liver disease
-2,NA,55,liver disease
-3,NA,40,liver disease
-4,NA,15,liver disease
-5,NA,5,liver disease
-NA,NA,2160,liver disease
-0,NA,5,primary immune deficiencies
-1,NA,40,primary immune deficiencies
-2,NA,115,primary immune deficiencies
-3,NA,85,primary immune deficiencies
-4,NA,45,primary immune deficiencies
-5,NA,15,primary immune deficiencies
-NA,NA,6800,primary immune deficiencies
-0,NA,NA,rare neurological conditions
-1,NA,45,rare neurological conditions
-2,NA,190,rare neurological conditions
-3,NA,165,rare neurological conditions
-4,NA,65,rare neurological conditions
-5,NA,15,rare neurological conditions
-NA,NA,3735,rare neurological conditions
-0,NA,NA,renal disease
-1,NA,40,renal disease
-2,NA,140,renal disease
-3,NA,115,renal disease
-4,NA,55,renal disease
-5,NA,25,renal disease
-NA,NA,1865,renal disease
-0,NA,NA,sickle cell disease
-1,NA,5,sickle cell disease
-2,NA,10,sickle cell disease
-3,NA,5,sickle cell disease
-4,NA,5,sickle cell disease
-5,NA,NA,sickle cell disease
-NA,NA,580,sickle cell disease
-0,NA,NA,solid cancer
-1,NA,35,solid cancer
-2,NA,110,solid cancer
-3,NA,75,solid cancer
-4,NA,30,solid cancer
-5,NA,5,solid cancer
-NA,NA,5530,solid cancer
-0,NA,15,solid organ recipients
-1,NA,150,solid organ recipients
-2,NA,550,solid organ recipients
-3,NA,400,solid organ recipients
-4,NA,200,solid organ recipients
-5,NA,55,solid organ recipients
-NA,NA,237615,solid organ recipients
-2,NA,NA,stem cell transplant recipients
-3,NA,NA,stem cell transplant recipients
+tb_postest_treat,treatment_type,n,high_risk_group_elig,high_risk_cohort,Count
+-31,Sotrovimab,NA,All,NA,NA
+-29,Sotrovimab,NA,All,NA,NA
+-24,Molnupiravir,NA,All,NA,NA
+-19,Sotrovimab,NA,All,NA,NA
+-18,Sotrovimab,NA,All,NA,NA
+-16,Sotrovimab,NA,All,NA,NA
+-15,Sotrovimab,NA,All,NA,NA
+-12,Sotrovimab,NA,All,NA,NA
+-9,Sotrovimab,NA,All,NA,NA
+-7,Sotrovimab,NA,All,NA,NA
+-5,Sotrovimab,NA,All,NA,NA
+-4,Molnupiravir,NA,All,NA,NA
+-4,Sotrovimab,NA,All,NA,NA
+-3,Molnupiravir,NA,All,NA,NA
+-3,Sotrovimab,NA,All,NA,NA
+-2,Molnupiravir,NA,All,NA,NA
+-2,Sotrovimab,NA,All,NA,NA
+-1,Molnupiravir,10,All,NA,NA
+-1,Sotrovimab,NA,All,NA,NA
+0,Molnupiravir,25,All,NA,NA
+0,Sotrovimab,35,All,NA,NA
+1,Casirivimab,NA,All,NA,NA
+1,Molnupiravir,340,All,NA,NA
+1,Sotrovimab,340,All,NA,NA
+2,Casirivimab,20,All,NA,NA
+2,Molnupiravir,940,All,NA,NA
+2,Sotrovimab,975,All,NA,NA
+3,Casirivimab,25,All,NA,NA
+3,Molnupiravir,625,All,NA,NA
+3,Sotrovimab,865,All,NA,NA
+4,Casirivimab,NA,All,NA,NA
+4,Molnupiravir,315,All,NA,NA
+4,Sotrovimab,395,All,NA,NA
+5,Casirivimab,NA,All,NA,NA
+5,Molnupiravir,85,All,NA,NA
+5,Sotrovimab,115,All,NA,NA
+6,Casirivimab,NA,All,NA,NA
+6,Molnupiravir,15,All,NA,NA
+6,Sotrovimab,35,All,NA,NA
+7,Molnupiravir,NA,All,NA,NA
+7,Sotrovimab,NA,All,NA,NA
+8,Molnupiravir,NA,All,NA,NA
+8,Sotrovimab,10,All,NA,NA
+9,Molnupiravir,NA,All,NA,NA
+9,Sotrovimab,NA,All,NA,NA
+10,Molnupiravir,NA,All,NA,NA
+11,Sotrovimab,NA,All,NA,NA
+16,Molnupiravir,NA,All,NA,NA
+16,Sotrovimab,NA,All,NA,NA
+17,Sotrovimab,NA,All,NA,NA
+19,Molnupiravir,NA,All,NA,NA
+21,Sotrovimab,NA,All,NA,NA
+23,Sotrovimab,NA,All,NA,NA
+28,Sotrovimab,NA,All,NA,NA
+29,Molnupiravir,NA,All,NA,NA
+30,Molnupiravir,NA,All,NA,NA
+30,Sotrovimab,NA,All,NA,NA
+31,Molnupiravir,NA,All,NA,NA
+31,Sotrovimab,NA,All,NA,NA
+33,Molnupiravir,NA,All,NA,NA
+33,Sotrovimab,NA,All,NA,NA
+34,Molnupiravir,5,All,NA,NA
+35,Molnupiravir,NA,All,NA,NA
+36,Sotrovimab,NA,All,NA,NA
+37,Molnupiravir,NA,All,NA,NA
+38,Sotrovimab,NA,All,NA,NA
+41,Sotrovimab,NA,All,NA,NA
+55,Molnupiravir,NA,All,NA,NA
+61,Molnupiravir,NA,All,NA,NA
+NA,Casirivimab,NA,All,NA,NA
+NA,Molnupiravir,55,All,NA,NA
+NA,Sotrovimab,60,All,NA,NA
+-31,NA,NA,NA,downs_syndrome,NA
+-31,NA,NA,NA,sickle_cell_disease,NA
+-31,NA,NA,NA,solid_cancer,NA
+-31,NA,NA,NA,haematological_disease,NA
+-31,NA,NA,NA,renal_disease,NA
+-31,NA,NA,NA,liver_disease,NA
+-31,NA,NA,NA,imid,NA
+-31,NA,NA,NA,immunosupression,NA
+-31,NA,NA,NA,hiv_aids,NA
+-31,NA,NA,NA,solid_organ_transplant,NA
+-31,NA,NA,NA,rare_neurological_conditions,NA
+-29,NA,NA,NA,downs_syndrome,NA
+-29,NA,NA,NA,sickle_cell_disease,NA
+-29,NA,NA,NA,solid_cancer,NA
+-29,NA,NA,NA,haematological_disease,NA
+-29,NA,NA,NA,renal_disease,NA
+-29,NA,NA,NA,liver_disease,NA
+-29,NA,NA,NA,imid,NA
+-29,NA,NA,NA,immunosupression,NA
+-29,NA,NA,NA,hiv_aids,NA
+-29,NA,NA,NA,solid_organ_transplant,NA
+-29,NA,NA,NA,rare_neurological_conditions,NA
+-24,NA,NA,NA,downs_syndrome,NA
+-24,NA,NA,NA,sickle_cell_disease,NA
+-24,NA,NA,NA,solid_cancer,NA
+-24,NA,NA,NA,haematological_disease,NA
+-24,NA,NA,NA,renal_disease,NA
+-24,NA,NA,NA,liver_disease,NA
+-24,NA,NA,NA,imid,NA
+-24,NA,NA,NA,immunosupression,NA
+-24,NA,NA,NA,hiv_aids,NA
+-24,NA,NA,NA,solid_organ_transplant,NA
+-24,NA,NA,NA,rare_neurological_conditions,NA
+-19,NA,NA,NA,downs_syndrome,NA
+-19,NA,NA,NA,sickle_cell_disease,NA
+-19,NA,NA,NA,solid_cancer,NA
+-19,NA,NA,NA,haematological_disease,NA
+-19,NA,NA,NA,renal_disease,NA
+-19,NA,NA,NA,liver_disease,NA
+-19,NA,NA,NA,imid,NA
+-19,NA,NA,NA,immunosupression,NA
+-19,NA,NA,NA,hiv_aids,NA
+-19,NA,NA,NA,solid_organ_transplant,NA
+-19,NA,NA,NA,rare_neurological_conditions,NA
+-18,NA,NA,NA,downs_syndrome,NA
+-18,NA,NA,NA,sickle_cell_disease,NA
+-18,NA,NA,NA,solid_cancer,NA
+-18,NA,NA,NA,haematological_disease,NA
+-18,NA,NA,NA,renal_disease,NA
+-18,NA,NA,NA,liver_disease,NA
+-18,NA,NA,NA,imid,NA
+-18,NA,NA,NA,immunosupression,NA
+-18,NA,NA,NA,hiv_aids,NA
+-18,NA,NA,NA,solid_organ_transplant,NA
+-18,NA,NA,NA,rare_neurological_conditions,NA
+-16,NA,NA,NA,downs_syndrome,NA
+-16,NA,NA,NA,sickle_cell_disease,NA
+-16,NA,NA,NA,solid_cancer,NA
+-16,NA,NA,NA,haematological_disease,NA
+-16,NA,NA,NA,renal_disease,NA
+-16,NA,NA,NA,liver_disease,NA
+-16,NA,NA,NA,imid,NA
+-16,NA,NA,NA,immunosupression,NA
+-16,NA,NA,NA,hiv_aids,NA
+-16,NA,NA,NA,solid_organ_transplant,NA
+-16,NA,NA,NA,rare_neurological_conditions,NA
+-15,NA,NA,NA,downs_syndrome,NA
+-15,NA,NA,NA,sickle_cell_disease,NA
+-15,NA,NA,NA,solid_cancer,NA
+-15,NA,NA,NA,haematological_disease,NA
+-15,NA,NA,NA,renal_disease,NA
+-15,NA,NA,NA,liver_disease,NA
+-15,NA,NA,NA,imid,NA
+-15,NA,NA,NA,immunosupression,NA
+-15,NA,NA,NA,hiv_aids,NA
+-15,NA,NA,NA,solid_organ_transplant,NA
+-15,NA,NA,NA,rare_neurological_conditions,NA
+-12,NA,NA,NA,downs_syndrome,NA
+-12,NA,NA,NA,sickle_cell_disease,NA
+-12,NA,NA,NA,solid_cancer,NA
+-12,NA,NA,NA,haematological_disease,NA
+-12,NA,NA,NA,renal_disease,NA
+-12,NA,NA,NA,liver_disease,NA
+-12,NA,NA,NA,imid,NA
+-12,NA,NA,NA,immunosupression,NA
+-12,NA,NA,NA,hiv_aids,NA
+-12,NA,NA,NA,solid_organ_transplant,NA
+-12,NA,NA,NA,rare_neurological_conditions,NA
+-9,NA,NA,NA,downs_syndrome,NA
+-9,NA,NA,NA,sickle_cell_disease,NA
+-9,NA,NA,NA,solid_cancer,NA
+-9,NA,NA,NA,haematological_disease,NA
+-9,NA,NA,NA,renal_disease,NA
+-9,NA,NA,NA,liver_disease,NA
+-9,NA,NA,NA,imid,NA
+-9,NA,NA,NA,immunosupression,NA
+-9,NA,NA,NA,hiv_aids,NA
+-9,NA,NA,NA,solid_organ_transplant,NA
+-9,NA,NA,NA,rare_neurological_conditions,NA
+-7,NA,NA,NA,downs_syndrome,NA
+-7,NA,NA,NA,sickle_cell_disease,NA
+-7,NA,NA,NA,solid_cancer,NA
+-7,NA,NA,NA,haematological_disease,NA
+-7,NA,NA,NA,renal_disease,NA
+-7,NA,NA,NA,liver_disease,NA
+-7,NA,NA,NA,imid,NA
+-7,NA,NA,NA,immunosupression,NA
+-7,NA,NA,NA,hiv_aids,NA
+-7,NA,NA,NA,solid_organ_transplant,NA
+-7,NA,NA,NA,rare_neurological_conditions,NA
+-5,NA,NA,NA,downs_syndrome,NA
+-5,NA,NA,NA,sickle_cell_disease,NA
+-5,NA,NA,NA,solid_cancer,NA
+-5,NA,NA,NA,haematological_disease,NA
+-5,NA,NA,NA,renal_disease,NA
+-5,NA,NA,NA,liver_disease,NA
+-5,NA,NA,NA,imid,NA
+-5,NA,NA,NA,immunosupression,NA
+-5,NA,NA,NA,hiv_aids,NA
+-5,NA,NA,NA,solid_organ_transplant,NA
+-5,NA,NA,NA,rare_neurological_conditions,NA
+-4,NA,NA,NA,downs_syndrome,NA
+-4,NA,NA,NA,sickle_cell_disease,NA
+-4,NA,NA,NA,solid_cancer,NA
+-4,NA,NA,NA,haematological_disease,NA
+-4,NA,NA,NA,renal_disease,NA
+-4,NA,NA,NA,liver_disease,NA
+-4,NA,NA,NA,imid,NA
+-4,NA,NA,NA,immunosupression,NA
+-4,NA,NA,NA,hiv_aids,NA
+-4,NA,NA,NA,solid_organ_transplant,NA
+-4,NA,NA,NA,rare_neurological_conditions,NA
+-3,NA,NA,NA,downs_syndrome,NA
+-3,NA,NA,NA,sickle_cell_disease,NA
+-3,NA,NA,NA,solid_cancer,NA
+-3,NA,NA,NA,haematological_disease,NA
+-3,NA,NA,NA,renal_disease,NA
+-3,NA,NA,NA,liver_disease,NA
+-3,NA,NA,NA,imid,NA
+-3,NA,NA,NA,immunosupression,NA
+-3,NA,NA,NA,hiv_aids,NA
+-3,NA,NA,NA,solid_organ_transplant,NA
+-3,NA,NA,NA,rare_neurological_conditions,NA
+-2,NA,NA,NA,downs_syndrome,NA
+-2,NA,NA,NA,sickle_cell_disease,NA
+-2,NA,NA,NA,solid_cancer,NA
+-2,NA,NA,NA,haematological_disease,NA
+-2,NA,NA,NA,renal_disease,NA
+-2,NA,NA,NA,liver_disease,NA
+-2,NA,NA,NA,imid,5
+-2,NA,NA,NA,immunosupression,NA
+-2,NA,NA,NA,hiv_aids,NA
+-2,NA,NA,NA,solid_organ_transplant,NA
+-2,NA,NA,NA,rare_neurological_conditions,NA
+-1,NA,NA,NA,downs_syndrome,NA
+-1,NA,NA,NA,sickle_cell_disease,NA
+-1,NA,NA,NA,solid_cancer,NA
+-1,NA,NA,NA,haematological_disease,5
+-1,NA,NA,NA,renal_disease,5
+-1,NA,NA,NA,liver_disease,NA
+-1,NA,NA,NA,imid,5
+-1,NA,NA,NA,immunosupression,NA
+-1,NA,NA,NA,hiv_aids,NA
+-1,NA,NA,NA,solid_organ_transplant,5
+-1,NA,NA,NA,rare_neurological_conditions,NA
+0,NA,NA,NA,downs_syndrome,NA
+0,NA,NA,NA,sickle_cell_disease,NA
+0,NA,NA,NA,solid_cancer,15
+0,NA,NA,NA,haematological_disease,10
+0,NA,NA,NA,renal_disease,5
+0,NA,NA,NA,liver_disease,NA
+0,NA,NA,NA,imid,25
+0,NA,NA,NA,immunosupression,10
+0,NA,NA,NA,hiv_aids,NA
+0,NA,NA,NA,solid_organ_transplant,5
+0,NA,NA,NA,rare_neurological_conditions,5
+1,NA,NA,NA,downs_syndrome,10
+1,NA,NA,NA,sickle_cell_disease,10
+1,NA,NA,NA,solid_cancer,125
+1,NA,NA,NA,haematological_disease,100
+1,NA,NA,NA,renal_disease,90
+1,NA,NA,NA,liver_disease,25
+1,NA,NA,NA,imid,310
+1,NA,NA,NA,immunosupression,130
+1,NA,NA,NA,hiv_aids,25
+1,NA,NA,NA,solid_organ_transplant,105
+1,NA,NA,NA,rare_neurological_conditions,85
+2,NA,NA,NA,downs_syndrome,45
+2,NA,NA,NA,sickle_cell_disease,15
+2,NA,NA,NA,solid_cancer,290
+2,NA,NA,NA,haematological_disease,250
+2,NA,NA,NA,renal_disease,235
+2,NA,NA,NA,liver_disease,110
+2,NA,NA,NA,imid,930
+2,NA,NA,NA,immunosupression,365
+2,NA,NA,NA,hiv_aids,65
+2,NA,NA,NA,solid_organ_transplant,260
+2,NA,NA,NA,rare_neurological_conditions,295
+3,NA,NA,NA,downs_syndrome,40
+3,NA,NA,NA,sickle_cell_disease,10
+3,NA,NA,NA,solid_cancer,210
+3,NA,NA,NA,haematological_disease,195
+3,NA,NA,NA,renal_disease,200
+3,NA,NA,NA,liver_disease,75
+3,NA,NA,NA,imid,735
+3,NA,NA,NA,immunosupression,280
+3,NA,NA,NA,hiv_aids,45
+3,NA,NA,NA,solid_organ_transplant,205
+3,NA,NA,NA,rare_neurological_conditions,250
+4,NA,NA,NA,downs_syndrome,15
+4,NA,NA,NA,sickle_cell_disease,5
+4,NA,NA,NA,solid_cancer,95
+4,NA,NA,NA,haematological_disease,80
+4,NA,NA,NA,renal_disease,95
+4,NA,NA,NA,liver_disease,40
+4,NA,NA,NA,imid,355
+4,NA,NA,NA,immunosupression,130
+4,NA,NA,NA,hiv_aids,20
+4,NA,NA,NA,solid_organ_transplant,90
+4,NA,NA,NA,rare_neurological_conditions,100
+5,NA,NA,NA,downs_syndrome,5
+5,NA,NA,NA,sickle_cell_disease,5
+5,NA,NA,NA,solid_cancer,15
+5,NA,NA,NA,haematological_disease,25
+5,NA,NA,NA,renal_disease,30
+5,NA,NA,NA,liver_disease,10
+5,NA,NA,NA,imid,110
+5,NA,NA,NA,immunosupression,45
+5,NA,NA,NA,hiv_aids,5
+5,NA,NA,NA,solid_organ_transplant,25
+5,NA,NA,NA,rare_neurological_conditions,20
+6,NA,NA,NA,downs_syndrome,NA
+6,NA,NA,NA,sickle_cell_disease,NA
+6,NA,NA,NA,solid_cancer,5
+6,NA,NA,NA,haematological_disease,10
+6,NA,NA,NA,renal_disease,15
+6,NA,NA,NA,liver_disease,NA
+6,NA,NA,NA,imid,25
+6,NA,NA,NA,immunosupression,10
+6,NA,NA,NA,hiv_aids,NA
+6,NA,NA,NA,solid_organ_transplant,5
+6,NA,NA,NA,rare_neurological_conditions,5
+7,NA,NA,NA,downs_syndrome,NA
+7,NA,NA,NA,sickle_cell_disease,NA
+7,NA,NA,NA,solid_cancer,NA
+7,NA,NA,NA,haematological_disease,NA
+7,NA,NA,NA,renal_disease,NA
+7,NA,NA,NA,liver_disease,NA
+7,NA,NA,NA,imid,NA
+7,NA,NA,NA,immunosupression,NA
+7,NA,NA,NA,hiv_aids,NA
+7,NA,NA,NA,solid_organ_transplant,NA
+7,NA,NA,NA,rare_neurological_conditions,NA
+8,NA,NA,NA,downs_syndrome,NA
+8,NA,NA,NA,sickle_cell_disease,NA
+8,NA,NA,NA,solid_cancer,NA
+8,NA,NA,NA,haematological_disease,NA
+8,NA,NA,NA,renal_disease,NA
+8,NA,NA,NA,liver_disease,NA
+8,NA,NA,NA,imid,5
+8,NA,NA,NA,immunosupression,NA
+8,NA,NA,NA,hiv_aids,NA
+8,NA,NA,NA,solid_organ_transplant,NA
+8,NA,NA,NA,rare_neurological_conditions,NA
+9,NA,NA,NA,downs_syndrome,NA
+9,NA,NA,NA,sickle_cell_disease,NA
+9,NA,NA,NA,solid_cancer,NA
+9,NA,NA,NA,haematological_disease,NA
+9,NA,NA,NA,renal_disease,NA
+9,NA,NA,NA,liver_disease,NA
+9,NA,NA,NA,imid,NA
+9,NA,NA,NA,immunosupression,NA
+9,NA,NA,NA,hiv_aids,NA
+9,NA,NA,NA,solid_organ_transplant,NA
+9,NA,NA,NA,rare_neurological_conditions,NA
+10,NA,NA,NA,downs_syndrome,NA
+10,NA,NA,NA,sickle_cell_disease,NA
+10,NA,NA,NA,solid_cancer,NA
+10,NA,NA,NA,haematological_disease,NA
+10,NA,NA,NA,renal_disease,NA
+10,NA,NA,NA,liver_disease,NA
+10,NA,NA,NA,imid,NA
+10,NA,NA,NA,immunosupression,NA
+10,NA,NA,NA,hiv_aids,NA
+10,NA,NA,NA,solid_organ_transplant,NA
+10,NA,NA,NA,rare_neurological_conditions,NA
+11,NA,NA,NA,downs_syndrome,NA
+11,NA,NA,NA,sickle_cell_disease,NA
+11,NA,NA,NA,solid_cancer,NA
+11,NA,NA,NA,haematological_disease,NA
+11,NA,NA,NA,renal_disease,NA
+11,NA,NA,NA,liver_disease,NA
+11,NA,NA,NA,imid,NA
+11,NA,NA,NA,immunosupression,NA
+11,NA,NA,NA,hiv_aids,NA
+11,NA,NA,NA,solid_organ_transplant,NA
+11,NA,NA,NA,rare_neurological_conditions,NA
+16,NA,NA,NA,downs_syndrome,NA
+16,NA,NA,NA,sickle_cell_disease,NA
+16,NA,NA,NA,solid_cancer,NA
+16,NA,NA,NA,haematological_disease,NA
+16,NA,NA,NA,renal_disease,NA
+16,NA,NA,NA,liver_disease,NA
+16,NA,NA,NA,imid,NA
+16,NA,NA,NA,immunosupression,NA
+16,NA,NA,NA,hiv_aids,NA
+16,NA,NA,NA,solid_organ_transplant,NA
+16,NA,NA,NA,rare_neurological_conditions,NA
+17,NA,NA,NA,downs_syndrome,NA
+17,NA,NA,NA,sickle_cell_disease,NA
+17,NA,NA,NA,solid_cancer,NA
+17,NA,NA,NA,haematological_disease,NA
+17,NA,NA,NA,renal_disease,NA
+17,NA,NA,NA,liver_disease,NA
+17,NA,NA,NA,imid,NA
+17,NA,NA,NA,immunosupression,NA
+17,NA,NA,NA,hiv_aids,NA
+17,NA,NA,NA,solid_organ_transplant,NA
+17,NA,NA,NA,rare_neurological_conditions,NA
+19,NA,NA,NA,downs_syndrome,NA
+19,NA,NA,NA,sickle_cell_disease,NA
+19,NA,NA,NA,solid_cancer,NA
+19,NA,NA,NA,haematological_disease,NA
+19,NA,NA,NA,renal_disease,NA
+19,NA,NA,NA,liver_disease,NA
+19,NA,NA,NA,imid,NA
+19,NA,NA,NA,immunosupression,NA
+19,NA,NA,NA,hiv_aids,NA
+19,NA,NA,NA,solid_organ_transplant,NA
+19,NA,NA,NA,rare_neurological_conditions,NA
+21,NA,NA,NA,downs_syndrome,NA
+21,NA,NA,NA,sickle_cell_disease,NA
+21,NA,NA,NA,solid_cancer,NA
+21,NA,NA,NA,haematological_disease,NA
+21,NA,NA,NA,renal_disease,NA
+21,NA,NA,NA,liver_disease,NA
+21,NA,NA,NA,imid,NA
+21,NA,NA,NA,immunosupression,NA
+21,NA,NA,NA,hiv_aids,NA
+21,NA,NA,NA,solid_organ_transplant,NA
+21,NA,NA,NA,rare_neurological_conditions,NA
+23,NA,NA,NA,downs_syndrome,NA
+23,NA,NA,NA,sickle_cell_disease,NA
+23,NA,NA,NA,solid_cancer,NA
+23,NA,NA,NA,haematological_disease,NA
+23,NA,NA,NA,renal_disease,NA
+23,NA,NA,NA,liver_disease,NA
+23,NA,NA,NA,imid,NA
+23,NA,NA,NA,immunosupression,NA
+23,NA,NA,NA,hiv_aids,NA
+23,NA,NA,NA,solid_organ_transplant,NA
+23,NA,NA,NA,rare_neurological_conditions,NA
+28,NA,NA,NA,downs_syndrome,NA
+28,NA,NA,NA,sickle_cell_disease,NA
+28,NA,NA,NA,solid_cancer,NA
+28,NA,NA,NA,haematological_disease,NA
+28,NA,NA,NA,renal_disease,NA
+28,NA,NA,NA,liver_disease,NA
+28,NA,NA,NA,imid,NA
+28,NA,NA,NA,immunosupression,NA
+28,NA,NA,NA,hiv_aids,NA
+28,NA,NA,NA,solid_organ_transplant,NA
+28,NA,NA,NA,rare_neurological_conditions,NA
+29,NA,NA,NA,downs_syndrome,NA
+29,NA,NA,NA,sickle_cell_disease,NA
+29,NA,NA,NA,solid_cancer,NA
+29,NA,NA,NA,haematological_disease,NA
+29,NA,NA,NA,renal_disease,NA
+29,NA,NA,NA,liver_disease,NA
+29,NA,NA,NA,imid,NA
+29,NA,NA,NA,immunosupression,NA
+29,NA,NA,NA,hiv_aids,NA
+29,NA,NA,NA,solid_organ_transplant,NA
+29,NA,NA,NA,rare_neurological_conditions,NA
+30,NA,NA,NA,downs_syndrome,NA
+30,NA,NA,NA,sickle_cell_disease,NA
+30,NA,NA,NA,solid_cancer,NA
+30,NA,NA,NA,haematological_disease,NA
+30,NA,NA,NA,renal_disease,NA
+30,NA,NA,NA,liver_disease,NA
+30,NA,NA,NA,imid,NA
+30,NA,NA,NA,immunosupression,NA
+30,NA,NA,NA,hiv_aids,NA
+30,NA,NA,NA,solid_organ_transplant,NA
+30,NA,NA,NA,rare_neurological_conditions,NA
+31,NA,NA,NA,downs_syndrome,NA
+31,NA,NA,NA,sickle_cell_disease,NA
+31,NA,NA,NA,solid_cancer,NA
+31,NA,NA,NA,haematological_disease,NA
+31,NA,NA,NA,renal_disease,NA
+31,NA,NA,NA,liver_disease,NA
+31,NA,NA,NA,imid,NA
+31,NA,NA,NA,immunosupression,NA
+31,NA,NA,NA,hiv_aids,NA
+31,NA,NA,NA,solid_organ_transplant,NA
+31,NA,NA,NA,rare_neurological_conditions,NA
+33,NA,NA,NA,downs_syndrome,NA
+33,NA,NA,NA,sickle_cell_disease,NA
+33,NA,NA,NA,solid_cancer,NA
+33,NA,NA,NA,haematological_disease,NA
+33,NA,NA,NA,renal_disease,NA
+33,NA,NA,NA,liver_disease,NA
+33,NA,NA,NA,imid,NA
+33,NA,NA,NA,immunosupression,NA
+33,NA,NA,NA,hiv_aids,NA
+33,NA,NA,NA,solid_organ_transplant,NA
+33,NA,NA,NA,rare_neurological_conditions,NA
+34,NA,NA,NA,downs_syndrome,NA
+34,NA,NA,NA,sickle_cell_disease,NA
+34,NA,NA,NA,solid_cancer,NA
+34,NA,NA,NA,haematological_disease,NA
+34,NA,NA,NA,renal_disease,NA
+34,NA,NA,NA,liver_disease,NA
+34,NA,NA,NA,imid,NA
+34,NA,NA,NA,immunosupression,NA
+34,NA,NA,NA,hiv_aids,NA
+34,NA,NA,NA,solid_organ_transplant,NA
+34,NA,NA,NA,rare_neurological_conditions,NA
+35,NA,NA,NA,downs_syndrome,NA
+35,NA,NA,NA,sickle_cell_disease,NA
+35,NA,NA,NA,solid_cancer,NA
+35,NA,NA,NA,haematological_disease,NA
+35,NA,NA,NA,renal_disease,NA
+35,NA,NA,NA,liver_disease,NA
+35,NA,NA,NA,imid,NA
+35,NA,NA,NA,immunosupression,NA
+35,NA,NA,NA,hiv_aids,NA
+35,NA,NA,NA,solid_organ_transplant,NA
+35,NA,NA,NA,rare_neurological_conditions,NA
+36,NA,NA,NA,downs_syndrome,NA
+36,NA,NA,NA,sickle_cell_disease,NA
+36,NA,NA,NA,solid_cancer,NA
+36,NA,NA,NA,haematological_disease,NA
+36,NA,NA,NA,renal_disease,NA
+36,NA,NA,NA,liver_disease,NA
+36,NA,NA,NA,imid,NA
+36,NA,NA,NA,immunosupression,NA
+36,NA,NA,NA,hiv_aids,NA
+36,NA,NA,NA,solid_organ_transplant,NA
+36,NA,NA,NA,rare_neurological_conditions,NA
+37,NA,NA,NA,downs_syndrome,NA
+37,NA,NA,NA,sickle_cell_disease,NA
+37,NA,NA,NA,solid_cancer,NA
+37,NA,NA,NA,haematological_disease,NA
+37,NA,NA,NA,renal_disease,NA
+37,NA,NA,NA,liver_disease,NA
+37,NA,NA,NA,imid,NA
+37,NA,NA,NA,immunosupression,NA
+37,NA,NA,NA,hiv_aids,NA
+37,NA,NA,NA,solid_organ_transplant,NA
+37,NA,NA,NA,rare_neurological_conditions,NA
+38,NA,NA,NA,downs_syndrome,NA
+38,NA,NA,NA,sickle_cell_disease,NA
+38,NA,NA,NA,solid_cancer,NA
+38,NA,NA,NA,haematological_disease,NA
+38,NA,NA,NA,renal_disease,NA
+38,NA,NA,NA,liver_disease,NA
+38,NA,NA,NA,imid,NA
+38,NA,NA,NA,immunosupression,NA
+38,NA,NA,NA,hiv_aids,NA
+38,NA,NA,NA,solid_organ_transplant,NA
+38,NA,NA,NA,rare_neurological_conditions,NA
+41,NA,NA,NA,downs_syndrome,NA
+41,NA,NA,NA,sickle_cell_disease,NA
+41,NA,NA,NA,solid_cancer,NA
+41,NA,NA,NA,haematological_disease,NA
+41,NA,NA,NA,renal_disease,NA
+41,NA,NA,NA,liver_disease,NA
+41,NA,NA,NA,imid,NA
+41,NA,NA,NA,immunosupression,NA
+41,NA,NA,NA,hiv_aids,NA
+41,NA,NA,NA,solid_organ_transplant,NA
+41,NA,NA,NA,rare_neurological_conditions,NA
+55,NA,NA,NA,downs_syndrome,NA
+55,NA,NA,NA,sickle_cell_disease,NA
+55,NA,NA,NA,solid_cancer,NA
+55,NA,NA,NA,haematological_disease,NA
+55,NA,NA,NA,renal_disease,NA
+55,NA,NA,NA,liver_disease,NA
+55,NA,NA,NA,imid,NA
+55,NA,NA,NA,immunosupression,NA
+55,NA,NA,NA,hiv_aids,NA
+55,NA,NA,NA,solid_organ_transplant,NA
+55,NA,NA,NA,rare_neurological_conditions,NA
+61,NA,NA,NA,downs_syndrome,NA
+61,NA,NA,NA,sickle_cell_disease,NA
+61,NA,NA,NA,solid_cancer,NA
+61,NA,NA,NA,haematological_disease,NA
+61,NA,NA,NA,renal_disease,NA
+61,NA,NA,NA,liver_disease,NA
+61,NA,NA,NA,imid,NA
+61,NA,NA,NA,immunosupression,NA
+61,NA,NA,NA,hiv_aids,NA
+61,NA,NA,NA,solid_organ_transplant,NA
+61,NA,NA,NA,rare_neurological_conditions,NA
