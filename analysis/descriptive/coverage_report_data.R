@@ -33,7 +33,7 @@ library(stringr)
 source(here("analysis", "lib", "custom_functions.R"))
 
 ## Create output directory
-output_dir <- here::here("output", "reports", "coverage")
+output_dir <- here::here("output", "coverage")
 fs::dir_create(output_dir)
 
 ## Redaction threshold
