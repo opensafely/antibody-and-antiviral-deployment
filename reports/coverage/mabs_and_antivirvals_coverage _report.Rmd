@@ -62,7 +62,7 @@ While vaccines remain the best strategy to prevent COVID-19, recent evidence sug
 
 With the recent roll out of nMABs and antivirals, there is an urgent need to for knowledge and understanding around the use of nMABs and antivirals in the treatment of patients with COVID-19, such as factors of relevance in determining nMAB and antiviral treatment and the impact of nMAB and antiviral treatment in the community and hospital settings.
 
-This OpenSAFELY report ...
+This OpenSAFELY report..
 
 The code and data for this report can be found at the OpenSafely [antibody-and-antiviral-deployment repository](https://github.com/opensafely/antibody-and-antiviral-deployment).
 
