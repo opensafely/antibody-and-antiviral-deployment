@@ -61,11 +61,11 @@ data_processed_clean <- data_processed %>%
 study_start <- min(data_processed_clean$elig_start, na.rm = T)
 study_end <- max(data_processed_clean$elig_start, na.rm = T)
 eligible_patients <- plyr::round_any(data_processed_clean %>% filter(eligibility_status == "Eligible") %>% nrow(), 10)
-treated_patients <- plyr::round_any(data_processed_clean %>% filter(!is.na(treatment_date), eligibility_status == "Treated") %>% nrow(), 10)
+treated_patients <- plyr::round_any(data_processed_clean %>% filter(!is.na(treatment_date)) %>% nrow(), 10)
 
-treated_sotrovimab <- plyr::round_any(data_processed_clean %>% filter(treatment_type == "Sotrovimab",  eligibility_status == "Treated") %>% nrow(), 10)
-treated_molnupiravir <- plyr::round_any(data_processed_clean %>% filter(treatment_type == "Molnupiravir",  eligibility_status == "Treated") %>% nrow(), 10)
-treated_casirivimab <- plyr::round_any(data_processed_clean %>% filter(treatment_type == "Casirivimab",  eligibility_status == "Treated") %>% nrow(), 10)
+treated_sotrovimab <- plyr::round_any(data_processed_clean %>% filter(treatment_type == "Sotrovimab") %>% nrow(), 10)
+treated_molnupiravir <- plyr::round_any(data_processed_clean %>% filter(treatment_type == "Molnupiravir") %>% nrow(), 10)
+treated_casirivimab <- plyr::round_any(data_processed_clean %>% filter(treatment_type == "Casirivimab") %>% nrow(), 10)
 
 high_risk_cohort_2plus <- plyr::round_any(subset(data_processed_clean, high_risk_group_combined_count > 1) %>% nrow(), 10)
 high_risk_cohort_lower <- min(data_processed_clean$high_risk_group_combined_count, na.rm = T)
