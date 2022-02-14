@@ -90,6 +90,8 @@ print(text)
 # Coverage ----
 
 ## Eligibility
+print(length(unique(subset(data_processed_clean, !is.na(elig_start)$patient_id))))
+
 plot_data_coverage <- data_processed_clean %>%
   select(elig_start, downs_syndrome, sickle_cell_disease, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
          hiv_aids, solid_organ_transplant, rare_neurological_conditions)  %>%
