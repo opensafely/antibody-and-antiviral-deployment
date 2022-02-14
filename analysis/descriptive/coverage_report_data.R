@@ -58,6 +58,10 @@ data_processed_clean <- data_processed %>%
 
 
 # Numbers for text ----
+print(dim(data_processed_clean))
+print(length(unique(data_processed_clean$patient_id)))
+print(summary(data_processed_clean$high_risk_group_combined_count))
+
 study_start <- min(data_processed_clean$elig_start, na.rm = T)
 study_end <- max(data_processed_clean$elig_start, na.rm = T)
 eligible_patients <- plyr::round_any(data_processed_clean %>% filter(eligibility_status == "Eligible") %>% nrow(), 10)
