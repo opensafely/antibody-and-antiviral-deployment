@@ -265,6 +265,7 @@ table_elig_treat_redacted %>%
         booktabs=TRUE, 
         table.attr = "style='width:30%;'") %>%
   kable_styling(position = "center", full_width = F, bootstrap_options = "striped")  %>%
+  column_spec(4, background = "lightgrey") %>%
   add_header_above(., c(" ", "Eligible patients", "Treated Patients" = 5))
 ```
 
@@ -285,16 +286,21 @@ table_demo_clinc_breakdown_redacted %>%
         booktabs=TRUE, 
         table.attr = "style='width:30%;'") %>%
   kable_styling(position = "center", full_width = F, bootstrap_options = "striped")  %>%
+  column_spec(5, background = "lightgrey") %>%
+  column_spec(7, background = "lightgrey") %>%
+  column_spec(9, background = "lightgrey") %>%
+  column_spec(11, background = "lightgrey") %>%
   add_header_above(., c(" ", "", "Eligible", "All" = 2, "Sotrovimab" = 2, "Molnupiravir" = 2, "Casirivimab" = 2)) %>%
   add_header_above(., c(" ", "", "", "Treated" = 8))
+
 ```
 
 ## Concordance with guidance <a name="concordance"></a>
-Of the `r format(report_stats$treated_patients, format = "%d-%b-%Y")` patients who received treatment for COVID-19 between `r format(report_stats$study_start, format = "%d-%b-%Y")` and `r format(report_stats$study_end, format = "%d-%b-%Y")`,  `r format(report_stats$non_eligible_patients, big.mark = ",", scientific = FALSE)` patients were missing records needed to confirm eligibility. It is likely that most, if not all, of these patients meet all of the eligibility criteria and non of the exclusion criteria but, for example, their SARS-CoV-2 test result is not available in their record or we just do not have access to all the criteria the clinician might use to assess high risk group status (such as the patients identified via non digital methods).
+Of the `r format(report_stats$treated_patients, format = "%d-%b-%Y")` patients who received treatment for COVID-19 between `r format(report_stats$study_start, format = "%d-%b-%Y")` and `r format(report_stats$study_end, format = "%d-%b-%Y")`,  `r format(report_stats$non_eligible_patients - flowchart_non_elig[1,2], big.mark = ",", scientific = FALSE)` patients were missing records needed to confirm eligibility. It is likely that most, if not all, of these patients meet all of the eligibility criteria and non of the exclusion criteria but, for example, their SARS-CoV-2 test result is not available in their record or we just do not have access to all the criteria the clinician might use to assess high risk group status (such as the patients identified via non digital methods).
 
 ```{r non_elig, echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=10, out.width = '80%', fig.align = 'center', fig.cap = "Figure 3: Breakdown of eligibility criteria variables in treated patients with missing records needed to confirm eligibility"}
-flowchart_non_elig_plot <- flowchart_non_elig %>%
-  mutate(criteria2 = c("High risk cohort identified within records but does not match treatment high risk cohort",
+flowchart_non_elig_plot <- flowchart_non_elig[-1,] %>%
+  mutate(criteria2 = c(#"High risk cohort identified within records but does not match treatment high risk cohort",
                        "Not treated within 5 days post positive SARS-CoV-2 test",
                        "No positive SARS-CoV-2 test record",
                        "Required hospitalisation within 30 days prior to treatment with COVID-19 recorded as the primary diagnosis",
