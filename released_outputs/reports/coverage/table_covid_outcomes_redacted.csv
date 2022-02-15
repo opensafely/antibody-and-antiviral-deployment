@@ -1,4 +1,4 @@
 Outcome,Un treated,,Treated,
-Positive SARS-CoV-2 test,190,0.31,50,0.93
-Required hospitalisation with COVID-19 recorded as the primary diagnosis,145,0.23,95,1.77
-COVID-19 related death,640,1.03,15,0.28
+"Positive SARS-CoV-2 test, 30 days or more since start date",190,0.31,50,0.93
+"Required hospitalisation with COVID-19 recorded as the primary diagnosis,one or more days after start date",145,0.23,95,1.77
+"COVID-19 related death, one or more days after start date",640,1.03,15,0.28

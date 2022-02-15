@@ -285,7 +285,7 @@ table_demo_clinc_breakdown_redacted %>%
         booktabs=TRUE, 
         table.attr = "style='width:30%;'") %>%
   kable_styling(position = "center", full_width = F, bootstrap_options = "striped")  %>%
-  add_header_above(., c(" ", "", "Eligible", "All" = 2, "Molnupiravir" = 2, "Sotrovimab" = 2, "Casirivimab" = 2)) %>%
+  add_header_above(., c(" ", "", "Eligible", "All" = 2, "Sotrovimab" = 2, "Molnupiravir" = 2, "Casirivimab" = 2)) %>%
   add_header_above(., c(" ", "", "", "Treated" = 8))
 ```
 
@@ -312,7 +312,7 @@ flowchart_non_elig_plot <- flowchart_non_elig_plot %>%
   geom_col(aes(x = criteria2, y = n, fill = criteria)) + 
   theme_classic(base_size = 8) +
   labs(x = "",
-       y = "Percentage of non-eligible patients receiving treatment",
+       y = "Number of patients receiving treatment",
        colour = "High risk cohort",
        title = "") +
   theme(legend.position = "none") +
@@ -330,7 +330,7 @@ include_graphics(fs::path(output_dir_rmd, "figures", "figure_non_elig_breakdown.
 ```
 
 ## Time to treatment <a name="time"></a>
-```{r time to treatment, echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=10, out.width = '80%', fig.align = 'center', fig.cap = "Figure 4: Time between positive SARS-CoV-2 test and treatment for COVID-19, broken down by treatment type"}
+```{r time to treatment, echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=10, out.width = '80%', fig.align = 'center', fig.cap = "Figure 4a: Time between positive SARS-CoV-2 test and treatment for COVID-19, broken down by treatment type"}
 data_time_between <- read_csv(fs::path(input_dir_os, "table_time_to_treat_redacted.csv"))
 
 data_time_between %>%
@@ -351,6 +351,61 @@ data_time_between %>%
         legend.title = element_blank())
 ```
 
+```{r time to treatment 2, echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=10, fig.height=8, out.width = '80%', fig.align = 'center', fig.cap = "Figure 4b: Time between positive SARS-CoV-2 test and treatment for COVID-19, broken down by high risk cohort"}
+data_time_between <- read_csv(fs::path(input_dir_os, "table_time_to_treat_redacted.csv"))
+
+time_groups <- data_time_between %>%
+  mutate(high_risk_cohort = coalesce(high_risk_group_elig,high_risk_cohort),
+         Count = coalesce(n,Count)) %>%
+  filter(!is.na(high_risk_cohort),
+         !is.na(Count),
+         tb_postest_treat < 15)  %>%
+  mutate(high_risk_cohort = case_when(
+    high_risk_cohort == "All" ~ "All", 
+    high_risk_cohort == "downs_syndrome" ~ "Down's syndrome", 
+    high_risk_cohort == "sickle_cell_disease" ~ "Sickle cell disease", 
+    high_risk_cohort == "solid_cancer" ~ "Solid cancer", 
+    high_risk_cohort == "haematological_disease" ~ "Haematological diseases and stem cell transplant recipients", 
+    high_risk_cohort == "renal_disease" ~ "Renal disease", 
+    high_risk_cohort == "liver_disease" ~ "Liver disease", 
+    high_risk_cohort == "imid" ~ "Immune-mediated inflammatory disorders", 
+    high_risk_cohort == "immunosupression" ~ "Primary immune deficiencies", 
+    high_risk_cohort == "hiv_aids" ~ "Immuosupression due to HIV or AIDS (CD4 <350 cells/mm3)", 
+    high_risk_cohort == "solid_organ_transplant" ~ "Solid organ transplant recipients",
+    high_risk_cohort == "rare_neurological_conditions" ~ "Rare neurological conditions",
+    TRUE ~ NA_character_)) %>%
+  mutate(high_risk_cohort = unlist(lapply(strwrap(high_risk_cohort, width=30, simplify=FALSE), paste, collapse="\n"))) 
+
+plot_order <- time_groups %>%
+  group_by(high_risk_cohort) %>%
+  mutate(order = max(Count, na.rm = T)) %>%
+  arrange(desc(order)) %>%
+  filter(Count == order) %>%
+  select(high_risk_cohort, order) %>%
+  distinct()
+
+time_groups <- time_groups %>%
+  mutate(high_risk_cohort = factor(high_risk_cohort, levels = plot_order$high_risk_cohort))
+
+time_groups %>%
+  arrange(high_risk_cohort, tb_postest_treat) %>%
+  ggplot(aes(tb_postest_treat)) +
+  geom_col(aes(x = tb_postest_treat, y = Count, fill = high_risk_cohort, group = high_risk_cohort), position = "dodge") + 
+  theme_bw(base_size = 8) +
+  facet_wrap(~high_risk_cohort, scales = "free_y", ncol = 3) +
+  theme(legend.position = "none") +
+  labs(x = "Time between positive SARS-CoV-2 test and treatment for COVID-19 (days)",
+       y = "Number of patients receiving treatment",
+       colour = "High risk cohort",
+       title = "") +
+  theme(legend.position = "none")  +
+  theme(
+    axis.text = element_text(size = 15),
+    axis.text.x = element_text(angle = 60, hjust = 1),
+    axis.title = element_text(size = 20)) +
+  scale_y_continuous(labels = comma)
+```
+
 
 ## COVID-19-related events <a name="events"></a>
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
@@ -361,7 +416,7 @@ colnames(table_outcomes) <- c("Outcome",
                                                    "Count",	"%",
                                                    "Count",	"%")
 table_outcomes %>%
-  kable(caption = "Table 4: Count and proportion of patients with COVID-19 outcomes", 
+  kable(caption = "Table 3: Count and proportion of patients with COVID-19 outcomes. Occurances of hospitalisation and death are included if they occure one day or more after a patient is eligible or recieves treatemnt (start date). Positive SARS-CoV-2 tests are included if they occure 30 days or more since each patients start date.", 
         row.names = FALSE, 
         align = c("l", rep("c", 4)),
         booktabs=TRUE, 
