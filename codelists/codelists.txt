@@ -1,5 +1,7 @@
 user/MillieGreen/covid-19-symptoms/0ca4c5ac
 opensafely/covid-identification/2020-06-03
+primis-covid19-vacc-uptake/preg/v1
+opensafely/weight-snomed/5459abc6
 nhsd/downs-syndrome-snomed-ct/3bb246d7
 nhsd/downs-syndrome-icd-10/22a2d3a2
 nhsd/sickle-spl-atriskv4-snomed-ct/7083ed37

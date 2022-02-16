@@ -31,6 +31,20 @@ covid_icd10_codes = codelist_from_csv(
   column = "icd10_code",
 )
 
+### Pregnancy
+pregnancy_primis_codes = codelist_from_csv(
+  "codelists/primis-covid19-vacc-uptake-preg.csv",
+  system = "snomed",
+  column = "code",
+)
+
+### Weight
+weight_opensafely_snomed_codes  = codelist_from_csv(
+  "codelists/opensafely-weight-snomed.csv",
+  system = "snomed",
+  column = "code",
+) 
+
 
 ## HIGH RISK GROUPS ----
 

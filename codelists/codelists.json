@@ -12,6 +12,18 @@
       "downloaded_at": "2022-01-28 14:27:02.985609Z",
       "sha": "124db6929439379b7dacd55ba26ae4f2ed9370bc"
     },
+    "primis-covid19-vacc-uptake-preg.csv": {
+      "id": "primis-covid19-vacc-uptake/preg/v1",
+      "url": "https://codelists.opensafely.org/codelist/primis-covid19-vacc-uptake/preg/v1/",
+      "downloaded_at": "2022-02-16 13:57:28.093764Z",
+      "sha": "16b9bdf6c37c9f5e802912a98542c5dd5d21183d"
+    },
+    "opensafely-weight-snomed.csv": {
+      "id": "opensafely/weight-snomed/5459abc6",
+      "url": "https://codelists.opensafely.org/codelist/opensafely/weight-snomed/5459abc6/",
+      "downloaded_at": "2022-02-16 14:10:45.946209Z",
+      "sha": "66c5fa2b4fc41bd55982e97ba2a30b148136b2dd"
+    },
     "nhsd-downs-syndrome-snomed-ct.csv": {
       "id": "nhsd/downs-syndrome-snomed-ct/3bb246d7",
       "url": "https://codelists.opensafely.org/codelist/nhsd/downs-syndrome-snomed-ct/3bb246d7/",

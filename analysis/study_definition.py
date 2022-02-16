@@ -28,7 +28,7 @@ from cohortextractor import (
 from codelists import *
   
   
-# DEFINE STUDY POPULATION ----
+  # DEFINE STUDY POPULATION ----
 
 ## Define study time variables
 from datetime import date
@@ -76,10 +76,40 @@ study = StudyDefinition(
   
   # TREATMENT - NEUTRALISING MONOCLONAL ANTIBODIES OR ANTIVIRALS ----
   
+  ### Paxlovid
+  paxlovid_covid_therapeutics = patients.with_covid_therapeutics(
+    #with_these_statuses = ["Approved", "Treatment Complete"],
+    with_these_therapeutics = "Paxlovid",
+    with_these_indications = "non_hospitalised",
+    on_or_after = "index_date",
+    find_first_match_in_period = True,
+    returning = "date",
+    date_format = "YYYY-MM-DD",
+    return_expectations = {
+      "date": {"earliest": "2022-02-10"},
+      "incidence": 0.05
+    },
+  ), 
+  
   ## Sotrovimab
   sotrovimab_covid_therapeutics = patients.with_covid_therapeutics(
     #with_these_statuses = ["Approved", "Treatment Complete"],
     with_these_therapeutics = "Sotrovimab",
+    with_these_indications = "non_hospitalised",
+    on_or_after = "index_date",
+    find_first_match_in_period = True,
+    returning = "date",
+    date_format = "YYYY-MM-DD",
+    return_expectations = {
+      "date": {"earliest": "2021-12-16"},
+      "incidence": 0.2
+    },
+  ),
+  
+  ## Remdesivir
+  remdesivir_covid_therapeutics = patients.with_covid_therapeutics(
+    #with_these_statuses = ["Approved", "Treatment Complete"],
+    with_these_therapeutics = "Remdesivir",
     with_these_indications = "non_hospitalised",
     on_or_after = "index_date",
     find_first_match_in_period = True,
@@ -121,14 +151,19 @@ study = StudyDefinition(
     },
   ), 
   
+  
   ## Date treated
   date_treated = patients.minimum_of(
+    "paxlovid_covid_therapeutics",
     "sotrovimab_covid_therapeutics",
+    "remdesivir_covid_therapeutics",
     "molnupiravir_covid_therapeutics",
     "casirivimab_covid_therapeutics",
+    
   ),
   
-  # ELIGIBILITY CRITERIA VARIABLES ----
+  
+  # OVERALL ELIGIBILITY CRITERIA VARIABLES ----
   
   ## Inclusion criteria variables
   
@@ -161,7 +196,20 @@ study = StudyDefinition(
     },
   ),
   
-  ### Second positive SARS-CoV-2 test -- add in 
+  ### Second positive SARS-CoV-2 test
+  covid_test_positive_date2 = patients.with_test_result_in_sgss(
+    pathogen = "SARS-CoV-2",
+    test_result = "positive",
+    find_first_match_in_period = True,
+    restrict_to_earliest_specimen_date = False,
+    returning = "date",
+    date_format = "YYYY-MM-DD",
+    on_or_after = "covid_test_positive_date + 30 days",
+    return_expectations = {
+      "date": {"earliest": "2021-12-20", "latest": "index_date"},
+      "incidence": 0.1
+    },
+  ),
   
   ### Covid test type - add in when avaliable 
   # covid_positive_test_type = patients.with_test_result_in_sgss(
@@ -220,8 +268,12 @@ study = StudyDefinition(
   
   ## Study start date for extracting variables
   start_date = patients.minimum_of(
-    "covid_test_positive_date", "sotrovimab_covid_therapeutics",
-    "molnupiravir_covid_therapeutics", "casirivimab_covid_therapeutics"
+    "covid_test_positive_date", 
+    "paxlovid_covid_therapeutics",
+    "sotrovimab_covid_therapeutics",
+    "remdesivir_covid_therapeutics",
+    "molnupiravir_covid_therapeutics",
+    "casirivimab_covid_therapeutics",
   ),
   
   
@@ -230,7 +282,7 @@ study = StudyDefinition(
   ### Pattern of clinical presentation indicates that there is recovery rather than risk of deterioration from infection
   #   (not currently possible to define/code)
   
-  ### Require hospitalisation for COVID-19- within 30 days before treatment -- PRIMARY DIAGNOSIS
+  ### Require hospitalisation for COVID-19
   ## NB this data lags behind the therapeutics/testing data so may be missing
   primary_covid_hospital_discharge_date = patients.admitted_to_hospital(
     returning = "date_discharged",
@@ -248,8 +300,6 @@ study = StudyDefinition(
     },
   ),
   
-  ### Require hospitalisation for COVID-19- within 30 days before treatment -- ANY DIAGNOSIS POSITION
-  ## NB this data lags behind the therapeutics/testing data so may be missing
   any_covid_hospital_discharge_date = patients.admitted_to_hospital(
     returning = "date_discharged",
     with_these_diagnoses = covid_icd10_codes,
@@ -269,14 +319,125 @@ study = StudyDefinition(
   ### New supplemental oxygen requirement specifically for the management of COVID-19 symptoms
   #   (not currently possible to define/code)
   
-  ### Children weighing less than 40kg
+  ### Known hypersensitivity reaction to the active substances or to any of the excipients of treatments
   #   (not currently possible to define/code)
   
-  ### Children aged under 12 years
-  #defined below
   
-  ### Known hypersensitivity reaction to the active substances or to any of the excipients of sotrovimab
+  
+  # TREATMENT SPECIFIC ELIGIBILITY CRITERIA VARIABLES ----
+  
+  ## Paxlovid - inclusion
+  
+  ### Clinical judgement deems that an antiviral is the preferred option
   #   (not currently possible to define/code)
+  
+  ### Treatment is commenced within 5 days of symptom onset
+  #   (defined above)
+  
+  ### The patient does NOT have a history of advanced decompensated liver cirrhosis or stage 3-5 chronic kidney disease
+  #   (use renal and liver high rosk cohorts defined below)
+  
+  ## Paxlovid - exclusion
+  
+  ### Children aged less than 18 years
+  #   (defined below)
+  
+  ### Pregnancy
+  pregnancy = patients.satisfying(
+    
+    """
+    (preg_36wks_date AND gender = 'F' AND preg_age < 60)
+    """,
+    
+    preg_36wks_date = patients.with_these_clinical_events(
+      pregnancy_primis_codes,
+      returning = "date",
+      find_last_match_in_period = True,
+      between = ["start_date - 252 days", "start_date - 1 day"],
+      date_format = "YYYY-MM-DD",
+    ),
+    
+    gender = patients.sex(
+      return_expectations = {
+        "rate": "universal",
+        "category": {"ratios": {"M": 0.49, "F": 0.51}},
+      }
+    ),
+    
+    preg_age = patients.age_as_of(
+      "preg_36wks_date",
+      return_expectations = {
+        "rate": "universal",
+        "int": {"distribution": "population_ages"},
+        "incidence" : 0.9
+      },
+    ),
+    
+  ),
+  
+  ### The patient is taking any of the medications listed in Appendix 2
+  #   (not currently possible to define/code)
+  
+  
+  ## Sotrovimab - inclusion
+  
+  ### Clinical judgement deems that an antiviral is the preferred option
+  #   (not currently possible to define/code)
+  
+  ### Treatment is commenced within 5 days of symptom onset
+  #   (defined above)
+  
+  ## Sotrovimab - exclusion
+  
+  ### Children aged less than 12 years
+  #   (defined below)
+  
+  ### Adolescents (aged 12-17) weighing 40kg and under
+  weight = patients.with_these_clinical_events(
+    weight_opensafely_snomed_codes,
+    on_or_before = "start_date",
+    find_last_match_in_period=True,
+    date_format = "YYYY-MM-DD",
+    returning = "numeric_value",
+    return_expectations = {
+      "incidence": 0.8,
+      "float": {"distribution": "normal", "mean": 70.0, "stddev": 10.0},
+    },
+  ),
+  
+  ## Remdesivir - inclusion
+  
+  ### Clinical judgement deems that an antiviral is the preferred option
+  #   (not currently possible to define/code)
+  
+  ### Treatment is commenced within 7 days of symptom onset
+  #   (defined above)
+  
+  ## Remdesivir - exclusion
+  
+  ### Children aged less than 12 years
+  #   (defined below)
+  
+  ### Adolescents (aged 12-17) weighing 40kg and under
+  #   (defined above)
+  
+  
+  ## Molnupiravir - inclusion
+  
+  ### Clinical judgement deems that an antiviral is the preferred option
+  #   (not currently possible to define/code)
+  
+  ### Treatment is commenced within 5 days of symptom onset
+  #   (defined above)
+  
+  ## Molnupiravir - exclusion
+  
+  ### Children aged less than 18 years
+  #   (defined below)
+  
+  ### Pregnancy
+  #   (defined above)
+  
   
   
   
@@ -435,14 +596,13 @@ study = StudyDefinition(
     },
   ),
   
-  # haematological_malignancies_nhsd_snomed = patients.with_these_clinical_events(
-  #   haematological_malignancies_nhsd_snomed_codes,
-  #   between = ["start_date - 24 months", "start_date"],
-  #   returning = "date",
-  #   date_format = "YYYY-MM-DD",
-  #   find_last_match_in_period = True,
-  #   #on_or_before = "end_date",
-  # ),
+  haematological_malignancies_nhsd_snomed = patients.with_these_clinical_events(
+    haematological_malignancies_nhsd_snomed_codes,
+    between = ["start_date - 24 months", "start_date"],
+    returning = "date",
+    date_format = "YYYY-MM-DD",
+    find_last_match_in_period = True,
+  ),
   
   haematological_malignancies_nhsd_icd10 = patients.admitted_to_hospital(
     returning = "date_admitted",
@@ -455,7 +615,7 @@ study = StudyDefinition(
   haematological_disease_nhsd = patients.minimum_of("haematopoietic_stem_cell_transplant_nhsd_snomed", 
                                                     "haematopoietic_stem_cell_transplant_nhsd_icd10", 
                                                     "haematopoietic_stem_cell_transplant_nhsd_opcs4", 
-                                                    #"haematological_malignancies_nhsd_snomed", 
+                                                    "haematological_malignancies_nhsd_snomed", 
                                                     "haematological_malignancies_nhsd_icd10"), 
   
   
@@ -498,15 +658,42 @@ study = StudyDefinition(
   liver_disease_nhsd = patients.minimum_of("liver_disease_nhsd_snomed", "liver_disease_nhsd_icd10"), 
   
   ## Immune-mediated inflammatory disorders (IMID)
-  imid_nhsd = patients.with_these_medications(
-    codelist = combine_codelists(immunosuppresant_drugs_dmd_codes, immunosuppresant_drugs_snomed_codes, 
-                                 oral_steroid_drugs_dmd_codes, 
-                                 oral_steroid_drugs_snomed_codes),
+  immunosuppresant_drugs_nhsd = patients.with_these_medications(
+    codelist = combine_codelists(immunosuppresant_drugs_dmd_codes, immunosuppresant_drugs_snomed_codes),
     returning = "date",
     between = ["start_date - 6 months", "start_date"],
     find_last_match_in_period = True,
     date_format = "YYYY-MM-DD",
   ),
+  
+  oral_steroid_drugs_nhsd = patients.with_these_medications(
+    codelist = combine_codelists(oral_steroid_drugs_dmd_codes, oral_steroid_drugs_snomed_codes),
+    returning = "date",
+    between = ["start_date - 12 months", "start_date"],
+    find_last_match_in_period = True,
+    date_format = "YYYY-MM-DD",
+  ),
+  
+  oral_steroid_drug_nhsd_3m_count = patients.with_these_medications(
+    codelist = combine_codelists(oral_steroid_drugs_dmd_codes, oral_steroid_drugs_snomed_codes),
+    returning = "number_of_matches_in_period",
+    between = ["start_date - 3 months", "start_date"],
+    return_expectations = {"incidence": 0.1,
+      "int": {"distribution": "normal", "mean": 2, "stddev": 1},
+    },
+  ),
+  
+  oral_steroid_drug_nhsd_12m_count = patients.with_these_medications(
+    codelist = combine_codelists(oral_steroid_drugs_dmd_codes, oral_steroid_drugs_snomed_codes),
+    returning = "number_of_matches_in_period",
+    between = ["start_date - 12 months", "start_date"],
+    return_expectations = {"incidence": 0.1,
+      "int": {"distribution": "normal", "mean": 3, "stddev": 1},
+    },
+  ),
+  
+  # imid_nhsd = patients.minimum_of("immunosuppresant_drugs_nhsd", "oral_steroid_drugs_nhsd"), - define in processing script
+  
   
   ## Primary immune deficiencies
   immunosupression_nhsd = patients.with_these_clinical_events(
@@ -892,6 +1079,17 @@ study = StudyDefinition(
           "STP10": 0.1,
         }
       },
+    },
+  ),
+  
+  # Rurality
+  rural_urban=patients.address_as_of(
+    "start_date",
+    returning = "rural_urban_classification",
+    return_expectations = {
+      "rate": "universal",
+      "category": {"ratios": {1: 0.125, 2: 0.125, 3: 0.125, 4: 0.125, 5: 0.125, 6: 0.125, 7: 0.125, 8: 0.125}},
+      "incidence": 1,
     },
   ),
   
