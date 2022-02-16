@@ -54,5 +54,6 @@ primis-covid19-vacc-uptake/learndis/v1
 primis-covid19-vacc-uptake/shield/v1
 primis-covid19-vacc-uptake/nonshield/v1
 nhsd-primary-care-domain-refsets/mh_cod/20210127
-
+opensafely/covid-19-vaccination-first-dose-declined/0c16880b
+opensafely/covid-19-vaccination-second-dose-declined/27d8bb36
 

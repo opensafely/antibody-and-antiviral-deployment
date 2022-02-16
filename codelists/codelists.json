@@ -335,6 +335,18 @@
       "url": "https://codelists.opensafely.org/codelist/nhsd-primary-care-domain-refsets/mh_cod/20210127/",
       "downloaded_at": "2022-02-11 13:28:18.018626Z",
       "sha": "6e98da3c8765354b47ab74d1bef4679966a337f3"
+    },
+    "opensafely-covid-19-vaccination-first-dose-declined.csv": {
+      "id": "opensafely/covid-19-vaccination-first-dose-declined/0c16880b",
+      "url": "https://codelists.opensafely.org/codelist/opensafely/covid-19-vaccination-first-dose-declined/0c16880b/",
+      "downloaded_at": "2022-02-16 16:33:44.217522Z",
+      "sha": "fcb6418a6219bb7409029ffce5079c9b2cc98de2"
+    },
+    "opensafely-covid-19-vaccination-second-dose-declined.csv": {
+      "id": "opensafely/covid-19-vaccination-second-dose-declined/27d8bb36",
+      "url": "https://codelists.opensafely.org/codelist/opensafely/covid-19-vaccination-second-dose-declined/27d8bb36/",
+      "downloaded_at": "2022-02-16 16:33:44.441520Z",
+      "sha": "5f79648b7682f0fc85eb0c47c1da6dc180c5a89d"
     }
   }
 }

@@ -390,5 +390,20 @@ serious_mental_illness_nhsd_snomed_codes = codelist_from_csv(
 )
     
 
+## Vaccination declined
+first_dose_declined = codelist_from_csv(
+  "codelists/opensafely-covid-19-vaccination-first-dose-declined.csv",
+  system = "snomed",
+  column = "code",
+)
 
+second_dose_declined = codelist_from_csv(
+  "codelists/opensafely-covid-19-vaccination-second-dose-declined.csv",
+  system = "snomed",
+  column = "code",
+)
+
+covid_vaccine_declined_codes = combine_codelists(
+  first_dose_declined, second_dose_declined
+)
 

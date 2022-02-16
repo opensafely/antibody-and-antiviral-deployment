@@ -1260,6 +1260,7 @@ study = StudyDefinition(
       "One vaccination": """ covid_vax_1 AND NOT covid_vax_2 """,
       "Two vaccinations": """ covid_vax_2 AND NOT covid_vax_3 """,
       "Three or more vaccinations": """ covid_vax_3 """,
+      "Un-vaccinated (declined)": """ covid_vax_declined AND NOT (covid_vax_1 OR covid_vax_2 OR covid_vax_3)"""
     },
     
     covid_vax_1 = patients.with_tpp_vaccination_record(
@@ -1284,6 +1285,12 @@ study = StudyDefinition(
       find_first_match_in_period = True,
       returning = "date",
       date_format = "YYYY-MM-DD"
+    ),
+
+    covid_vax_declined = patients.with_these_clinical_events(
+      covid_vaccine_declined_codes,
+      returning="binary_flag",
+      on_or_before = end_date,
     ),
     
     return_expectations = {
