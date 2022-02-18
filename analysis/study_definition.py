@@ -5,8 +5,8 @@
 #
 # Output: output/data/input.csv.gz
 #
-# Author(s): M Green, H Curtis)
-# Date last updated: 11/02/2022
+# Author(s): M Green, H Curtis
+# Date last updated: 18/02/2022
 #
 ################################################################################
 
@@ -28,7 +28,7 @@ from cohortextractor import (
 from codelists import *
   
   
-  # DEFINE STUDY POPULATION ----
+# DEFINE STUDY POPULATION ----
 
 ## Define study time variables
 from datetime import date
@@ -1083,7 +1083,7 @@ study = StudyDefinition(
   ),
   
   # Rurality
-  rural_urban=patients.address_as_of(
+  rural_urban = patients.address_as_of(
     "start_date",
     returning = "rural_urban_classification",
     return_expectations = {
@@ -1257,10 +1257,10 @@ study = StudyDefinition(
   vaccination_status = patients.categorised_as(
     {
       "Un-vaccinated": "DEFAULT",
+      "Un-vaccinated (declined)": """ covid_vax_declined AND NOT (covid_vax_1 OR covid_vax_2 OR covid_vax_3)""",
       "One vaccination": """ covid_vax_1 AND NOT covid_vax_2 """,
       "Two vaccinations": """ covid_vax_2 AND NOT covid_vax_3 """,
-      "Three or more vaccinations": """ covid_vax_3 """,
-      "Un-vaccinated (declined)": """ covid_vax_declined AND NOT (covid_vax_1 OR covid_vax_2 OR covid_vax_3)"""
+      "Three or more vaccinations": """ covid_vax_3 """
     },
     
     covid_vax_1 = patients.with_tpp_vaccination_record(
@@ -1298,9 +1298,10 @@ study = StudyDefinition(
       "category": {
         "ratios": {
           "Un-vaccinated": 0.1,
+          "Un-vaccinated (declined)": 0.1,
           "One vaccination": 0.1,
           "Two vaccinations": 0.2,
-          "Three or more vaccinations": 0.6,
+          "Three or more vaccinations": 0.5,
         }
       },
     },
