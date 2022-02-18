@@ -371,7 +371,25 @@ data_processed_eligible <- data_processed %>%
     
     # Overall exclusion criteria
     is.na(primary_covid_hospital_discharge_date) | (primary_covid_hospital_discharge_date < (elig_start - 30) & 
-                                                      primary_covid_hospital_discharge_date > (elig_start)),
+                                                      primary_covid_hospital_discharge_date > (elig_start))
+    # 
+    # # Treatment specific eligibility criteria
+    # (tb_symponset_treat <= 5 | tb_symponset_treat >= 0) & treatment_type == "Paxlovid",
+    # (renal_disease != 1 | liver_disease != 0) & treatment_type == "Paxlovid",
+    # age >= 18 & treatment_type == "Paxlovid",
+    # pregnancy != 1 & treatment_type == "Paxlovid",
+    # 
+    # (tb_symponset_treat <= 5 | tb_symponset_treat >= 0) & treatment_type == "Sotrovimab",
+    # age >= 12 & treatment_type == "Sotrovimab",
+    # (weight >= 40 | is.na(weight)) & (age >=12 | age <= 17) & treatment_type == "Sotrovimab",
+    # 
+    # (tb_symponset_treat <= 7 | tb_symponset_treat >= 0) & treatment_type == "Remdesivir",
+    # age >= 12 & treatment_type == "Remdesivir",
+    # (weight >= 40 | is.na(weight)) & (age >=12 | age <= 17) & treatment_type == "Remdesivir",
+    # 
+    # (tb_symponset_treat <= 5 | tb_symponset_treat >= 0) & treatment_type == "Molnupiravir",
+    # age >= 18 & treatment_type =="Molnupiravir",
+    # pregnancy != 1 & treatment_type == "Molnupiravir",
   ) %>%
   mutate(eligibility_status = "Eligible")
 
@@ -438,7 +456,7 @@ data_processed_clean <- data_processed_combined %>%
     patient_id, eligibility_status,
     
     # Censoring
-    has_died, death_date, dereg_date, registered_eligible, registered_treated,
+    start_date, has_died, death_date, dereg_date, registered_eligible, registered_treated,
     
     # Eligibility
     covid_test_positive, symptomatic_covid_test, covid_test_positive_date, covid_positive_previous_30_days, tb_postest_treat, 

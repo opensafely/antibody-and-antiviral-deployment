@@ -47,7 +47,8 @@ actions:
     needs: [data_process]
     outputs:
       moderately_sensitive:
-        tables: output/coverage/table_*.csv
+        redacted_tables: output/coverage/table_*.csv
+        unredacted_tables: output/coverage/for-checks/table_*.csv
 
 
 
