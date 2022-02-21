@@ -273,7 +273,8 @@ data_processed <- data_extract %>%
     high_risk_group_combined = as.character(paste(high_risk_group_nhsd_combined, high_risk_cohort_covid_therapeutics, sep = ","), ""),
     high_risk_group_combined = ifelse(high_risk_group_combined == "NA", "", high_risk_group_combined),
     high_risk_group_combined = as.character(paste(unique(unlist(strsplit(high_risk_group_combined, ","))), collapse = ",")),
-    high_risk_group_combined_count = ifelse(high_risk_group_combined != "", str_count(high_risk_group_combined,",") + 1, NA)) %>%
+    high_risk_group_combined_count = ifelse(high_risk_group_combined != "" | high_risk_group_combined != "NA", 
+                                            str_count(high_risk_group_combined,",") + 1, NA)) %>%
   ungroup() %>%
   mutate(
     

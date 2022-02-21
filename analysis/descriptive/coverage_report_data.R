@@ -568,7 +568,7 @@ all <- data_processed_clean %>%
   filter(!is.na(treatment_type)) %>%
   group_by(tb, treatment_type) %>%
   tally() %>%
-  mutate(high_risk_group = "All",
+  mutate(high_risk_cohort = "All",
          n = ifelse(n < 5, NA, n),
          n = plyr::round_any(as.numeric(n), 5)) %>%
   filter(!is.na(n))
