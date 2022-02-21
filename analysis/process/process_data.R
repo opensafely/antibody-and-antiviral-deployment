@@ -368,7 +368,7 @@ data_processed_eligible <- data_processed %>%
     # Overall eligibility criteria
     covid_test_positive == 1,
     covid_positive_previous_30_days != 1,
-    !is.na(high_risk_group_nhsd_combined),
+    !is.na(high_risk_group_nhsd_combined) | high_risk_group_nhsd_combined != "NA",
     
     # Overall exclusion criteria
     is.na(primary_covid_hospital_discharge_date) | (primary_covid_hospital_discharge_date < (elig_start - 30) & 
