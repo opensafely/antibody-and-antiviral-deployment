@@ -568,7 +568,7 @@ all <- data_processed_clean %>%
   filter(!is.na(treatment_type)) %>%
   group_by(tb, treatment_type) %>%
   tally() %>%
-  mutate(high_risk_group_elig = "All",
+  mutate(high_risk_group = "All",
          n = ifelse(n < 5, NA, n),
          n = plyr::round_any(as.numeric(n), 5)) %>%
   filter(!is.na(n))
@@ -587,9 +587,9 @@ groups <- data_processed_clean %>%
     cols = c(downs_syndrome, sickle_cell_disease, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
              hiv_aids, solid_organ_transplant, rare_neurological_conditions),
     names_to = "high_risk_cohort",
-    values_to = "Count"
+    values_to = "n"
   ) %>%
-  mutate(n = ifelse(Count < 5, NA, Count),
+  mutate(n = ifelse(n < 5, NA, n),
          n = plyr::round_any(as.numeric(n), 5)) %>%
   filter(!is.na(n))
 
