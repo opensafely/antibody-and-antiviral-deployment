@@ -229,6 +229,7 @@ data_processed <- data_extract %>%
     solid_organ_transplant_nhsd = ifelse(!is.na(solid_organ_transplant_nhsd), 1, NA),
     rare_neurological_conditions_nhsd = ifelse(!is.na(rare_neurological_conditions_nhsd), 1, NA),
     
+    high_risk_cohort_covid_therapeutics =ifelse(high_risk_cohort_covid_therapeutics == "other", NA, high_risk_cohort_covid_therapeutics),
     downs_syndrome_therapeutics = ifelse(str_detect(high_risk_cohort_covid_therapeutics, "Downs syndrome") == TRUE, 1, NA),
     sickle_cell_disease_therapeutics = ifelse(str_detect(high_risk_cohort_covid_therapeutics, "sickle cell disease") == TRUE, 1, NA),
     cancer_therapeutics = ifelse(str_detect(high_risk_cohort_covid_therapeutics, "solid cancer") == TRUE, 1, NA),
