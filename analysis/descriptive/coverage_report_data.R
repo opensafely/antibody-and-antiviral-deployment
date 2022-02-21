@@ -593,8 +593,54 @@ groups <- data_processed_clean %>%
          n = plyr::round_any(as.numeric(n), 5)) %>%
   filter(!is.na(n))
 
+groups2 <- data_processed_clean %>%
+  filter(!is.na(treatment_type)) %>%
+  mutate(tb = ifelse(is.na(tb_symponset_treat), tb_postest_treat, tb_symponset_treat)) %>%
+  select(tb, autism_nhsd, care_home_primis, dementia_nhsd, learning_disability_primis, serious_mental_illness_nhsd, 
+         housebound_opensafely, shielded_primis) %>%
+  group_by(tb) %>%
+  filter(!is.na(tb)) %>%
+  summarise(
+    across(.fns=sum, na.rm = T)
+  ) %>%
+  pivot_longer(
+    cols = c(autism_nhsd, care_home_primis, dementia_nhsd, learning_disability_primis, serious_mental_illness_nhsd, 
+             housebound_opensafely, shielded_primis),
+    names_to = "group",
+    values_to = "n"
+  ) %>%
+  mutate(n = ifelse(n < 5, NA, n),
+         n = plyr::round_any(as.numeric(n), 5),
+         variable = group) %>%
+  filter(!is.na(n))
+
+groups_tte <- c("ageband", "sex", "ethnicity", "imd", "rural_urban", "region_nhs", "vaccination_status")
+
+for (i in 1:length(groups_tte)) {
+  
+  group_tte <- data_processed_clean %>%
+    filter(!is.na(treatment_type)) %>%
+    mutate(tb = ifelse(is.na(tb_symponset_treat), tb_postest_treat, tb_symponset_treat)) %>%
+    filter(!is.na(tb)) %>%
+    select(tb, variable = groups_tte[i]) %>%
+    group_by_all() %>% 
+    tally() %>%
+    mutate(n = ifelse(n < 5, NA, n),
+           n = plyr::round_any(as.numeric(n), 5),
+           group = groups_tte[i]) %>%
+    filter(!is.na(n))
+  
+  groups2 <- rbind(groups2, group_tte)
+  
+  print(i)
+  
+}
+
+groups2 <- groups2 %>%
+  arrange(variable, group, tb)
 
 write_csv(rbind(all, groups), fs::path(output_dir, "table_time_to_treat_redacted.csv"))
+write_csv(groups2, fs::path(output_dir, "table_time_to_treat_groups_redacted.csv"))
 
 
 # COVID-19 related events ----
