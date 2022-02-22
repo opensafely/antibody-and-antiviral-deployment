@@ -76,6 +76,7 @@ data_processed_clean <- data_processed %>%
 print(dim(data_processed_clean))
 print(length(unique(data_processed_clean$patient_id)))
 print(summary(data_processed_clean$high_risk_group_combined_count))
+print(table(data_processed_clean$high_risk_group_combined_count))
 
 study_start <- min(data_processed_clean$elig_start, na.rm = T)
 study_end <- max(data_processed_clean$elig_start, na.rm = T)
@@ -436,13 +437,18 @@ table_demo_clinc_breakdown_redacted <- left_join(table_demo_clinc_breakdown_base
          Casirivimab = ifelse(Casirivimab < threshold, NA, as.numeric(Casirivimab)),
          Molnupiravir = ifelse(Molnupiravir < threshold, NA, as.numeric(Molnupiravir)),
          Sotrovimab = ifelse(Sotrovimab < threshold, NA, as.numeric(Sotrovimab))
+         Remedesivir = ifelse(Remedesivir < threshold, NA, as.numeric(Remedesivir)),
+         Paxlovid = ifelse(Paxlovid < threshold, NA, as.numeric(Paxlovid))
+         
   ) %>%
   # Round to nearest 10
   mutate(All = plyr::round_any(All, 10),
          Treated = plyr::round_any(Treated, 10),
          Casirivimab = plyr::round_any(as.numeric(Casirivimab), 10),
          Molnupiravir = plyr::round_any(Molnupiravir, 10),
-         Sotrovimab = plyr::round_any(Sotrovimab, 10))
+         Sotrovimab = plyr::round_any(Sotrovimab, 10),
+         Remedesivir = plyr::round_any(Remedesivir, 10),
+         Paxlovid = plyr::round_any(Paxlovid, 10))
 
 write_csv(table_demo_clinc_breakdown_redacted, fs::path(output_dir, "table_demo_clinc_breakdown_redacted.csv"))
 
