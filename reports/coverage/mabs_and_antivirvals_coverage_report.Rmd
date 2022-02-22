@@ -47,8 +47,8 @@ library(scales)
 source(here("analysis", "lib", "custom_functions.R"))
 
 # Input directory ----
-#input_dir_os <- here("released_outputs", "reports", "coverage")
-input_dir_os <- here("output", "coverage")
+input_dir_os <- here("released_outputs", "reports", "coverage")
+#input_dir_os <- here("output", "coverage")
 
 # Output directory ----
 output_dir_rmd <- here("reports", "coverage")
@@ -98,7 +98,7 @@ Between **`r format(report_stats$study_start, format = "%d-%b-%Y")`** and **`r f
 - Sotrovimab: `r format(report_stats$treated_sotrovimab, big.mark = ",", scientific = FALSE)`;
 - Remdesivir: `r format(report_stats$treated_remdesivir, big.mark = ",", scientific = FALSE)`;
 - Molnupiravir: `r format(report_stats$treated_molnupiravir, big.mark = ",", scientific = FALSE)`; 
-- Casirivimab.`r format(report_stats$treated_casirivimab, big.mark = ",", scientific = FALSE)`,
+- Casirivimab: `r format(report_stats$treated_casirivimab, big.mark = ",", scientific = FALSE)`,
 
 For all subsequent analysis by high risk cohort, patients identified as being eligible for receiving a nMABs or antiviral for treating COVID-19 have been included within each high risk cohorts that their records indicate they fall into. Out of the `r format(report_stats$eligible_patients, big.mark = ",", scientific = FALSE)` eligible patients, `r format(report_stats$high_risk_cohort_2plus, big.mark = ",", scientific = FALSE)` (`r format(round(report_stats$high_risk_cohort_2plus/report_stats$eligible_patients*100, digits = 0), big.mark = ",", scientific = FALSE)`%) were included in two or more high risk cohorts (range `r report_stats$high_risk_cohort_lower` - `r report_stats$high_risk_cohort_upper`). 
 
@@ -150,8 +150,14 @@ coverage_plot <- coverage_plot_data %>%
     axis.text = element_text(size = 15),
     axis.text.x = element_text(angle = 60, hjust = 1),
     axis.title = element_text(size = 20),
-    legend.text = element_text(size = 10),
-    strip.text.x = element_text(size = 12)) +
+    legend.text = element_text(size = 12),
+    legend.title=element_text(size=12, face = "bold"),
+    legend.position = c(0.15,0.65),
+    legend.background = element_rect(colour = "white"),
+    legend.box.background = element_rect(colour = "black"),
+    axis.line.x = element_line(colour = "black"),
+    panel.grid.minor.x = element_blank(),
+    legend.box.margin = margin(t = 1, l = 1, b = 1, r = 1)) + 
   scale_y_continuous(labels = comma)
 
 ggsave(
@@ -302,7 +308,7 @@ table_elig_treat_redacted <- read_csv(fs::path(input_dir_os, "table_elig_treat_r
     high_risk_cohort == "hiv_aids" ~ "Immuosupression due to HIV or AIDS (CD4 <350 cells/mm3)", 
     high_risk_cohort == "solid_organ_transplant" ~ "Solid organ transplant recipients",
     high_risk_cohort == "rare_neurological_conditions" ~ "Rare neurological conditions",
-    TRUE ~ NA_character_)) 
+    TRUE ~ NA_character_))
 
 table_elig_treat_redacted <- table_elig_treat_redacted %>%
   mutate(`Number of treated patients, %` = round(Treated/Eligibile*100, digits = 0),
@@ -321,7 +327,9 @@ table_elig_treat_redacted <- table_elig_treat_redacted %>%
           `Molnupiravir, n (%)`,
           `Casirivimab, n (%)`
           ) %>%  
-  mutate(`Casirivimab, n (%)` = ifelse(`Casirivimab, n (%)` == "NA (NA)", "<5", `Casirivimab, n (%)`))
+  mutate(`Casirivimab, n (%)` = ifelse(`Casirivimab, n (%)` == "NA (NA)", "<5", `Casirivimab, n (%)`),
+         `Paxlovid, n (%)` = ifelse(`Paxlovid, n (%)` == "NA (NA)", "<5", `Paxlovid, n (%)`),
+         `Remdesivir, n (%)` = ifelse(`Remdesivir, n (%)` == "NA (NA)", "<5", `Remdesivir, n (%)`))
 
 colnames(table_elig_treat_redacted) <- c("High risk cohort", "Count", "Count", "%", "Count (%)", "Count (%)", "Count (%)", 
                                          "Count (%)", "Count (%)")
@@ -333,7 +341,7 @@ table_elig_treat_redacted %>%
         booktabs=TRUE) %>%
   kable_styling(position = "center", full_width = F, bootstrap_options = "striped")  %>%
   column_spec(4, background = "lightgrey")  %>%
-  add_header_above(., c(" ", "Eligible", "All" = 2, "Paxlovid  " = 1, "Sotrovimab" = 1, "Remedesivir" = 1,
+  add_header_above(., c(" ", "Eligible", "All" = 2, "Paxlovid  " = 1, "Sotrovimab" = 1, "Remdesivir" = 1,
                         "Molnupiravir" = 1, "Casirivimab" = 1)) %>%
   add_header_above(., c(" ", "", "Treated" = 7))
 ```
@@ -349,7 +357,8 @@ table_demo_clinc_breakdown_redacted <- read_csv(fs::path(input_dir_os, "table_de
                                    "housebound_opensafely", "shielded_primis", "vaccination_status"),
                         labels = c("Age band", "Sex", "Ethnicity", "IMD", "Rurality", "Region", "Autism", "Care home", "Dementia",
                                    "Learning disability ", "Serious mental illness", "Housebound", "CEV", "Vaccination status")),
-         Variable = factor(Variable, levels = c("12-29", "30-39", "40-49", "50-59", "60-69", "70-79", "80+", 
+         Variable = factor(Variable, 
+                           levels = c("12-29", "30-39", "40-49", "50-59", "60-69", "70-79", "80+", 
                                                 "Female", "Male" ,
                                                 "White", "Asian or Asian British", "Black or Black British", "Mixed", "Other ethnic groups",
                                                 "1 most deprived", "2", "3", "4", "5 least deprived",
@@ -361,16 +370,33 @@ table_demo_clinc_breakdown_redacted <- read_csv(fs::path(input_dir_os, "table_de
                                                 "dementia_nhsd", "learning_disability_primis", "serious_mental_illness_nhsd", 
                                                 "housebound_opensafely", "shielded_primis",
                                                 "Un-vaccinated (declined)", "Un-vaccinated" , "One vaccination", "Two vaccinations", 
+                                                "Three or more vaccinations", "Unknown"),
+                           labels = c("12-29", "30-39", "40-49", "50-59", "60-69", "70-79", "80+", 
+                                                "Female", "Male" ,
+                                                "White", "Asian or Asian British", "Black or Black British", "Mixed", "Other ethnic groups",
+                                                "1 most deprived", "2", "3", "4", "5 least deprived",
+                                                "Urban - conurbation" , "Urban - city and town", "Rural - town and fringe", 
+                                                "Rural - village and dispersed",
+                                                "East Midlands", "East of England", "London", "North East", "North West", "South East",
+                                                "South West", "West Midlands", "Yorkshire and the Humber",
+                                                "Autism", "Care home", "Dementia", "Learning disability ", "Serious mental illness",
+                                                "Housebound", "CEV",
+                                                "Un-vaccinated (declined)", "Un-vaccinated" , "One vaccination", "Two vaccinations", 
                                                 "Three or more vaccinations", "Unknown"))) %>%
   arrange(Group, Variable) %>%
   filter(!is.na(Variable)) %>%
   mutate(Treated_perc = round(Treated/All*100, digits = 0),
          Paxlovid = paste(Paxlovid, " (", round(Paxlovid/Treated*100, digits = 0), ")", sep = ""),
          Sotrovimab = paste(Sotrovimab, " (", round(Sotrovimab/Treated*100, digits = 0), ")", sep = ""),
-         Remedesivir = paste(Remedesivir, " (", round(Remedesivir/Treated*100, digits = 0), ")", sep = ""),
+         Remdesivir = paste(Remedesivir, " (", round(Remedesivir/Treated*100, digits = 0), ")", sep = ""),
          Molnupiravir = paste(Molnupiravir, " (", round(Molnupiravir/Treated*100, digits = 0), ")", sep = ""),
          Casirivimab = paste(Casirivimab, " (", round(Casirivimab/Treated*100, digits = 0), ")", sep = "")) %>%
-  select(Group, Variable, All, Treated, Treated_perc, Paxlovid, Sotrovimab, Remedesivir, Molnupiravir, Casirivimab)
+  select(Group, Variable, All, Treated, Treated_perc, Paxlovid, Sotrovimab, Remdesivir, Molnupiravir, Casirivimab) %>%  
+  mutate(Casirivimab = ifelse(Casirivimab == "NA (NA)", "<5", Casirivimab),
+         Paxlovid = ifelse(Paxlovid == "NA (NA)", "<5", Paxlovid),
+         Remdesivir = ifelse(Remdesivir == "NA (NA)", "<5", Remdesivir),
+         Sotrovimab = ifelse(Sotrovimab == "NA (NA)", "<5", Sotrovimab),
+         Molnupiravir = ifelse(Molnupiravir == "NA (NA)", "<5", Molnupiravir))
 
 colnames(table_demo_clinc_breakdown_redacted) <- c("Group", "Variable", "Count", "Count", "%",
                                                    "Count (%)", "Count (%)", "Count (%)", "Count (%)", "Count (%)")
@@ -381,41 +407,60 @@ table_demo_clinc_breakdown_redacted %>%
         booktabs=TRUE) %>%
   kable_styling(position = "center", full_width = F, bootstrap_options = "striped")  %>%
   column_spec(5, background = "lightgrey") %>%
-  add_header_above(., c(" ", "", "Eligible", "All" = 2, "Paxlovid" = 1, "Sotrovimab" = 1, "Remedesivir" = 1,
+  add_header_above(., c(" ", "", "Eligible", "All" = 2, "Paxlovid" = 1, "Sotrovimab" = 1, "Remdesivir" = 1,
                         "Molnupiravir" = 1, "Casirivimab" = 1)) %>%
   add_header_above(., c(" ", "", "", "Treated" = 7))
 ```
 
 ## Concordance with guidance <a name="concordance"></a>
-Of the `r format(report_stats$treated_patients, format = "%d-%b-%Y")` patients who received treatment for COVID-19 between `r format(report_stats$study_start, format = "%d-%b-%Y")` and `r format(report_stats$study_end, format = "%d-%b-%Y")`,  `r format(flowchart_non_elig[1,2], big.mark = ",", scientific = FALSE)` patients were missing records needed to confirm eligibility. It is likely that most, if not all, of these patients meet all of the eligibility criteria and non of the exclusion criteria but, for example, their SARS-CoV-2 test result is not available in their record or we just do not have access to all the criteria the clinician might use to assess high risk group status (such as the patients identified via non digital methods).
+Of the `r format(report_stats$treated_patients, format = "%d-%b-%Y")` patients who received treatment for COVID-19 between `r format(report_stats$study_start, format = "%d-%b-%Y")` and `r format(report_stats$study_end, format = "%d-%b-%Y")`,  `r format(as.numeric(flowchart_non_elig[1,2]), big.mark = ",", scientific = FALSE)` patients were missing records needed to confirm eligibility. It is likely that most, if not all, of these patients meet all of the eligibility criteria and non of the exclusion criteria but, for example, their SARS-CoV-2 test result is not available in their record or we just do not have access to all the criteria the clinician might use to assess high risk group status (such as the patients identified via non digital methods).
 
 ```{r non_elig, echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=10, out.width = '80%', fig.align = 'center', fig.cap = "Figure 3: Breakdown of eligibility criteria variables in treated patients with missing records needed to confirm eligibility"}
-flowchart_non_elig_plot <- flowchart_non_elig[-1,] #%>%
-  # mutate(criteria2 = c(#"High risk cohort identified within records but does not match treatment high risk cohort",
-  #                      "Not treated within 5 days post positive SARS-CoV-2 test",
-  #                      "No positive SARS-CoV-2 test record",
-  #                      "Required hospitalisation within 30 days prior to treatment with COVID-19 recorded as the primary diagnosis",
-  #                      "No high risk cohort identified within records",
-  #                      "Positive SARS-CoV-2 test record in previous 30 days")) 
-
-flowchart_non_elig_plot$criteria2 = unlist(lapply(strwrap(flowchart_non_elig_plot$criteria, width=30, simplify=FALSE), paste, 
+flowchart_non_elig_plot <- flowchart_non_elig[-1,] %>%
+mutate(criteria2 = c("No positive SARS-CoV-2 test record",                       
+                     "Positive SARS-CoV-2 test record in previous 30 days",
+                     "No high risk cohort identified within records",                      
+                     "High risk cohort identified within records does not match high risk cohort associated with treatment",
+                     "Required hospitalisation within 30 days prior to treatment with COVID-19 recorded as the primary diagnosis",
+                     "Required hospitalisation within 30 days prior to treatment with any diagnosis",
+                     "Treated with paxlovid 5 days post symptom onset",           
+                     "Treated with paxlovid and in renal or liver high risk cohort",
+                     "Treated with paxlovid aged under 18",                       
+                     "Treated with paxlovid and pregnant",
+                     "Treated with sotrovimab 5 days post symptom onset",
+                     "Treated with sotrovimab aged under 12",  
+                     "Treated with sotrovimab weight under 40kg", 
+                     "Treated with remdesivir 7 days post symptom onset",
+                     "Treated with remdesivir aged under 12",  
+                     "Treated with remdesivir weight under 40kg", 
+                     "Treated with molnupiravir 7 days post symptom onset",
+                     "Treated with molnupiravir and pregnant")) %>%
+  filter(!is.na(n)) %>%
+  filter(criteria != "c_no_high_risk_group_nhsd",
+         criteria != "c_no_high_risk_group_match") %>%
+  arrange(desc(n))
+  
+flowchart_non_elig_plot$criteria2 = unlist(lapply(strwrap(flowchart_non_elig_plot$criteria2, width=30, simplify=FALSE), paste, 
                                                   collapse="\n"))
 
 flowchart_non_elig_plot <- flowchart_non_elig_plot %>%
   mutate(criteria2 = factor(criteria2, levels = unique(flowchart_non_elig_plot$criteria2)))
 
 flowchart_non_elig_plot <- flowchart_non_elig_plot %>%
-  ggplot(aes(criteria)) +
-  geom_col(aes(x = criteria2, y = n, fill = criteria)) + 
+  ggplot(aes(criteria2)) +
+  geom_col(aes(x = criteria2, y = n, fill = criteria2)) + 
   theme_classic(base_size = 8) +
   labs(x = "",
        y = "Number of patients receiving treatment",
-       colour = "High risk cohort",
+       colour = "",
        title = "") +
   theme(legend.position = "none") +
   theme(axis.text.x = element_text(angle = 60, hjust = 1),
         axis.text = element_text(size = 15),
-        axis.title = element_text(size = 15))
+        axis.title = element_text(size = 15),
+        legend.text = element_text(size = 12),
+        legend.title=element_text(size=12, face = "bold"),
+        strip.text = element_text(size=12))
 
 ggsave(
   here::here(output_dir_rmd, "figures", "figure_non_elig_breakdown.png"),
@@ -431,7 +476,7 @@ include_graphics(fs::path(output_dir_rmd, "figures", "figure_non_elig_breakdown.
 data_time_between <- read_csv(fs::path(input_dir_os, "table_time_to_treat_redacted.csv"))
 
 data_time_between %>%
-  filter(high_risk_group_elig == "All",
+  filter(high_risk_cohort == "All",
          !is.na(tb),
          !is.na(n),
          tb < 15) %>%
@@ -444,8 +489,12 @@ data_time_between %>%
        y = "Number of patients receiving treatment",
        colour = "High risk cohort",
        title = "") +
-  theme(legend.position = "bottom",
-        legend.title = element_blank())
+  theme(legend.position = "none",
+        legend.title = element_blank(),
+        axis.text.x = element_text(angle = 60, hjust = 1),
+        axis.text = element_text(size = 15),
+        axis.title = element_text(size = 15),
+        strip.text = element_text(size=12))
 ```
 
 ```{r time to treatment 2, echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=10, fig.height=8, out.width = '80%', fig.align = 'center', fig.cap = "Figure 4b: Time between positive SARS-CoV-2 test and treatment for COVID-19, broken down by high risk cohort"}
@@ -493,11 +542,10 @@ time_groups %>%
        y = "Number of patients receiving treatment",
        colour = "High risk cohort",
        title = "") +
-  theme(legend.position = "none")  +
-  theme(
+  theme(legend.position = "none",
     axis.text = element_text(size = 15),
     axis.text.x = element_text(angle = 60, hjust = 1),
-    axis.title = element_text(size = 20)) +
+    axis.title = element_text(size = 20),
+    strip.text = element_text(size=12)) +
   scale_y_continuous(labels = comma)
 ```
-

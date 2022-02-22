@@ -1,4 +1,6 @@
-Outcome,Un treated,,Treated,
-"Positive SARS-CoV-2 test, 30 days or more since start date",190,0.31,50,0.93
-"Required hospitalisation with COVID-19 recorded as the primary diagnosis,one or more days after start date",145,0.23,95,1.77
-"COVID-19 related death, one or more days after start date",640,1.03,15,0.28
+Outcome,not treated,untreated_perc,treated,treated_perc
+"Positive SARS-CoV-2 test, 30 days or more since start date",215,1,65,1
+"Required hospitalisation with COVID-19 recorded as the primary diagnosis, one or more days after start date",125,0,95,2
+"COVID-19-related critical care admission, one or more days after start date",NA,NA,NA,NA
+"COVID-19 related death, one or more days after start date",780,2,20,0
+"Any death, one or more days after start date",810,2,20,0
