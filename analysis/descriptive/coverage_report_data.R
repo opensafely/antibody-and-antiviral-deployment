@@ -75,8 +75,6 @@ data_processed_clean <- data_processed %>%
 # Numbers for text ----
 print(dim(data_processed_clean))
 print(length(unique(data_processed_clean$patient_id)))
-print(summary(data_processed_clean$high_risk_group_combined_count))
-print(table(data_processed_clean$high_risk_group_combined_count))
 
 study_start <- min(data_processed_clean$elig_start, na.rm = T)
 study_end <- max(data_processed_clean$elig_start, na.rm = T)
@@ -89,9 +87,17 @@ treated_remdesivir <- plyr::round_any(data_processed_clean %>% filter(treatment_
 treated_molnupiravir <- plyr::round_any(data_processed_clean %>% filter(treatment_type == "Molnupiravir") %>% nrow(), 10)
 treated_casirivimab <- plyr::round_any(data_processed_clean %>% filter(treatment_type == "Casirivimab") %>% nrow(), 10)
 
+print("High risk cohort count")
+hrc_counts <- data_processed_clean %>% 
+  group_by(high_risk_group_combined_count) %>% 
+  select(high_risk_group_combined_count) %>% 
+  tally() %>%
+  filter(n>5)
+print(hrc_counts)
+
 high_risk_cohort_2plus <- plyr::round_any(subset(data_processed_clean, high_risk_group_combined_count > 1) %>% nrow(), 10)
-high_risk_cohort_lower <- min(data_processed_clean$high_risk_group_combined_count, na.rm = T)
-high_risk_cohort_upper <- max(data_processed_clean$high_risk_group_combined_count, na.rm = T)
+high_risk_cohort_lower <- min(hrc_counts$high_risk_group_combined_count, na.rm = T)
+high_risk_cohort_upper <- max(hrc_counts$high_risk_group_combined_count, na.rm = T)
 
 deregistered <- plyr::round_any(print(length(unique(subset(data_processed, !is.na(treatment_date))$patient_id)) -
                         length(unique(subset(data_processed_clean, !is.na(treatment_date))$patient_id))), 10)
@@ -437,7 +443,7 @@ table_demo_clinc_breakdown_redacted <- left_join(table_demo_clinc_breakdown_base
          Casirivimab = ifelse(Casirivimab < threshold, NA, as.numeric(Casirivimab)),
          Molnupiravir = ifelse(Molnupiravir < threshold, NA, as.numeric(Molnupiravir)),
          Sotrovimab = ifelse(Sotrovimab < threshold, NA, as.numeric(Sotrovimab)),
-         Remedesivir = ifelse(Remedesivir < threshold, NA, as.numeric(Remedesivir)),
+         Remedesivir = as.numeric(ifelse(Remedesivir < threshold, NA, as.numeric(Remedesivir))),
          Paxlovid = ifelse(Paxlovid < threshold, NA, as.numeric(Paxlovid))
          ) %>%
   # Round to nearest 10
