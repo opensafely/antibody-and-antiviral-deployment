@@ -417,9 +417,9 @@ table_demo_clinc_breakdown <- table_demo_clinc_breakdown$table_body %>%
   select(Group = variable,
          Variable = label, 
          Treated = stat_0,
-         Paxlovid = stat_3,
          Sotrovimab = stat_5,
          Remedesivir = stat_4,
+         Paxlovid = stat_3,
          Molnupiravir = stat_2,
          Casirivimab = stat_1) %>%
   mutate(Treated = as.numeric(gsub(",", "", Treated)),
@@ -436,11 +436,10 @@ table_demo_clinc_breakdown_redacted <- left_join(table_demo_clinc_breakdown_base
          Treated = ifelse(Treated < threshold, NA, as.numeric(Treated)),
          Casirivimab = ifelse(Casirivimab < threshold, NA, as.numeric(Casirivimab)),
          Molnupiravir = ifelse(Molnupiravir < threshold, NA, as.numeric(Molnupiravir)),
-         Sotrovimab = ifelse(Sotrovimab < threshold, NA, as.numeric(Sotrovimab))
+         Sotrovimab = ifelse(Sotrovimab < threshold, NA, as.numeric(Sotrovimab)),
          Remedesivir = ifelse(Remedesivir < threshold, NA, as.numeric(Remedesivir)),
          Paxlovid = ifelse(Paxlovid < threshold, NA, as.numeric(Paxlovid))
-         
-  ) %>%
+         ) %>%
   # Round to nearest 10
   mutate(All = plyr::round_any(All, 10),
          Treated = plyr::round_any(Treated, 10),
