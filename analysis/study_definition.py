@@ -489,7 +489,7 @@ study = StudyDefinition(
   ## Blueteq ‘high risk’ cohort
   high_risk_cohort_covid_therapeutics = patients.with_covid_therapeutics(
     #with_these_statuses = ["Approved", "Treatment Complete"],
-    with_these_therapeutics = ["Sotrovimab", "Molnupiravir","Casirivimab and imdevimab"],
+    with_these_therapeutics = ["Sotrovimab", "Molnupiravir","Casirivimab and imdevimab", "Paxlovid", "Remdesivir"],
     with_these_indications = "non_hospitalised",
     on_or_after = "index_date",
     find_first_match_in_period = True,
@@ -533,25 +533,6 @@ study = StudyDefinition(
   ),
   
   downs_syndrome_nhsd = patients.minimum_of("downs_syndrome_nhsd_snomed", "downs_syndrome_nhsd_icd10"), 
-  
-  ## Sickle cell disease
-  sickle_cell_disease_nhsd_snomed = patients.with_these_clinical_events(
-    sickle_cell_disease_nhsd_snomed_codes,
-    on_or_before = "start_date",
-    returning = "date",
-    date_format = "YYYY-MM-DD",
-    find_last_match_in_period = True,
-  ),
-  
-  sickle_cell_disease_nhsd_icd10 = patients.admitted_to_hospital(
-    returning = "date_admitted",
-    on_or_before = "start_date",
-    with_these_diagnoses = sickle_cell_disease_nhsd_icd10_codes,
-    find_last_match_in_period = True,
-    date_format = "YYYY-MM-DD",
-  ),
-  
-  sickle_cell_disease_nhsd = patients.minimum_of("sickle_cell_disease_nhsd_snomed", "sickle_cell_disease_nhsd_icd10"), 
   
   ## Solid cancer
   cancer_opensafely_snomed = patients.with_these_clinical_events(
@@ -612,11 +593,29 @@ study = StudyDefinition(
     date_format = "YYYY-MM-DD",
   ),
   
+  sickle_cell_disease_nhsd_snomed = patients.with_these_clinical_events(
+    sickle_cell_disease_nhsd_snomed_codes,
+    on_or_before = "start_date",
+    returning = "date",
+    date_format = "YYYY-MM-DD",
+    find_last_match_in_period = True,
+  ),
+  
+  sickle_cell_disease_nhsd_icd10 = patients.admitted_to_hospital(
+    returning = "date_admitted",
+    on_or_before = "start_date",
+    with_these_diagnoses = sickle_cell_disease_nhsd_icd10_codes,
+    find_last_match_in_period = True,
+    date_format = "YYYY-MM-DD",
+  ),
+  
   haematological_disease_nhsd = patients.minimum_of("haematopoietic_stem_cell_transplant_nhsd_snomed", 
                                                     "haematopoietic_stem_cell_transplant_nhsd_icd10", 
                                                     "haematopoietic_stem_cell_transplant_nhsd_opcs4", 
                                                     "haematological_malignancies_nhsd_snomed", 
-                                                    "haematological_malignancies_nhsd_icd10"), 
+                                                    "haematological_malignancies_nhsd_icd10",
+                                                    "sickle_cell_disease_nhsd_snomed", 
+                                                    "sickle_cell_disease_nhsd_icd10"), 
   
   
   ## Renal disease
@@ -1252,6 +1251,9 @@ study = StudyDefinition(
     returning = "binary_flag",
     return_expectations = {"incidence": 0.1}
   ),
+  
+  ## Sickle cell disease
+  sickle_cell_disease_nhsd = patients.minimum_of("sickle_cell_disease_nhsd_snomed", "sickle_cell_disease_nhsd_icd10"), 
   
   ## Vaccination status
   vaccination_status = patients.categorised_as(

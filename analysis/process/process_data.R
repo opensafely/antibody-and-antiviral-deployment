@@ -10,7 +10,7 @@
 #         /output/data/data_processed_clean.csv
 #
 # Author(s): M Green
-# Date last updated: 18/02/2022
+# Date last updated: 23/02/2022
 #
 ################################################################################
 
@@ -77,7 +77,6 @@ data_extract0 <- read_csv(
     # HIGH RISK GROUPS ----
     high_risk_cohort_covid_therapeutics = col_character(),
     downs_syndrome_nhsd = col_date(format = "%Y-%m-%d"),
-    sickle_cell_disease_nhsd = col_date(format = "%Y-%m-%d"),
     cancer_opensafely_snomed = col_date(format = "%Y-%m-%d"),
     haematological_disease_nhsd = col_date(format = "%Y-%m-%d"), 
     ckd_stage_5_nhsd = col_date(format = "%Y-%m-%d"),
@@ -113,6 +112,7 @@ data_extract0 <- read_csv(
     learning_disability_primis = col_logical(),
     shielded_primis = col_logical(),
     serious_mental_illness_nhsd = col_logical(),
+    sickle_cell_disease_nhsd = col_date(format = "%Y-%m-%d"),
     vaccination_status = col_character(),
     
     # OUTCOMES ----
@@ -192,21 +192,23 @@ data_processed <- data_extract %>%
                                              oral_steroid_drugs_nhsd, NA), origin = "1970-01-01"),
     imid_nhsd = pmin(oral_steroid_drugs_nhsd, immunosuppresant_drugs_nhsd, na.rm = T),
     
+    ## Convert sickle cell disease from date
+    sickle_cell_disease_nhsd = ifelse(!is.na(sickle_cell_disease_nhsd), 1, 0),
+    
     # Combine subgoups of rare neurological conditions cohort
     rare_neurological_conditions_nhsd =  pmax(multiple_sclerosis_nhsd, motor_neurone_disease_nhsd, myasthenia_gravis_nhsd,
                                               huntingtons_disease_nhsd, na.rm = T),
     ## Eligibility window
-    high_risk_group_nhsd_date = pmax(downs_syndrome_nhsd, sickle_cell_disease_nhsd, cancer_opensafely_snomed,
+    high_risk_group_nhsd_date = pmax(downs_syndrome_nhsd, cancer_opensafely_snomed,
                                 haematological_disease_nhsd, ckd_stage_5_nhsd, liver_disease_nhsd, imid_nhsd,
                                 immunosupression_nhsd, hiv_aids_nhsd, solid_organ_transplant_nhsd, rare_neurological_conditions_nhsd,
                                 na.rm = TRUE),
     
-    elig_start = as.Date(ifelse(covid_test_positive == 1 & (covid_test_positive_date >= high_risk_group_nhsd_date), covid_test_positive_date, NA), origin = "1970-01-01"),
-    elig_end = as.Date(elig_start + 5, origin = "1970-01-01"),
-    
+    elig_start = as.Date(ifelse(covid_test_positive == 1 & (covid_test_positive_date >= high_risk_group_nhsd_date), 
+                                covid_test_positive_date, NA), origin = "1970-01-01"),
+
     # HIGH RISK GROUPS ----
     downs_syndrome_nhsd_name = ifelse(!is.na(downs_syndrome_nhsd), "Down's syndrome", NA),
-    sickle_cell_disease_nhsd_name = ifelse(!is.na(sickle_cell_disease_nhsd), "sickle cell disease", NA),
     cancer_opensafely_name = ifelse(!is.na(cancer_opensafely_snomed), "solid cancer", NA),
     haematological_disease_nhsd_name = ifelse(!is.na(haematological_disease_nhsd), "haematological diseases and stem cell transplant recipients", NA),
     ckd_stage_5_nhsd_name = ifelse(!is.na(ckd_stage_5_nhsd), "renal disease", NA),
@@ -218,7 +220,6 @@ data_processed <- data_extract %>%
     rare_neurological_conditions_nhsd_name = ifelse(!is.na(rare_neurological_conditions_nhsd), "rare neurological conditions", NA),
     
     downs_syndrome_nhsd = ifelse(!is.na(downs_syndrome_nhsd), 1, NA),
-    sickle_cell_disease_nhsd = ifelse(!is.na(sickle_cell_disease_nhsd), 1, NA),
     cancer_opensafely = ifelse(!is.na(cancer_opensafely_snomed), 1, NA),
     haematological_disease_nhsd = ifelse(!is.na(haematological_disease_nhsd), 1, NA),
     ckd_stage_5_nhsd = ifelse(!is.na(ckd_stage_5_nhsd), 1, NA),
@@ -231,12 +232,12 @@ data_processed <- data_extract %>%
     
     high_risk_cohort_covid_therapeutics =ifelse(high_risk_cohort_covid_therapeutics == "other", NA, high_risk_cohort_covid_therapeutics),
     downs_syndrome_therapeutics = ifelse(str_detect(high_risk_cohort_covid_therapeutics, "Downs syndrome") == TRUE, 1, NA),
-    sickle_cell_disease_therapeutics = ifelse(str_detect(high_risk_cohort_covid_therapeutics, "sickle cell disease") == TRUE, 1, NA),
     cancer_therapeutics = ifelse(str_detect(high_risk_cohort_covid_therapeutics, "solid cancer") == TRUE, 1, NA),
     haematological_disease_therapeutics = ifelse(str_detect(high_risk_cohort_covid_therapeutics, "haematological diseases and stem cell transplant recipients") == TRUE, 1, NA),
     haematological_disease_therapeutics = ifelse(str_detect(high_risk_cohort_covid_therapeutics, "haematological diseases") == TRUE, 1, haematological_disease_therapeutics),
     haematological_disease_therapeutics = ifelse(str_detect(high_risk_cohort_covid_therapeutics, "haematologic malignancy") == TRUE, 1, haematological_disease_therapeutics),
     haematological_disease_therapeutics = ifelse(str_detect(high_risk_cohort_covid_therapeutics, "stem cell transplant recipients") == TRUE, 1, haematological_disease_therapeutics),
+    haematological_disease_therapeutics = ifelse(str_detect(high_risk_cohort_covid_therapeutics, "sickle cell disease") == TRUE, 1, haematological_disease_therapeutics),
     ckd_stage_5_therapeutics = ifelse(str_detect(high_risk_cohort_covid_therapeutics, "renal disease") == TRUE, 1, NA),
     liver_disease_therapeutics = ifelse(str_detect(high_risk_cohort_covid_therapeutics, "liver disease") == TRUE, 1, NA),
     imid_therapeutics = ifelse(str_detect(high_risk_cohort_covid_therapeutics, "IMID") == TRUE, 1, NA),
@@ -246,7 +247,6 @@ data_processed <- data_extract %>%
     rare_neurological_conditions_therapeutics = ifelse(str_detect(high_risk_cohort_covid_therapeutics, "rare neurological conditions") == TRUE, 1, NA),   
     
     downs_syndrome = ifelse(downs_syndrome_nhsd == 1 | downs_syndrome_therapeutics == 1, 1, NA),
-    sickle_cell_disease = ifelse(sickle_cell_disease_nhsd == 1 | sickle_cell_disease_therapeutics== 1, 1, NA),
     solid_cancer = ifelse(cancer_opensafely == 1 | cancer_therapeutics == 1, 1, NA),
     haematological_disease = ifelse(haematological_disease_nhsd == 1 | haematological_disease_therapeutics == 1, 1, NA),
     renal_disease = ifelse(ckd_stage_5_nhsd == 1 | ckd_stage_5_therapeutics == 1, 1, NA),
@@ -258,23 +258,27 @@ data_processed <- data_extract %>%
     rare_neurological_conditions = ifelse(rare_neurological_conditions_nhsd == 1 | rare_neurological_conditions_therapeutics == 1, 1, NA)
     
     ) %>%
-  unite("high_risk_group_nhsd_combined", downs_syndrome_nhsd_name, sickle_cell_disease_nhsd_name, cancer_opensafely_name,
+  unite("high_risk_group_nhsd_combined", downs_syndrome_nhsd_name, cancer_opensafely_name,
         haematological_disease_nhsd_name, ckd_stage_5_nhsd_name, liver_disease_nhsd_name, imid_nhsd_name, immunosupression_nhsd_name, 
         hiv_aids_nhsd_name, solid_organ_transplant_nhsd_name, rare_neurological_conditions_nhsd_name, sep = ",", na.rm = T) %>%
   mutate(
     
     ## Find matches between nhsd high risk cohorts and therapeutics high risk cohorts 
     ind_therapeutic_groups = map_chr(strsplit(high_risk_cohort_covid_therapeutics, ","), paste,collapse="|"),
-    match = str_detect(high_risk_group_nhsd_combined, ind_therapeutic_groups)) %>%
-  rowwise() %>%
-  mutate(
+    match = str_detect(high_risk_group_nhsd_combined, ind_therapeutic_groups),
     
-    ## Combine nhsd cohorts with theraputics cohorts to get list of all possible cohorts
-    high_risk_group_combined = as.character(paste(high_risk_group_nhsd_combined, high_risk_cohort_covid_therapeutics, sep = ","), ""),
-    high_risk_group_combined = ifelse(high_risk_group_combined == "NA", "", high_risk_group_combined),
-    high_risk_group_combined = as.character(paste(unique(unlist(strsplit(high_risk_group_combined, ","))), collapse = ",")),
-    high_risk_group_combined_count = ifelse(high_risk_group_combined != "" | high_risk_group_combined != "NA", 
-                                            str_count(high_risk_group_combined,",") + 1, NA)) %>%
+    ## Parse NAs
+    high_risk_group_nhsd_combined = ifelse(high_risk_group_nhsd_combined == "", NA, high_risk_group_nhsd_combined),
+    high_risk_cohort_covid_therapeutics = ifelse(high_risk_cohort_covid_therapeutics == "", NA, high_risk_cohort_covid_therapeutics)
+  ) %>%
+  ## Combine groups
+  unite("high_risk_group_combined", c(high_risk_group_nhsd_combined, high_risk_cohort_covid_therapeutics), sep = ",", 
+        na.rm = TRUE, remove = FALSE) %>%
+  rowwise() %>%
+  mutate(high_risk_group_combined = as.character(paste(unique(unlist(strsplit(high_risk_group_combined, ","))), collapse = ",")),
+         high_risk_group_combined = ifelse(high_risk_group_combined == "", NA, high_risk_group_combined),
+         high_risk_group_combined_count = ifelse(high_risk_group_combined != "" | high_risk_group_combined != "NA", 
+                                                 str_count(high_risk_group_combined,",") + 1, NA)) %>%
   ungroup() %>%
   mutate(
     
@@ -407,7 +411,8 @@ data_processed_treated <- data_processed %>%
     !is.na(treatment_date),
     !(patient_id %in% unique(data_processed_eligible$patient_id)),
   ) %>%
-  mutate(eligibility_status = "Treated")
+  mutate(elig_start = as.Date(ifelse(is.na(elig_start), covid_test_positive_date, NA), origin = "1970-01-01"),
+         eligibility_status = "Treated")
 
 cat("#### treated patients ####\n")
 print(dim(data_processed_treated))
@@ -463,7 +468,7 @@ data_processed_clean <- data_processed_combined %>%
     
     # Eligibility
     covid_test_positive, symptomatic_covid_test, covid_test_positive_date, covid_positive_previous_30_days, tb_postest_treat, 
-    tb_symponset_treat, elig_start, elig_end, primary_covid_hospital_discharge_date, any_covid_hospital_discharge_date, pregnancy,
+    tb_symponset_treat, elig_start, primary_covid_hospital_discharge_date, any_covid_hospital_discharge_date, pregnancy,
     weight,
     
     # Treatment
@@ -471,7 +476,7 @@ data_processed_clean <- data_processed_combined %>%
     casirivimab_covid_therapeutics, treatment_date, treatment_type,
     
     # High risk cohort
-    downs_syndrome, sickle_cell_disease, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
+    downs_syndrome, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
     hiv_aids, solid_organ_transplant, rare_neurological_conditions, high_risk_group_nhsd_combined, high_risk_cohort_covid_therapeutics, 
     match, high_risk_group_combined, high_risk_group_combined_count, 
     
@@ -480,7 +485,7 @@ data_processed_clean <- data_processed_combined %>%
     
     # Clinical groups
     autism_nhsd, care_home_primis, dementia_nhsd, housebound_opensafely, learning_disability_primis, shielded_primis, 
-    serious_mental_illness_nhsd, vaccination_status,
+    serious_mental_illness_nhsd, sickle_cell_disease_nhsd, vaccination_status,
     
     # Outcomes
     covid_positive_test_30_days_post_elig_or_treat, covid_hospitalisation_outcome_date, covid_hospitalisation_critical_care, 

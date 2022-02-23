@@ -129,14 +129,14 @@ plot_data_coverage <- data_processed_clean %>%
 
 plot_data_coverage_groups <- data_processed_clean %>%
   filter(!is.na(start_date)) %>%
-  select(start_date, downs_syndrome, sickle_cell_disease, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
+  select(start_date, downs_syndrome, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
          hiv_aids, solid_organ_transplant, rare_neurological_conditions)  %>%
   group_by(start_date) %>%
   summarise(
     across(.fns=sum, na.rm = T)
   ) %>%
   pivot_longer(
-    cols=c(downs_syndrome, sickle_cell_disease, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
+    cols=c(downs_syndrome, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
            hiv_aids, solid_organ_transplant, rare_neurological_conditions),
     names_to = "high_risk_cohort",
     values_to = "n"
@@ -183,14 +183,14 @@ plot_data_treatment <- data_processed_clean %>%
   select(-n)
 
 plot_data_treatment_groups <- data_processed_clean %>%
-  select(treatment_date, downs_syndrome, sickle_cell_disease, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
+  select(treatment_date, downs_syndrome, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
          hiv_aids, solid_organ_transplant, rare_neurological_conditions)  %>%
   group_by(treatment_date) %>%
   summarise(
     across(.fns=sum, na.rm = T)
   ) %>%
   pivot_longer(
-    cols=c(downs_syndrome, sickle_cell_disease, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
+    cols=c(downs_syndrome, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
            hiv_aids, solid_organ_transplant, rare_neurological_conditions),
     names_to = "high_risk_cohort",
     values_to = "n"
@@ -265,20 +265,20 @@ plot_data_prop_treated <- plot_data_prop_treated %>%
 plot_data_prop_treated_groups <- data_processed_clean %>%
   filter(!is.na(start_date)) %>%
   mutate(treatment_status = ifelse(is.na(treatment_date), "Untreated", "Treated")) %>%
-  select(start_date, treatment_type, treatment_status, downs_syndrome, sickle_cell_disease, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
+  select(start_date, treatment_type, treatment_status, downs_syndrome, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
          hiv_aids, solid_organ_transplant, rare_neurological_conditions)  %>%
   rbind(data_processed_clean %>%
           filter(!is.na(start_date)) %>%
           mutate(treatment_status = ifelse(is.na(treatment_date), "Untreated", "Treated"),
                  treatment_type = "any") %>%
-          select(start_date, treatment_type, treatment_status, downs_syndrome, sickle_cell_disease, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
+          select(start_date, treatment_type, treatment_status, downs_syndrome, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
                  hiv_aids, solid_organ_transplant, rare_neurological_conditions)) %>%
   group_by(start_date, treatment_type, treatment_status) %>%
   summarise(
     across(.fns=sum, na.rm = T)
   ) %>%
   pivot_longer(
-    cols=c(downs_syndrome, sickle_cell_disease, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
+    cols=c(downs_syndrome, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
            hiv_aids, solid_organ_transplant, rare_neurological_conditions),
     names_to = "high_risk_cohort",
     values_to = "n"
@@ -323,13 +323,13 @@ print("prop_treated_data saved")
 
 ## Eligible and treated table
 eligibility_table <- data_processed_clean %>%
-  select(downs_syndrome, sickle_cell_disease, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
+  select(downs_syndrome, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
          hiv_aids, solid_organ_transplant, rare_neurological_conditions)  %>%
   summarise(
     across(.fns=sum, na.rm = T)
   ) %>%
   pivot_longer(
-    cols = c(downs_syndrome, sickle_cell_disease, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
+    cols = c(downs_syndrome, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
            hiv_aids, solid_organ_transplant, rare_neurological_conditions),
     names_to = "high_risk_cohort",
     values_to = "Eligibile"
@@ -340,14 +340,14 @@ eligibility_table <- data_processed_clean %>%
 treatment_table <- data_processed_clean %>%
   filter(!is.na(treatment_type)) %>%
   mutate(All = ifelse(!is.na(high_risk_group_combined), 1, 0)) %>%
-  select(treatment_type, All, downs_syndrome, sickle_cell_disease, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
+  select(treatment_type, All, downs_syndrome, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
          hiv_aids, solid_organ_transplant, rare_neurological_conditions)  %>%
   group_by(treatment_type) %>%
   summarise(
     across(.fns=sum, na.rm = T)
   ) %>%
   pivot_longer(
-    cols = c(All, downs_syndrome, sickle_cell_disease, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
+    cols = c(All, downs_syndrome, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
            hiv_aids, solid_organ_transplant, rare_neurological_conditions),
     names_to = "high_risk_cohort",
     values_to = "Treated"
@@ -384,7 +384,7 @@ write_csv(table_elig_treat_redacted, fs::path(output_dir, "table_elig_treat_reda
 ## Clinical and demographics table
 variables <- c("ageband", "sex", "ethnicity", "imd", "rural_urban", "region_nhs", "autism_nhsd", "care_home_primis",
                "dementia_nhsd", "learning_disability_primis", "serious_mental_illness_nhsd", 
-               "housebound_opensafely", "shielded_primis", "vaccination_status")
+               "housebound_opensafely", "shielded_primis", "sickle_cell_disease_nhsd", "vaccination_status")
 
 table_demo_clinc_breakdown_base <- data_processed_clean %>%
   select(all_of(variables)) %>%
@@ -467,6 +467,7 @@ non_elig_treated <-  data_processed_clean %>%
   mutate(
     patient_id,
     no_positive_covid_test = (covid_test_positive != 1),
+    no_symptomatic_covid_test = (symptomatic_covid_test == "Y"),
     positive_covid_test_previous_30_days = (covid_positive_previous_30_days == 1),
     no_high_risk_group_nhsd = (high_risk_group_nhsd_combined == ""),
     no_high_risk_group_match =  (match == TRUE),
@@ -499,6 +500,7 @@ non_elig_treated <-  data_processed_clean %>%
     
     include = (
       no_positive_covid_test  &
+        no_symptomatic_covid_test &
         positive_covid_test_previous_30_days &
         no_high_risk_group_nhsd &
         no_high_risk_group_match &
@@ -524,6 +526,7 @@ data_flowchart <- non_elig_treated %>%
   transmute(
     c_all = TRUE,
     c_no_positive_covid_test = c_all & no_positive_covid_test,
+    c_no_symptomatic_covid_test = c_all & no_symptomatic_covid_test,
     c_positive_covid_test_previous_30_days = c_all & positive_covid_test_previous_30_days,
     c_no_high_risk_group_nhsd = c_all & no_high_risk_group_nhsd,
     c_no_high_risk_group_match = c_all & no_high_risk_group_match,
@@ -587,7 +590,7 @@ all <- data_processed_clean %>%
 groups <- data_processed_clean %>%
   filter(!is.na(treatment_type)) %>%
   mutate(tb = ifelse(is.na(tb_symponset_treat), tb_postest_treat, tb_symponset_treat)) %>%
-  select(tb, downs_syndrome, sickle_cell_disease, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
+  select(tb, downs_syndrome, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
          hiv_aids, solid_organ_transplant, rare_neurological_conditions) %>%
   group_by(tb) %>%
   filter(!is.na(tb)) %>%
@@ -595,7 +598,7 @@ groups <- data_processed_clean %>%
     across(.fns=sum, na.rm = T)
   ) %>%
   pivot_longer(
-    cols = c(downs_syndrome, sickle_cell_disease, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
+    cols = c(downs_syndrome, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
              hiv_aids, solid_organ_transplant, rare_neurological_conditions),
     names_to = "high_risk_cohort",
     values_to = "n"
