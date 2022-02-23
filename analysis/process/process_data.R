@@ -196,17 +196,16 @@ data_processed <- data_extract %>%
     sickle_cell_disease_nhsd = ifelse(!is.na(sickle_cell_disease_nhsd), 1, 0),
     
     # Combine subgoups of rare neurological conditions cohort
-    rare_neurological_conditions_nhsd =  pmax(multiple_sclerosis_nhsd, motor_neurone_disease_nhsd, myasthenia_gravis_nhsd,
+    rare_neurological_conditions_nhsd =  pmin(multiple_sclerosis_nhsd, motor_neurone_disease_nhsd, myasthenia_gravis_nhsd,
                                               huntingtons_disease_nhsd, na.rm = T),
     ## Eligibility window
-    high_risk_group_nhsd_date = pmax(downs_syndrome_nhsd, cancer_opensafely_snomed,
+    high_risk_group_nhsd_date = pmin(downs_syndrome_nhsd, cancer_opensafely_snomed,
                                 haematological_disease_nhsd, ckd_stage_5_nhsd, liver_disease_nhsd, imid_nhsd,
                                 immunosupression_nhsd, hiv_aids_nhsd, solid_organ_transplant_nhsd, rare_neurological_conditions_nhsd,
                                 na.rm = TRUE),
     
-    elig_start = as.Date(ifelse(covid_test_positive == 1 & (covid_test_positive_date >= high_risk_group_nhsd_date), 
+    elig_start = as.Date(ifelse(covid_test_positive <= Sys.Date() & covid_test_positive == 1 & (covid_test_positive_date >= high_risk_group_nhsd_date), 
                                 covid_test_positive_date, NA), origin = "1970-01-01"),
-
     # HIGH RISK GROUPS ----
     downs_syndrome_nhsd_name = ifelse(!is.na(downs_syndrome_nhsd), "Down's syndrome", NA),
     cancer_opensafely_name = ifelse(!is.na(cancer_opensafely_snomed), "solid cancer", NA),
@@ -410,7 +409,8 @@ data_processed_treated <- data_processed %>%
     !(patient_id %in% unique(data_processed_eligible$patient_id)),
     
     # Sensible treatment date
-    treatment_date >= covid_test_positive_date + 21 | treatment_date < max(data_processed$elig_start, na.rm = T) + 14
+    (treatment_date >= covid_test_positive_date + 21 | treatment_date < max(data_processed$elig_start, na.rm = T) + 14) &
+      treatment_date <= Sys.Date()
   ) %>%
   mutate(elig_start = coalesce(elig_start, treatment_date),
          eligibility_status = "Treated")
