@@ -291,16 +291,14 @@ data_processed <- data_extract %>%
       TRUE ~ NA_character_
     ),
     
-    ethnicity_filled = ifelse(is.na(ethnicity_primis), ethnicity_sus, ethnicity_primis),
-    ethnicity = ifelse(is.na(ethnicity_filled), 6, ethnicity_filled),
-    
+    ethnicity = coalesce(ethnicity_primis, ethnicity_sus),
+
     ethnicity = fct_case_when(
       ethnicity == "1" ~ "White",
       ethnicity == "2" ~ "Mixed",
       ethnicity == "3" ~ "Asian or Asian British",
       ethnicity == "4" ~ "Black or Black British",
       ethnicity == "5" ~ "Other ethnic groups",
-      ethnicity == "6" ~ "Unknown",
       #TRUE ~ "Unknown"
       TRUE ~ NA_character_),
     
@@ -410,9 +408,13 @@ data_processed_treated <- data_processed %>%
     # Treated but non-eligible patients
     !is.na(treatment_date),
     !(patient_id %in% unique(data_processed_eligible$patient_id)),
+    
+    # Sensible treatment date
+    treatment_date >= covid_test_positive_date + 21 | treatment_date < max(data_processed$elig_start, na.rm = T) + 14
   ) %>%
-  mutate(elig_start = as.Date(ifelse(is.na(elig_start), covid_test_positive_date, NA), origin = "1970-01-01"),
+  mutate(elig_start = coalesce(elig_start, treatment_date),
          eligibility_status = "Treated")
+
 
 cat("#### treated patients ####\n")
 print(dim(data_processed_treated))

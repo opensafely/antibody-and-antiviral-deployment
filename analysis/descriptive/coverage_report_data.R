@@ -13,7 +13,7 @@
 #         /output/reports/coverage/figures/figure_cum_eligiblity_plot.png
 #
 # Author(s): M Green
-# Date last updated: 18/02/2022
+# Date last updated: 23/02/2022
 #
 ################################################################################
 
@@ -111,16 +111,16 @@ write_csv(text, fs::path(output_dir, "table_report_stats_redacted.csv"))
 print(text)
 
 
-# Coverage ----
+# Eligibility for treatment ----
 
-## Eligibility
+## Cumulative total of eligible patients 
 plot_data_coverage <- data_processed_clean %>%
-  select(start_date)  %>%
-  group_by(start_date) %>%
+  select(elig_start)  %>%
+  group_by(elig_start) %>%
   tally() %>%
   ungroup() %>%
-  arrange(start_date) %>%
-  complete(start_date = seq.Date(min(start_date, na.rm = T), max(start_date, na.rm = T), by="day"))  %>%
+  arrange(elig_start) %>%
+  complete(elig_start = seq.Date(min(elig_start, na.rm = T), max(elig_start, na.rm = T), by="day"))  %>%
   mutate(count = ifelse(is.na(n), 0, n),
          cum_count = cumsum(count),
          cum_count_redacted =  plyr::round_any(cum_count, 10),
@@ -128,10 +128,10 @@ plot_data_coverage <- data_processed_clean %>%
   select(-n)
 
 plot_data_coverage_groups <- data_processed_clean %>%
-  filter(!is.na(start_date)) %>%
-  select(start_date, downs_syndrome, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
+  filter(!is.na(elig_start)) %>%
+  select(elig_start, downs_syndrome, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
          hiv_aids, solid_organ_transplant, rare_neurological_conditions)  %>%
-  group_by(start_date) %>%
+  group_by(elig_start) %>%
   summarise(
     across(.fns=sum, na.rm = T)
   ) %>%
@@ -141,11 +141,11 @@ plot_data_coverage_groups <- data_processed_clean %>%
     names_to = "high_risk_cohort",
     values_to = "n"
   ) %>%
-  group_by(high_risk_cohort, start_date) %>%
+  group_by(high_risk_cohort, elig_start) %>%
   summarise(n = sum(n, na.rm = T)) %>%
-  arrange(high_risk_cohort, start_date) %>%
+  arrange(high_risk_cohort, elig_start) %>%
   group_by(high_risk_cohort) %>%
-  complete(start_date = seq.Date(min(start_date, na.rm = T), max(start_date, na.rm = T), by="day"))  %>%
+  complete(elig_start = seq.Date(min(elig_start, na.rm = T), max(elig_start, na.rm = T), by="day"))  %>%
   mutate(count = ifelse(is.na(n), 0, n),
          cum_count = cumsum(count),
          cum_count_redacted =  plyr::round_any(cum_count, 10)) %>%
@@ -163,13 +163,17 @@ plot_order <- rbind(plot_data_coverage, plot_data_coverage_groups) %>%
 coverage_plot_data <- rbind(plot_data_coverage, plot_data_coverage_groups) %>%
   mutate(high_risk_cohort = factor(high_risk_cohort, levels = plot_order$high_risk_cohort))
 
-write_csv(coverage_plot_data %>% select(start_date, cum_count_redacted, high_risk_cohort), fs::path(output_dir, "table_cum_eligiblity_redacted.csv"))
+write_csv(coverage_plot_data %>% select(elig_start, cum_count_redacted, high_risk_cohort), fs::path(output_dir, "table_cum_eligiblity_redacted.csv"))
 write_csv(coverage_plot_data, fs::path(output_dir2, "table_cum_eligiblity.csv"))
 
 print("coverage_plot_data saved")
 
-## Treatment (all)
+
+# Coverage of COVID-19 treatment ----
+
+## Cumulative total of treated patients
 plot_data_treatment <- data_processed_clean %>%
+  filter(!is.na(treatment_date)) %>%
   select(treatment_date)  %>%
   group_by(treatment_date) %>%
   tally() %>%
@@ -183,6 +187,7 @@ plot_data_treatment <- data_processed_clean %>%
   select(-n)
 
 plot_data_treatment_groups <- data_processed_clean %>%
+  filter(!is.na(treatment_date)) %>%
   select(treatment_date, downs_syndrome, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
          hiv_aids, solid_organ_transplant, rare_neurological_conditions)  %>%
   group_by(treatment_date) %>%
@@ -219,105 +224,144 @@ write_csv(treatment_plot_data, fs::path(output_dir2, "table_cum_treatment.csv"))
 
 print("treatment_plot_data saved")
 
-
-# Delivery ----
-
-## Eligible and treated plot
-plot_data_prop_treated <- data_processed_clean %>%
-  mutate(treatment_status = ifelse(is.na(treatment_date), "Untreated", "Treated")) %>%
-  select(start_date, treatment_status, treatment_type)  %>%
+## Cumulative total of treated types
+plot_data_treatment_type <- data_processed_clean %>%
+  filter(!is.na(treatment_date)) %>%
+  select(treatment_date, treatment_type)  %>%
   rbind(data_processed_clean %>%
-          mutate(treatment_status = ifelse(is.na(treatment_date), "Untreated", "Treated"),
-                 treatment_type = "any") %>%
-          select(start_date, treatment_status, treatment_type)) %>%
-  group_by(start_date, treatment_status, treatment_type) %>%
+          filter(!is.na(treatment_date)) %>%
+          select(treatment_date, treatment_type) %>%
+          mutate(treatment_type = "All")) %>%
+  group_by(treatment_date, treatment_type) %>%
   tally() %>%
-  ungroup() %>%
-  arrange(treatment_type, treatment_status, start_date) %>%
-  pivot_wider(
-    id_cols = c(start_date,treatment_type),
-    names_from = treatment_status,
-    values_from = n) %>%
-  arrange(start_date) %>%
-  group_by(treatment_type, week = cut(start_date -2 , "week")) %>% 
-  summarise(Treated = sum(Treated, na.rm = T),
-            Untreated = sum(Untreated, na.rm = T)) %>%
-  ungroup()
+  group_by(treatment_type) %>%
+  arrange(treatment_type, treatment_date) %>%
+  complete(treatment_date = seq.Date(min(treatment_date, na.rm = T), max(treatment_date, na.rm = T), by="day"))  %>%
+  mutate(count = ifelse(is.na(n), 0, n),
+         cum_count = cumsum(count),
+         cum_count_redacted =  plyr::round_any(cum_count, 10)) %>%
+  select(-n) %>%
+  arrange(treatment_type, treatment_date)
 
-untreated <- plot_data_prop_treated %>%
-  filter(!is.na(week), 
-         treatment_type == "any") %>%
-  select(week, Untreated)
+plot_order <- plot_data_treatment_type %>%
+  group_by(treatment_type) %>%
+  mutate(order = max(cum_count_redacted, na.rm = T)) %>%
+  arrange(desc(order)) %>%
+  filter(cum_count_redacted == order) %>%
+  select(treatment_type, order) %>%
+  distinct()
 
-plot_data_prop_treated <- plot_data_prop_treated %>%
-  select(-Untreated) %>%
-  left_join(untreated, by = "week") %>%
-  arrange(treatment_type, week) %>%
-  mutate(week = as.Date(week) - 2,
-         Treated = ifelse(is.na(Treated), 0, Treated),
-         Untreated = ifelse(is.na(Untreated), 0, Untreated),
-         Total = Treated + Untreated,
-         prop = Treated/Total,
-         prop_redacted = ifelse((Total < threshold | Treated < threshold | Untreated < threshold), NA, round(prop, digits = 2)),
-         high_risk_cohort = "All") %>%
-  filter(!is.na(treatment_type))
+treatment_plot_data <- plot_data_treatment_type %>%
+  mutate(treatment_type = factor(treatment_type, levels = plot_order$treatment_type))
 
-plot_data_prop_treated_groups <- data_processed_clean %>%
-  filter(!is.na(start_date)) %>%
-  mutate(treatment_status = ifelse(is.na(treatment_date), "Untreated", "Treated")) %>%
-  select(start_date, treatment_type, treatment_status, downs_syndrome, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
+write_csv(treatment_plot_data %>% select(treatment_date, cum_count_redacted, treatment_type), fs::path(output_dir, "table_cum_treatment_type_redacted.csv"))
+write_csv(treatment_plot_data, fs::path(output_dir2, "table_cum_treatment_type.csv"))
+
+print("treatment_type_plot_data saved")
+
+## Proportion treated
+plot_data_treated_groups <- data_processed_clean %>%
+  filter(!is.na(treatment_type)) %>%
+  mutate(week = cut(elig_start -2 , "week")) %>%
+  select(week, treatment_type, downs_syndrome, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
          hiv_aids, solid_organ_transplant, rare_neurological_conditions)  %>%
   rbind(data_processed_clean %>%
-          filter(!is.na(start_date)) %>%
-          mutate(treatment_status = ifelse(is.na(treatment_date), "Untreated", "Treated"),
-                 treatment_type = "any") %>%
-          select(start_date, treatment_type, treatment_status, downs_syndrome, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
+          filter(!is.na(treatment_type)) %>%
+          mutate(treatment_type = "All",
+                 week = cut(elig_start -2 , "week")) %>%
+          select(week, treatment_type, downs_syndrome, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
                  hiv_aids, solid_organ_transplant, rare_neurological_conditions)) %>%
-  group_by(start_date, treatment_type, treatment_status) %>%
+  group_by(treatment_type, week) %>%  
   summarise(
     across(.fns=sum, na.rm = T)
   ) %>%
   pivot_longer(
-    cols=c(downs_syndrome, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
-           hiv_aids, solid_organ_transplant, rare_neurological_conditions),
+    cols = c(downs_syndrome, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
+             hiv_aids, solid_organ_transplant, rare_neurological_conditions),
     names_to = "high_risk_cohort",
     values_to = "n"
   ) %>%
-  group_by(high_risk_cohort, treatment_type, treatment_status, start_date) %>%
+  group_by(high_risk_cohort, treatment_type, week) %>%
   summarise(n = sum(n, na.rm = T)) %>%
-  pivot_wider(
-    id_cols = c(high_risk_cohort, start_date,treatment_type),
-    names_from = treatment_status,
-    values_from = n) %>%
-  arrange(start_date) %>%
-  group_by(high_risk_cohort, treatment_type, week = cut(start_date -2 , "week")) %>% 
-  summarise(Treated = sum(Treated, na.rm = T),
-            Untreated = sum(Untreated, na.rm = T)) %>%
-  ungroup()
+  group_by(high_risk_cohort, treatment_type) %>%
+  mutate(count = ifelse(is.na(n), 0, n),
+         cum_count = cumsum(count),
+         cum_count_redacted =  plyr::round_any(cum_count, 10)) %>%
+  select(-n) %>%
+  arrange(high_risk_cohort, treatment_type, week)
 
-untreated <- plot_data_prop_treated_groups %>%
-  filter(!is.na(week), 
-         treatment_type == "any") %>%
-  select(week, Untreated, high_risk_cohort)
-
-plot_data_prop_treated_groups <- plot_data_prop_treated_groups %>%
-  select(-Untreated) %>%
-  left_join(untreated, by = c("week", "high_risk_cohort")) %>%
+plot_data_treated_all <- data_processed_clean %>%
+  filter(!is.na(treatment_type)) %>%
+  mutate(week = cut(elig_start -2 , "week")) %>%
+  select(week, treatment_type)  %>%
+  rbind(data_processed_clean %>%
+          filter(!is.na(treatment_type)) %>%
+          mutate(treatment_type = "All",
+                 week = cut(elig_start -2 , "week")) %>%
+          select(week, treatment_type)) %>%
+  group_by(treatment_type, week) %>%  
+  tally() %>%
+  mutate(count = ifelse(is.na(n), 0, n),
+         cum_count = cumsum(count),
+         cum_count_redacted =  plyr::round_any(cum_count, 10),
+         high_risk_cohort = "All") %>%
+  select(-n) %>%
   arrange(high_risk_cohort, treatment_type, week) %>%
+  rbind(plot_data_treated_groups)
+
+plot_data_groups <- data_processed_clean %>%
+  mutate(week = cut(elig_start -2 , "week")) %>%
+  select(week, downs_syndrome, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
+         hiv_aids, solid_organ_transplant, rare_neurological_conditions)  %>%
+  group_by(week) %>%  
+  summarise(
+    across(.fns=sum, na.rm = T)
+  ) %>%
+  pivot_longer(
+    cols = c(downs_syndrome, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
+             hiv_aids, solid_organ_transplant, rare_neurological_conditions),
+    names_to = "high_risk_cohort",
+    values_to = "n"
+  ) %>%
+  group_by(high_risk_cohort, week) %>%
+  summarise(n = sum(n, na.rm = T)) %>%
+  group_by(high_risk_cohort) %>%
+  mutate(count = ifelse(is.na(n), 0, n),
+         cum_count = cumsum(count),
+         cum_count_redacted =  plyr::round_any(cum_count, 10)) %>%
+  select(-n) %>%
+  arrange(high_risk_cohort, week)
+
+plot_data_all <- data_processed_clean %>%
+  mutate(week = cut(elig_start -2 , "week")) %>%
+  select(week)  %>%
+  rbind(data_processed_clean %>%
+          mutate(week = cut(elig_start -2 , "week")) %>%
+          select(week)) %>%
+  group_by(week) %>%  
+  tally() %>%
+  mutate(count = ifelse(is.na(n), 0, n),
+         cum_count = cumsum(count),
+         cum_count_redacted =  plyr::round_any(cum_count, 10),
+         high_risk_cohort = "All") %>%
+  select(-n) %>%
+  arrange(high_risk_cohort, week) %>%
+  rbind(plot_data_groups)
+
+print(head(plot_data_all))
+
+plot_data_prop_treated <- left_join(plot_data_treated_all, plot_data_all, 
+                                    by = c("high_risk_cohort", "week")) %>%
   mutate(week = as.Date(week) - 2,
-         Treated = ifelse(is.na(Treated), 0, Treated),
-         Untreated = ifelse(is.na(Untreated), 0, Untreated),
-         Total = Treated + Untreated,
+         Treated = ifelse(is.na(cum_count_redacted.x), 0, cum_count_redacted.x),
+         Total = ifelse(is.na(cum_count_redacted.y), 0, cum_count_redacted.y),
          prop = Treated/Total,
-         prop_redacted = ifelse((Total < threshold | Treated < threshold | Untreated < threshold), NA, round(prop, digits = 2))) %>%
-  filter(!is.na(treatment_type))
+         prop_redacted = ifelse((Total < threshold | Treated < threshold), NA, round(prop, digits = 2)))
 
-
-write_csv(rbind(plot_data_prop_treated, plot_data_prop_treated_groups) %>% 
-            select(start_date = week, prop_redacted, treatment_type, high_risk_cohort), 
+write_csv(plot_data_prop_treated %>% select(elig_start = week, prop_redacted, treatment_type, high_risk_cohort), 
           fs::path(output_dir, "table_prop_treated_redacted.csv"))
 
-write_csv(rbind(plot_data_prop_treated, plot_data_prop_treated_groups), fs::path(output_dir2, "table_prop_treated.csv"))
+write_csv(plot_data_prop_treated, fs::path(output_dir2, "table_prop_treated.csv"))
 
 print("prop_treated_data saved")
 
@@ -334,7 +378,7 @@ eligibility_table <- data_processed_clean %>%
     names_to = "high_risk_cohort",
     values_to = "Eligibile"
   ) %>%
-  add_row(high_risk_cohort = "All", Eligibile = (data_processed_clean %>% filter(!is.na(start_date)) %>% nrow())) %>%
+  add_row(high_risk_cohort = "All", Eligibile = (data_processed_clean %>% filter(!is.na(elig_start)) %>% nrow())) %>%
   arrange(desc(Eligibile))
 
 treatment_table <- data_processed_clean %>%
