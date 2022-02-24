@@ -63,32 +63,30 @@ end_date <- report_stats$study_end
 ```
 
 # Overview
-While vaccines remain the best strategy to prevent COVID-19, recent evidence suggests monoclonal antibodies (nMABs) or antivirals could potentially benefit certain vulnerable populations before or after exposure to SARS-CoV-2, such as the unvaccinated or recently vaccinated high-risk patients. 
+This OpenSAFELY report was rapidly developed to support monitoring the ongoing roll-out of neutralising monoclonal antibodies (nMABs) and antivirals for treatment of COVID-19, based on the population of 23.4m people registered with practices that use TPP SystmOne software. This report will be updated approximately weekly as new data arrives. 
 
-With the recent roll out of nMABs and antivirals, there is an urgent need to for knowledge and understanding around the use of nMABs and antivirals in the treatment of patients with COVID-19, such as factors of relevance in determining nMAB and antiviral treatment and the impact of nMAB and antiviral treatment in the community and hospital settings.
-
-This OpenSAFELY report..
-
-The code and data for this report can be found at the OpenSafely [antibody-and-antiviral-deployment repository](https://github.com/opensafely/antibody-and-antiviral-deployment).
+The code and data for this report can be found at the OpenSAFELY [antibody-and-antiviral-deployment repository](https://github.com/opensafely/antibody-and-antiviral-deployment). The accompanying manuscript will be available shortly on MedRXiV (link to follow) and submitted for peer review. 
 
 
 ##### Contents
 * [Introduction](#intro)
-* [Methods](#methods)
 * [Results](#results)
   + [Coverage of COVID-19 treatment](#coverage)
   + [Coverage of COVID-19 treatment by high risk cohorts](#hrc)
   + [Key demographic and clinical characteristics of treated patients](#demographic)
   + [Concordance with guidance](#concordance)
   + [Time to treatment](#time)
-
+* [Methods](#methods)
 
       
 # Introduction <a name="intro"></a>
-    
-    
-      
-# Methods <a name="methods"></a>
+While vaccines remain the best strategy to prevent COVID-19, recent evidence suggests neutralising monoclonal antibodies (nMABs) or antivirals could potentially benefit certain vulnerable populations before or after exposure to SARS-CoV-2, such as the unvaccinated or recently vaccinated high-risk patients. 
+
+With the recent roll-out of nMABs and antivirals, there is an urgent need to for knowledge and understanding around the use of these treatments in patients with COVID-19, such as factors of relevance in determining nMAB and antiviral treatment and the impact of nMAB and antiviral treatment in the community and hospital settings.
+
+Full methods in code form can be found in the accompanying [antibody-and-antiviral-deployment repository](https://github.com/opensafely/antibody-and-antiviral-deployment) and are also described in our paper, linked above. [Brief methods](#methods) can be found at the end of the this report.  
+
+
       
       
 # Results <a name="results"></a>
@@ -103,7 +101,7 @@ Between **`r format(report_stats$study_start, format = "%d-%b-%Y")`** and **`r f
 - Casirivimab: `r format(report_stats$treated_casirivimab, big.mark = ",", scientific = FALSE)`.
 
 $$\\[0.5cm]$$
-```{r, coverage plot, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '90%', fig.align = 'center', fig.cap = "Figure 1: Cumulative total of patients eligible for receiving an antiviral or nMABs for treating COVID-19 since 11th December 2021, stratified by high risk cohort. Patients are included as eligible on the date of thier positive SARS-CoV-2 test. Note, eligible patients can appear in more than one high risk group and the overall number (pre 10th February 2022) in each group is likely to be an overestimation due to including patients where their SARS-CoV-2 infection is confirmed by a lateral flow or polymerase chain reaction test."}
+```{r, coverage plot, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '90%', fig.align = 'center', fig.cap = "Figure 1: Cumulative total of patients eligible for receiving an antiviral or nMABs for treating COVID-19 since 11th December 2021, stratified by high risk cohort. Patients are included as eligible on the date of their positive SARS-CoV-2 test. Note, eligible patients can appear in more than one high risk group and the overall number (pre 10th February 2022) in each group is likely to be an overestimation due to including patients where their SARS-CoV-2 infection is confirmed by a lateral flow or polymerase chain reaction test."}
 
 coverage_plot_data <- read_csv(here::here(input_dir_os, "table_cum_eligiblity_redacted.csv")) %>%
   mutate(high_risk_cohort = case_when(
@@ -408,7 +406,7 @@ colnames(table_elig_treat_redacted) <- c("High risk cohort", "Count", "Count", "
                                          "Count (%)", "Count (%)")
 
 table_elig_treat_redacted %>%
-  kable(caption = "Table 1: Proportion of eligible patients who have recieved treatment for COVID-19 since 11th December 2021, broken down by high risk cohort and treatment type", 
+  kable(caption = "Table 1: Count and proportion of eligible patients who have received treatment for COVID-19 since 11th December 2021, broken down by high risk cohort and treatment type", 
         row.names = FALSE, 
         align = c("l", rep("c", 8)),
         booktabs=TRUE) %>%
@@ -476,7 +474,7 @@ table_demo_clinc_breakdown_redacted <- read_csv(fs::path(input_dir_os, "table_de
 colnames(table_demo_clinc_breakdown_redacted) <- c("Group", "Variable", "Count", "Count", "%",
                                                    "Count (%)", "Count (%)", "Count (%)", "Count (%)", "Count (%)")
 table_demo_clinc_breakdown_redacted %>%
-  kable(caption = "Table 2: Count and proportion of eligible patients who have received treatment for COVID-19, broken down by demographic and clinical categories and by and treatment type", 
+  kable(caption = "Table 2: Count and proportion of eligible patients who have received treatment for COVID-19, broken down by demographic and clinical categories and by treatment type", 
         row.names = FALSE, 
         align = c("l", rep("c", 9)),
         booktabs=TRUE) %>%
@@ -489,7 +487,7 @@ table_demo_clinc_breakdown_redacted %>%
 ```
 
 ## Concordance with guidance <a name="concordance"></a>
-Of the `r format(report_stats$treated_patients, format = "%d-%b-%Y")` patients who received treatment for COVID-19 between `r format(report_stats$study_start, format = "%d-%b-%Y")` and `r format(report_stats$study_end, format = "%d-%b-%Y")`,  `r format(as.numeric(flowchart_non_elig[1,2]), big.mark = ",", scientific = FALSE)` patients were missing records needed to confirm eligibility. It is likely that most, if not all, of these patients meet all of the eligibility criteria and non of the exclusion criteria but, for example, their SARS-CoV-2 test result was not available in their record or we just do not have access to all the criteria the clinician might use to assess high risk group status (such as the patients identified via non digital methods).
+Of the `r format(report_stats$treated_patients, format = "%d-%b-%Y")` patients who received treatment for COVID-19 between `r format(report_stats$study_start, format = "%d-%b-%Y")` and `r format(report_stats$study_end, format = "%d-%b-%Y")`,  `r format(as.numeric(flowchart_non_elig[1,2]), big.mark = ",", scientific = FALSE)` patients were missing records needed to confirm eligibility. It is likely that most, if not all, of these patients meet all of the eligibility criteria and none of the exclusion criteria but, for example, their SARS-CoV-2 test result was not available in their record or we just do not have access to all the criteria the clinician might use to assess high risk group status (such as the patients identified via non-digital methods).
 
 ```{r non_elig, echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=10, out.width = '80%', fig.align = 'center', fig.cap = "Figure 4: Breakdown of eligibility criteria variables in treated patients with missing records needed to confirm eligibility"}
 
@@ -635,5 +633,34 @@ time_groups %>%
 
 ```
 
+# Brief Methods <a name="methods"></a>
+
+Full methods in code form can be found in the accompanying [antibody-and-antiviral-deployment repository](https://github.com/opensafely/antibody-and-antiviral-deployment) and are also described in our paper, linked above. Brief methods are given below.  
+
+## Data sources
+All data were analysed securely through OpenSAFELY-TPP  [https://opensafely.org](https://opensafely.org). Contains the full pseudonymised primary care records for all patients currently registered with general practices using TPP SystmOne software (approximately 23.4 million, 40% of the English population). Data are linked with accident and emergency (A&E) attendance and in-patient records from NHS Digital; national coronavirus testing records from the Second Generation Surveillance System (SGSS); and the “COVID-19 therapeutics dataset”, a patient-level dataset on antiviral and nMAB treatments from NHS England, derived from software used to notify NHS England of COVID-19 treatments.  
+
+## Study population
+
+Base population:
+- Patients in OpenSAFELY-TPP registered with a general practice on 11th December 2021 (earliest possible date for eligibility for receiving antivirals/nMABS in outpatient settings).Patients with unknown date of birth excluded. 
+
+Eligible patients:
+- Eligibility and exclusion criteria were applied as per the Interim Clinical Commissioning Policy for non-hospitalised COVID-19 patients (NHSE, 28/01/2022): symptomatic SARS-CoV-2 infection not requiring hospitalisation or supplemental oxygen, in a ‘high risk’ cohort, no known hypersensitivity reaction to relevant active substances). 
+- To determine high risk status we applied the detailed codelists and logic from NHS Digital as far as possible.
+- We also included patients in the eligible population if they were in the Treated cohort below.
+
+Treated patients:
+- Treatments and the date they were given were identified in the COVID-19 therapeutics dataset, restricted to those treated in the community (“non_hospitalised”).
+- Patients issued more than one treatment within two weeks of one another, or with an implausible treatment date (e.g. far in the future) were excluded. 
+
+## Key demographic and clinical characteristics
+We classified patients by age group, sex, NHS region of their general practice and other key demographics including ethnicity (White, Black, Asian or Asian British, Mixed, Other, and Unknown), and Index of Multiple Deprivation (IMD, in quintiles, derived from patient postcode at lower super output area level). Individuals with missing sex, ethnicity, IMD or region were included as “Unknown”. Treated patients were also grouped by whether they had autism, dementia, learning disability, serious mental illness, were resident in a care home or housebound, and by vaccination status.
+
+## Concordance with guidance
+For patients who received treatment but who were not otherwise identified in the eligible population, we report which eligibility or exclusion criteria were not met (e.g. no positive SARS-CoV-2 test result). Where possible within available data, we also report other potential breaches in guidance for patients receiving treatment, such as not being treated within the prescribed timescale (see Table S2 in the supplementary material for implementation details). 
+
+## Codelists
+Detailed information on compilation and sources for every individual codelist are available at https://www.opencodelists.org/.
 
 
