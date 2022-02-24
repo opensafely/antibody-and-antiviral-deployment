@@ -430,7 +430,7 @@ table_demo_clinc_breakdown_redacted <- read_csv(fs::path(input_dir_os, "table_de
                                    "dementia_nhsd", "learning_disability_primis", "serious_mental_illness_nhsd", 
                                    "housebound_opensafely", "shielded_primis", "sickle_cell_disease_nhsd", "vaccination_status"),
                         labels = c("Age band", "Sex", "Ethnicity", "IMD", "Rurality", "Region", "Autism", "Care home", "Dementia",
-                                   "Learning disability ", "Serious mental illness", "Sickle cell disease", "Housebound", "CEV",
+                                   "Learning disability ", "Serious mental illness", "Housebound", "CEV", "Sickle cell disease",
                                    "Vaccination status")),
          Variable = factor(Variable, 
                            levels = c("12-29", "30-39", "40-49", "50-59", "60-69", "70-79", "80+", 
@@ -455,7 +455,7 @@ table_demo_clinc_breakdown_redacted <- read_csv(fs::path(input_dir_os, "table_de
                                                 "East Midlands", "East of England", "London", "North East", "North West", "South East",
                                                 "South West", "West Midlands", "Yorkshire and the Humber",
                                                 "Autism", "Care home", "Dementia", "Learning disability ", "Serious mental illness",
-                                                "Sickle cell disease", "Housebound", "CEV",
+                                                "Housebound", "CEV", "Sickle cell disease",
                                                 "Un-vaccinated (declined)", "Un-vaccinated" , "One vaccination", "Two vaccinations", 
                                                 "Three or more vaccinations", "Unknown"))) %>%
   arrange(Group, Variable) %>%

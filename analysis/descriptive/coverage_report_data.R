@@ -511,9 +511,9 @@ non_elig_treated <-  data_processed_clean %>%
   mutate(
     patient_id,
     no_positive_covid_test = (covid_test_positive != 1),
-    no_symptomatic_covid_test = (symptomatic_covid_test == "Y"),
+    no_symptomatic_covid_test = (symptomatic_covid_test != "Y"),
     positive_covid_test_previous_30_days = (covid_positive_previous_30_days == 1),
-    no_high_risk_group_nhsd = (high_risk_group_nhsd_combined == ""),
+    no_high_risk_group_nhsd = is.na(high_risk_group_nhsd_combined),
     no_high_risk_group_match =  (match == TRUE),
     primary_covid_hospital_admission_last_30_days = (!is.na(primary_covid_hospital_discharge_date) | 
                                                   primary_covid_hospital_discharge_date > (treatment_date - 30) & 
