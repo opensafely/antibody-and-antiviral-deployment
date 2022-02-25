@@ -400,6 +400,7 @@ data_processed_eligible <- data_processed %>%
 cat("#### eligible patients ####\n")
 print(dim(data_processed_eligible))
 print(table(data_processed_eligible$match))
+print(table(data_processed_eligible$symptomatic_covid_test))
 
 ## Include treated patients not flagged as eligible
 data_processed_treated <- data_processed %>%
