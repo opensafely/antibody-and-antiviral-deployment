@@ -403,20 +403,16 @@ print(dim(data_processed_eligible))
 print(table(data_processed_eligible$match))
 print(table(data_processed_eligible$symptomatic_covid_test))
 
-## Include treated patients not flagged as eligible
+## Include registered treated patients not flagged as eligible
 data_processed_treated <- data_processed %>%
   filter(
     # Treated but non-eligible patients
     !is.na(treatment_date),
     !(patient_id %in% unique(data_processed_eligible$patient_id)),
-    
-    # Sensible treatment date
-    (treatment_date >= covid_test_positive_date + 21 | treatment_date < max(data_processed$elig_start, na.rm = T) + 14) &
-      treatment_date <= Sys.Date()
+
   ) %>%
   mutate(elig_start = coalesce(elig_start, treatment_date),
          eligibility_status = "Treated")
-
 
 cat("#### treated patients ####\n")
 print(dim(data_processed_treated))
@@ -437,7 +433,7 @@ print(table(data_processed_combined$eligibility_status, data_processed_combined$
 
 ## Exclude patients issued more than one treatment within two weeks
 dup_ids <- data_processed_combined %>%
-  select(patient_id, treatment_date, paxlovid_covid_therapeutics, sotrovimab_covid_therapeutics, remdesivir_covid_therapeutics,
+  select(patient_id, treatment_date, covid_test_positive_date, paxlovid_covid_therapeutics, sotrovimab_covid_therapeutics, remdesivir_covid_therapeutics,
          molnupiravir_covid_therapeutics, casirivimab_covid_therapeutics) %>%
   filter(!is.na(treatment_date)) %>%
   mutate(pax_sot_diff = as.numeric(paxlovid_covid_therapeutics - sotrovimab_covid_therapeutics),
@@ -459,10 +455,20 @@ dup_ids <- data_processed_combined %>%
   arrange(patient_id)
 
 cat("#### patients with more than one treatment ####\n")
-print(dim(dup_ids))
+print(length(unique(dup_ids$patient_id)))
 
+## Exclude patients with implausible treatment date
+date_ids <- data_processed_combined %>%
+  select(patient_id, treatment_date, covid_test_positive_date) %>%
+  filter((treatment_date >= covid_test_positive_date + 21 | treatment_date >= Sys.Date()))
+
+cat("#### patients with implausible treatment date ####\n")
+print(length(unique(date_ids$patient_id)))
+
+## Clean data
 data_processed_clean <- data_processed_combined %>%
-  subset(!(patient_id %in% unique(dup_ids$patient_id))) %>%
+  subset(!(patient_id %in% unique(dup_ids$patient_id)),
+         !(patient_id %in% unique(date_ids$patient_id))) %>%
   select(
     
     # ID
@@ -496,11 +502,14 @@ data_processed_clean <- data_processed_combined %>%
     covid_positive_test_30_days_post_elig_or_treat, covid_hospitalisation_outcome_date, covid_hospitalisation_critical_care, 
     covid_death, any_death)
 
+cat("#### patients excluded ####\n")
+print(dim(data_processed_combined)[1] - dim(data_processed_clean)[1])
 
 rm(data_processed_combined)
 
+
 cat("#### treated patients symptomatic test ####\n")
-print(table(subset(data_processed_clean, !is.na(treatement_date))$symptomatic_covid_test))
+print(table(subset(data_processed_clean, !is.na(treatment_date))$symptomatic_covid_test))
 
 
 # Save dataset(s) ----
