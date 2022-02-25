@@ -13,7 +13,7 @@
 #         /output/reports/coverage/figures/figure_cum_eligiblity_plot.png
 #
 # Author(s): M Green
-# Date last updated: 23/02/2022
+# Date last updated: 25/02/2022
 #
 ################################################################################
 
@@ -513,7 +513,7 @@ non_elig_treated <-  data_processed_clean %>%
     no_symptomatic_covid_test = (symptomatic_covid_test != "Y"),
     positive_covid_test_previous_30_days = (covid_positive_previous_30_days == 1),
     no_high_risk_group_nhsd = is.na(high_risk_group_nhsd_combined),
-    no_high_risk_group_match =  (match == TRUE),
+    no_high_risk_group_match =  (match != TRUE),
     primary_covid_hospital_admission_last_30_days = (!is.na(primary_covid_hospital_discharge_date) | 
                                                   primary_covid_hospital_discharge_date > (treatment_date - 30) & 
                                                   primary_covid_hospital_discharge_date < (treatment_date)),

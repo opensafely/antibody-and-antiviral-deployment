@@ -286,7 +286,7 @@ data_processed <- data_extract %>%
   rowwise() %>%
   mutate(high_risk_group_combined = as.character(paste(unique(unlist(strsplit(high_risk_group_combined, ","))), collapse = ",")),
          high_risk_group_combined = ifelse(high_risk_group_combined == "", NA, high_risk_group_combined),
-         high_risk_group_combined_count = ifelse(high_risk_group_combined != "" | high_risk_group_combined != "NA", 
+         high_risk_group_combined_count = ifelse(high_risk_group_combined != "" | high_risk_group_combined != "NA" | !is.na(high_risk_group_combined), 
                                                  str_count(high_risk_group_combined,",") + 1, NA)) %>%
   ungroup() %>%
   mutate(
