@@ -513,7 +513,7 @@ non_elig_treated <-  data_processed_clean %>%
     no_symptomatic_covid_test = (symptomatic_covid_test != "Y"),
     positive_covid_test_previous_30_days = (covid_positive_previous_30_days == 1),
     no_high_risk_group_nhsd = is.na(high_risk_group_nhsd_combined),
-    no_high_risk_group_match =  (match != TRUE),
+    no_high_risk_group_match =  is.na(match),
     primary_covid_hospital_admission_last_30_days = (!is.na(primary_covid_hospital_discharge_date) | 
                                                   primary_covid_hospital_discharge_date > (treatment_date - 30) & 
                                                   primary_covid_hospital_discharge_date < (treatment_date)),
@@ -608,7 +608,7 @@ print(table(data_processed_clean$match))
 
 high_risk_cohort_comparison_redacted <- data_processed_clean %>%
   filter(!is.na(treatment_date)) %>%
-  filter(match == FALSE) %>%
+  filter(is.na(match)) %>%
   select(high_risk_group_nhsd_combined, high_risk_cohort_covid_therapeutics) %>%
   group_by(high_risk_group_nhsd_combined, high_risk_cohort_covid_therapeutics) %>%
   tally() %>%

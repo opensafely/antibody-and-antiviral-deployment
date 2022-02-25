@@ -274,8 +274,8 @@ data_processed <- data_extract %>%
                       immunosupression_nhsd == 1 & immunosupression_therapeutics == 1 |
                       hiv_aids_nhsd == 1 & hiv_aids_therapeutics == 1 |
                       solid_organ_transplant_nhsd == 1 & solid_organ_transplant_therapeutics == 1 |
-                      rare_neurological_conditions_nhsd == 1 & rare_neurological_conditions_therapeutics == 1, TRUE, FALSE),
-    
+                      rare_neurological_conditions_nhsd == 1 & rare_neurological_conditions_therapeutics == 1, 1, NA),
+
     ## Parse NAs
     high_risk_group_nhsd_combined = ifelse(high_risk_group_nhsd_combined == "", NA, high_risk_group_nhsd_combined),
     high_risk_cohort_covid_therapeutics = ifelse(high_risk_cohort_covid_therapeutics == "", NA, high_risk_cohort_covid_therapeutics)
