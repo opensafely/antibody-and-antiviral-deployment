@@ -291,6 +291,7 @@ include_graphics(fs::path(output_dir_rmd, "figures", "figure_cum_treatment_thera
 
 $$\\[0.5cm]$$
 ```{r, prop treatment plot, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '100%', fig.align = 'center', fig.cap = "Figure 4: Weekly proportion of eligible patients receiving an antiviral or nMAB for treating COVID-19 since 11th December 2021, stratified by high risk cohort"}
+
 weekly_treatment_proportion <- read_csv(here::here(input_dir_os, "table_prop_treated_redacted.csv")) %>%
   filter(!is.na(prop_redacted),
          treatment_type == "All") %>%
@@ -379,42 +380,88 @@ table_elig_treat_redacted <- read_csv(fs::path(input_dir_os, "table_elig_treat_r
     high_risk_cohort == "hiv_aids" ~ "Immuosupression due to HIV or AIDS (CD4 <350 cells/mm3)", 
     high_risk_cohort == "solid_organ_transplant" ~ "Solid organ transplant recipients",
     high_risk_cohort == "rare_neurological_conditions" ~ "Rare neurological conditions",
-    TRUE ~ NA_character_))
+    TRUE ~ NA_character_)) %>%
+  mutate(order = Treated/Eligibile,
+        order = ifelse(high_risk_cohort == "All", 1, order)) %>%
+  arrange(desc(order)) %>%
+  select(-order)
 
 table_elig_treat_redacted <- table_elig_treat_redacted %>%
-  mutate(`Number of treated patients, %` = round(Treated/Eligibile*100, digits = 0),
-         `Paxlovid, n (%)` = paste(Paxlovid, " (", round(Paxlovid/Treated*100, digits = 0), ")", sep = ""),
-         `Remdesivir, n (%)` = paste(Remdesivir, " (", round(Remdesivir/Treated*100, digits = 0), ")", sep = ""),
-         `Casirivimab, n (%)` = paste(Casirivimab, " (", round(Casirivimab/Treated*100, digits = 0), ")", sep = ""),
-         `Molnupiravir, n (%)` = paste(Molnupiravir, " (", round(Molnupiravir/Treated*100, digits = 0), ")", sep = ""),
-         `Sotrovimab, n (%)` = paste(Sotrovimab, " (", round(Sotrovimab/Treated*100, digits = 0), ")", sep = "")) %>%
-  select(`High risk cohort` = high_risk_cohort,
-         n =  Eligibile,
-         `All, n` = Treated,
-         `All, %` = `Number of treated patients, %`,
-         `Paxlovid, n (%)`,
-         `Sotrovimab, n (%)`,
-         `Remdesivir, n (%)`,
-          `Molnupiravir, n (%)`,
-          `Casirivimab, n (%)`
-          ) %>%  
-  mutate(`Casirivimab, n (%)` = ifelse(`Casirivimab, n (%)` == "NA (NA)", "<5", `Casirivimab, n (%)`),
-         `Paxlovid, n (%)` = ifelse(`Paxlovid, n (%)` == "NA (NA)", "<5", `Paxlovid, n (%)`),
-         `Remdesivir, n (%)` = ifelse(`Remdesivir, n (%)` == "NA (NA)", "<5", `Remdesivir, n (%)`))
-
-colnames(table_elig_treat_redacted) <- c("High risk cohort", "Count", "Count", "%", "Count (%)", "Count (%)", "Count (%)", 
-                                         "Count (%)", "Count (%)")
+  mutate(Treated_perc = paste(round(Treated/Eligibile*100, digits = 0), " (",
+                              round((Treated/Eligibile - 1.96*sqrt((Treated/Eligibile)*(1-Treated/Eligibile)/Eligibile))*100, digits = 0),
+                              "-",
+                              round((Treated/Eligibile + 1.96*sqrt((Treated/Eligibile)*(1-Treated/Eligibile)/Eligibile))*100, digits = 0), 
+                              ")",
+                              sep = ""),
+         Paxlovid_perc = paste(round(Paxlovid/Treated*100, digits = 0), " (",
+                              round((Paxlovid/Treated - 1.96*sqrt((Paxlovid/Treated)*(1-Paxlovid/Treated)/Treated))*100, digits = 0),
+                              "-",
+                              round((Paxlovid/Treated + 1.96*sqrt((Paxlovid/Treated)*(1-Paxlovid/Treated)/Treated))*100, digits = 0), 
+                              ")",
+                              sep = ""),
+         Sotrovimab_perc = paste(round(Sotrovimab/Treated*100, digits = 0), " (",
+                              round((Sotrovimab/Treated - 1.96*sqrt((Sotrovimab/Treated)*(1-Sotrovimab/Treated)/Treated))*100, 
+                                    digits = 0),
+                              "-",
+                              round((Sotrovimab/Treated + 1.96*sqrt((Sotrovimab/Treated)*(1-Sotrovimab/Treated)/Treated))*100, 
+                                    digits = 0), 
+                              ")",
+                              sep = ""),
+         Remdesivir_perc = paste(round(Remdesivir/Treated*100, digits = 0), " (",
+                              round((Remdesivir/Treated - 1.96*sqrt((Remdesivir/Treated)*(1-Remdesivir/Treated)/Treated))*100, 
+                                    digits = 0),
+                              "-",
+                              round((Remdesivir/Treated + 1.96*sqrt((Remdesivir/Treated)*(1-Remdesivir/Treated)/Treated))*100, 
+                                    digits = 0), 
+                              ")",
+                              sep = ""),
+         Molnupiravir_perc = paste(round(Molnupiravir/Treated*100, digits = 0), " (",
+                              round((Molnupiravir/Treated - 1.96*sqrt((Molnupiravir/Treated)*(1-Molnupiravir/Treated)/Treated))*100,
+                                    digits = 0),
+                              "-",
+                              round((Molnupiravir/Treated + 1.96*sqrt((Molnupiravir/Treated)*(1-Molnupiravir/Treated)/Treated))*100, 
+                                    digits = 0), 
+                              ")",
+                              sep = ""),
+         Casirivimab_perc = paste(round(Casirivimab/Treated*100, digits = 0), " (",
+                              round((Casirivimab/Treated - 1.96*sqrt((Casirivimab/Treated)*(1-Casirivimab/Treated)/Treated))*100, 
+                                    digits = 0),
+                              "-",
+                              round((Casirivimab/Treated + 1.96*sqrt((Casirivimab/Treated)*(1-Casirivimab/Treated)/Treated))*100, 
+                                    digits = 0), 
+                              ")",
+                              sep = "")) %>%
+  select(high_risk_cohort, Eligibile, Treated, Treated_perc, Paxlovid, Paxlovid_perc, Sotrovimab, Sotrovimab_perc, Remdesivir, 
+         Remdesivir_perc, Molnupiravir, Molnupiravir_perc, Casirivimab, Casirivimab_perc) %>%  
+  mutate(Paxlovid = ifelse(is.na(Paxlovid), "<5", Paxlovid),
+         Paxlovid_perc = ifelse(Paxlovid_perc == "NA (NA-NA)", "--", Paxlovid_perc),
+         Remdesivir = ifelse(is.na(Remdesivir), "<5", Remdesivir),
+         Remdesivir_perc = ifelse(Remdesivir_perc == "NA (NA-NA)", "--", Remdesivir_perc),
+         Casirivimab = ifelse(is.na(Casirivimab), "<5", Casirivimab),
+         Casirivimab_perc = ifelse(Casirivimab_perc == "NA (NA-NA)", "--", Casirivimab_perc))
+         
+colnames(table_elig_treat_redacted) <- c("High risk cohort", "Count", "Count", "%", "Count", "%", 
+                                         "Count", "%", "Count", "%", "Count", "%", 
+                                         "Count", "%")
 
 table_elig_treat_redacted %>%
   kable(caption = "Table 1: Count and proportion of eligible patients who have received treatment for COVID-19 since 11th December 2021, broken down by high risk cohort and treatment type", 
         row.names = FALSE, 
-        align = c("l", rep("c", 8)),
+        align = c("l", rep("c", 13)),
         booktabs=TRUE) %>%
-  kable_styling(position = "center", full_width = F, bootstrap_options = "striped")  %>%
+  kable_styling(position = "center", full_width = T, bootstrap_options = "striped", font_size = 13)  %>%
+  #row_spec(1, bold = T) %>%
+  column_spec(1, bold = T, width = "10em") %>%
+  column_spec(2, width = "5em") %>%
   column_spec(4, background = "lightgrey")  %>%
-  add_header_above(., c(" ", "Eligible", "All" = 2, "Paxlovid  " = 1, "Sotrovimab" = 1, "Remdesivir" = 1,
-                        "Molnupiravir" = 1, "Casirivimab" = 1)) %>%
-  add_header_above(., c(" ", "", "Treated" = 7))
+  add_header_above(., c(" ", "Eligible", "All" = 2, "Paxlovid  " = 2, "Sotrovimab" = 2, "Remdesivir" = 2,
+                        "Molnupiravir" = 2, "Casirivimab" = 2)) %>%
+  add_header_above(., c(" ", "", "Treated" = 12)) %>%
+  add_footnote(c("High risk cohorts are arranged in descending order, according to percentage treated",
+                 "All percentages (%) are caluclated with 95% confidence intervals"), 
+               notation = "symbol")
+
+write_csv(table_elig_treat_redacted, here::here(output_dir_rmd, "tables", "table_prop_eligible_high_risk_cohort.csv"))
 
 ```
 
@@ -432,57 +479,113 @@ table_demo_clinc_breakdown_redacted <- read_csv(fs::path(input_dir_os, "table_de
                                    "Vaccination status")),
          Variable = factor(Variable, 
                            levels = c("12-29", "30-39", "40-49", "50-59", "60-69", "70-79", "80+", 
-                                                "Female", "Male" ,
-                                                "White", "Asian or Asian British", "Black or Black British", "Mixed", "Other ethnic groups",
-                                                "1 most deprived", "2", "3", "4", "5 least deprived",
-                                                "Urban - conurbation" , "Urban - city and town", "Rural - town and fringe", 
-                                                "Rural - village and dispersed",
-                                                "East Midlands", "East of England", "London", "North East", "North West", "South East",
-                                                "South West", "West Midlands", "Yorkshire and the Humber",
-                                                "autism_nhsd", "care_home_primis",
-                                                "dementia_nhsd", "learning_disability_primis", "serious_mental_illness_nhsd", 
-                                                "housebound_opensafely", "shielded_primis", "sickle_cell_disease_nhsd",
-                                                "Un-vaccinated (declined)", "Un-vaccinated" , "One vaccination", "Two vaccinations", 
-                                                "Three or more vaccinations", "Unknown"),
+                                      "Female", "Male" ,
+                                      "White", "Asian or Asian British", "Black or Black British", "Mixed", "Other ethnic groups",
+                                      "1 most deprived", "2", "3", "4", "5 least deprived",
+                                      "Urban - conurbation" , "Urban - city and town", "Rural - town and fringe", 
+                                      "Rural - village and dispersed",
+                                      "East Midlands", "East of England", "London", "North East", "North West", "South East",
+                                      "South West", "West Midlands", "Yorkshire and the Humber",
+                                      "autism_nhsd", "care_home_primis",
+                                      "dementia_nhsd", "learning_disability_primis", "serious_mental_illness_nhsd", 
+                                      "housebound_opensafely", "shielded_primis", "sickle_cell_disease_nhsd",
+                                      "Un-vaccinated (declined)", "Un-vaccinated" , "One vaccination", "Two vaccinations", 
+                                      "Three or more vaccinations", "Unknown"),
                            labels = c("12-29", "30-39", "40-49", "50-59", "60-69", "70-79", "80+", 
-                                                "Female", "Male" ,
-                                                "White", "Asian or Asian British", "Black or Black British", "Mixed", "Other ethnic groups",
-                                                "1 most deprived", "2", "3", "4", "5 least deprived",
-                                                "Urban - conurbation" , "Urban - city and town", "Rural - town and fringe", 
-                                                "Rural - village and dispersed",
-                                                "East Midlands", "East of England", "London", "North East", "North West", "South East",
-                                                "South West", "West Midlands", "Yorkshire and the Humber",
-                                                "Autism", "Care home", "Dementia", "Learning disability ", "Serious mental illness",
-                                                "Housebound", "CEV", "Sickle cell disease",
-                                                "Un-vaccinated (declined)", "Un-vaccinated" , "One vaccination", "Two vaccinations", 
-                                                "Three or more vaccinations", "Unknown"))) %>%
+                                      "Female", "Male" ,
+                                      "White", "Asian or Asian British", "Black or Black British", "Mixed", "Other ethnic groups",
+                                      "1 most deprived", "2", "3", "4", "5 least deprived",
+                                      "Urban - conurbation" , "Urban - city and town", "Rural - town and fringe", 
+                                      "Rural - village and dispersed",
+                                      "East Midlands", "East of England", "London", "North East", "North West", "South East",
+                                      "South West", "West Midlands", "Yorkshire and the Humber",
+                                      "Autism", "Care home", "Dementia", "Learning disability ", "Serious mental illness",
+                                      "Housebound", "CEV", "Sickle cell disease",
+                                      "Un-vaccinated (declined)", "Un-vaccinated" , "One vaccination", "Two vaccinations", 
+                                      "Three or more vaccinations", "Unknown")))  %>%
   arrange(Group, Variable) %>%
   filter(!is.na(Variable)) %>%
-  mutate(Treated_perc = round(Treated/All*100, digits = 0),
-         Paxlovid = paste(Paxlovid, " (", round(Paxlovid/Treated*100, digits = 0), ")", sep = ""),
-         Sotrovimab = paste(Sotrovimab, " (", round(Sotrovimab/Treated*100, digits = 0), ")", sep = ""),
-         Remdesivir = paste(Remedesivir, " (", round(Remedesivir/Treated*100, digits = 0), ")", sep = ""),
-         Molnupiravir = paste(Molnupiravir, " (", round(Molnupiravir/Treated*100, digits = 0), ")", sep = ""),
-         Casirivimab = paste(Casirivimab, " (", round(Casirivimab/Treated*100, digits = 0), ")", sep = "")) %>%
-  select(Group, Variable, All, Treated, Treated_perc, Paxlovid, Sotrovimab, Remdesivir, Molnupiravir, Casirivimab) %>%  
-  mutate(Casirivimab = ifelse(Casirivimab == "NA (NA)", "<5", Casirivimab),
-         Paxlovid = ifelse(Paxlovid == "NA (NA)", "<5", Paxlovid),
-         Remdesivir = ifelse(Remdesivir == "NA (NA)", "<5", Remdesivir),
-         Sotrovimab = ifelse(Sotrovimab == "NA (NA)", "<5", Sotrovimab),
-         Molnupiravir = ifelse(Molnupiravir == "NA (NA)", "<5", Molnupiravir))
+  rename(Eligibile = "All",  Remdesivir = "Remedesivir") %>%
+  mutate(Treated_perc = paste(round(Treated/Eligibile*100, digits = 0), " (",
+                              round((Treated/Eligibile - 1.96*sqrt((Treated/Eligibile)*(1-Treated/Eligibile)/Eligibile))*100, digits = 0),
+                              "-",
+                              round((Treated/Eligibile + 1.96*sqrt((Treated/Eligibile)*(1-Treated/Eligibile)/Eligibile))*100, digits = 0), 
+                              ")",
+                              sep = ""),
+         Paxlovid_perc = paste(round(Paxlovid/Treated*100, digits = 0), " (",
+                               round((Paxlovid/Treated - 1.96*sqrt((Paxlovid/Treated)*(1-Paxlovid/Treated)/Treated))*100, digits = 0),
+                               "-",
+                               round((Paxlovid/Treated + 1.96*sqrt((Paxlovid/Treated)*(1-Paxlovid/Treated)/Treated))*100, digits = 0),
+                               ")",
+                               sep = ""),
+         Sotrovimab_perc = paste(round(Sotrovimab/Treated*100, digits = 0), " (",
+                                 round((Sotrovimab/Treated - 1.96*sqrt((Sotrovimab/Treated)*(1-Sotrovimab/Treated)/Treated))*100, 
+                                       digits = 0),
+                                 "-",
+                                 round((Sotrovimab/Treated + 1.96*sqrt((Sotrovimab/Treated)*(1-Sotrovimab/Treated)/Treated))*100, 
+                                       digits = 0), 
+                                 ")",
+                                 sep = ""),
+         Remdesivir_perc = paste(round(Remdesivir/Treated*100, digits = 0), " (",
+                                 round((Remdesivir/Treated - 1.96*sqrt((Remdesivir/Treated)*(1-Remdesivir/Treated)/Treated))*100, 
+                                       digits = 0),
+                                 "-",
+                                 round((Remdesivir/Treated + 1.96*sqrt((Remdesivir/Treated)*(1-Remdesivir/Treated)/Treated))*100, 
+                                       digits = 0), 
+                                 ")",
+                                 sep = ""),
+         Molnupiravir_perc = paste(round(Molnupiravir/Treated*100, digits = 0), " (",
+                                   round((Molnupiravir/Treated-1.96*sqrt((Molnupiravir/Treated)*(1-Molnupiravir/Treated)/Treated))*100,
+                                         digits = 0),
+                                   "-",
+                                   round((Molnupiravir/Treated + 1.96*sqrt((Molnupiravir/Treated)*(1-Molnupiravir/Treated)/Treated))*100,
+                                         digits = 0), 
+                                   ")",
+                                   sep = ""),
+         Casirivimab_perc = paste(round(Casirivimab/Treated*100, digits = 0), " (",
+                                  round((Casirivimab/Treated - 1.96*sqrt((Casirivimab/Treated)*(1-Casirivimab/Treated)/Treated))*100, 
+                                        digits = 0),
+                                  "-",
+                                  round((Casirivimab/Treated + 1.96*sqrt((Casirivimab/Treated)*(1-Casirivimab/Treated)/Treated))*100, 
+                                        digits = 0), 
+                                  ")",
+                                  sep = "")) %>%
+  select(Group, Variable, Eligibile, Treated, Treated_perc, Paxlovid, Paxlovid_perc, Sotrovimab, Sotrovimab_perc, Remdesivir, 
+         Remdesivir_perc, Molnupiravir, Molnupiravir_perc, Casirivimab, Casirivimab_perc) %>%  
+  mutate(Eligibile = ifelse(is.na(Eligibile), "<5", Eligibile),
+         Treated = ifelse(is.na(Treated), "<5", Treated),
+         Treated_perc = ifelse(Treated_perc == "NA (NA-NA)", "--", Treated_perc),
+         Paxlovid = ifelse(is.na(Paxlovid), "<5", Paxlovid),
+         Paxlovid_perc = ifelse(Paxlovid_perc == "NA (NA-NA)", "--", Paxlovid_perc),
+         Sotrovimab = ifelse(is.na(Sotrovimab), "<5", Sotrovimab),
+         Sotrovimab_perc = ifelse(Sotrovimab_perc == "NA (NA-NA)", "--", Sotrovimab_perc),
+         Remdesivir = ifelse(is.na(Remdesivir), "<5", Remdesivir),
+         Remdesivir_perc = ifelse(Remdesivir_perc == "NA (NA-NA)", "--", Remdesivir_perc),
+         Molnupiravir = ifelse(is.na(Molnupiravir), "<5", Molnupiravir),
+         Molnupiravir_perc = ifelse(Molnupiravir_perc == "NA (NA-NA)", "--", Molnupiravir_perc),
+         Casirivimab = ifelse(is.na(Casirivimab), "<5", Casirivimab),
+         Casirivimab_perc = ifelse(Casirivimab_perc == "NA (NA-NA)", "--", Casirivimab_perc))
 
-colnames(table_demo_clinc_breakdown_redacted) <- c("Group", "Variable", "Count", "Count", "%",
-                                                   "Count (%)", "Count (%)", "Count (%)", "Count (%)", "Count (%)")
+colnames(table_demo_clinc_breakdown_redacted) <- c("Group", "Variable", "Count", "Count", "%", "Count", "%", 
+                                                   "Count", "%", "Count", "%", "Count", "%", 
+                                                   "Count", "%")
 table_demo_clinc_breakdown_redacted %>%
   kable(caption = "Table 2: Count and proportion of eligible patients who have received treatment for COVID-19, broken down by demographic and clinical categories and by treatment type", 
         row.names = FALSE, 
-        align = c("l", rep("c", 9)),
+        align = c("l", "l", rep("c", 11)),
         booktabs=TRUE) %>%
-  kable_styling(position = "center", full_width = F, bootstrap_options = "striped")  %>%
+  kable_styling(position = "center", full_width = T, bootstrap_options = "striped", font_size = 13)  %>%
+  column_spec(1, bold = T, width = "2em") %>%
+  column_spec(2, bold = T, width = "2em") %>%
   column_spec(5, background = "lightgrey") %>%
-  add_header_above(., c(" ", "", "Eligible", "All" = 2, "Paxlovid" = 1, "Sotrovimab" = 1, "Remdesivir" = 1,
-                        "Molnupiravir" = 1, "Casirivimab" = 1)) %>%
-  add_header_above(., c(" ", "", "", "Treated" = 7))
+  add_header_above(., c(" ", "", "Eligible", "All" = 2, "Paxlovid" = 2, "Sotrovimab" = 2, "Remdesivir" = 2,
+                        "Molnupiravir" = 2, "Casirivimab" = 2)) %>%
+  add_header_above(., c(" ", "", "", "Treated" = 12)) %>%
+  add_footnote(c("All percentages (%) are caluclated with 95% confidence intervals"), 
+               notation = "symbol")
+
+write_csv(table_demo_clinc_breakdown_redacted, here::here(output_dir_rmd, "tables", "table_prop_eligible_clinc_demo.csv"))
+
 
 ```
 
@@ -491,31 +594,35 @@ Of the `r format(report_stats$treated_patients, format = "%d-%b-%Y")` patients w
 
 ```{r non_elig, echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=10, out.width = '80%', fig.align = 'center', fig.cap = "Figure 4: Breakdown of eligibility criteria variables in treated patients with missing records needed to confirm eligibility"}
 
-flowchart_non_elig_plot <- flowchart_non_elig[-1,] %>%
-mutate(criteria2 = c("No positive SARS-CoV-2 test record", 
-                     "Non symptomatic positive SARS-CoV-2 test record",
-                     "Positive SARS-CoV-2 test record in previous 30 days",
-                     "No high risk cohort identified within records",                      
-                     "High risk cohort identified within records does not match high risk cohort associated with treatment",
-                     "Required hospitalisation within 30 days prior to treatment with COVID-19 recorded as the primary diagnosis",
-                     "Required hospitalisation within 30 days prior to treatment with any diagnosis",
-                     "Treated with paxlovid 5 days pre/post positive SARS-CoV-2 test",           
-                     "Treated with paxlovid and in renal or liver high risk cohort",
-                     "Treated with paxlovid aged under 18",                       
-                     "Treated with paxlovid and pregnant",
-                     "Treated with sotrovimab 5 days pre/post positive SARS-CoV-2 test",
-                     "Treated with sotrovimab aged under 12",  
-                     "Treated with sotrovimab weight under 40kg", 
-                     "Treated with remdesivir 7 days pre/post positive SARS-CoV-2 test",
-                     "Treated with remdesivir aged under 12",  
-                     "Treated with remdesivir weight under 40kg", 
-                     "Treated with molnupiravir 7 days pre/post positive SARS-CoV-2 test",
-                     "Treated with molnupiravir and pregnant")) %>%
-  filter(!is.na(n)) %>%
-  filter(criteria != "c_no_high_risk_group_nhsd",
-         criteria != "c_no_high_risk_group_match") %>%
+flowchart_non_elig_plot <- flowchart_non_elig[-c(1,8),] %>%
+  mutate(criteria2 = c("No positive SARS-CoV-2 test record", 
+                       "Positive SARS-CoV-2 test record in previous 30 days",
+                       "No high risk cohort identified within records",                      
+                       "High risk cohort identified within records does not match high risk cohort associated with treatment",
+                       "Required hospitalisation within 30 days prior to treatment with COVID-19 recorded as the primary diagnosis",
+                       "Required hospitalisation within 30 days prior to treatment with any diagnosis",
+                       "Non symptomatic positive SARS-CoV-2 test record",
+                       "Treated with paxlovid outside of treatment eligibility window",           
+                       "Treated with paxlovid and in renal or liver high risk cohort",
+                       "Treated with paxlovid aged under 18",                       
+                       "Treated with paxlovid and pregnant",
+                       "Treated with sotrovimab outside of treatment eligibility window",
+                       "Treated with sotrovimab aged under 12",  
+                       "Treated with sotrovimab weight under 40kg", 
+                       "Treated with remdesivir outside of treatment eligibility window",
+                       "Treated with remdesivir aged under 12",  
+                       "Treated with remdesivir weight under 40kg", 
+                       "Treated with molnupiravir outside of treatment eligibility window",
+                       "Treated with molnupiravir and pregnant")) %>%
+  filter(n != 0) %>%
+  mutate(n = as.numeric(ifelse(n == "<5", 5, n))) %>%
+  filter(#criteria != "c_no_high_risk_group_match",
+    #criteria != "c_no_high_risk_group_nhsd",
+    criteria != "c_any_covid_hospital_admission_last_30_days") %>%
+  #group_by(criteria3) %>%
+  #summarise(n = sum(n)) %>%
   arrange(desc(n))
-  
+
 flowchart_non_elig_plot$criteria2 = unlist(lapply(strwrap(flowchart_non_elig_plot$criteria2, width=30, simplify=FALSE), paste, 
                                                   collapse="\n"))
 
@@ -523,25 +630,23 @@ flowchart_non_elig_plot <- flowchart_non_elig_plot %>%
   mutate(criteria2 = factor(criteria2, levels = unique(flowchart_non_elig_plot$criteria2)))
 
 flowchart_non_elig_plot <- flowchart_non_elig_plot %>%
-  ggplot(aes(criteria2)) +
+  ggplot() +
   geom_col(aes(x = criteria2, y = n, fill = criteria2)) + 
   theme_classic(base_size = 8) +
   labs(x = "",
        y = "Number of patients receiving treatment",
        colour = "",
        title = "") +
-  theme(legend.position = "none") +
-  theme(axis.text.x = element_text(angle = 60, hjust = 1),
+  theme(legend.position = "none",
+        axis.text.x = element_text(angle = 60, hjust = 1),
         axis.text = element_text(size = 15),
         axis.title = element_text(size = 15),
-        legend.text = element_text(size = 12),
-        legend.title=element_text(size=12, face = "bold"),
         strip.text = element_text(size=12))
 
 ggsave(
   here::here(output_dir_rmd, "figures", "figure_non_elig_breakdown.png"),
   flowchart_non_elig_plot,
-  units = "cm", width = 35, height = 35
+  units = "cm", width = 40, height = 30
 )
 
 include_graphics(fs::path(output_dir_rmd, "figures", "figure_non_elig_breakdown.png"))
@@ -554,7 +659,7 @@ include_graphics(fs::path(output_dir_rmd, "figures", "figure_non_elig_breakdown.
 
 data_time_between <- read_csv(fs::path(input_dir_os, "table_time_to_treat_redacted.csv"))
 
-data_time_between %>%
+data_time_between_plot <- data_time_between %>%
   filter(high_risk_cohort == "All",
          !is.na(tb),
          !is.na(n),
@@ -574,6 +679,14 @@ data_time_between %>%
         axis.text = element_text(size = 15),
         axis.title = element_text(size = 15),
         strip.text = element_text(size=12))
+
+ggsave(
+  here::here(output_dir_rmd, "figures", "figure_time_to_treatment_types.png"),
+  data_time_between_plot,
+  units = "cm", width = 40, height = 30
+)
+
+include_graphics(fs::path(output_dir_rmd, "figures", "figure_time_to_treatment_types.png"))
 
 ```
 
@@ -613,7 +726,7 @@ plot_order <- time_groups %>%
 time_groups <- time_groups %>%
   mutate(high_risk_cohort = factor(high_risk_cohort, levels = plot_order$high_risk_cohort))
 
-time_groups %>%
+data_time_between_plot <- time_groups %>%
   arrange(high_risk_cohort, tb) %>%
   ggplot(aes(tb)) +
   geom_col(aes(x = tb, y = n, fill = high_risk_cohort, group = high_risk_cohort), position = "dodge") + 
@@ -631,16 +744,27 @@ time_groups %>%
     strip.text = element_text(size=12)) +
   scale_y_continuous(labels = comma)
 
+ggsave(
+  here::here(output_dir_rmd, "figures", "figure_time_to_treatment_cohort.png"),
+  data_time_between_plot,
+  units = "cm", width = 40, height = 30
+)
+
+include_graphics(fs::path(output_dir_rmd, "figures", "figure_time_to_treatment_cohort.png"))
+
 ```
+
+$$\\[0.5cm]$$
+
 
 # Brief Methods <a name="methods"></a>
 
 Full methods in code form can be found in the accompanying [antibody-and-antiviral-deployment repository](https://github.com/opensafely/antibody-and-antiviral-deployment) and are also described in our paper, linked above. Brief methods are given below.  
 
-## Data sources
+### Data sources
 All data were analysed securely through OpenSAFELY-TPP  [https://opensafely.org](https://opensafely.org). Contains the full pseudonymised primary care records for all patients currently registered with general practices using TPP SystmOne software (approximately 23.4 million, 40% of the English population). Data are linked with accident and emergency (A&E) attendance and in-patient records from NHS Digital; national coronavirus testing records from the Second Generation Surveillance System (SGSS); and the “COVID-19 therapeutics dataset”, a patient-level dataset on antiviral and nMAB treatments from NHS England, derived from software used to notify NHS England of COVID-19 treatments.  
 
-## Study population
+### Study population
 
 Base population:
 - Patients in OpenSAFELY-TPP registered with a general practice on 11th December 2021 (earliest possible date for eligibility for receiving antivirals/nMABS in outpatient settings).Patients with unknown date of birth excluded. 
@@ -654,13 +778,16 @@ Treated patients:
 - Treatments and the date they were given were identified in the COVID-19 therapeutics dataset, restricted to those treated in the community (“non_hospitalised”).
 - Patients issued more than one treatment within two weeks of one another, or with an implausible treatment date (e.g. far in the future) were excluded. 
 
-## Key demographic and clinical characteristics
+### Key demographic and clinical characteristics
 We classified patients by age group, sex, NHS region of their general practice and other key demographics including ethnicity (White, Black, Asian or Asian British, Mixed, Other, and Unknown), and Index of Multiple Deprivation (IMD, in quintiles, derived from patient postcode at lower super output area level). Individuals with missing sex, ethnicity, IMD or region were included as “Unknown”. Treated patients were also grouped by whether they had autism, dementia, learning disability, serious mental illness, were resident in a care home or housebound, and by vaccination status.
 
-## Concordance with guidance
+### Concordance with guidance
 For patients who received treatment but who were not otherwise identified in the eligible population, we report which eligibility or exclusion criteria were not met (e.g. no positive SARS-CoV-2 test result). Where possible within available data, we also report other potential breaches in guidance for patients receiving treatment, such as not being treated within the prescribed timescale (see Table S2 in the supplementary material for implementation details). 
 
-## Codelists
+### Descriptive statistics
+Charts of eligibility and treatment coverage were generated for all high risk cohorts, and stratified by treatment type. Charts showing the weekly proportion of eligible people receiving each treatment were also generated, again stratified by treatment type. Simple descriptive statistics were also used to summarise the counts and proportions of eligible patients treated, stratified by high risk cohort, treatment type and by selected clinical and demographic group. Charts and results not presented in this report are available online for inspection in the associated Github [antibody-and-antiviral-deployment](https://github.com/opensafely/antibody-and-antiviral-deployment) repository. Patient counts are rounded to the nearest 10 to protect against small number differences in our routinely updating data. 
+
+### Codelists
 Detailed information on compilation and sources for every individual codelist are available at https://www.opencodelists.org/.
 
 
