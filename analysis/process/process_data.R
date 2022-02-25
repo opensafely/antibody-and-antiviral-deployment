@@ -370,7 +370,7 @@ data_processed_eligible <- data_processed %>%
     # Overall eligibility criteria
     covid_test_positive == 1,
     covid_positive_previous_30_days != 1,
-    symptomatic_covid_test != "N",
+    #symptomatic_covid_test != "N",
     !is.na(high_risk_group_nhsd_combined) | high_risk_group_nhsd_combined != "NA",
     !is.na(elig_start),
     
@@ -401,6 +401,7 @@ data_processed_eligible <- data_processed %>%
 cat("#### eligible patients ####\n")
 print(dim(data_processed_eligible))
 print(table(data_processed_eligible$match))
+print(table(data_processed_eligible$symptomatic_covid_test))
 
 ## Include treated patients not flagged as eligible
 data_processed_treated <- data_processed %>%
@@ -497,6 +498,10 @@ data_processed_clean <- data_processed_combined %>%
 
 
 rm(data_processed_combined)
+
+cat("#### treated patients symptomatic test ####\n")
+print(table(subset(data_processed_clean, !is.na(treatement_date))$symptomatic_covid_test))
+
 
 # Save dataset(s) ----
 write_rds(data_processed_clean, here::here("output", "data", "data_processed_clean.rds"), compress = "gz")
