@@ -557,22 +557,24 @@ all_treated <-  data_processed_clean %>%
   mutate(
     patient_id,
     not_symptomatic_covid_test = (symptomatic_covid_test != "Y"),
-    not_treated_within_5_days_paxlovid = (((tb_symponset_treat > 5 & tb_symponset_treat < 0) | is.na(tb_symponset_treat)) & 
-                                            treatment_type == "Paxlovid"),
+    not_treated_within_5_days_paxlovid = ((tb_postest_treat > 5 & treatment_type == "Paxlovid") | 
+                                            (tb_postest_treat < 0 & treatment_type == "Paxlovid")) & !is.na(tb_postest_treat),
     renal_liver_paxlovid = ((renal_disease == 1 | liver_disease == 0) & treatment_type == "Paxlovid"),
     aged_under_18_paxlovid = (age < 18 & treatment_type == "Paxlovid"),
     pregnancy_paxlovid = (pregnancy != 1 & treatment_type == "Paxlovid"),
     
-    not_treated_within_5_days_sotrovimab = (((tb_symponset_treat > 5 & tb_symponset_treat < 0) | is.na(tb_symponset_treat)) & 
-                                              treatment_type == "Sotrovimab"),
+    not_treated_within_5_days_sotrovimab = (((tb_postest_treat > 5 & treatment_type == "Sotrovimab") | 
+                                               (tb_postest_treat < 0 & treatment_type == "Sotrovimab")) & !is.na(tb_postest_treat)),
     aged_under_12_sotrovimab = (age < 12 & treatment_type == "Sotrovimab"),
     weight_sotrovimab = (weight <= 40 & (age >=12 | age <= 17) & treatment_type == "Sotrovimab"),
     
-    not_treated_within_7_days_remdesivir = ((tb_symponset_treat > 7 | tb_symponset_treat < 0) & treatment_type == "Remdesivir"),
+    not_treated_within_7_days_remdesivir = ((tb_postest_treat > 7 & treatment_type == "Remdesivir") | 
+                                              (tb_postest_treat < 0 & treatment_type == "Remdesivir")) & !is.na(tb_postest_treat),
     age_under_12_remdesivir = (age < 12 & treatment_type == "Remdesivir"),
     weight_remdesivir = (weight < 40 & (age >=12 | age <= 17) & treatment_type == "Remdesivir"),
     
-    not_treated_within_7_days_molnupiravir = ((tb_symponset_treat <= 5 | tb_symponset_treat >= 0) & treatment_type == "Molnupiravir"),
+    not_treated_within_7_days_molnupiravir = ((tb_postest_treat > 7 & treatment_type == "Molnupiravir") | 
+                                                (tb_postest_treat < 0 & treatment_type == "Molnupiravir")) & !is.na(tb_postest_treat),
     age_under_18_molnupiravir = (age < 18 & treatment_type =="Molnupiravir"),
     pregnancy_molnupiravir  = (pregnancy == 1 & treatment_type == "Molnupiravir"),
     
@@ -644,7 +646,7 @@ write_csv(high_risk_cohort_comparison_redacted, fs::path(output_dir, "table_non_
 
 # Time to treatment ----
 all <- data_processed_clean %>%
-  mutate(tb = ifelse(is.na(tb_symponset_treat), tb_postest_treat, tb_symponset_treat)) %>%
+  mutate(tb = ifelse(is.na(tb_postest_treat), tb_postest_treat, tb_postest_treat)) %>%
   filter(!is.na(treatment_type)) %>%
   group_by(tb, treatment_type) %>%
   tally() %>%
@@ -655,7 +657,7 @@ all <- data_processed_clean %>%
 
 groups <- data_processed_clean %>%
   filter(!is.na(treatment_type)) %>%
-  mutate(tb = ifelse(is.na(tb_symponset_treat), tb_postest_treat, tb_symponset_treat)) %>%
+  mutate(tb = ifelse(is.na(tb_postest_treat), tb_postest_treat, tb_postest_treat)) %>%
   select(tb, downs_syndrome, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
          hiv_aids, solid_organ_transplant, rare_neurological_conditions) %>%
   group_by(tb) %>%
@@ -675,7 +677,7 @@ groups <- data_processed_clean %>%
 
 groups2 <- data_processed_clean %>%
   filter(!is.na(treatment_type)) %>%
-  mutate(tb = ifelse(is.na(tb_symponset_treat), tb_postest_treat, tb_symponset_treat)) %>%
+  mutate(tb = ifelse(is.na(tb_postest_treat), tb_postest_treat, tb_postest_treat)) %>%
   select(tb, autism_nhsd, care_home_primis, dementia_nhsd, learning_disability_primis, serious_mental_illness_nhsd, 
          housebound_opensafely, shielded_primis) %>%
   group_by(tb) %>%
@@ -700,7 +702,7 @@ for (i in 1:length(groups_tte)) {
   
   group_tte <- data_processed_clean %>%
     filter(!is.na(treatment_type)) %>%
-    mutate(tb = ifelse(is.na(tb_symponset_treat), tb_postest_treat, tb_symponset_treat)) %>%
+    mutate(tb = ifelse(is.na(tb_postest_treat), tb_postest_treat, tb_postest_treat)) %>%
     filter(!is.na(tb)) %>%
     select(tb, variable = groups_tte[i]) %>%
     group_by_all() %>% 
