@@ -10,7 +10,7 @@
 #         /output/data/data_processed_clean.csv
 #
 # Author(s): M Green
-# Date last updated: 23/02/2022
+# Date last updated: 25/02/2022
 #
 ################################################################################
 
@@ -264,7 +264,17 @@ data_processed <- data_extract %>%
     
     ## Find matches between nhsd high risk cohorts and therapeutics high risk cohorts 
     ind_therapeutic_groups = map_chr(strsplit(high_risk_cohort_covid_therapeutics, ","), paste,collapse="|"),
-    match = str_detect(high_risk_group_nhsd_combined, ind_therapeutic_groups),
+    #match = str_detect(high_risk_group_nhsd_combined, ind_therapeutic_groups),
+    match = ifelse(downs_syndrome_nhsd == 1 & downs_syndrome_therapeutics == 1 |
+                      cancer_opensafely == 1 & cancer_therapeutics == 1 |
+                      haematological_disease_nhsd == 1 & haematological_disease_therapeutics == 1 |
+                      ckd_stage_5_nhsd == 1 & ckd_stage_5_therapeutics == 1 |
+                      liver_disease_nhsd == 1 & liver_disease_therapeutics == 1 |
+                      imid_nhsd == 1 & imid_therapeutics == 1 |
+                      immunosupression_nhsd == 1 & immunosupression_therapeutics == 1 |
+                      hiv_aids_nhsd == 1 & hiv_aids_therapeutics == 1 |
+                      solid_organ_transplant_nhsd == 1 & solid_organ_transplant_therapeutics == 1 |
+                      rare_neurological_conditions_nhsd == 1 & rare_neurological_conditions_therapeutics == 1, TRUE, FALSE),
     
     ## Parse NAs
     high_risk_group_nhsd_combined = ifelse(high_risk_group_nhsd_combined == "", NA, high_risk_group_nhsd_combined),
