@@ -420,6 +420,7 @@ data_processed_treated <- data_processed %>%
 cat("#### treated patients ####\n")
 print(dim(data_processed_treated))
 print(table(data_processed_treated$match))
+print(table(data_processed_treated$symptomatic_covid_test))
 
 ## Free up space and combine
 rm(data_processed)
