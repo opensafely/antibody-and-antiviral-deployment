@@ -553,6 +553,7 @@ data_flowchart <- non_elig_treated %>%
 
 all_treated <-  data_processed_clean %>%
   filter(!is.na(treatment_date),
+         symptomatic_covid_test != "Y" |
          ((tb_symponset_treat > 5 | tb_symponset_treat < 0) & treatment_type == "Paxlovid" ) |
            ((renal_disease == 1 | liver_disease == 0) & treatment_type == "Paxlovid") | 
            (age < 18 & treatment_type == "Paxlovid") | 
@@ -572,6 +573,7 @@ all_treated <-  data_processed_clean %>%
   ) %>%
   mutate(
     patient_id,
+    not_symptomatic_covid_test = (symptomatic_covid_test != "Y"),
     not_treated_within_5_days_paxlovid = (((tb_symponset_treat > 5 & tb_symponset_treat < 0) | is.na(tb_symponset_treat)) & 
                                             treatment_type == "Paxlovid"),
     renal_liver_paxlovid = ((renal_disease == 1 | liver_disease == 0) & treatment_type == "Paxlovid"),
@@ -593,6 +595,7 @@ all_treated <-  data_processed_clean %>%
     pregnancy_molnupiravir  = (pregnancy == 1 & treatment_type == "Molnupiravir"),
     
     include = (
+      not_symptomatic_covid_test &
       not_treated_within_5_days_paxlovid &
         renal_liver_paxlovid &
         aged_under_18_paxlovid &
@@ -612,6 +615,7 @@ data_flowchart2 <- all_treated %>%
   ungroup() %>%
   transmute(
     c_all = TRUE,
+    c_not_symptomatic_covid_test = c_all & not_symptomatic_covid_test,
     c_not_treated_within_5_days_paxlovid = c_all & not_treated_within_5_days_paxlovid,
     c_renal_liver_paxlovid = c_all & renal_liver_paxlovid,
     c_aged_under_18_paxlovid = c_all & aged_under_18_paxlovid,
