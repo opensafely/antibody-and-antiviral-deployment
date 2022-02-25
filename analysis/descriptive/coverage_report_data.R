@@ -521,6 +521,44 @@ non_elig_treated <-  data_processed_clean %>%
                                                   any_covid_hospital_discharge_date > (treatment_date - 30) & 
                                                   any_covid_hospital_discharge_date < (treatment_date)),
     
+    include = (
+      no_positive_covid_test  &
+        no_symptomatic_covid_test &
+        positive_covid_test_previous_30_days &
+        no_high_risk_group_nhsd &
+        no_high_risk_group_match &
+        primary_covid_hospital_admission_last_30_days &
+        any_covid_hospital_admission_last_30_days
+    )
+  )
+
+data_flowchart <- non_elig_treated %>%
+  ungroup() %>%
+  transmute(
+    c_all = TRUE,
+    c_no_positive_covid_test = c_all & no_positive_covid_test,
+    c_no_symptomatic_covid_test = c_all & no_symptomatic_covid_test,
+    c_positive_covid_test_previous_30_days = c_all & positive_covid_test_previous_30_days,
+    c_no_high_risk_group_nhsd = c_all & no_high_risk_group_nhsd,
+    c_no_high_risk_group_match = c_all & no_high_risk_group_match,
+    c_primary_covid_hospital_admission_last_30_days = c_all & primary_covid_hospital_admission_last_30_days,
+    c_any_covid_hospital_admission_last_30_days =  c_all & any_covid_hospital_admission_last_30_days)  %>%
+  summarise(
+    across(.fns=sum, na.rm = T)
+  ) %>%
+  pivot_longer(
+    cols=everything(),
+    names_to="criteria",
+    values_to="n"
+  )  %>%
+  mutate(n = ifelse(n < 5 & n > 0, "<5", n),
+         n = ifelse(n != "<5", plyr::round_any(as.numeric(n), 5), n))
+
+all_treated <-  data_processed_clean %>%
+  filter(!is.na(treatment_date)
+  ) %>%
+  mutate(
+    patient_id,
     not_treated_within_5_days_paxlovid = (((tb_symponset_treat > 5 & tb_symponset_treat < 0) | is.na(tb_symponset_treat)) & 
                                             treatment_type == "Paxlovid"),
     renal_liver_paxlovid = ((renal_disease == 1 | liver_disease == 0) & treatment_type == "Paxlovid"),
@@ -528,10 +566,10 @@ non_elig_treated <-  data_processed_clean %>%
     pregnancy_paxlovid = (pregnancy != 1 & treatment_type == "Paxlovid"),
     
     not_treated_within_5_days_sotrovimab = (((tb_symponset_treat > 5 & tb_symponset_treat < 0) | is.na(tb_symponset_treat)) & 
-                                            treatment_type == "Sotrovimab"),
+                                              treatment_type == "Sotrovimab"),
     aged_under_12_sotrovimab = (age < 12 & treatment_type == "Sotrovimab"),
     weight_sotrovimab = (weight <= 40 & (age >=12 | age <= 17) & treatment_type == "Sotrovimab"),
-  
+    
     
     not_treated_within_7_days_remdesivir = ((tb_symponset_treat > 7 | tb_symponset_treat < 0) & treatment_type == "Remdesivir"),
     age_under_12_remdesivir = (age < 12 & treatment_type == "Remdesivir"),
@@ -542,14 +580,7 @@ non_elig_treated <-  data_processed_clean %>%
     pregnancy_molnupiravir  = (pregnancy == 1 & treatment_type == "Molnupiravir"),
     
     include = (
-      no_positive_covid_test  &
-        no_symptomatic_covid_test &
-        positive_covid_test_previous_30_days &
-        no_high_risk_group_nhsd &
-        no_high_risk_group_match &
-        primary_covid_hospital_admission_last_30_days &
-        any_covid_hospital_admission_last_30_days &
-        not_treated_within_5_days_paxlovid &
+      not_treated_within_5_days_paxlovid &
         renal_liver_paxlovid &
         aged_under_18_paxlovid &
         pregnancy_paxlovid &
@@ -564,17 +595,10 @@ non_elig_treated <-  data_processed_clean %>%
     )
   )
 
-data_flowchart <- non_elig_treated %>%
+data_flowchart2 <- all_treated %>%
   ungroup() %>%
   transmute(
     c_all = TRUE,
-    c_no_positive_covid_test = c_all & no_positive_covid_test,
-    c_no_symptomatic_covid_test = c_all & no_symptomatic_covid_test,
-    c_positive_covid_test_previous_30_days = c_all & positive_covid_test_previous_30_days,
-    c_no_high_risk_group_nhsd = c_all & no_high_risk_group_nhsd,
-    c_no_high_risk_group_match = c_all & no_high_risk_group_match,
-    c_primary_covid_hospital_admission_last_30_days = c_all & primary_covid_hospital_admission_last_30_days,
-    c_any_covid_hospital_admission_last_30_days =  c_all & any_covid_hospital_admission_last_30_days,
     c_not_treated_within_5_days_paxlovid = c_all & not_treated_within_5_days_paxlovid,
     c_renal_liver_paxlovid = c_all & renal_liver_paxlovid,
     c_aged_under_18_paxlovid = c_all & aged_under_18_paxlovid,
@@ -598,7 +622,7 @@ data_flowchart <- non_elig_treated %>%
   mutate(n = ifelse(n < 5 & n > 0, "<5", n),
          n = ifelse(n != "<5", plyr::round_any(as.numeric(n), 5), n))
 
-write_csv(data_flowchart, fs::path(output_dir, "table_non_elig_flowchart_redacted.csv"))
+write_csv(rbind(data_flowchart, data_flowchart2), fs::path(output_dir, "table_non_elig_flowchart_redacted.csv"))
 
 print("data_flowchart saved")
 
