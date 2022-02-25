@@ -510,10 +510,9 @@ non_elig_treated <-  data_processed_clean %>%
   mutate(
     patient_id,
     no_positive_covid_test = (covid_test_positive != 1),
-    no_symptomatic_covid_test = (symptomatic_covid_test != "Y"),
     positive_covid_test_previous_30_days = (covid_positive_previous_30_days == 1),
     no_high_risk_group_nhsd = is.na(high_risk_group_nhsd_combined),
-    no_high_risk_group_match =  is.na(match),
+    no_high_risk_group_match =  is.na(match) & !is.na(high_risk_group_nhsd_combined),
     primary_covid_hospital_admission_last_30_days = (!is.na(primary_covid_hospital_discharge_date) | 
                                                   primary_covid_hospital_discharge_date > (treatment_date - 30) & 
                                                   primary_covid_hospital_discharge_date < (treatment_date)),
@@ -523,7 +522,6 @@ non_elig_treated <-  data_processed_clean %>%
     
     include = (
       no_positive_covid_test  &
-        no_symptomatic_covid_test &
         positive_covid_test_previous_30_days &
         no_high_risk_group_nhsd &
         no_high_risk_group_match &
@@ -537,7 +535,6 @@ data_flowchart <- non_elig_treated %>%
   transmute(
     c_all = TRUE,
     c_no_positive_covid_test = c_all & no_positive_covid_test,
-    c_no_symptomatic_covid_test = c_all & no_symptomatic_covid_test,
     c_positive_covid_test_previous_30_days = c_all & positive_covid_test_previous_30_days,
     c_no_high_risk_group_nhsd = c_all & no_high_risk_group_nhsd,
     c_no_high_risk_group_match = c_all & no_high_risk_group_match,
@@ -555,7 +552,23 @@ data_flowchart <- non_elig_treated %>%
          n = ifelse(n != "<5", plyr::round_any(as.numeric(n), 5), n))
 
 all_treated <-  data_processed_clean %>%
-  filter(!is.na(treatment_date)
+  filter(!is.na(treatment_date),
+         ((tb_symponset_treat > 5 | tb_symponset_treat < 0) & treatment_type == "Paxlovid" ) |
+           ((renal_disease == 1 | liver_disease == 0) & treatment_type == "Paxlovid") | 
+           (age < 18 & treatment_type == "Paxlovid") | 
+           (pregnancy == 1 & treatment_type == "Paxlovid") |
+           
+           ((tb_symponset_treat > 5 | tb_symponset_treat < 0) & treatment_type == "Sotrovimab") |
+           (age < 12 & treatment_type == "Sotrovimab") | 
+           ((weight < 40 & age < 18) & treatment_type == "Sotrovimab") |
+
+         ((tb_symponset_treat > 7 | tb_symponset_treat < 0) & treatment_type == "Remdesivir") |
+         (age < 12 & treatment_type == "Remdesivir") |
+         ((weight < 40 & age < 18) & treatment_type == "Remdesivir") |
+
+         ((tb_symponset_treat > 5 | tb_symponset_treat < 0) & treatment_type == "Molnupiravir") |
+         (age < 18 & treatment_type =="Molnupiravir") |
+         (pregnancy == 1 & treatment_type == "Molnupiravir")
   ) %>%
   mutate(
     patient_id,
