@@ -553,23 +553,6 @@ data_flowchart <- non_elig_treated %>%
 
 all_treated <-  data_processed_clean %>%
   filter(!is.na(treatment_date),
-         symptomatic_covid_test != "Y" |
-         ((tb_symponset_treat > 5 | tb_symponset_treat < 0) & treatment_type == "Paxlovid" ) |
-           ((renal_disease == 1 | liver_disease == 0) & treatment_type == "Paxlovid") | 
-           (age < 18 & treatment_type == "Paxlovid") | 
-           (pregnancy == 1 & treatment_type == "Paxlovid") |
-           
-           ((tb_symponset_treat > 5 | tb_symponset_treat < 0) & treatment_type == "Sotrovimab") |
-           (age < 12 & treatment_type == "Sotrovimab") | 
-           ((weight < 40 & age < 18) & treatment_type == "Sotrovimab") |
-
-         ((tb_symponset_treat > 7 | tb_symponset_treat < 0) & treatment_type == "Remdesivir") |
-         (age < 12 & treatment_type == "Remdesivir") |
-         ((weight < 40 & age < 18) & treatment_type == "Remdesivir") |
-
-         ((tb_symponset_treat > 5 | tb_symponset_treat < 0) & treatment_type == "Molnupiravir") |
-         (age < 18 & treatment_type =="Molnupiravir") |
-         (pregnancy == 1 & treatment_type == "Molnupiravir")
   ) %>%
   mutate(
     patient_id,
@@ -584,7 +567,6 @@ all_treated <-  data_processed_clean %>%
                                               treatment_type == "Sotrovimab"),
     aged_under_12_sotrovimab = (age < 12 & treatment_type == "Sotrovimab"),
     weight_sotrovimab = (weight <= 40 & (age >=12 | age <= 17) & treatment_type == "Sotrovimab"),
-    
     
     not_treated_within_7_days_remdesivir = ((tb_symponset_treat > 7 | tb_symponset_treat < 0) & treatment_type == "Remdesivir"),
     age_under_12_remdesivir = (age < 12 & treatment_type == "Remdesivir"),
