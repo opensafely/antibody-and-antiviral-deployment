@@ -467,6 +467,7 @@ print(length(unique(date_ids$patient_id)))
 
 ## Clean data
 data_processed_clean <- data_processed_combined %>%
+  filter(elig_start <= Sys.Date()) %>%
   subset(!(patient_id %in% unique(dup_ids$patient_id)),
          !(patient_id %in% unique(date_ids$patient_id))) %>%
   select(

@@ -595,8 +595,8 @@ data_flowchart <- non_elig_treated %>%
     names_to="criteria",
     values_to="n"
   )  %>%
-  mutate(n = ifelse(n < 5, NA, n),
-         n = plyr::round_any(as.numeric(n), 5))
+  mutate(n = ifelse(n < 5 & n > 0, "<5", n),
+         n = ifelse(n != "<5", plyr::round_any(as.numeric(n), 5), n))
 
 write_csv(data_flowchart, fs::path(output_dir, "table_non_elig_flowchart_redacted.csv"))
 
