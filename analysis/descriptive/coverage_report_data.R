@@ -45,7 +45,7 @@ threshold = 5
 ## Import data
 data_processed <- read_rds(here::here("output", "data", "data_processed_clean.rds"))
 
-## Formatting variables
+## Remove patients no longer registered at time of treatment and format variables
 data_processed_clean <- data_processed %>%
   filter(has_died == 0,
          registered_eligible == 1 | registered_treated == 1) %>%
@@ -505,9 +505,8 @@ write_csv(table_demo_clinc_breakdown_redacted, fs::path(output_dir, "table_demo_
 # Concordance with guidance ----
 non_elig_treated <-  data_processed_clean %>%
   filter(!is.na(treatment_date),
-         eligibility_status == "Treated",
-         has_died == 0,
-         registered_eligible == 1 | registered_treated == 1) %>%
+         eligibility_status == "Treated"
+         ) %>%
   mutate(
     patient_id,
     no_positive_covid_test = (covid_test_positive != 1),
