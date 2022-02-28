@@ -94,7 +94,7 @@ Full methods in code form can be found in the accompanying [antibody-and-antivir
 ## Overall coverage of COVID-19 treatment <a name="coverage"></a>
 Between **`r format(report_stats$study_start, format = "%d-%b-%Y")`** and **`r format(report_stats$study_end, format = "%d-%b-%Y")`**, a total of `r format(report_stats$eligible_patients, big.mark = ",", scientific = FALSE)` non-hospitalised patients registered at a TPP practice in England were identified as being eligible for receiving an antiviral or nMABs for treating COVID-19 (Figure 1). While the majority of these patients only belonged to one high risk cohort, `r format(report_stats$high_risk_cohort_2plus, big.mark = ",", scientific = FALSE)` (`r format(round(report_stats$high_risk_cohort_2plus/report_stats$eligible_patients*100, digits = 0), big.mark = ",", scientific = FALSE)`%) eligible patients had records indicating that they fell into multiple high risk cohorts (high risk cohort count range `r report_stats$high_risk_cohort_lower` - `r report_stats$high_risk_cohort_upper`). Out of the `r format(report_stats$eligible_patients, big.mark = ",", scientific = FALSE)` eligible patients, a total of `r format(report_stats$treated_patients, big.mark = ",", scientific = FALSE)` patients received an antiviral or nMABs (Figures 2 and 3); 
 
-- Paxlovid: `r format(report_stats$treated_paxlovid, big.mark = ",", scientific = FALSE)`;
+- PF-07321332 (nirmatrelvir) plus ritonavir: `r format(report_stats$treated_paxlovid, big.mark = ",", scientific = FALSE)`;
 - Sotrovimab: `r format(report_stats$treated_sotrovimab, big.mark = ",", scientific = FALSE)`;
 - Remdesivir: `r format(report_stats$treated_remdesivir, big.mark = ",", scientific = FALSE)`;
 - Molnupiravir: `r format(report_stats$treated_molnupiravir, big.mark = ",", scientific = FALSE)`; 
@@ -314,7 +314,7 @@ weekly_treatment_proportion <- read_csv(here::here(input_dir_os, "table_prop_tre
                                      collapse="\n"))) %>%
   mutate(treatment_type = case_when(
     treatment_type == "All" ~ "All", 
-    treatment_type == "Paxlovid" ~ "Paxlovid", 
+    treatment_type == "Paxlovid" ~ "PF-07321332 (nirmatrelvir) plus ritonavir", 
     treatment_type == "Sotrovimab" ~ "Sotrovimab", 
     treatment_type == "Remdesivir" ~ "Remdesivir", 
     treatment_type == "Molnupiravir" ~ "Molnupiravir", 
@@ -333,7 +333,7 @@ weekly_treatment_proportion <- weekly_treatment_proportion %>%
   mutate(high_risk_cohort = factor(high_risk_cohort, levels = plot_order$high_risk_cohort)) 
 
 weekly_treatment_proportion_plot <- weekly_treatment_proportion %>%
-  mutate(treatment_type = factor(treatment_type, levels = c("All", "Paxlovid", "Sotrovimab", "Remdesivir", 
+  mutate(treatment_type = factor(treatment_type, levels = c("All", "PF-07321332 (nirmatrelvir) plus ritonavir", "Sotrovimab", "Remdesivir", 
                                                             "Molnupiravir", "Casirivimab"))) %>%
   ggplot(aes(x = elig_start, y = prop_redacted, colour = high_risk_cohort, group = high_risk_cohort)) +
   geom_line(size = 1) +
@@ -454,7 +454,7 @@ table_elig_treat_redacted %>%
   column_spec(1, bold = T, width = "10em") %>%
   column_spec(2, width = "5em") %>%
   column_spec(4, background = "lightgrey")  %>%
-  add_header_above(., c(" ", "Eligible", "All" = 2, "Paxlovid  " = 2, "Sotrovimab" = 2, "Remdesivir" = 2,
+  add_header_above(., c(" ", "Eligible", "All" = 2, "PF-07321332 (nirmatrelvir) plus ritonavir  " = 2, "Sotrovimab" = 2, "Remdesivir" = 2,
                         "Molnupiravir" = 2, "Casirivimab" = 2)) %>%
   add_header_above(., c(" ", "", "Treated" = 12)) %>%
   add_footnote(c("High risk cohorts are arranged in descending order, according to percentage treated",
@@ -578,7 +578,7 @@ table_demo_clinc_breakdown_redacted %>%
   column_spec(1, bold = T, width = "2em") %>%
   column_spec(2, bold = T, width = "2em") %>%
   column_spec(5, background = "lightgrey") %>%
-  add_header_above(., c(" ", "", "Eligible", "All" = 2, "Paxlovid" = 2, "Sotrovimab" = 2, "Remdesivir" = 2,
+  add_header_above(., c(" ", "", "Eligible", "All" = 2, "PF-07321332 (nirmatrelvir) plus ritonavir" = 2, "Sotrovimab" = 2, "Remdesivir" = 2,
                         "Molnupiravir" = 2, "Casirivimab" = 2)) %>%
   add_header_above(., c(" ", "", "", "Treated" = 12)) %>%
   add_footnote(c("All percentages (%) are caluclated with 95% confidence intervals"), 
@@ -602,10 +602,10 @@ flowchart_non_elig_plot <- flowchart_non_elig[-c(1,8),] %>%
                        "Required hospitalisation within 30 days prior to treatment with COVID-19 recorded as the primary diagnosis",
                        "Required hospitalisation within 30 days prior to treatment with any diagnosis",
                        "Non symptomatic positive SARS-CoV-2 test record",
-                       "Treated with paxlovid outside of treatment eligibility window",           
-                       "Treated with paxlovid and in renal or liver high risk cohort",
-                       "Treated with paxlovid aged under 18",                       
-                       "Treated with paxlovid and pregnant",
+                       "Treated with PF-07321332 (nirmatrelvir) plus ritonavir outside of treatment eligibility window",           
+                       "Treated with PF-07321332 (nirmatrelvir) plus ritonavir and in renal or liver high risk cohort",
+                       "Treated with PF-07321332 (nirmatrelvir) plus ritonavir aged under 18",                       
+                       "Treated with PF-07321332 (nirmatrelvir) plus ritonavir and pregnant",
                        "Treated with sotrovimab outside of treatment eligibility window",
                        "Treated with sotrovimab aged under 12",  
                        "Treated with sotrovimab weight under 40kg", 
@@ -618,7 +618,9 @@ flowchart_non_elig_plot <- flowchart_non_elig[-c(1,8),] %>%
   mutate(n = as.numeric(ifelse(n == "<5", 5, n))) %>%
   filter(#criteria != "c_no_high_risk_group_match",
     #criteria != "c_no_high_risk_group_nhsd",
-    criteria != "c_any_covid_hospital_admission_last_30_days") %>%
+    criteria != "c_any_covid_hospital_admission_last_30_days",
+    criteria != "c_pregnancy_paxlovid",
+    criteria != "c_pregnancy_molnupiravir") %>%
   #group_by(criteria3) %>%
   #summarise(n = sum(n)) %>%
   arrange(desc(n))
