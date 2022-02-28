@@ -343,19 +343,34 @@ study = StudyDefinition(
   #   (defined below)
   
   ### Pregnancy
+  
+  # pregnancy record in last 36 weeks
+  preg_36wks_date = patients.with_these_clinical_events(
+    pregnancy_primis_codes,
+    returning = "date",
+    find_last_match_in_period = True,
+    between = ["start_date - 252 days", "start_date - 1 day"],
+    date_format = "YYYY-MM-DD",
+  ),
+  
+  # pregnancy OR delivery code since latest pregnancy record:
+  # if one of these codes occurs later than the latest pregnancy code
+  #  this indicates pregnancy has ended, if they are same date assume 
+  #  pregnancy has most likely not ended yet
+  pregdel = patients.with_these_clinical_events(
+    pregdel_primis_codes,
+    returning = "binary_flag",
+    find_last_match_in_period = True,
+    between = ["preg_36wks_date + 1 day", "start_date - 1 day"],
+    date_format = "YYYY-MM-DD",
+  ),
+  
   pregnancy = patients.satisfying(
     
     """
-    (preg_36wks_date AND gender = 'F' AND preg_age < 60)
+    gender = 'F' AND preg_age <= 50
+    AND (preg_36wks_date AND NOT pregdel)
     """,
-    
-    preg_36wks_date = patients.with_these_clinical_events(
-      pregnancy_primis_codes,
-      returning = "date",
-      find_last_match_in_period = True,
-      between = ["start_date - 252 days", "start_date - 1 day"],
-      date_format = "YYYY-MM-DD",
-    ),
     
     gender = patients.sex(
       return_expectations = {
