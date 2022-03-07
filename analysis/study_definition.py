@@ -67,7 +67,11 @@ study = StudyDefinition(
       OR 
     molnupiravir_covid_therapeutics 
       OR
-    casirivimab_covid_therapeutics)
+    casirivimab_covid_therapeutics
+      OR
+    paxlovid_covid_therapeutics
+      OR
+    remdesivir_covid_therapeutics
     """,
     
   ),
