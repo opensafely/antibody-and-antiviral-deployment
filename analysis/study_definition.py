@@ -59,7 +59,7 @@ study = StudyDefinition(
     AND
     NOT has_died
     AND
-    covid_test_positive 
+    (covid_test_positive AND NOT covid_positive_previous_30_days)
     AND 
     (age >= 12 AND age < 110))
     OR
@@ -224,7 +224,9 @@ study = StudyDefinition(
   #   },
   # ),
   
-  ### Positive covid test last 30 days
+  ### Positive covid test last 30 days 
+  # (note this will only apply to patients who first tested positive towards the beginning
+  # of the study period)
   covid_positive_previous_30_days = patients.with_test_result_in_sgss(
     pathogen = "SARS-CoV-2",
     test_result = "positive",
