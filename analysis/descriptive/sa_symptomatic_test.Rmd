@@ -69,7 +69,7 @@ treated_patients <- plyr::round_any(data_processed_clean %>% filter(!is.na(treat
 eligible_patients
 treated_patients
 
-round(eligible_patients/treated_patients*100, digits = 2)
+round(treated_patients/eligible_patients*100, digits = 2)
 
 table(data_processed_clean$symptomatic_covid_test)
 
@@ -83,6 +83,6 @@ treated_patients <- plyr::round_any(data_processed_clean %>% filter(!is.na(treat
 eligible_patients
 treated_patients
 
-round(eligible_patients/treated_patients*100, digits = 2)
+round(treated_patients/eligible_patients*100, digits = 2)
 
 ```
