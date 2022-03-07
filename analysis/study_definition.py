@@ -408,9 +408,10 @@ study = StudyDefinition(
   #   (defined below)
   
   ### Adolescents (aged 12-17) weighing 40kg and under
+  # look in last 6 months only to get a relevant weight value
   weight = patients.with_these_clinical_events(
     weight_opensafely_snomed_codes,
-    on_or_before = "start_date",
+    between = ["start_date - 26 weeks", "start_date"]
     find_last_match_in_period=True,
     date_format = "YYYY-MM-DD",
     returning = "numeric_value",
