@@ -413,7 +413,7 @@ study = StudyDefinition(
   # look in last 6 months only to get a relevant weight value
   weight = patients.with_these_clinical_events(
     weight_opensafely_snomed_codes,
-    between = ["start_date - 26 weeks", "start_date"]
+    between = ["start_date - 182 days", "start_date"],
     find_last_match_in_period=True,
     date_format = "YYYY-MM-DD",
     returning = "numeric_value",
@@ -1286,7 +1286,7 @@ study = StudyDefinition(
     # first vaccine from during trials and up to treatment/test date
     covid_vax_1 = patients.with_tpp_vaccination_record(
       target_disease_matches = "SARS-2 CORONAVIRUS",
-      between = ["2020-06-08", start_date],
+      between = ["2020-06-08", "start_date"],
       find_first_match_in_period = True,
       returning = "date",
       date_format = "YYYY-MM-DD"
@@ -1294,7 +1294,7 @@ study = StudyDefinition(
     
     covid_vax_2 = patients.with_tpp_vaccination_record(
       target_disease_matches = "SARS-2 CORONAVIRUS",
-      between = ["covid_vax_1 + 19 days", start_date],
+      between = ["covid_vax_1 + 19 days", "start_date"],
       find_first_match_in_period = True,
       returning = "date",
       date_format = "YYYY-MM-DD"
@@ -1302,7 +1302,7 @@ study = StudyDefinition(
     
     covid_vax_3 = patients.with_tpp_vaccination_record(
       target_disease_matches = "SARS-2 CORONAVIRUS",
-      between = ["covid_vax_2 + 56 days", start_date],
+      between = ["covid_vax_2 + 56 days", "start_date"],
       find_first_match_in_period = True,
       returning = "date",
       date_format = "YYYY-MM-DD"
@@ -1311,7 +1311,7 @@ study = StudyDefinition(
     covid_vax_declined = patients.with_these_clinical_events(
       covid_vaccine_declined_codes,
       returning="binary_flag",
-      on_or_before = start_date,
+      on_or_before = "start_date",
     ),
     
     return_expectations = {
