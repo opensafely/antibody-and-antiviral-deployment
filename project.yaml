@@ -39,6 +39,14 @@ actions:
     outputs:
       moderately_sensitive:
         cohort: output/data_properties/data_processed*.txt
+        
+  # Sensitivity anslysis ----
+  sa_symptomatic_test:
+    run: r:latest -e 'rmarkdown::render("analysis/descriptive/sa_symptomatic_test.Rmd", knit_root_dir = "/workspace", output_dir="/workspace/output/coverage")'
+    needs: [data_process]
+    outputs:
+      moderately_sensitive:
+        html: output/coverage/sa_symptomatic_test.html
   
   
   # Report ----
