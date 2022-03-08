@@ -1,0 +1,2 @@
+study_start,study_end,eligible_patients,treated_patients,treated_paxlovid,treated_sotrovimab,treated_remdesivir,treated_molnupiravir,treated_casirivimab,high_risk_cohort_2plus,high_risk_cohort_lower,high_risk_cohort_upper,deregistered
+2021-12-11,2022-02-23,50730,6460,110,3610,0,2680,50,7690,1,6,770

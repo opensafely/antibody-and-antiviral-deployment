@@ -1,0 +1,12 @@
+high_risk_cohort,Eligibile,Treated,Paxlovid,Sotrovimab,Remdesivir,Molnupiravir,Casirivimab
+All,50730,6420,80,3600,NA,2680,50
+imid,20390,3030,30,1720,NA,1250,20
+immunosupression,9940,1190,20,620,NA,540,10
+solid_cancer,8370,950,10,550,NA,380,10
+rare_neurological_conditions,5680,920,20,480,NA,420,10
+haematological_disease,4530,930,10,520,NA,390,10
+solid_organ_transplant,3490,860,NA,560,NA,290,10
+renal_disease,3160,800,NA,540,NA,260,10
+liver_disease,3130,320,NA,170,NA,140,NA
+downs_syndrome,1090,150,NA,50,NA,100,NA
+hiv_aids,330,190,NA,70,NA,120,NA

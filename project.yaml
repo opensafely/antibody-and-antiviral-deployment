@@ -5,7 +5,7 @@
 #              actions.
 #
 # Author(s): M Green
-# Date last updated: 31/01/2022
+# Date last updated: 11/02/2022
 #
 ################################################################################
 
@@ -17,61 +17,47 @@ expectations:
 actions:
   
   # Extract data ----
-
-  ## Cohort data
   extract_data:
-    run: cohortextractor:latest generate_cohort --study-definition study_definition --index-date-range "2021-12-13 to 2022-01-24 by week" --output-dir=output/data --output-format=csv.gz
+    run: cohortextractor:latest generate_cohort --study-definition study_definition --output-dir=output/data --output-format=csv.gz
     outputs:
       highly_sensitive:
-        cohort: output/data/input_*.csv.gz
+        cohort: output/data/input.csv.gz
   
- ## Cohort data - not weekly
-  extract_data_not_weekly:
-    run: cohortextractor:latest generate_cohort --study-definition study_definition_not_weekly --output-dir=output/data
-    outputs:
-      highly_sensitive:
-        cohort: output/data/input_not_weekly.csv # use csv temporarily to avoid match with wildcard in previous output
   
   # Data processing ----
-
-  ## Process data
   data_process:
     run: r:latest analysis/process/process_data.R
-    needs: [extract_data_not_weekly]
+    needs: [extract_data]
     outputs:
       highly_sensitive:
-        data: output/data/data_processed.rds
+        data: output/data/data_processed*.rds
   
-  ## Inclusion/exclusion flow chart
-  flow_chart:
-    run: r:latest analysis/descriptive/flow_chart.R
-    needs: [data_process]
-    outputs:
-      moderately_sensitive:
-        data: output/data/flowchart.csv
-
-  ## Data properties     
+  # Data summaries ----
   data_properties:
     run: r:latest analysis/descriptive/data_properties.R output/data/data_processed.rds output/data_properties
     needs: [data_process]
     outputs:
       moderately_sensitive:
         cohort: output/data_properties/data_processed*.txt
-  
-  
-  # Report ----
-  
-  ## Data, figures and tables
-  report_data:
-    run: r:latest reports/coverage/report_data.R
+        
+  # Sensitivity anslysis ----
+  sa_symptomatic_test:
+    run: r:latest -e 'rmarkdown::render("analysis/descriptive/sa_symptomatic_test.Rmd", knit_root_dir = "/workspace", output_dir="/workspace/output/coverage")'
     needs: [data_process]
     outputs:
       moderately_sensitive:
-        table1: reports/coverage/tables/report_stats.csv
-        table2: reports/coverage/tables/table_elig_treat_redacted.csv
-        table3: reports/coverage/tables/table_demo_clinc_breakdown_redacted.html
-        figure1: reports/coverage/figures/cum_treatment_plot.png
-        figure2: reports/coverage/figures/cum_eligiblity_plot.png
+        html: output/coverage/sa_symptomatic_test.html
+  
+  
+  # Report ----
+  report_data:
+    run: r:latest analysis/descriptive/coverage_report_data.R
+    needs: [data_process]
+    outputs:
+      moderately_sensitive:
+        redacted_tables: output/coverage/table_*.csv
+        unredacted_tables: output/coverage/for-checks/table_*.csv
+
 
 
 
