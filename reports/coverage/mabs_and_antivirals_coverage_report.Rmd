@@ -382,8 +382,7 @@ colnames(table_elig_treat_redacted) <- c("High risk cohort", "Count", "Count", "
                                          "Count", "%")
 
 table_elig_treat_redacted %>%
-  kable(caption = "**Table 1 Count and proportion of potentially eligible patients in OpenSAFELY-TPP who have received treatment for COVID-19 between 16th December 2021 23rd February 2022, broken down by high risk cohort and treatment type.** Patient counts >5 are rounded to the nearest 10; as a result percentages may not add up to 100%. ", 
-        row.names = FALSE, 
+  kable(row.names = FALSE, 
         align = c("l", rep("c", 13)),
         booktabs=TRUE) %>%
   kable_styling(position = "center", full_width = T, bootstrap_options = "striped", font_size = 13)  %>%
@@ -396,13 +395,19 @@ table_elig_treat_redacted %>%
   add_header_above(., c(" ", "", "Treated" = 12)) %>%
   add_footnote(c("High risk cohorts are arranged in descending order, according to number of potentially eligible patients",
                  "All percentages (%) are caluclated with 95% confidence intervals"), 
-               notation = "symbol")
+               notation = "symbol") %>%
+  save_kable(file = "tables/table_prop_eligible_high_risk_cohort.png",
+             zoom = 1.5)
 
 write_csv(table_elig_treat_redacted, here::here(output_dir_rmd, "tables", "table_prop_eligible_high_risk_cohort.csv"))
 
 ```
 
+```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '100%', fig.cap = "**Table 1 Count and proportion of potentially eligible patients in OpenSAFELY-TPP who have received treatment for COVID-19 between 16th December 2021 23rd February 2022, broken down by high risk cohort and treatment type.** Patient counts >5 are rounded to the nearest 10; as a result percentages may not add up to 100%.", fig.topcaption=TRUE}
 
+include_graphics(fs::path(output_dir_rmd, "tables", "table_prop_eligible_high_risk_cohort.png"))
+
+```
 
 ### High risk patient cohorts <a name="hrc"></a>
 
@@ -592,8 +597,7 @@ colnames(table_demo_clinc_breakdown_redacted) <- c("Group", "Variable", "Count",
                                                    "Count", "%", "Count", "%", "Count", "%", 
                                                    "Count", "%")
 table_demo_clinc_breakdown_redacted[,-c(14:15)] %>%
-  kable(caption = "**Table 2 Count and proportion of potentially eligible patients in OpenSAFELY-TPP who have received treatment for COVID-19 between 11th December 2021 and 23rd February 2022, broken down by demographic and clinical categories and by treatment type.** Patient counts >5 are rounded to the nearest 10; as a result percentages may not add up to 100%. ", 
-        row.names = FALSE, 
+  kable(row.names = FALSE, 
         align = c("l", "l", rep("c", 9)),
         booktabs=TRUE) %>%
   kable_styling(position = "center", full_width = T, bootstrap_options = "striped", font_size = 13)  %>%
@@ -606,13 +610,19 @@ table_demo_clinc_breakdown_redacted[,-c(14:15)] %>%
   add_footnote(c("All percentages (%) are caluclated with 95% confidence intervals"), 
                notation = "symbol")  %>%
   add_footnote(c("Due to not being used after December 2021, Casirivimab had been omitted from this table"), 
-               notation = "symbol")
+               notation = "symbol") %>%
+  save_kable(file = "tables/table_prop_eligible_clinc_demo.png",
+             zoom = 1.5)
 
 write_csv(table_demo_clinc_breakdown_redacted, here::here(output_dir_rmd, "tables", "table_prop_eligible_clinc_demo.csv"))
 
 ```
 
+```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '100%', fig.cap = "***Table 2 Count and proportion of potentially eligible patients in OpenSAFELY-TPP who have received treatment for COVID-19 between 11th December 2021 and 23rd February 2022, broken down by demographic and clinical categories and by treatment type.** Patient counts >5 are rounded to the nearest 10; as a result percentages may not add up to 100%.", fig.topcaption=TRUE}
 
+include_graphics(fs::path(output_dir_rmd, "tables", "table_prop_eligible_clinc_demo.png"))
+
+```
 
 ### Consistency with guidance <a name="concordance"></a>
 
