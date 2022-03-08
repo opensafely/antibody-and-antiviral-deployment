@@ -55,19 +55,26 @@ study = StudyDefinition(
   # POPULATION ----
   population = patients.satisfying(
     """
-    ((registered_eligible OR registered_treated)
-    AND
-    NOT has_died
-    AND
-    covid_test_positive 
-    AND 
-    (age >= 12 AND age < 110))
-    OR
-    (sotrovimab_covid_therapeutics 
-      OR 
-    molnupiravir_covid_therapeutics 
-      OR
-    casirivimab_covid_therapeutics)
+    age >= 12 AND age < 110
+    AND NOT has_died
+    AND (
+     registered_eligible
+      AND
+     (covid_test_positive AND NOT covid_positive_previous_30_days)
+     )
+    OR (  
+     registered_treated 
+      AND
+      (sotrovimab_covid_therapeutics 
+        OR 
+      molnupiravir_covid_therapeutics 
+        OR
+      casirivimab_covid_therapeutics
+        OR
+      paxlovid_covid_therapeutics
+        OR
+      remdesivir_covid_therapeutics)
+      )
     """,
     
   ),
@@ -224,7 +231,9 @@ study = StudyDefinition(
   #   },
   # ),
   
-  ### Positive covid test last 30 days
+  ### Positive covid test last 30 days 
+  # (note this will only apply to patients who first tested positive towards the beginning
+  # of the study period)
   covid_positive_previous_30_days = patients.with_test_result_in_sgss(
     pathogen = "SARS-CoV-2",
     test_result = "positive",
@@ -343,19 +352,34 @@ study = StudyDefinition(
   #   (defined below)
   
   ### Pregnancy
+  
+  # pregnancy record in last 36 weeks
+  preg_36wks_date = patients.with_these_clinical_events(
+    pregnancy_primis_codes,
+    returning = "date",
+    find_last_match_in_period = True,
+    between = ["start_date - 252 days", "start_date - 1 day"],
+    date_format = "YYYY-MM-DD",
+  ),
+  
+  # pregnancy OR delivery code since latest pregnancy record:
+  # if one of these codes occurs later than the latest pregnancy code
+  #  this indicates pregnancy has ended, if they are same date assume 
+  #  pregnancy has most likely not ended yet
+  pregdel = patients.with_these_clinical_events(
+    pregdel_primis_codes,
+    returning = "binary_flag",
+    find_last_match_in_period = True,
+    between = ["preg_36wks_date + 1 day", "start_date - 1 day"],
+    date_format = "YYYY-MM-DD",
+  ),
+  
   pregnancy = patients.satisfying(
     
     """
-    (preg_36wks_date AND gender = 'F' AND preg_age < 60)
+    gender = 'F' AND preg_age <= 50
+    AND (preg_36wks_date AND NOT pregdel)
     """,
-    
-    preg_36wks_date = patients.with_these_clinical_events(
-      pregnancy_primis_codes,
-      returning = "date",
-      find_last_match_in_period = True,
-      between = ["start_date - 252 days", "start_date - 1 day"],
-      date_format = "YYYY-MM-DD",
-    ),
     
     gender = patients.sex(
       return_expectations = {
@@ -393,9 +417,10 @@ study = StudyDefinition(
   #   (defined below)
   
   ### Adolescents (aged 12-17) weighing 40kg and under
+  # look in last 6 months only to get a relevant weight value
   weight = patients.with_these_clinical_events(
     weight_opensafely_snomed_codes,
-    on_or_before = "start_date",
+    between = ["start_date - 182 days", "start_date"],
     find_last_match_in_period=True,
     date_format = "YYYY-MM-DD",
     returning = "numeric_value",
@@ -1265,9 +1290,10 @@ study = StudyDefinition(
       "Three or more vaccinations": """ covid_vax_3 """
     },
     
+    # first vaccine from during trials and up to treatment/test date
     covid_vax_1 = patients.with_tpp_vaccination_record(
       target_disease_matches = "SARS-2 CORONAVIRUS",
-      between = ["2020-12-08", end_date],
+      between = ["2020-06-08", "start_date"],
       find_first_match_in_period = True,
       returning = "date",
       date_format = "YYYY-MM-DD"
@@ -1275,7 +1301,7 @@ study = StudyDefinition(
     
     covid_vax_2 = patients.with_tpp_vaccination_record(
       target_disease_matches = "SARS-2 CORONAVIRUS",
-      between = ["covid_vax_1 + 19 days", end_date],
+      between = ["covid_vax_1 + 19 days", "start_date"],
       find_first_match_in_period = True,
       returning = "date",
       date_format = "YYYY-MM-DD"
@@ -1283,7 +1309,7 @@ study = StudyDefinition(
     
     covid_vax_3 = patients.with_tpp_vaccination_record(
       target_disease_matches = "SARS-2 CORONAVIRUS",
-      between = ["covid_vax_2 + 56 days", end_date],
+      between = ["covid_vax_2 + 56 days", "start_date"],
       find_first_match_in_period = True,
       returning = "date",
       date_format = "YYYY-MM-DD"
@@ -1292,7 +1318,7 @@ study = StudyDefinition(
     covid_vax_declined = patients.with_these_clinical_events(
       covid_vaccine_declined_codes,
       returning="binary_flag",
-      on_or_before = end_date,
+      on_or_before = "start_date",
     ),
     
     return_expectations = {

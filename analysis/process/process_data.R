@@ -72,6 +72,8 @@ data_extract0 <- read_csv(
     any_covid_hospital_discharge_date = col_date(format = "%Y-%m-%d"),
     age = col_integer(),
     pregnancy = col_logical(),
+    pregdel = col_logical(),
+    preg_36wks_date = col_date(format = "%Y-%m-%d"),
     weight =  col_double(),
     
     # HIGH RISK GROUPS ----

@@ -38,6 +38,13 @@ pregnancy_primis_codes = codelist_from_csv(
   column = "code",
 )
 
+### Pregnancy or delivery
+pregdel_primis_codes = codelist_from_csv(
+  "codelists/primis-covid19-vacc-uptake-pregdel.csv",
+  system = "snomed",
+  column = "code",
+)
+
 ### Weight
 weight_opensafely_snomed_codes  = codelist_from_csv(
   "codelists/opensafely-weight-snomed.csv",

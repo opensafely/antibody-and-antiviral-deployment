@@ -18,6 +18,12 @@
       "downloaded_at": "2022-02-16 13:57:28.093764Z",
       "sha": "16b9bdf6c37c9f5e802912a98542c5dd5d21183d"
     },
+    "primis-covid19-vacc-uptake-pregdel.csv": {
+      "id": "primis-covid19-vacc-uptake/pregdel/v1",
+      "url": "https://codelists.opensafely.org/codelist/primis-covid19-vacc-uptake/pregdel/v1/",
+      "downloaded_at": "2022-02-28 17:43:53.056887Z",
+      "sha": "cc80ae0d636a46cf09990f4262c1edc044614835"
+    },
     "opensafely-weight-snomed.csv": {
       "id": "opensafely/weight-snomed/5459abc6",
       "url": "https://codelists.opensafely.org/codelist/opensafely/weight-snomed/5459abc6/",
