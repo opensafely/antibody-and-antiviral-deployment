@@ -573,7 +573,7 @@ all_treated <-  data_processed_clean %>%
     age_under_12_remdesivir = (age < 12 & treatment_type == "Remdesivir"),
     weight_remdesivir = (weight < 40 & (age >=12 | age <= 17) & treatment_type == "Remdesivir"),
     
-    not_treated_within_7_days_molnupiravir = ((tb_postest_treat > 7 & treatment_type == "Molnupiravir") | 
+    not_treated_within_7_days_molnupiravir = ((tb_postest_treat > 5 & treatment_type == "Molnupiravir") | 
                                                 (tb_postest_treat < 0 & treatment_type == "Molnupiravir")) & !is.na(tb_postest_treat),
     age_under_18_molnupiravir = (age < 18 & treatment_type =="Molnupiravir"),
     pregnancy_molnupiravir  = (pregnancy == 1 & treatment_type == "Molnupiravir"),

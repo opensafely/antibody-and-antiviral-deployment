@@ -1,5 +1,5 @@
 ---
-title: Coverage and uptake of neutralising monoclonal antibodies or antivirals for non-hospitalised patients with COVID-19
+title: Coverage and uptake of antivirals and neutralising monoclonal antibodies for the treatment of non-hospitalised patients with COVID-19
 output:
   html_document:
   theme: journal
@@ -43,6 +43,7 @@ library(htmltools)
 library(gt)
 library(scales)
 
+
 # Import custom user functions ----
 source(here("analysis", "lib", "custom_functions.R"))
 
@@ -63,7 +64,7 @@ end_date <- report_stats$study_end
 ```
 
 # Overview
-This OpenSAFELY report was rapidly developed to support monitoring the ongoing roll-out of neutralising monoclonal antibodies (nMABs) and antivirals for treatment of COVID-19, based on the population of 23.4m people registered with practices that use TPP SystmOne software. This report will be updated approximately weekly as new data arrives. 
+This OpenSAFELY report was rapidly developed to support monitoring the ongoing roll-out of antivirals and neutralising monoclonal antibodies (nMABs) for the treatment of COVID-19, based on the population of 23.4m people registered with practices that use TPP SystmOne software. This report will be updated approximately weekly as new data arrives. 
 
 The code and data for this report can be found at the OpenSAFELY [antibody-and-antiviral-deployment repository](https://github.com/opensafely/antibody-and-antiviral-deployment). The accompanying manuscript will be available shortly on MedRXiV (link to follow) and submitted for peer review. 
 
@@ -72,17 +73,19 @@ The code and data for this report can be found at the OpenSAFELY [antibody-and-a
 * [Introduction](#intro)
 * [Results](#results)
   + [Coverage of COVID-19 treatment](#coverage)
-  + [Coverage of COVID-19 treatment by high risk cohorts](#hrc)
+  + [High risk patient cohorts](#hrc)
   + [Key demographic and clinical characteristics of treated patients](#demographic)
-  + [Concordance with guidance](#concordance)
+  + [Consistency with guidance](#concordance)
   + [Time to treatment](#time)
 * [Methods](#methods)
 
       
 # Introduction <a name="intro"></a>
-While vaccines remain the best strategy to prevent COVID-19, recent evidence suggests neutralising monoclonal antibodies (nMABs) or antivirals could potentially benefit certain vulnerable populations before or after exposure to SARS-CoV-2, such as the unvaccinated or recently vaccinated high-risk patients. 
+While vaccines remain the best strategy to prevent COVID-19, recent evidence suggests neutralising monoclonal antibodies (nMABs) or antivirals could potentially benefit certain vulnerable populations before or after exposure to SARS-CoV-2, such as the unvaccinated or recently vaccinated high-risk patients. On 16th December 2021, new COVID-19 Medicine Delivery Units (CMDUs) were launched across England, offering antiviral medicines and neutralising monoclonal antibodies (nMABs) as treatment to patients with COVID-19 at high risk of severe outcomes in outpatient clinics or their own home.
 
-With the recent roll-out of nMABs and antivirals, there is an urgent need to for knowledge and understanding around the use of these treatments in patients with COVID-19, such as factors of relevance in determining nMAB and antiviral treatment and the impact of nMAB and antiviral treatment in the community and hospital settings.
+With the recent roll-out of nMABs and antivirals, there is an urgent need assess the coverage of these new treatments amongst these patients, such as factors of relevance in determining nMAB and antiviral treatment and the impact of nMAB and antiviral treatment in the community and hospital settings.
+
+Using the OpenSAFELY platform we have developed and delivered a rapid, near real-time data-monitoring framework for the roll-out of antivirals and nMABs in England that can deliver detailed coverage reports in fine-grained clinical and demographic risk groups, using publicly auditable methods, using linked but pseudonymised patient-level NHS data in a highly secure Trusted Research Environment. 
 
 Full methods in code form can be found in the accompanying [antibody-and-antiviral-deployment repository](https://github.com/opensafely/antibody-and-antiviral-deployment) and are also described in our paper, linked above. [Brief methods](#methods) can be found at the end of the this report.  
 
@@ -91,17 +94,22 @@ Full methods in code form can be found in the accompanying [antibody-and-antivir
       
 # Results <a name="results"></a>
       
-## Overall coverage of COVID-19 treatment <a name="coverage"></a>
-Between **`r format(report_stats$study_start, format = "%d-%b-%Y")`** and **`r format(report_stats$study_end, format = "%d-%b-%Y")`**, a total of `r format(report_stats$eligible_patients, big.mark = ",", scientific = FALSE)` non-hospitalised patients registered at a TPP practice in England were identified as being eligible for receiving an antiviral or nMABs for treating COVID-19 (Figure 1). While the majority of these patients only belonged to one high risk cohort, `r format(report_stats$high_risk_cohort_2plus, big.mark = ",", scientific = FALSE)` (`r format(round(report_stats$high_risk_cohort_2plus/report_stats$eligible_patients*100, digits = 0), big.mark = ",", scientific = FALSE)`%) eligible patients had records indicating that they fell into multiple high risk cohorts (high risk cohort count range `r report_stats$high_risk_cohort_lower` - `r report_stats$high_risk_cohort_upper`). Out of the `r format(report_stats$eligible_patients, big.mark = ",", scientific = FALSE)` eligible patients, a total of `r format(report_stats$treated_patients, big.mark = ",", scientific = FALSE)` patients received an antiviral or nMABs (Figures 2 and 3); 
+      
+### Overall coverage of COVID-19 treatment <a name="coverage"></a>
 
-- PF-07321332 (nirmatrelvir) plus ritonavir: `r format(report_stats$treated_paxlovid, big.mark = ",", scientific = FALSE)`;
+Between **`r format(report_stats$study_start, format = "%d-%b-%Y")`** and **`r format(report_stats$study_end, format = "%d-%b-%Y")`**, a total of `r format(report_stats$eligible_patients, big.mark = ",", scientific = FALSE)` non-hospitalised patients registered at a TPP practice in England were identified as potentially being eligible for receiving an antiviral or nMAB for treating COVID-19. Of the `r format(report_stats$eligible_patients, big.mark = ",", scientific = FALSE)` potentially eligible patients, (`r format(round(report_stats$high_risk_cohort_2plus/report_stats$eligible_patients*100, digits = 0), big.mark = ",", scientific = FALSE)`%)  were classified into more than one high risk cohort (high risk cohort count range `r report_stats$high_risk_cohort_lower` - `r report_stats$high_risk_cohort_upper`). The number of patients potentially eligible in each high risk cohort is described in Figure 1 and Table 1 below.
+
+Of the `r format(report_stats$eligible_patients, big.mark = ",", scientific = FALSE)` potentially eligible patients, `r format(report_stats$treated_patients, big.mark = ",", scientific = FALSE)` (**`r round(report_stats$treated_patients/report_stats$eligible_patients*100, digits = 0)`%**) received treatment from a CMDU (Table 1, Figure 2); 
+
+- Paxlovid: `r format(report_stats$treated_paxlovid, big.mark = ",", scientific = FALSE)`;
 - Sotrovimab: `r format(report_stats$treated_sotrovimab, big.mark = ",", scientific = FALSE)`;
 - Remdesivir: `r format(report_stats$treated_remdesivir, big.mark = ",", scientific = FALSE)`;
 - Molnupiravir: `r format(report_stats$treated_molnupiravir, big.mark = ",", scientific = FALSE)`; 
 - Casirivimab: `r format(report_stats$treated_casirivimab, big.mark = ",", scientific = FALSE)`.
 
-$$\\[0.5cm]$$
-```{r, coverage plot, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '90%', fig.align = 'center', fig.cap = "Figure 1: Cumulative total of patients eligible for receiving an antiviral or nMABs for treating COVID-19 since 11th December 2021, stratified by high risk cohort. Patients are included as eligible on the date of their positive SARS-CoV-2 test. Note, eligible patients can appear in more than one high risk group and the overall number (pre 10th February 2022) in each group is likely to be an overestimation due to including patients where their SARS-CoV-2 infection is confirmed by a lateral flow or polymerase chain reaction test."}
+<br>
+
+```{r, coverage plot, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '100%', fig.cap = "**Figure 1 Cumulative total of potentially eligible patients for receiving an antiviral or nMABs for treating COVID-19 since 11th December 2021, stratified by high risk cohort.** Patients are considered eligible on the date of their positive SARS-CoV-2 test. Note, patients can appear in more than one high risk group, and the overall number in each group is likely to be an overestimation due to including SARS-CoV-2 infection confirmed by either lateral flow or PCR test (where only PCR-confirmed infections should have been treated according to guidance in effect prior to 10th February 2022), and potentially including non-symptomatic patients.", fig.topcaption=TRUE}
 
 coverage_plot_data <- read_csv(here::here(input_dir_os, "table_cum_eligiblity_redacted.csv")) %>%
   mutate(high_risk_cohort = case_when(
@@ -114,7 +122,7 @@ coverage_plot_data <- read_csv(here::here(input_dir_os, "table_cum_eligiblity_re
     high_risk_cohort == "liver_disease" ~ "Liver disease", 
     high_risk_cohort == "imid" ~ "Immune-mediated inflammatory disorders", 
     high_risk_cohort == "immunosupression" ~ "Primary immune deficiencies", 
-    high_risk_cohort == "hiv_aids" ~ "Immuosupression due to HIV or AIDS (CD4 <350 cells/mm3)", 
+    high_risk_cohort == "hiv_aids" ~ "Immunosuppression due to HIV or AIDS", 
     high_risk_cohort == "solid_organ_transplant" ~ "Solid organ transplant recipients",
     high_risk_cohort == "rare_neurological_conditions" ~ "Rare neurological conditions",
     TRUE ~ NA_character_))
@@ -170,8 +178,9 @@ include_graphics(fs::path(output_dir_rmd, "figures", "figure_cum_eligiblity.png"
 
 ```
 
-$$\\[0.5cm]$$
-```{r, elig treatment type plot, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '90%', fig.align = 'center', fig.cap = "Figure 2: Cumulative total of patients who received an antiviral or nMAB for treating COVID-19 since 11th December 2021, stratified by treatment type"}
+<br>
+
+```{r, elig treatment type plot, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '100%', fig.cap = "**Figure 2 Cumulative total of patients who received an antiviral or nMAB for treating COVID-19 since 16th December 2021, stratified by (a) treatment type and (b) high risk cohorts.** Shorter lines for Paxlovid and casirivimab reflect availability and guidance. Note, treated patients can appear in more than one high risk group.", fig.topcaption=TRUE}
 
 treatment_plot_data <- read_csv(here::here(input_dir_os, "table_cum_treatment_type_redacted.csv")) %>%
   filter(!is.na(treatment_date),
@@ -195,10 +204,10 @@ treatment_type_plot <- treatment_plot_data %>%
   theme_classic(base_size = 8) +
   scale_x_date(date_breaks = "1 week", date_labels =  "%d %b %Y") +
   labs(
-    x = "Treatment date",
+    x = "",
     y = "Number of patients receiving treatment",
     colour = "Treatment type",
-    title = "") +
+    title = "(a)") +
   theme(
     axis.text = element_text(size = 15),
     axis.text.x = element_text(angle = 60, hjust = 1),
@@ -210,7 +219,8 @@ treatment_type_plot <- treatment_plot_data %>%
     legend.box.background = element_rect(colour = "black"),
     axis.line.x = element_line(colour = "black"),
     panel.grid.minor.x = element_blank(),
-    legend.box.margin = margin(t = 1, l = 1, b = 1, r = 1))
+    legend.box.margin = margin(t = 1, l = 1, b = 1, r = 1),
+    plot.title = element_text(size=20, face="bold"))
 
 ggsave(
   here::here(output_dir_rmd, "figures", "figure_cum_treatment_type.png"),
@@ -222,10 +232,9 @@ include_graphics(fs::path(output_dir_rmd, "figures", "figure_cum_treatment_type.
 
 ```
 
+<br>
 
-
-## Coverage of COVID-19 treatment by high risk cohort <a name="hrc"></a>
-```{r, elig treatment plot, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '90%', fig.align = 'center', fig.cap = "Figure 3: Cumulative total of patients who received an antiviral or nMABs for treating COVID-19 since 11th December 2021, stratified by high risk cohorts. Note, treated patients can appear in more than one high risk group."}
+```{r, elig treatment plot, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '100%', fig.cap = "**(b)**"}
 
 treatment_plot_data_therapeutics <- read_csv(here::here(input_dir_os, "table_cum_treatment_redacted.csv")) %>%
   filter(!is.na(treatment_date),
@@ -240,7 +249,7 @@ treatment_plot_data_therapeutics <- read_csv(here::here(input_dir_os, "table_cum
     high_risk_cohort == "liver_disease" ~ "Liver disease", 
     high_risk_cohort == "imid" ~ "Immune-mediated inflammatory disorders", 
     high_risk_cohort == "immunosupression" ~ "Primary immune deficiencies", 
-    high_risk_cohort == "hiv_aids" ~ "Immuosupression due to HIV or AIDS (CD4 <350 cells/mm3)", 
+    high_risk_cohort == "hiv_aids" ~ "Immunosuppression due to HIV or AIDS", 
     high_risk_cohort == "solid_organ_transplant" ~ "Solid organ transplant recipients",
     high_risk_cohort == "rare_neurological_conditions" ~ "Rare neurological conditions",
     TRUE ~ NA_character_))
@@ -265,7 +274,7 @@ treatment_plot_therapeutics <- treatment_plot_data_therapeutics %>%
     x = "Treatment date",
     y = "Number of patients receiving treatment",
     colour = "High risk cohort",
-    title = "") +
+    title = "(b)") +
   theme(
     axis.text = element_text(size = 15),
     axis.text.x = element_text(angle = 60, hjust = 1),
@@ -277,7 +286,8 @@ treatment_plot_therapeutics <- treatment_plot_data_therapeutics %>%
     legend.box.background = element_rect(colour = "black"),
     axis.line.x = element_line(colour = "black"),
     panel.grid.minor.x = element_blank(),
-    legend.box.margin = margin(t = 1, l = 1, b = 1, r = 1))
+    legend.box.margin = margin(t = 1, l = 1, b = 1, r = 1),
+    plot.title = element_text(size=20, face="bold"))
 
 ggsave(
   here::here(output_dir_rmd, "figures", "figure_cum_treatment_therapeutics.png"),
@@ -289,81 +299,8 @@ include_graphics(fs::path(output_dir_rmd, "figures", "figure_cum_treatment_thera
 
 ```
 
-$$\\[0.5cm]$$
-```{r, prop treatment plot, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '100%', fig.align = 'center', fig.cap = "Figure 4: Weekly proportion of eligible patients receiving an antiviral or nMAB for treating COVID-19 since 11th December 2021, stratified by high risk cohort"}
+<br>
 
-weekly_treatment_proportion <- read_csv(here::here(input_dir_os, "table_prop_treated_redacted.csv")) %>%
-  filter(!is.na(prop_redacted),
-         treatment_type == "All") %>%
-  mutate(high_risk_cohort = case_when(
-    high_risk_cohort == "All" ~ "All", 
-    high_risk_cohort == "downs_syndrome" ~ "Down's syndrome", 
-    high_risk_cohort == "sickle_cell_disease" ~ "Sickle cell disease", 
-    high_risk_cohort == "solid_cancer" ~ "Solid cancer", 
-    high_risk_cohort == "haematological_disease" ~ "Haematological diseases and stem cell transplant recipients", 
-    high_risk_cohort == "renal_disease" ~ "Renal disease", 
-    high_risk_cohort == "liver_disease" ~ "Liver disease", 
-    high_risk_cohort == "imid" ~ "Immune-mediated inflammatory disorders", 
-    high_risk_cohort == "immunosupression" ~ "Primary immune deficiencies", 
-    high_risk_cohort == "hiv_aids" ~ "Immuosupression due to HIV or AIDS (CD4 <350 cells/mm3)", 
-    high_risk_cohort == "solid_organ_transplant" ~ "Solid organ transplant recipients",
-    high_risk_cohort == "rare_neurological_conditions" ~ "Rare neurological conditions",
-    TRUE ~ NA_character_),
-    
-    high_risk_cohort = unlist(lapply(strwrap(high_risk_cohort, width=30, simplify=FALSE), paste, 
-                                     collapse="\n"))) %>%
-  mutate(treatment_type = case_when(
-    treatment_type == "All" ~ "All", 
-    treatment_type == "Paxlovid" ~ "PF-07321332 (nirmatrelvir) plus ritonavir", 
-    treatment_type == "Sotrovimab" ~ "Sotrovimab", 
-    treatment_type == "Remdesivir" ~ "Remdesivir", 
-    treatment_type == "Molnupiravir" ~ "Molnupiravir", 
-    treatment_type == "Casirivimab" ~ "Casirivimab", 
-    TRUE ~ NA_character_))
-
-plot_order <- weekly_treatment_proportion %>%
-  group_by(high_risk_cohort) %>%
-  mutate(order = max(prop_redacted, na.rm = T)) %>%
-  arrange(desc(order)) %>%
-  filter(prop_redacted == order) %>%
-  select(high_risk_cohort, order) %>%
-  distinct()
-
-weekly_treatment_proportion <- weekly_treatment_proportion %>%
-  mutate(high_risk_cohort = factor(high_risk_cohort, levels = plot_order$high_risk_cohort)) 
-
-weekly_treatment_proportion_plot <- weekly_treatment_proportion %>%
-  mutate(treatment_type = factor(treatment_type, levels = c("All", "PF-07321332 (nirmatrelvir) plus ritonavir", "Sotrovimab", "Remdesivir", 
-                                                            "Molnupiravir", "Casirivimab"))) %>%
-  ggplot(aes(x = elig_start, y = prop_redacted, colour = high_risk_cohort, group = high_risk_cohort)) +
-  geom_line(size = 1) +
-  facet_wrap(~high_risk_cohort, scales = "free_y") +
-  theme_classic(base_size = 8) +
-  scale_x_date(date_breaks = "2 week", date_labels =  "%d %b %Y") +
-  labs(
-    x = "",
-    y = "Proportion of eligble patients receiving treatment",
-    colour = "Treatment type",
-    title = "") +
-    theme(legend.position = "none") +
-  theme(
-    axis.text = element_text(size = 15),
-    axis.text.x = element_text(angle = 60, hjust = 1),
-    axis.title = element_text(size = 20),
-    legend.text = element_text(size = 12),
-    legend.title=element_text(size=12, face = "bold"),
-    strip.text = element_text(size=12))
-
-ggsave(
-  here::here(output_dir_rmd, "figures", "figure_prop_treatment.png"),
-  weekly_treatment_proportion_plot,
-  units = "cm", width = 35, height = 20
-)
-
-include_graphics(fs::path(output_dir_rmd, "figures", "figure_prop_treatment.png"))
-```
-
-$$\\[0.5cm]$$
 ```{r, eligible-treatment breakdown, echo=FALSE, message=FALSE, warning=FALSE, out.width = '90%'}
 
 table_elig_treat_redacted <- read_csv(fs::path(input_dir_os, "table_elig_treat_redacted.csv")) %>%
@@ -377,14 +314,14 @@ table_elig_treat_redacted <- read_csv(fs::path(input_dir_os, "table_elig_treat_r
     high_risk_cohort == "liver_disease" ~ "Liver disease", 
     high_risk_cohort == "imid" ~ "Immune-mediated inflammatory disorders", 
     high_risk_cohort == "immunosupression" ~ "Primary immune deficiencies", 
-    high_risk_cohort == "hiv_aids" ~ "Immuosupression due to HIV or AIDS (CD4 <350 cells/mm3)", 
+    high_risk_cohort == "hiv_aids" ~ "Immunosuppression due to HIV or AIDS", 
     high_risk_cohort == "solid_organ_transplant" ~ "Solid organ transplant recipients",
     high_risk_cohort == "rare_neurological_conditions" ~ "Rare neurological conditions",
     TRUE ~ NA_character_)) %>%
-  mutate(order = Treated/Eligibile,
-        order = ifelse(high_risk_cohort == "All", 1, order)) %>%
-  arrange(desc(order)) %>%
-  select(-order)
+  #mutate(order = Treated/Eligibile,
+  #      order = ifelse(high_risk_cohort == "All", 1, order)) %>%
+  arrange(desc(Eligibile)) #%>%
+  #select(-order)
 
 table_elig_treat_redacted <- table_elig_treat_redacted %>%
   mutate(Treated_perc = paste(round(Treated/Eligibile*100, digits = 0), " (",
@@ -445,7 +382,7 @@ colnames(table_elig_treat_redacted) <- c("High risk cohort", "Count", "Count", "
                                          "Count", "%")
 
 table_elig_treat_redacted %>%
-  kable(caption = "Table 1: Count and proportion of eligible patients who have received treatment for COVID-19 since 11th December 2021, broken down by high risk cohort and treatment type", 
+  kable(caption = "**Table 1 Count and proportion of potentially eligible patients in OpenSAFELY-TPP who have received treatment for COVID-19 between 16th December 2021 23rd February 2022, broken down by high risk cohort and treatment type.** Patient counts >5 are rounded to the nearest 10; as a result percentages may not add up to 100%. ", 
         row.names = FALSE, 
         align = c("l", rep("c", 13)),
         booktabs=TRUE) %>%
@@ -454,10 +391,10 @@ table_elig_treat_redacted %>%
   column_spec(1, bold = T, width = "10em") %>%
   column_spec(2, width = "5em") %>%
   column_spec(4, background = "lightgrey")  %>%
-  add_header_above(., c(" ", "Eligible", "All" = 2, "PF-07321332 (nirmatrelvir) plus ritonavir  " = 2, "Sotrovimab" = 2, "Remdesivir" = 2,
+  add_header_above(., c(" ", "Eligible", "All" = 2, "Paxlovid" = 2, "Sotrovimab" = 2, "Remdesivir" = 2,
                         "Molnupiravir" = 2, "Casirivimab" = 2)) %>%
   add_header_above(., c(" ", "", "Treated" = 12)) %>%
-  add_footnote(c("High risk cohorts are arranged in descending order, according to percentage treated",
+  add_footnote(c("High risk cohorts are arranged in descending order, according to number of potentially eligible patients",
                  "All percentages (%) are caluclated with 95% confidence intervals"), 
                notation = "symbol")
 
@@ -466,8 +403,93 @@ write_csv(table_elig_treat_redacted, here::here(output_dir_rmd, "tables", "table
 ```
 
 
-## Key demographic and clinical characteristics of treated patients <a name="demographic"></a>
-```{r, echo=FALSE, warning=FALSE, message=FALSE, out.width = '90%'}
+
+### High risk patient cohorts <a name="hrc"></a>
+
+The proportion of potentially eligible patients receiving treatment varied over time and by high risk cohort (Figure 3).
+
+```{r, prop treatment plot, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '100%', fig.cap = "**Figure 3 Weekly proportion of eligible patients receiving an antiviral or nMAB for treating COVID-19 since 11th December 2021, stratified by high risk cohort**", fig.topcaption=TRUE}
+
+weekly_treatment_proportion <- read_csv(here::here(input_dir_os, "table_prop_treated_redacted.csv")) %>%
+  filter(!is.na(prop_redacted),
+         treatment_type == "All") %>%
+  mutate(high_risk_cohort = case_when(
+    high_risk_cohort == "All" ~ "All", 
+    high_risk_cohort == "downs_syndrome" ~ "Down's syndrome", 
+    high_risk_cohort == "sickle_cell_disease" ~ "Sickle cell disease", 
+    high_risk_cohort == "solid_cancer" ~ "Solid cancer", 
+    high_risk_cohort == "haematological_disease" ~ "Haematological diseases and stem cell transplant recipients", 
+    high_risk_cohort == "renal_disease" ~ "Renal disease", 
+    high_risk_cohort == "liver_disease" ~ "Liver disease", 
+    high_risk_cohort == "imid" ~ "Immune-mediated inflammatory disorders", 
+    high_risk_cohort == "immunosupression" ~ "Primary immune deficiencies", 
+    high_risk_cohort == "hiv_aids" ~ "Immunosuppression due to HIV or AIDS", 
+    high_risk_cohort == "solid_organ_transplant" ~ "Solid organ transplant recipients",
+    high_risk_cohort == "rare_neurological_conditions" ~ "Rare neurological conditions",
+    TRUE ~ NA_character_),
+    
+    high_risk_cohort = unlist(lapply(strwrap(high_risk_cohort, width=30, simplify=FALSE), paste, 
+                                     collapse="\n"))) %>%
+  mutate(treatment_type = case_when(
+    treatment_type == "All" ~ "All", 
+    treatment_type == "Paxlovid" ~ "Paxlovid", 
+    treatment_type == "Sotrovimab" ~ "Sotrovimab", 
+    treatment_type == "Remdesivir" ~ "Remdesivir", 
+    treatment_type == "Molnupiravir" ~ "Molnupiravir", 
+    treatment_type == "Casirivimab" ~ "Casirivimab", 
+    TRUE ~ NA_character_))
+
+plot_order <- weekly_treatment_proportion %>%
+  group_by(high_risk_cohort) %>%
+  mutate(order = max(prop_redacted, na.rm = T)) %>%
+  arrange(desc(order)) %>%
+  filter(prop_redacted == order) %>%
+  mutate(order = ifelse(high_risk_cohort == "All", 1, order)) %>%
+  select(high_risk_cohort, order) %>%
+  distinct() %>%
+  arrange(desc(order))
+
+weekly_treatment_proportion <- weekly_treatment_proportion %>%
+  mutate(high_risk_cohort = factor(high_risk_cohort, levels = plot_order$high_risk_cohort)) 
+
+weekly_treatment_proportion_plot <- weekly_treatment_proportion %>%
+  mutate(treatment_type = factor(treatment_type, levels = c("All", "Paxlovid", "Sotrovimab", "Remdesivir", 
+                                                            "Molnupiravir", "Casirivimab"))) %>%
+  ggplot(aes(x = elig_start, y = prop_redacted, colour = high_risk_cohort, group = high_risk_cohort)) +
+  geom_line(size = 1) +
+  facet_wrap(~high_risk_cohort, scales = "free_y") +
+  theme_classic(base_size = 8) +
+  scale_x_date(date_breaks = "2 week", date_labels =  "%d %b %Y") +
+  labs(
+    x = "",
+    y = "Proportion of eligble patients receiving treatment",
+    colour = "Treatment type",
+    title = "") +
+    theme(legend.position = "none") +
+  theme(
+    axis.text = element_text(size = 15),
+    axis.text.x = element_text(angle = 60, hjust = 1),
+    axis.title = element_text(size = 20),
+    legend.text = element_text(size = 12),
+    legend.title=element_text(size=12, face = "bold"),
+    strip.text = element_text(size=12))
+
+ggsave(
+  here::here(output_dir_rmd, "figures", "figure_prop_treatment.png"),
+  weekly_treatment_proportion_plot,
+  units = "cm", width = 35, height = 20
+)
+
+include_graphics(fs::path(output_dir_rmd, "figures", "figure_prop_treatment.png"))
+```
+
+
+
+### Key demographic and clinical characteristics of treated patients <a name="demographic"></a>
+
+Table 2 shows the count and proportion of potentially eligible patients who received treatment for COVID-19 by `r format(report_stats$study_end, format = "%d-%b-%Y")`, broken down by demographic and clinical categories and by treatment type. The proportion treated varied by ethnicity, NHS Regions and by rurality. There was also lower coverage among care home residents, those with dementia, those with sickle cell disease, unvaccinated patients and in the most socioeconomically deprived areas. Patients who were housebound, or who had a severe mental illness also had a slightly reduced chance of being treated.
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, out.width = '100%'}
 
 table_demo_clinc_breakdown_redacted <- read_csv(fs::path(input_dir_os, "table_demo_clinc_breakdown_redacted.csv")) %>%
   mutate(Group = factor(Group, 
@@ -569,30 +591,34 @@ table_demo_clinc_breakdown_redacted <- read_csv(fs::path(input_dir_os, "table_de
 colnames(table_demo_clinc_breakdown_redacted) <- c("Group", "Variable", "Count", "Count", "%", "Count", "%", 
                                                    "Count", "%", "Count", "%", "Count", "%", 
                                                    "Count", "%")
-table_demo_clinc_breakdown_redacted %>%
-  kable(caption = "Table 2: Count and proportion of eligible patients who have received treatment for COVID-19, broken down by demographic and clinical categories and by treatment type", 
+table_demo_clinc_breakdown_redacted[,-c(14:15)] %>%
+  kable(caption = "**Table 2 Count and proportion of potentially eligible patients in OpenSAFELY-TPP who have received treatment for COVID-19 between 11th December 2021 and 23rd February 2022, broken down by demographic and clinical categories and by treatment type.** Patient counts >5 are rounded to the nearest 10; as a result percentages may not add up to 100%. ", 
         row.names = FALSE, 
-        align = c("l", "l", rep("c", 11)),
+        align = c("l", "l", rep("c", 9)),
         booktabs=TRUE) %>%
   kable_styling(position = "center", full_width = T, bootstrap_options = "striped", font_size = 13)  %>%
   column_spec(1, bold = T, width = "2em") %>%
   column_spec(2, bold = T, width = "2em") %>%
   column_spec(5, background = "lightgrey") %>%
-  add_header_above(., c(" ", "", "Eligible", "All" = 2, "PF-07321332 (nirmatrelvir) plus ritonavir" = 2, "Sotrovimab" = 2, "Remdesivir" = 2,
-                        "Molnupiravir" = 2, "Casirivimab" = 2)) %>%
-  add_header_above(., c(" ", "", "", "Treated" = 12)) %>%
+  add_header_above(., c(" ", "", "Eligible", "All" = 2, "Paxlovid" = 2, "Sotrovimab" = 2, "Remdesivir" = 2,
+                        "Molnupiravir" = 2)) %>%
+  add_header_above(., c(" ", "", "", "Treated" = 10)) %>%
   add_footnote(c("All percentages (%) are caluclated with 95% confidence intervals"), 
+               notation = "symbol")  %>%
+  add_footnote(c("Due to not being used after December 2021, Casirivimab had been omitted from this table"), 
                notation = "symbol")
 
 write_csv(table_demo_clinc_breakdown_redacted, here::here(output_dir_rmd, "tables", "table_prop_eligible_clinc_demo.csv"))
 
-
 ```
 
-## Concordance with guidance <a name="concordance"></a>
-Of the `r format(report_stats$treated_patients, format = "%d-%b-%Y")` patients who received treatment for COVID-19 between `r format(report_stats$study_start, format = "%d-%b-%Y")` and `r format(report_stats$study_end, format = "%d-%b-%Y")`,  `r format(as.numeric(flowchart_non_elig[1,2]), big.mark = ",", scientific = FALSE)` patients were missing records needed to confirm eligibility. It is likely that most, if not all, of these patients meet all of the eligibility criteria and none of the exclusion criteria but, for example, their SARS-CoV-2 test result was not available in their record or we just do not have access to all the criteria the clinician might use to assess high risk group status (such as the patients identified via non-digital methods).
 
-```{r non_elig, echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=10, out.width = '80%', fig.align = 'center', fig.cap = "Figure 4: Breakdown of eligibility criteria variables in treated patients with missing records needed to confirm eligibility"}
+
+### Consistency with guidance <a name="concordance"></a>
+
+Of the `r format(report_stats$treated_patients,  big.mark = ",", scientific = FALSE)` patients who received treatment for COVID-19 between `r format(report_stats$study_start, format = "%d-%b-%Y")` and `r format(report_stats$study_end, format = "%d-%b-%Y")`,  `r format(as.numeric(flowchart_non_elig[1,2]), big.mark = ",", scientific = FALSE)` patients were missing records needed to confirm eligibility; `r round(as.numeric(subset(flowchart_non_elig, criteria == "c_no_positive_covid_test")$n)/report_stats$treated_patients*100, digits = 0)`% did not have evidence of a positive SARS-CoV-2 test, `r round(as.numeric(subset(flowchart_non_elig, criteria == "c_no_high_risk_group_nhsd")$n)/report_stats$treated_patients*100, digits = 0)`% did not have a high risk cohort identified from their GP records alone, and `r round(as.numeric(subset(flowchart_non_elig, criteria == "c_primary_covid_hospital_admission_last_30_days")$n)/report_stats$treated_patients*100, digits = 0)`% were discharged from hospital within 30 days prior to their positive test or treatment date, where COVID-19 was the primary diagnosis. There were also a small number of other potential inconsistencies with guidance for patients who received treatment, such as having a potential contraindication to the treatment given (Figure 3).
+
+```{r non_elig, echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=10, out.width = '100%', fig.cap = "**Figure 3 Breakdown of possible inconsistencies with guidance on eligibility/exclusion criteria in treated COVID-19 patients.** Treatment eligibility window for Paxlovid, sotrovimab and molnupiravir was 5 days from positive SARS-CoV-2 test (used as a proxy for symptom onset date) and 7 days for remdesivir.", fig.topcaption=TRUE}
 
 flowchart_non_elig_plot <- flowchart_non_elig[-c(1,8),] %>%
   mutate(criteria2 = c("No positive SARS-CoV-2 test record", 
@@ -602,10 +628,10 @@ flowchart_non_elig_plot <- flowchart_non_elig[-c(1,8),] %>%
                        "Required hospitalisation within 30 days prior to treatment with COVID-19 recorded as the primary diagnosis",
                        "Required hospitalisation within 30 days prior to treatment with any diagnosis",
                        "Non symptomatic positive SARS-CoV-2 test record",
-                       "Treated with PF-07321332 (nirmatrelvir) plus ritonavir outside of treatment eligibility window",           
-                       "Treated with PF-07321332 (nirmatrelvir) plus ritonavir and in renal or liver high risk cohort",
-                       "Treated with PF-07321332 (nirmatrelvir) plus ritonavir aged under 18",                       
-                       "Treated with PF-07321332 (nirmatrelvir) plus ritonavir and pregnant",
+                       "Treated with Paxlovid outside of treatment eligibility window",           
+                       "Treated with Paxlovid and in renal or liver high risk cohort",
+                       "Treated with Paxlovid aged under 18",                       
+                       "Treated with Paxlovid and pregnant",
                        "Treated with sotrovimab outside of treatment eligibility window",
                        "Treated with sotrovimab aged under 12",  
                        "Treated with sotrovimab weight under 40kg", 
@@ -618,9 +644,13 @@ flowchart_non_elig_plot <- flowchart_non_elig[-c(1,8),] %>%
   mutate(n = as.numeric(ifelse(n == "<5", 5, n))) %>%
   filter(#criteria != "c_no_high_risk_group_match",
     #criteria != "c_no_high_risk_group_nhsd",
+    criteria != "c_not_symptomatic_covid_test",
+    criteria != "c_pregnancy_molnupiravir",
     criteria != "c_any_covid_hospital_admission_last_30_days",
+    criteria != "c_positive_covid_test_previous_30_days",
     criteria != "c_pregnancy_paxlovid",
-    criteria != "c_pregnancy_molnupiravir") %>%
+    criteria != "c_pregnancy_molnupiravir",
+    criteria != "c_pregnancy_paxlovid") %>%
   #group_by(criteria3) %>%
   #summarise(n = sum(n)) %>%
   arrange(desc(n))
@@ -641,14 +671,14 @@ flowchart_non_elig_plot <- flowchart_non_elig_plot %>%
        title = "") +
   theme(legend.position = "none",
         axis.text.x = element_text(angle = 60, hjust = 1),
-        axis.text = element_text(size = 15),
+        axis.text = element_text(size = 12),
         axis.title = element_text(size = 15),
         strip.text = element_text(size=12))
 
 ggsave(
   here::here(output_dir_rmd, "figures", "figure_non_elig_breakdown.png"),
   flowchart_non_elig_plot,
-  units = "cm", width = 40, height = 30
+  units = "cm", width = 30, height = 20
 )
 
 include_graphics(fs::path(output_dir_rmd, "figures", "figure_non_elig_breakdown.png"))
@@ -656,10 +686,26 @@ include_graphics(fs::path(output_dir_rmd, "figures", "figure_non_elig_breakdown.
 ```
 
 
-## Time to treatment <a name="time"></a>
-```{r time to treatment, echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=10, out.width = '80%', fig.align = 'center', fig.cap = "Figure 4a: Time between positive SARS-CoV-2 test and treatment for COVID-19, broken down by treatment type"}
 
+### Time to treatment <a name="time"></a>
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, include=FALSE}
 data_time_between <- read_csv(fs::path(input_dir_os, "table_time_to_treat_redacted.csv"))
+
+tbt_num <- data_time_between %>% 
+  filter(high_risk_cohort == "All",
+         (tb >= 0 & tb <= 5 & treatment_type %in% c("Paxlovid", "Sotrovimab")) |
+           (tb >= 0 & tb <= 7 & treatment_type %in% c("Remdesivir", "Molnupiravir"))) %>%
+  summarise(n = sum(n, na.rm = T))
+
+```
+
+Overall, of the `r format(report_stats$treated_patients,  big.mark = ",", scientific = FALSE)` patients who received treatment, `r round(tbt_num$n/report_stats$treated_patients*100, digits = 0)`% did so within the respective treatment-specific eligibility window as estimated from test date (as symptom date is not consistently available) (Figure 4).
+
+```{r time to treatment, echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=10, out.width = '100%', fig.cap = "**Figure 4 Time (number of days) between positive SARS-CoV-2 test and treatment for COVID-19, broken down by (a) treatment type and (b) high risk cohort.**", fig.topcaption=TRUE}
+
+data_time_between$treatment_type = unlist(lapply(strwrap(data_time_between$treatment_type, width=20, simplify=FALSE), paste, 
+                                                  collapse="\n"))
 
 data_time_between_plot <- data_time_between %>%
   filter(high_risk_cohort == "All",
@@ -669,31 +715,33 @@ data_time_between_plot <- data_time_between %>%
   ggplot(aes(tb)) +
   geom_col(aes(x = tb, y = n, fill = treatment_type, group = treatment_type), position = "dodge") + 
   theme_bw(base_size = 8) +
-  facet_wrap(~treatment_type, ncol = 2) +
+  facet_wrap(~treatment_type, ncol = 4) +
   theme(legend.position = "none") +
-  labs(x = "Time between positive SARS-CoV-2 test and treatment for COVID-19 (days)",
+  labs(x = "",
        y = "Number of patients receiving treatment",
        colour = "High risk cohort",
-       title = "") +
+       title = "(a)") +
   theme(legend.position = "none",
         legend.title = element_blank(),
         axis.text.x = element_text(angle = 60, hjust = 1),
         axis.text = element_text(size = 15),
         axis.title = element_text(size = 15),
-        strip.text = element_text(size=12))
+        strip.text = element_text(size=12),
+        plot.title = element_text(size=20, face="bold"))
 
 ggsave(
   here::here(output_dir_rmd, "figures", "figure_time_to_treatment_types.png"),
   data_time_between_plot,
-  units = "cm", width = 40, height = 30
+  units = "cm", width = 30, height = 15
 )
 
 include_graphics(fs::path(output_dir_rmd, "figures", "figure_time_to_treatment_types.png"))
 
 ```
 
-$$\\[0.5cm]$$
-```{r time to treatment 2, echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=10, fig.height=8, out.width = '80%', fig.align = 'center', fig.cap = "Figure 4b: Time between positive SARS-CoV-2 test and treatment for COVID-19, broken down by high risk cohort"}
+<br>
+
+```{r time to treatment 2, echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=10, fig.height=8, out.width = '80%', fig.align='center'}
 
 data_time_between <- read_csv(fs::path(input_dir_os, "table_time_to_treat_redacted.csv"))
 
@@ -711,7 +759,7 @@ time_groups <- data_time_between %>%
     high_risk_cohort == "liver_disease" ~ "Liver disease", 
     high_risk_cohort == "imid" ~ "Immune-mediated inflammatory disorders", 
     high_risk_cohort == "immunosupression" ~ "Primary immune deficiencies", 
-    high_risk_cohort == "hiv_aids" ~ "Immuosupression due to HIV or AIDS (CD4 <350 cells/mm3)", 
+    high_risk_cohort == "hiv_aids" ~ "Immunosuppression due to HIV or AIDS", 
     high_risk_cohort == "solid_organ_transplant" ~ "Solid organ transplant recipients",
     high_risk_cohort == "rare_neurological_conditions" ~ "Rare neurological conditions",
     TRUE ~ NA_character_)) %>%
@@ -738,58 +786,78 @@ data_time_between_plot <- time_groups %>%
   labs(x = "Time between positive SARS-CoV-2 test and treatment for COVID-19 (days)",
        y = "Number of patients receiving treatment",
        colour = "High risk cohort",
-       title = "") +
+       title = "(b)") +
   theme(legend.position = "none",
     axis.text = element_text(size = 15),
     axis.text.x = element_text(angle = 60, hjust = 1),
     axis.title = element_text(size = 20),
-    strip.text = element_text(size=12)) +
+    strip.text = element_text(size=12),
+    plot.title = element_text(size=20, face="bold")) +
   scale_y_continuous(labels = comma)
 
 ggsave(
   here::here(output_dir_rmd, "figures", "figure_time_to_treatment_cohort.png"),
   data_time_between_plot,
-  units = "cm", width = 40, height = 30
+  units = "cm", width = 30, height = 30
 )
 
 include_graphics(fs::path(output_dir_rmd, "figures", "figure_time_to_treatment_cohort.png"))
 
 ```
 
-$$\\[0.5cm]$$
+
+<br>
+<br>
 
 
-# Brief Methods <a name="methods"></a>
+# Methods <a name="methods"></a>
 
 Full methods in code form can be found in the accompanying [antibody-and-antiviral-deployment repository](https://github.com/opensafely/antibody-and-antiviral-deployment) and are also described in our paper, linked above. Brief methods are given below.  
 
 ### Data sources
-All data were analysed securely through OpenSAFELY-TPP  [https://opensafely.org](https://opensafely.org). Contains the full pseudonymised primary care records for all patients currently registered with general practices using TPP SystmOne software (approximately 23.4 million, 40% of the English population). Data are linked with accident and emergency (A&E) attendance and in-patient records from NHS Digital; national coronavirus testing records from the Second Generation Surveillance System (SGSS); and the “COVID-19 therapeutics dataset”, a patient-level dataset on antiviral and nMAB treatments from NHS England, derived from software used to notify NHS England of COVID-19 treatments.  
+
+All data were analysed securely through OpenSAFELY-TPP  [https://opensafely.org](https://opensafely.org) which contains the full pseudonymised primary care records for all patients currently registered with general practices using TPP SystmOne software (approximately 23.4 million, 40% of the English population). Data were linked with accident and emergency (A&E) attendance and in-patient records from NHS Digital; national coronavirus testing records from the Second Generation Surveillance System (SGSS); and the “COVID-19 therapeutics dataset”, a patient-level dataset on antiviral and nMAB treatments from NHS England, derived from software used to notify NHS England of COVID-19 treatments.  
 
 ### Study population
 
-Base population:
-- Patients in OpenSAFELY-TPP registered with a general practice on 11th December 2021 (earliest possible date for eligibility for receiving antivirals/nMABS in outpatient settings).Patients with unknown date of birth excluded. 
+##### Base population
 
-Eligible patients:
-- Eligibility and exclusion criteria were applied as per the Interim Clinical Commissioning Policy for non-hospitalised COVID-19 patients (NHSE, 28/01/2022): symptomatic SARS-CoV-2 infection not requiring hospitalisation or supplemental oxygen, in a ‘high risk’ cohort, no known hypersensitivity reaction to relevant active substances). 
-- To determine high risk status we applied the detailed codelists and logic from NHS Digital as far as possible.
-- We also included patients in the eligible population if they were in the Treated cohort below.
+- Patients with either a positive SARS-CoV-2 test on or after 11th December 2021 (this is the earliest date that a patient could have tested positive and still been eligible for receiving treatment when they became available from CMDUs from 16th December 2021) or with a treatment record on or after 16th December 2021, who were also registered at the time of their test/treatment. 
+- Patients aged under 12 or with an unknown date of birth were excluded. 
 
-Treated patients:
-- Treatments and the date they were given were identified in the COVID-19 therapeutics dataset, restricted to those treated in the community (“non_hospitalised”).
-- Patients issued more than one treatment within two weeks of one another, or with an implausible treatment date (e.g. far in the future) were excluded. 
+##### Eligible patients
+
+Where possible eligibility criteria were applied as per the Interim Clinical Commissioning Policy for non-hospitalised COVID-19 patients (NHSE, 28/01/2022) this included:
+
+- SARS-CoV-2 infection confirmed by a PCR or lateral flow test
+- being a member of a high risk cohort (determined by  applying the detailed codelists and logic from NHS Digital as far as possible)
+
+There were two main differences to the official criteria in our implementation. Firstly, prior to 10th February 2022, infection should have been confirmed by a PCR test, however this was then relaxed to include lateral flow tests. We were not able to always distinguish between lateral flow and PCR tests in all test records, and therefore included all positive SARS-CoV-2 test results. Secondly, having symptomatic COVID-19 was also an eligibility criteria: however due to difficulties in determining symptom status (i.e. it was only possible to determine whether a patient’s positive test had a “symptomatic” flag at the time of the test, but not whether symptoms developed later) we did not implement this requirement in our analysis; however we do address this in a separate sensitivity analysis, where we restricted the potentially eligible population to only those with a “symptomatic” flag associated with their positive SARS-CoV-2 test to determine its use as an indicator of being potentially asymptomatic.We also included patients in the eligible population if they were in the Treated cohort below.
+
+##### Treated patients
+
+- Treatments and the date they were given were identified in the COVID-19 therapeutics dataset, restricted to those treated in the community (“non_hospitalised”)
+- Patients issued more than one treatment within two weeks of one another, or with an implausible treatment date (e.g. far in the future) were excluded
 
 ### Key demographic and clinical characteristics
-We classified patients by age group, sex, NHS region of their general practice and other key demographics including ethnicity (White, Black, Asian or Asian British, Mixed, Other, and Unknown), and Index of Multiple Deprivation (IMD, in quintiles, derived from patient postcode at lower super output area level). Individuals with missing sex, ethnicity, IMD or region were included as “Unknown”. Treated patients were also grouped by whether they had autism, dementia, learning disability, serious mental illness, were resident in a care home or housebound, and by vaccination status.
 
-### Concordance with guidance
-For patients who received treatment but who were not otherwise identified in the eligible population, we report which eligibility or exclusion criteria were not met (e.g. no positive SARS-CoV-2 test result). Where possible within available data, we also report other potential breaches in guidance for patients receiving treatment, such as not being treated within the prescribed timescale (see Table S2 in the supplementary material for implementation details). 
+We classified treated patients by age group, sex, NHS region of their general practice and other key demographics including ethnicity and the level of deprivation. Deprivation was measured by Index of Multiple Deprivation (IMD), in quintiles, derived from the patient’s postcode at lower super output area level for a high degree of precision. Ethnicity was ascertained using 270 clinical codes grouped into broad categories White, Black or Black British, Asian or Asian British, Mixed, Other, and Unknown. Individuals with missing sex, ethnicity, IMD or region were included as “Unknown”. Treated patients were described according to whether they were in other groups of interest who are sometimes subject to variation in care, including autism, dementia, learning disability, serious mental illness, care home residents, and housebound. In addition we classified treated patients by their COVID-19 vaccination status (unvaccinated, unvaccinated with a record of declining vaccination, one vaccination, two vaccinations, or three or more).
+
+
+### Consistency with guidance
+
+For patients who received treatment but who were not otherwise identified as potentially being eligible for treatment, we report which eligibility or exclusion criteria were not met according to the data available (i.e. no positive SARS-CoV-2 test result, or not identified as part of a high risk group). Where possible within available data, we also report other potential inconsistencies with guidance for patients who received treatment, such as where the high risk cohort identified within their records did not match the high risk cohort associated with their treatment. 
+
+We also assess consistency with treatment-specific criteria, such as patients having a recorded contraindication to the specific treatment given (e.g. adolescents treated with sotrovimab/remdesivir with weight under 40kg, Table S2), or patients treated outside the prescribed timescale, 5-7 days from symptom onset, depending on the treatment. As symptom onset date was not available, here we used positive SARS-CoV-2 test as a proxy to estimate the extent to which patients may or may not have been treated outside the guidance time window.
+
 
 ### Descriptive statistics
-Charts of eligibility and treatment coverage were generated for all high risk cohorts, and stratified by treatment type. Charts showing the weekly proportion of eligible people receiving each treatment were also generated, again stratified by treatment type. Simple descriptive statistics were also used to summarise the counts and proportions of eligible patients treated, stratified by high risk cohort, treatment type and by selected clinical and demographic group. Charts and results not presented in this report are available online for inspection in the associated Github [antibody-and-antiviral-deployment](https://github.com/opensafely/antibody-and-antiviral-deployment) repository. Patient counts are rounded to the nearest 10 to protect against small number differences in our routinely updating data. 
+
+We generated charts showing the cumulative number of potentially eligible and treated patients per week, stratified by high risk group, and also stratified by treatment type for treated patients. We used simple descriptive statistics to summarise the counts and proportions of potentially eligible patients treated, stratified by treatment type and either high risk cohort or clinical and demographic groups, and to describe potential inconsistencies  with guidelines. Charts and results not presented in this manuscript are available online for inspection in the associated Github [antibody-and-antiviral-deployment](https://github.com/opensafely/antibody-and-antiviral-deployment) repository. Patient counts of 0-5 are shown as “<5” with remaining counts rounded to the nearest 10 to protect against small number differences in our routinely updating data. All percentages (%) are calculated with 95% confidence intervals (CI). 
+
 
 ### Codelists
+
 Detailed information on compilation and sources for every individual codelist are available at https://www.opencodelists.org/.
 
 
