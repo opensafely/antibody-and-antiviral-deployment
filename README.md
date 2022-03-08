@@ -1,6 +1,6 @@
 # Antibody-and-antiviral-deployment
 
-This is the code and configuration for Antibody-and-antiviral-deployment.
+This is the code and configuration for an OpenSAFELY analysis of antibody and antiviral deployment via NHS COVID-19 Medicine Delivery Units. An accompanying report will be available shortly (link pending).
 
 You can run this project via [Gitpod](https://gitpod.io) in a web browser by clicking on this badge: [![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-908a85?logo=gitpod)](https://gitpod.io/#https://github.com/opensafely/Antibody-and-antiviral-deployment)
 
