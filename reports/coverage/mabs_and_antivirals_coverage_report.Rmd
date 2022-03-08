@@ -26,7 +26,6 @@ pre[class] {
 </style>
 
   
-$$\\[0.25cm]$$
 ```{r setup, include=FALSE}
 # Document settings ----
 knitr::opts_chunk$set(echo = TRUE)
