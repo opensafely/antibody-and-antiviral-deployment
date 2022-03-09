@@ -1313,7 +1313,7 @@ study = StudyDefinition(
       returning = "date",
       date_format = "YYYY-MM-DD"
     ),
-
+    
     covid_vax_declined = patients.with_these_clinical_events(
       covid_vaccine_declined_codes,
       returning="binary_flag",
@@ -1337,6 +1337,35 @@ study = StudyDefinition(
   
   
   # CLINICAL CO-MORBIDITIES TBC ----
+  
+  # COVID VARIENT
+  
+  ## S-Gene Target Failure
+  sgtf = patients.with_test_result_in_sgss(
+    pathogen = "SARS-CoV-2",
+    test_result = "positive",
+    find_first_match_in_period = True,
+    between = ["covid_test_positive_date", "covid_test_positive_date"],
+    returning = "s_gene_target_failure",
+    return_expectations = {
+      "rate": "universal",
+      "category": {"ratios": {"0": 0.7, "1": 0.1, "9": 0.1, "": 0.1}},
+    },
+  ), 
+  
+  ## Variant
+  variant = patients.with_test_result_in_sgss(
+    pathogen = "SARS-CoV-2",
+    test_result = "positive",
+    find_first_match_in_period = True,
+    between = ["covid_test_positive_date", "covid_test_positive_date"],
+    restrict_to_earliest_specimen_date = False,
+    returning = "variant",
+    return_expectations = {
+      "rate": "universal",
+      "category": {"ratios": {"B.1.617.2": 0.7, "B.1.1.7+E484K": 0.1, "No VOC detected": 0.1, "Undetermined": 0.1}},
+    },
+  ), 
   
   
   
