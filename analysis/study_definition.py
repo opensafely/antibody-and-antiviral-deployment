@@ -6,7 +6,7 @@
 # Output: output/data/input.csv.gz
 #
 # Author(s): M Green, H Curtis
-# Date last updated: 18/02/2022
+# Date last updated: 09/03/2022
 #
 ################################################################################
 
@@ -467,7 +467,6 @@ study = StudyDefinition(
   
   
   # CENSORING ----
-  
   
   ## Death of any cause
   death_date = patients.died_from_any_cause(
@@ -1399,7 +1398,6 @@ study = StudyDefinition(
       "rate": "uniform",
       "incidence": 0.3},
   ),
-  
   
   death_with_28_days_of_covid_positive_test = patients.satisfying(
     
