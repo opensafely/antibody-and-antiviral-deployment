@@ -5,7 +5,7 @@
 #              actions.
 #
 # Author(s): M Green
-# Date last updated: 11/02/2022
+# Date last updated: 15/02/2022
 #
 ################################################################################
 
@@ -22,7 +22,6 @@ actions:
     outputs:
       highly_sensitive:
         cohort: output/data/input.csv.gz
-  
   
   # Data processing ----
   data_process:
@@ -48,8 +47,7 @@ actions:
       moderately_sensitive:
         html: output/coverage/sa_symptomatic_test.html
   
-  
-  # Report ----
+  # Coverage report ----
   report_data:
     run: r:latest analysis/descriptive/coverage_report_data.R
     needs: [data_process]
@@ -57,6 +55,16 @@ actions:
       moderately_sensitive:
         redacted_tables: output/coverage/table_*.csv
         unredacted_tables: output/coverage/for-checks/table_*.csv
+        
+  # Crude count of outcomes ----
+  outcomes_report:
+    run: r:latest -e 'rmarkdown::render("analysis/descriptive/crude_outcomes.Rmd", knit_root_dir = "/workspace", output_dir="/workspace/output/effectiveness/counts")'
+    needs: [data_process]
+    outputs:
+      moderately_sensitive:
+        html: output/effectiveness/counts/crude_outcomes.html
+  
+  
 
 
 

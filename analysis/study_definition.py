@@ -198,7 +198,7 @@ study = StudyDefinition(
     date_format = "YYYY-MM-DD",
     on_or_after = "index_date - 5 days",
     return_expectations = {
-      "date": {"earliest": "2021-12-20", "latest": "index_date"},
+      "date": {"earliest": "2021-12-20"},
       "incidence": 0.9
     },
   ),
@@ -213,7 +213,7 @@ study = StudyDefinition(
     date_format = "YYYY-MM-DD",
     on_or_after = "covid_test_positive_date + 30 days",
     return_expectations = {
-      "date": {"earliest": "2021-12-20", "latest": "index_date"},
+      "date": {"earliest": "2021-12-20"},
       "incidence": 0.1
     },
   ),
@@ -303,7 +303,7 @@ study = StudyDefinition(
     date_format = "YYYY-MM-DD",
     find_first_match_in_period = False,
     return_expectations = {
-      "date": {"earliest": "2021-12-20", "latest": "index_date - 1 day"},
+      "date": {"earliest": "2021-12-20"},
       "rate": "uniform",
       "incidence": 0.05
     },
@@ -319,7 +319,7 @@ study = StudyDefinition(
     date_format = "YYYY-MM-DD",
     find_first_match_in_period = False,
     return_expectations = {
-      "date": {"earliest": "2021-12-20", "latest": "index_date - 1 day"},
+      "date": {"earliest": "2021-12-20"},
       "rate": "uniform",
       "incidence": 0.05
     },
@@ -474,7 +474,7 @@ study = StudyDefinition(
     date_format = "YYYY-MM-DD",
     on_or_after = "start_date",
     return_expectations = {
-      "date": {"earliest": "2021-12-20", "latest": "index_date"},
+      "date": {"earliest": "2021-12-20"},
       "incidence": 0.1
     },
   ),
@@ -489,7 +489,7 @@ study = StudyDefinition(
     on_or_after = "start_date",
     date_format = "YYYY-MM-DD",
     return_expectations = {
-      "date": {"earliest": "2021-12-20", "latest": "index_date"},
+      "date": {"earliest": "2021-12-20"},
       "incidence": 0.1
     },
   ),
