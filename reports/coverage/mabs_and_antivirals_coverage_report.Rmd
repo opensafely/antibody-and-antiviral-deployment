@@ -65,7 +65,7 @@ end_date <- report_stats$study_end
 # Overview
 This OpenSAFELY report was rapidly developed to support monitoring the ongoing roll-out of antivirals and neutralising monoclonal antibodies (nMABs) for the treatment of COVID-19, based on the population of 23.4m people registered with practices that use TPP SystmOne software. This report will be updated approximately weekly as new data arrives. 
 
-The code and data for this report can be found at the OpenSAFELY [antibody-and-antiviral-deployment repository](https://github.com/opensafely/antibody-and-antiviral-deployment). The accompanying manuscript will be available shortly on MedRXiV (link to follow) and submitted for peer review. 
+The code and data for this report can be found at the OpenSAFELY [antibody-and-antiviral-deployment repository](https://github.com/opensafely/antibody-and-antiviral-deployment). The accompanying manuscript is available on [MedRXiV](https://reports.opensafely.org/reports/antivirals-and-nmabs-for-non-hospitalised-covid-19-patients-coverage-report/) and will shortly be submitted for peer review. 
 
 
 ##### Contents

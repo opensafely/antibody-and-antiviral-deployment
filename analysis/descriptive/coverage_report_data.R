@@ -352,7 +352,7 @@ plot_data_prop_treated <- left_join(plot_data_treated_all, plot_data_all,
          Treated = ifelse(is.na(count_redacted.x), 0, count_redacted.x),
          Total = ifelse(is.na(count_redacted.y), 0, count_redacted.y),
          prop = Treated/Total,
-         prop_redacted = ifelse((Total < threshold | Treated < threshold), NA, round(prop, digits = 2)))
+         prop_redacted = ifelse((Total < threshold | Treated < threshold), NA, round(prop, digits = 4)))
 
 write_csv(plot_data_prop_treated %>% select(elig_start = week, prop_redacted, treatment_type, high_risk_cohort), 
           fs::path(output_dir, "table_prop_treated_redacted.csv"))
