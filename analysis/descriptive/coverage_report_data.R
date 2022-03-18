@@ -545,7 +545,7 @@ data_flowchart <- non_elig_treated %>%
     values_to="n"
   )  %>%
   mutate(n = ifelse(n < 5 & n > 0, "<5", n),
-         n = ifelse(n != "<5", plyr::round_any(as.numeric(n), 5), n))
+         n = ifelse(n != "<5", plyr::round_any(as.numeric(n), 10), n))
 
 all_treated <-  data_processed_clean %>%
   filter(!is.na(treatment_date),
@@ -617,7 +617,7 @@ data_flowchart2 <- all_treated %>%
     values_to="n"
   )  %>%
   mutate(n = ifelse(n < 5 & n > 0, "<5", n),
-         n = ifelse(n != "<5", plyr::round_any(as.numeric(n), 5), n))
+         n = ifelse(n != "<5", plyr::round_any(as.numeric(n), 10), n))
 
 write_csv(rbind(data_flowchart, data_flowchart2), fs::path(output_dir, "table_non_elig_flowchart_redacted.csv"))
 
@@ -635,7 +635,7 @@ high_risk_cohort_comparison_redacted <- data_processed_clean %>%
   tally() %>%
   arrange(desc(n)) %>%
   mutate(n = ifelse(n < 5, NA, n),
-         n = plyr::round_any(as.numeric(n), 5))
+         n = plyr::round_any(as.numeric(n), 10))
 
 write_csv(high_risk_cohort_comparison_redacted, fs::path(output_dir, "table_non_elig_high_risk_cohort_comparison_redacted.csv"))
 
@@ -648,7 +648,7 @@ all <- data_processed_clean %>%
   tally() %>%
   mutate(high_risk_cohort = "All",
          n = ifelse(n < 5, NA, n),
-         n = plyr::round_any(as.numeric(n), 5)) %>%
+         n = plyr::round_any(as.numeric(n), 10)) %>%
   filter(!is.na(n))
 
 groups <- data_processed_clean %>%
@@ -668,7 +668,7 @@ groups <- data_processed_clean %>%
     values_to = "n"
   ) %>%
   mutate(n = ifelse(n < 5, NA, n),
-         n = plyr::round_any(as.numeric(n), 5)) %>%
+         n = plyr::round_any(as.numeric(n), 10)) %>%
   filter(!is.na(n))
 
 groups2 <- data_processed_clean %>%
@@ -688,7 +688,7 @@ groups2 <- data_processed_clean %>%
     values_to = "n"
   ) %>%
   mutate(n = ifelse(n < 5, NA, n),
-         n = plyr::round_any(as.numeric(n), 5),
+         n = plyr::round_any(as.numeric(n), 10),
          variable = group) %>%
   filter(!is.na(n))
 
@@ -704,7 +704,7 @@ for (i in 1:length(groups_tte)) {
     group_by_all() %>% 
     tally() %>%
     mutate(n = ifelse(n < 5, NA, n),
-           n = plyr::round_any(as.numeric(n), 5),
+           n = plyr::round_any(as.numeric(n), 10),
            group = groups_tte[i]) %>%
     filter(!is.na(n))
   
@@ -741,7 +741,7 @@ all <- data_processed_clean %>%
     values_to = "Count"
   ) %>%
   mutate(Count = ifelse(Count < 5, NA, Count),
-         Count = plyr::round_any(as.numeric(Count), 5)) %>%
+         Count = plyr::round_any(as.numeric(Count), 10)) %>%
   pivot_wider(names_from = treated_status, values_from = Count) %>%
   mutate(treated_tot = data_processed_clean %>% filter(!is.na(treatment_type)) %>% nrow(),
          treated_perc = round(treated/treated_tot*100, digits = 0),
