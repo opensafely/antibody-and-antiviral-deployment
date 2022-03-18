@@ -48,7 +48,6 @@ actions:
       moderately_sensitive:
         html: output/coverage/sa_symptomatic_test.html
   
-  
   # Report ----
   report_data:
     run: r:latest analysis/descriptive/coverage_report_data.R
