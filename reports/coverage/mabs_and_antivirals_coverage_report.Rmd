@@ -63,7 +63,9 @@ end_date <- report_stats$study_end
 ```
 
 # Overview
-This OpenSAFELY report was rapidly developed to support monitoring the ongoing roll-out of antivirals and neutralising monoclonal antibodies (nMABs) for the treatment of COVID-19, based on the population of 23.4m people registered with practices that use TPP SystmOne software. This report will be updated approximately weekly as new data arrives. 
+This OpenSAFELY report was rapidly developed to support monitoring the ongoing roll-out of antivirals and neutralising monoclonal antibodies (nMABs) for the treatment of COVID-19, based on the population of 23.4m people registered with practices that use TPP SystmOne software. This report will be updated approximately weekly as new data arrives and there are likely to be some small changes made between the some versions.
+
+Note that currently the clinician-assigned risk group for patients receiving Paxlovid or Remdesivir is not available. While we’re able to assign high risk groups to about 65% (n = 260)  of these patients by implementing the NHS Digital logic, the other 35% (n = 130) are most likely identified via non-digital routes. For now, where results are broken down by high risk cohort, these patients are excluded.
 
 The code and data for this report can be found at the OpenSAFELY [antibody-and-antiviral-deployment repository](https://github.com/opensafely/antibody-and-antiviral-deployment). The accompanying manuscript is available on [MedRXiV](https://reports.opensafely.org/reports/antivirals-and-nmabs-for-non-hospitalised-covid-19-patients-coverage-report/) and will shortly be submitted for peer review. 
 
@@ -412,7 +414,7 @@ include_graphics(fs::path(output_dir_rmd, "tables", "table_prop_eligible_high_ri
 
 The proportion of potentially eligible patients receiving treatment varied over time and by high risk cohort (Figure 3).
 
-```{r, prop treatment plot, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '100%', fig.cap = "**Figure 3 Weekly proportion of eligible patients receiving an antiviral or nMAB for treating COVID-19 since 11th December 2021, stratified by high risk cohort**", fig.topcaption=TRUE}
+```{r, prop treatment plot, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '100%', fig.cap = "**Figure 3 Weekly proportion of eligible patients receiving an antiviral or nMAB for treating COVID-19 since 11th December 2021, stratified by high risk cohort.** Proportions are rounded to 2 decimal places.", fig.topcaption=TRUE}
 
 weekly_treatment_proportion <- read_csv(here::here(input_dir_os, "table_prop_treated_redacted.csv")) %>%
   filter(!is.na(prop_redacted),
