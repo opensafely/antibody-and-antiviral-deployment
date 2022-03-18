@@ -285,8 +285,7 @@ plot_data_treated_groups <- data_processed_clean %>%
   summarise(n = sum(n, na.rm = T)) %>%
   group_by(high_risk_cohort, treatment_type) %>%
   mutate(count = ifelse(is.na(n), 0, n),
-         cum_count = cumsum(count),
-         cum_count_redacted =  plyr::round_any(cum_count, 10)) %>%
+         count_redacted =  plyr::round_any(count, 10)) %>%
   select(-n) %>%
   arrange(high_risk_cohort, treatment_type, week)
 
@@ -302,8 +301,7 @@ plot_data_treated_all <- data_processed_clean %>%
   group_by(treatment_type, week) %>%  
   tally() %>%
   mutate(count = ifelse(is.na(n), 0, n),
-         cum_count = cumsum(count),
-         cum_count_redacted =  plyr::round_any(cum_count, 10),
+         count_redacted =  plyr::round_any(count, 10),
          high_risk_cohort = "All") %>%
   select(-n) %>%
   arrange(high_risk_cohort, treatment_type, week) %>%
@@ -327,8 +325,7 @@ plot_data_groups <- data_processed_clean %>%
   summarise(n = sum(n, na.rm = T)) %>%
   group_by(high_risk_cohort) %>%
   mutate(count = ifelse(is.na(n), 0, n),
-         cum_count = cumsum(count),
-         cum_count_redacted =  plyr::round_any(cum_count, 10)) %>%
+         count_redacted =  plyr::round_any(count, 10)) %>%
   select(-n) %>%
   arrange(high_risk_cohort, week)
 
@@ -341,8 +338,7 @@ plot_data_all <- data_processed_clean %>%
   group_by(week) %>%  
   tally() %>%
   mutate(count = ifelse(is.na(n), 0, n),
-         cum_count = cumsum(count),
-         cum_count_redacted =  plyr::round_any(cum_count, 10),
+         count_redacted =  plyr::round_any(count, 10),
          high_risk_cohort = "All") %>%
   select(-n) %>%
   arrange(high_risk_cohort, week) %>%
@@ -353,8 +349,8 @@ print(head(plot_data_all))
 plot_data_prop_treated <- left_join(plot_data_treated_all, plot_data_all, 
                                     by = c("high_risk_cohort", "week")) %>%
   mutate(week = as.Date(week) - 2,
-         Treated = ifelse(is.na(cum_count_redacted.x), 0, cum_count_redacted.x),
-         Total = ifelse(is.na(cum_count_redacted.y), 0, cum_count_redacted.y),
+         Treated = ifelse(is.na(count_redacted.x), 0, count_redacted.x),
+         Total = ifelse(is.na(count_redacted.y), 0, count_redacted.y),
          prop = Treated/Total,
          prop_redacted = ifelse((Total < threshold | Treated < threshold), NA, round(prop, digits = 2)))
 
