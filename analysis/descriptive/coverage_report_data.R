@@ -544,8 +544,8 @@ data_flowchart <- non_elig_treated %>%
     names_to="criteria",
     values_to="n"
   )  %>%
-  mutate(n = ifelse(n < 5 & n > 0, "<5", n),
-         n = ifelse(n != "<5", plyr::round_any(as.numeric(n), 10), n))
+  mutate(n = ifelse(n < 8 & n > 0, "<8", n),
+         n = ifelse(n != "<8", plyr::round_any(as.numeric(n), 10), n))
 
 all_treated <-  data_processed_clean %>%
   filter(!is.na(treatment_date),
@@ -616,8 +616,8 @@ data_flowchart2 <- all_treated %>%
     names_to="criteria",
     values_to="n"
   )  %>%
-  mutate(n = ifelse(n < 5 & n > 0, "<5", n),
-         n = ifelse(n != "<5", plyr::round_any(as.numeric(n), 10), n))
+  mutate(n = ifelse(n < 8 & n > 0, "<8", n),
+         n = ifelse(n != "<8", plyr::round_any(as.numeric(n), 10), n))
 
 write_csv(rbind(data_flowchart, data_flowchart2), fs::path(output_dir, "table_non_elig_flowchart_redacted.csv"))
 
@@ -634,7 +634,7 @@ high_risk_cohort_comparison_redacted <- data_processed_clean %>%
   group_by(high_risk_group_nhsd_combined, high_risk_cohort_covid_therapeutics) %>%
   tally() %>%
   arrange(desc(n)) %>%
-  mutate(n = ifelse(n < 5, NA, n),
+  mutate(n = ifelse(n < 8, NA, n),
          n = plyr::round_any(as.numeric(n), 10))
 
 write_csv(high_risk_cohort_comparison_redacted, fs::path(output_dir, "table_non_elig_high_risk_cohort_comparison_redacted.csv"))
@@ -647,7 +647,7 @@ all <- data_processed_clean %>%
   group_by(tb, treatment_type) %>%
   tally() %>%
   mutate(high_risk_cohort = "All",
-         n = ifelse(n < 5, NA, n),
+         n = ifelse(n < 8, NA, n),
          n = plyr::round_any(as.numeric(n), 10)) %>%
   filter(!is.na(n))
 
@@ -667,7 +667,7 @@ groups <- data_processed_clean %>%
     names_to = "high_risk_cohort",
     values_to = "n"
   ) %>%
-  mutate(n = ifelse(n < 5, NA, n),
+  mutate(n = ifelse(n < 8, NA, n),
          n = plyr::round_any(as.numeric(n), 10)) %>%
   filter(!is.na(n))
 
@@ -687,7 +687,7 @@ groups2 <- data_processed_clean %>%
     names_to = "group",
     values_to = "n"
   ) %>%
-  mutate(n = ifelse(n < 5, NA, n),
+  mutate(n = ifelse(n < 8, NA, n),
          n = plyr::round_any(as.numeric(n), 10),
          variable = group) %>%
   filter(!is.na(n))
@@ -703,7 +703,7 @@ for (i in 1:length(groups_tte)) {
     select(tb, variable = groups_tte[i]) %>%
     group_by_all() %>% 
     tally() %>%
-    mutate(n = ifelse(n < 5, NA, n),
+    mutate(n = ifelse(n < 8, NA, n),
            n = plyr::round_any(as.numeric(n), 10),
            group = groups_tte[i]) %>%
     filter(!is.na(n))
