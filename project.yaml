@@ -47,7 +47,7 @@ actions:
       moderately_sensitive:
         html: output/coverage/sa_symptomatic_test.html
   
-  # Coverage report ----
+  # Report ----
   report_data:
     run: r:latest analysis/descriptive/coverage_report_data.R
     needs: [data_process]
