@@ -331,10 +331,7 @@ plot_data_groups <- data_processed_clean %>%
 
 plot_data_all <- data_processed_clean %>%
   mutate(week = cut(elig_start -2 , "week")) %>%
-  select(week)  %>%
-  rbind(data_processed_clean %>%
-          mutate(week = cut(elig_start -2 , "week")) %>%
-          select(week)) %>%
+  select(week) %>%
   group_by(week) %>%  
   tally() %>%
   mutate(count = ifelse(is.na(n), 0, n),
@@ -343,8 +340,6 @@ plot_data_all <- data_processed_clean %>%
   select(-n) %>%
   arrange(high_risk_cohort, week) %>%
   rbind(plot_data_groups)
-
-print(head(plot_data_all))
 
 plot_data_prop_treated <- left_join(plot_data_treated_all, plot_data_all, 
                                     by = c("high_risk_cohort", "week")) %>%
