@@ -278,11 +278,7 @@ study = StudyDefinition(
   ## Study start date for extracting variables
   start_date = patients.minimum_of(
     "covid_test_positive_date", 
-    "paxlovid_covid_therapeutics",
-    "sotrovimab_covid_therapeutics",
-    "remdesivir_covid_therapeutics",
-    "molnupiravir_covid_therapeutics",
-    "casirivimab_covid_therapeutics",
+    "date_treated"
   ),
   
   
@@ -298,8 +294,8 @@ study = StudyDefinition(
     with_these_primary_diagnoses = covid_icd10_codes,
     with_patient_classification = ["1"], # ordinary admissions only - exclude day cases and regular attenders
     # see https://docs.opensafely.org/study-def-variables/#sus for more info
-    #with_admission_method=["21", "22", "23", "24", "25", "2A", "2B", "2C", "2D", "28"], # emergency admissions only to exclude incidental COVID
-    on_or_before = "start_date - 1 day",
+    with_admission_method=["21", "22", "23", "24", "25", "2A", "2B", "2C", "2D", "28"], # emergency admissions only to exclude incidental COVID
+    between = ["start_date - 31 days","start_date - 1 day"],
     date_format = "YYYY-MM-DD",
     find_first_match_in_period = False,
     return_expectations = {
@@ -315,7 +311,7 @@ study = StudyDefinition(
     with_patient_classification = ["1"], # ordinary admissions only - exclude day cases and regular attenders
     # see https://docs.opensafely.org/study-def-variables/#sus for more info
     with_admission_method=["21", "22", "23", "24", "25", "2A", "2B", "2C", "2D", "28"], # emergency admissions only to exclude incidental COVID
-    on_or_before = "start_date - 1 day",
+    between = ["start_date - 31 days","start_date - 1 day"],
     date_format = "YYYY-MM-DD",
     find_first_match_in_period = False,
     return_expectations = {
@@ -994,7 +990,7 @@ study = StudyDefinition(
   ethnicity_primis = patients.with_these_clinical_events(
     ethnicity_primis_snomed_codes,
     returning = "category",
-    on_or_after = "start_date",
+    on_or_before = "start_date",
     find_first_match_in_period = True,
     include_date_of_match = False,
     return_expectations = {
@@ -1062,7 +1058,7 @@ study = StudyDefinition(
   
   region_covid_therapeutics = patients.with_covid_therapeutics(
     #with_these_statuses = ["Approved", "Treatment Complete"],
-    with_these_therapeutics = ["Sotrovimab", "Molnupiravir", "Casirivimab and imdevimab"],
+    #with_these_therapeutics = ["Sotrovimab", "Molnupiravir", "Casirivimab and imdevimab"],
     with_these_indications = "non_hospitalised",
     on_or_after = "start_date",
     find_first_match_in_period = True,
@@ -1349,7 +1345,7 @@ study = StudyDefinition(
     test_result = "positive",
     returning = "date",
     date_format = "YYYY-MM-DD",
-    on_or_after = "start_date + 30 days",
+    between = ["start_date + 30 days", "start_date + 90 days"],
     find_first_match_in_period = True,
     restrict_to_earliest_specimen_date = False,
     return_expectations = {
@@ -1365,8 +1361,8 @@ study = StudyDefinition(
     with_these_primary_diagnoses = covid_icd10_codes,
     with_patient_classification = ["1"], # ordinary admissions only - exclude day cases and regular attenders
     # see https://docs.opensafely.org/study-def-variables/#sus for more info
-    # with_admission_method=["21", "22", "23", "24", "25", "2A", "2B", "2C", "2D", "28"], # emergency admissions only to exclude incidental COVID
-    on_or_after = "start_date + 1 day",
+    with_admission_method=["21", "22", "23", "24", "25", "2A", "2B", "2C", "2D", "28"], # emergency admissions only to exclude incidental COVID
+    between = ["start_date + 1 day", "start_date + 90 days"],
     find_first_match_in_period = True,
     date_format = "YYYY-MM-DD",
     return_expectations = {
@@ -1380,7 +1376,7 @@ study = StudyDefinition(
   covid_hospitalisation_critical_care = patients.admitted_to_hospital(
     returning = "days_in_critical_care",
     with_these_diagnoses = covid_icd10_codes,
-    on_or_after = "covid_hospitalisation_outcome_date",
+    between = ["covid_hospitalisation_outcome_date","covid_hospitalisation_outcome_date + 90 days"],
     find_first_match_in_period = True,
     return_expectations = {
       "category": {"ratios": {"20": 0.5, "40": 0.5}},
@@ -1393,7 +1389,7 @@ study = StudyDefinition(
     covid_icd10_codes,
     returning = "date_of_death",
     date_format = "YYYY-MM-DD",
-    on_or_after = "start_date + 1 day",
+    between = ["start_date + 1 day", "start_date + 90 days"], 
     return_expectations = {
       "date": {"earliest": "2021-01-01", "latest" : end_date},
       "rate": "uniform",
