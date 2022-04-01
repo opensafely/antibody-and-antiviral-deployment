@@ -1,7 +1,7 @@
 ################################################################################
 #
 # Description: This script imports data extracted by the cohort extractor and
-#              calculates additional variables needed for subsequent anlyses 
+#              calculates additional variables needed for subsequent analyses 
 #              (i.e., eligibility criteria window)
 #
 # Input: /output/data/input.csv.gz
@@ -10,7 +10,7 @@
 #         /output/data/data_processed_clean.csv
 #
 # Author(s): M Green
-# Date last updated: 25/02/2022
+# Date last updated: 09/03/2022
 #
 ################################################################################
 
@@ -117,6 +117,10 @@ data_extract0 <- read_csv(
     sickle_cell_disease_nhsd = col_date(format = "%Y-%m-%d"),
     vaccination_status = col_character(),
     
+    # COVID VARIENT
+    sgtf = col_character(),
+    variant = col_character(),
+    
     # OUTCOMES ----
     covid_positive_test_30_days_post_elig_or_treat = col_date(format = "%Y-%m-%d"),
     covid_hospitalisation_outcome_date = col_date(format = "%Y-%m-%d"),
@@ -130,16 +134,20 @@ data_extract0 <- read_csv(
 ## Fix bad dummy data
 if(Sys.getenv("OPENSAFELY_BACKEND") %in% c("", "expectations")){
   data_extract0 <- data_extract0 %>%
-    mutate(date = sample(seq(as.Date('2021/11/01'), as.Date('2022/02/01'), by="day"), nrow(data_extract0), replace = TRUE),
-           covid_test_positive_date = as.Date(covid_test_positive_date, format = "%Y-%m-%d"),
-           covid_test_positive_date = as.Date(ifelse(!is.na(covid_test_positive_date), date, NA), origin = "1970-01-01"),
+    mutate(dereg_date = as.Date(ifelse(dereg_date >= covid_test_positive_date, dereg_date, NA),  origin = "1970-01-01"),
            
-           date2 = as.Date(covid_test_positive_date + sample(-1:10, dim(data_extract0)[1], replace=TRUE), origin = "1970-01-01"),
-           paxlovid_covid_therapeutics = as.Date(ifelse(!is.na(paxlovid_covid_therapeutics), date2, NA),  origin = "1970-01-01"),
-           sotrovimab_covid_therapeutics = as.Date(ifelse(!is.na(sotrovimab_covid_therapeutics), date2, NA),  origin = "1970-01-01"),
-           remdesivir_covid_therapeutics = as.Date(ifelse(!is.na(remdesivir_covid_therapeutics), date2, NA), origin = "1970-01-01"),
-           molnupiravir_covid_therapeutics = as.Date(ifelse(!is.na(molnupiravir_covid_therapeutics), date2, NA),  origin = "1970-01-01"),
-           casirivimab_covid_therapeutics = as.Date(ifelse(!is.na(casirivimab_covid_therapeutics), date2, NA),  origin = "1970-01-01"))
+           
+           death_date = as.Date(ifelse(death_date >= covid_test_positive_date, death_date, NA),  origin = "1970-01-01"),
+           
+           date = as.Date(covid_test_positive_date + sample(-1:10, dim(data_extract0)[1], replace=TRUE), origin = "1970-01-01"),
+           paxlovid_covid_therapeutics = as.Date(ifelse(!is.na(paxlovid_covid_therapeutics), date, NA),  origin = "1970-01-01"),
+           sotrovimab_covid_therapeutics = as.Date(ifelse(!is.na(sotrovimab_covid_therapeutics), date, NA),  origin = "1970-01-01"),
+           remdesivir_covid_therapeutics = as.Date(ifelse(!is.na(remdesivir_covid_therapeutics), date, NA), origin = "1970-01-01"),
+           molnupiravir_covid_therapeutics = as.Date(ifelse(!is.na(molnupiravir_covid_therapeutics), date, NA),  origin = "1970-01-01"),
+           casirivimab_covid_therapeutics = as.Date(ifelse(!is.na(casirivimab_covid_therapeutics), date, NA),  origin = "1970-01-01"),
+           
+           covid_positive_test_30_days_post_elig_or_treat = as.Date(ifelse(covid_positive_test_30_days_post_elig_or_treat > covid_test_positive_date + 30,
+                                                                   covid_positive_test_30_days_post_elig_or_treat, NA),  origin = "1970-01-01"))
            
 }
 
@@ -245,6 +253,7 @@ data_processed <- data_extract %>%
     immunosupression_therapeutics = ifelse(str_detect(high_risk_cohort_covid_therapeutics, "primary immune deficiencies") == TRUE, 1, NA),
     hiv_aids_therapeutics = ifelse(str_detect(high_risk_cohort_covid_therapeutics, "HIV or AIDS") == TRUE, 1, NA),
     solid_organ_transplant_therapeutics = ifelse(str_detect(high_risk_cohort_covid_therapeutics, "solid organ recipients") == TRUE, 1, NA),
+    solid_organ_transplant_therapeutics = ifelse(str_detect(high_risk_cohort_covid_therapeutics, "solid organ transplant recipients") == TRUE, 1, solid_organ_transplant_therapeutics),
     rare_neurological_conditions_therapeutics = ifelse(str_detect(high_risk_cohort_covid_therapeutics, "rare neurological conditions") == TRUE, 1, NA),   
     
     downs_syndrome = ifelse(downs_syndrome_nhsd == 1 | downs_syndrome_therapeutics == 1, 1, NA),
@@ -511,8 +520,13 @@ data_processed_clean <- data_processed_combined %>%
     autism_nhsd, care_home_primis, dementia_nhsd, housebound_opensafely, learning_disability_primis, shielded_primis, 
     serious_mental_illness_nhsd, sickle_cell_disease_nhsd, vaccination_status,
     
+    # COVID variant
+    sgtf, variant,
+    
     # Outcomes
-    covid_positive_test_30_days_post_elig_or_treat, covid_hospitalisation_outcome_date, covid_hospitalisation_critical_care, 
+    covid_positive_test_30_days_post_elig_or_treat, covid_positive_test_30_days_post_elig_or_treat_date,
+    covid_hospital_admission, covid_hospitalisation_outcome_date,
+    covid_hospitalisation_critical_care,
     covid_death, any_death)
 
 cat("#### patients excluded ####\n")

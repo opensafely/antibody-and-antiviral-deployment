@@ -6,7 +6,7 @@
 # Output: output/data/input.csv.gz
 #
 # Author(s): M Green, H Curtis
-# Date last updated: 18/02/2022
+# Date last updated: 09/03/2022
 #
 ################################################################################
 
@@ -198,7 +198,7 @@ study = StudyDefinition(
     date_format = "YYYY-MM-DD",
     on_or_after = "index_date - 5 days",
     return_expectations = {
-      "date": {"earliest": "2021-12-20", "latest": "index_date"},
+      "date": {"earliest": "2021-12-20"},
       "incidence": 0.9
     },
   ),
@@ -213,7 +213,7 @@ study = StudyDefinition(
     date_format = "YYYY-MM-DD",
     on_or_after = "covid_test_positive_date + 30 days",
     return_expectations = {
-      "date": {"earliest": "2021-12-20", "latest": "index_date"},
+      "date": {"earliest": "2021-12-20"},
       "incidence": 0.1
     },
   ),
@@ -299,7 +299,7 @@ study = StudyDefinition(
     date_format = "YYYY-MM-DD",
     find_first_match_in_period = False,
     return_expectations = {
-      "date": {"earliest": "2021-12-20", "latest": "index_date - 1 day"},
+      "date": {"earliest": "2021-12-20"},
       "rate": "uniform",
       "incidence": 0.05
     },
@@ -315,7 +315,7 @@ study = StudyDefinition(
     date_format = "YYYY-MM-DD",
     find_first_match_in_period = False,
     return_expectations = {
-      "date": {"earliest": "2021-12-20", "latest": "index_date - 1 day"},
+      "date": {"earliest": "2021-12-20"},
       "rate": "uniform",
       "incidence": 0.05
     },
@@ -464,14 +464,13 @@ study = StudyDefinition(
   
   # CENSORING ----
   
-  
   ## Death of any cause
   death_date = patients.died_from_any_cause(
     returning = "date_of_death",
     date_format = "YYYY-MM-DD",
     on_or_after = "start_date",
     return_expectations = {
-      "date": {"earliest": "2021-12-20", "latest": "index_date"},
+      "date": {"earliest": "2021-12-20"},
       "incidence": 0.1
     },
   ),
@@ -486,7 +485,7 @@ study = StudyDefinition(
     on_or_after = "start_date",
     date_format = "YYYY-MM-DD",
     return_expectations = {
-      "date": {"earliest": "2021-12-20", "latest": "index_date"},
+      "date": {"earliest": "2021-12-20"},
       "incidence": 0.1
     },
   ),
@@ -1310,7 +1309,7 @@ study = StudyDefinition(
       returning = "date",
       date_format = "YYYY-MM-DD"
     ),
-
+    
     covid_vax_declined = patients.with_these_clinical_events(
       covid_vaccine_declined_codes,
       returning="binary_flag",
@@ -1334,6 +1333,35 @@ study = StudyDefinition(
   
   
   # CLINICAL CO-MORBIDITIES TBC ----
+  
+  # COVID VARIENT
+  
+  ## S-Gene Target Failure
+  sgtf = patients.with_test_result_in_sgss(
+    pathogen = "SARS-CoV-2",
+    test_result = "positive",
+    find_first_match_in_period = True,
+    between = ["covid_test_positive_date", "covid_test_positive_date"],
+    returning = "s_gene_target_failure",
+    return_expectations = {
+      "rate": "universal",
+      "category": {"ratios": {"0": 0.7, "1": 0.1, "9": 0.1, "": 0.1}},
+    },
+  ), 
+  
+  ## Variant
+  variant = patients.with_test_result_in_sgss(
+    pathogen = "SARS-CoV-2",
+    test_result = "positive",
+    find_first_match_in_period = True,
+    between = ["covid_test_positive_date", "covid_test_positive_date"],
+    restrict_to_earliest_specimen_date = False,
+    returning = "variant",
+    return_expectations = {
+      "rate": "universal",
+      "category": {"ratios": {"B.1.617.2": 0.7, "B.1.1.7+E484K": 0.1, "No VOC detected": 0.1, "Undetermined": 0.1}},
+    },
+  ), 
   
   
   
@@ -1395,7 +1423,6 @@ study = StudyDefinition(
       "rate": "uniform",
       "incidence": 0.3},
   ),
-  
   
   death_with_28_days_of_covid_positive_test = patients.satisfying(
     

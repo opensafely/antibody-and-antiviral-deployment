@@ -1,0 +1,833 @@
+---
+title: Counts of outcomes for antivirals and neutralising monoclonal antibodies for the treatment of non-hospitalised patients with COVID-19
+output:
+  html_document:
+  theme: journal
+github_document:
+  keep_html: TRUE
+---
+  
+```{css, echo=FALSE}
+pre {
+  max-height: 300px;
+  overflow-y: auto;
+}
+pre[class] {
+  max-height: 200px;
+}
+```
+
+<style>
+  body {
+    text-align: justify;
+     font-size: 11pt}
+</style>
+
+  
+```{r setup, include=FALSE}
+# Document settings ----
+knitr::opts_chunk$set(echo = TRUE)
+
+# Preliminaries ----
+
+## Import libraries
+library(tidyverse)
+library(here)
+library(glue)
+library(gt)
+library(gtsummary)
+library(reshape2)
+library(stringr)
+library(kableExtra)
+library(knitr)
+library(ggplot2)
+library(png)
+library(readr)
+library(htmltools)
+library(scales)
+
+## Import custom user functions
+source(here("analysis", "lib", "custom_functions.R"))
+
+## Create directory
+dir.create(here::here("output", "effectiveness", "counts"), showWarnings = FALSE, recursive=TRUE)
+
+## Redaction threshold
+threshold = 6
+
+## IR per Y years
+Y = 1000
+
+## Import data
+data_processed <- read_rds(here::here("output", "data", "data_processed_clean.rds"))
+
+## End date
+end_date <- max(data_processed$start_date, na.rm = T)
+
+## Remove patients no longer registered at time of treatment and format variables
+data_processed_clean <- data_processed %>%
+  filter(has_died == 0,
+         registered_eligible == 1 | registered_treated == 1) %>%
+  mutate(
+    
+    # Age groups
+    ageband = cut(
+      age,
+      breaks = c(12, 30, 40, 50, 60, 70, 80, Inf),
+      labels = c("12-29", "30-39", "40-49", "50-59", "60-69", "70-79", "80+"),
+      right = FALSE),
+    
+    # Vaccination status
+    vaccination_status = fct_case_when(
+      vaccination_status == "Un-vaccinated" ~ "Un-vaccinated",
+      vaccination_status == "Un-vaccinated (declined)" ~ "Un-vaccinated (declined)",
+      vaccination_status== "One vaccination" ~ "One vaccination",
+      vaccination_status == "Two vaccinations" ~ "Two vaccinations",
+      vaccination_status == "Three or more vaccinations" ~ "Three or more vaccinations",
+      #TRUE ~ "Unknown",
+      TRUE ~ NA_character_
+    ),
+    
+    # Treated status
+    treated_status = ifelse(!is.na(treatment_type), "treated", "not treated"),
+    
+    # Censoring
+    start_date = coalesce(covid_test_positive_date, treatment_date),
+    study_end = end_date,
+    
+    censor_date = pmin(death_date, 
+                       dereg_date, 
+                       study_end, 
+                       na.rm = TRUE),
+    
+    # Follow up time 
+    follow_up = tte(start_date,
+                    study_end,
+                    censor_date),
+    
+    time_to_positive_test = tte(start_date,
+                                covid_positive_test_30_days_post_elig_or_treat_date,
+                                censor_date),
+    
+    time_to_positive_test = ifelse(covid_positive_test_30_days_post_elig_or_treat == 1, time_to_positive_test, NA),
+    
+    time_to_hospitalisation = tte(start_date,
+                                  covid_hospitalisation_outcome_date,
+                                  censor_date),
+    time_to_hospitalisation = ifelse(covid_hospital_admission == 1, time_to_hospitalisation, NA),
+    
+    time_to_itu = as.numeric(as.character((ifelse(covid_hospitalisation_critical_care == 1, time_to_hospitalisation, NA)))),
+    
+    covid_death_date = ifelse(covid_death == 1, death_date, NA),
+    covid_death_date = as.Date(covid_death_date, origin = "1970-01-01"),
+    
+    time_to_covid_death = tte(start_date,
+                              covid_death_date,
+                              censor_date),
+    time_to_covid_death = ifelse(covid_death == 1, time_to_covid_death, NA),
+    
+    time_to_any_death = tte(start_date,
+                            death_date,
+                            censor_date),
+    time_to_any_death = ifelse(any_death == 1, time_to_any_death, NA)
+    
+  )
+
+
+# COVID-19 related events tables ----
+## Outcomes, by high risk cohort
+outcomes_all_by_hrc_redacted <- data_processed_clean %>%
+  mutate(all = 1) %>%
+  select(all, downs_syndrome, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
+         hiv_aids, solid_organ_transplant, rare_neurological_conditions,
+         follow_up,
+         covid_positive_test_30_days_post_elig_or_treat, time_to_positive_test,
+         covid_hospital_admission, time_to_hospitalisation,
+         covid_hospitalisation_critical_care, time_to_itu,
+         covid_death, time_to_covid_death,
+         any_death, time_to_any_death
+  ) %>%
+  melt(id.var = c("follow_up",
+                  "covid_positive_test_30_days_post_elig_or_treat", "time_to_positive_test",
+                  "covid_hospital_admission", "time_to_hospitalisation",
+                  "covid_hospitalisation_critical_care", "time_to_itu",
+                  "covid_death", "time_to_covid_death",
+                  "any_death", "time_to_any_death")) %>%
+  filter(!is.na(value)) %>%
+  select(-value) %>%
+  group_by(variable) %>%
+  summarise(count = n(),
+            follow_up = paste(round(quantile(follow_up, 0.5, na.rm = T), digits = 0), " (",
+                              round(quantile(follow_up, 0.25, na.rm = T), digits = 0), "-",
+                              round(quantile(follow_up, 0.75, na.rm = T), digits = 0), ")", sep = ""),
+            
+            covid_positive_test_30_days_post_elig_or_treat_n = sum(covid_positive_test_30_days_post_elig_or_treat, na.rm = T),
+            covid_positive_test_30_days_post_elig_or_treat_py = sum(coalesce(as.numeric(time_to_positive_test), as.numeric(follow_up)), na.rm = T),
+            time_to_positive_test = paste(round(quantile(time_to_positive_test, 0.5, na.rm = T), digits = 0), " (",
+                                          round(quantile(time_to_positive_test, 0.25, na.rm = T), digits = 0), "-",
+                                          round(quantile(time_to_positive_test, 0.75, na.rm = T), digits = 0), ")", sep = ""),
+            
+            covid_hospital_admission_n = sum(covid_hospital_admission, na.rm = T),
+            covid_hospital_admission_py = sum(coalesce(as.numeric(time_to_hospitalisation), as.numeric(follow_up)), na.rm = T),
+            time_to_hospitalisation = paste(round(quantile(time_to_hospitalisation, 0.5, na.rm = T), digits = 0), " (",
+                                            round(quantile(time_to_hospitalisation, 0.25, na.rm = T), digits = 0), "-",
+                                            round(quantile(time_to_hospitalisation, 0.75, na.rm = T), digits = 0), ")", sep = ""),
+            
+            covid_hospitalisation_critical_care_n = sum(covid_hospitalisation_critical_care, na.rm = T),
+            covid_hospitalisation_critical_care_py = sum(coalesce(as.numeric(time_to_itu), as.numeric(follow_up)), na.rm = T),
+            time_to_itu = paste(round(quantile(time_to_itu, 0.5, na.rm = T), digits = 0), " (",
+                                round(quantile(time_to_itu, 0.25, na.rm = T), digits = 0), "-",
+                                round(quantile(time_to_itu, 0.75, na.rm = T), digits = 0), ")", sep = ""),
+            
+            covid_death_n = sum(covid_death, na.rm = T),
+            covid_death_py = sum(coalesce(as.numeric(time_to_covid_death), as.numeric(follow_up)), na.rm = T),
+            time_to_covid_death = paste(round(quantile(time_to_covid_death, 0.5, na.rm = T), digits = 0), " (",
+                                        round(quantile(time_to_covid_death, 0.25, na.rm = T), digits = 0), "-",
+                                        round(quantile(time_to_covid_death, 0.75, na.rm = T), digits = 0), ")", sep = ""),
+            
+            any_death_n = sum(any_death, na.rm = T),
+            any_death_py = sum(coalesce(as.numeric(time_to_any_death), as.numeric(follow_up)), na.rm = T),
+            time_to_any_death = paste(round(quantile(time_to_any_death, 0.5, na.rm = T), digits = 0), " (",
+                                      round(quantile(time_to_any_death, 0.25, na.rm = T), digits = 0), "-",
+                                      round(quantile(time_to_any_death, 0.75, na.rm = T), digits = 0), ")", sep = ""))  %>%
+  select(variable, count, follow_up,
+         covid_positive_test_30_days_post_elig_or_treat_n, covid_positive_test_30_days_post_elig_or_treat_py,
+         covid_hospital_admission_n, covid_hospital_admission_py,
+         covid_hospitalisation_critical_care_n, covid_hospitalisation_critical_care_py, 
+         covid_death_n, covid_death_py, any_death_n, any_death_py) %>%
+  melt(id.var = c("variable", "count", "follow_up")) %>%
+  ungroup() %>%
+  cbind(outcome = c(rep("covid_positive_test", 22),
+                    rep("covid_hospital_admission", 22),
+                    rep("covid_hospitalisation_critical_care", 22),
+                    rep("covid_death", 22),
+                    rep("any_death", 22))) %>%
+  cbind(names = c(rep(c(rep("n", 11), rep("py", 11)), 5))) %>%
+  pivot_wider(names_from = names,
+              values_from = value) %>%
+  mutate(
+    # Redact values < threshold
+    count = ifelse(count < threshold, NA, as.numeric(count)),
+    follow_up = ifelse(count < threshold, NA, follow_up),
+    n = ifelse(n < threshold, NA, as.numeric(n)),
+    py = ifelse(py < threshold, NA, as.numeric(py)),
+    
+    # Round to nearest 5
+    count = plyr::round_any(count, 5),
+    n = plyr::round_any(n, 5),
+    py = plyr::round_any(py, 5),
+  ) %>%
+  mutate(Rate = round(n/count*Y, digits = 2),
+         lower_py = round((n/count - 1.96*sqrt((n/count)*(1-n/count)/count))*Y, digits = 2),
+         upper_py = round((n/count + 1.96*sqrt((n/count)*(1-n/count)/count))*Y, digits = 2),
+         rate = paste(Rate, " (", lower_py, "-", upper_py, ")", sep = "")) %>%
+  select(variable, count, follow_up, n, outcome, rate) %>% 
+  pivot_wider(names_from = outcome,
+              values_from = c(n,rate)) 
+
+outcomes_non_treated_by_hrc_redacted <- data_processed_clean %>%
+  filter(treated_status == "not treated") %>%
+  mutate(all = 1) %>%
+  select(all, downs_syndrome, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
+         hiv_aids, solid_organ_transplant, rare_neurological_conditions,
+         follow_up,
+         covid_positive_test_30_days_post_elig_or_treat, time_to_positive_test,
+         covid_hospital_admission, time_to_hospitalisation,
+         covid_hospitalisation_critical_care, time_to_itu,
+         covid_death, time_to_covid_death,
+         any_death, time_to_any_death
+  ) %>%
+  melt(id.var = c("follow_up",
+                  "covid_positive_test_30_days_post_elig_or_treat", "time_to_positive_test",
+                  "covid_hospital_admission", "time_to_hospitalisation",
+                  "covid_hospitalisation_critical_care", "time_to_itu",
+                  "covid_death", "time_to_covid_death",
+                  "any_death", "time_to_any_death")) %>%
+  filter(!is.na(value)) %>%
+  select(-value) %>%
+  group_by(variable) %>%
+  summarise(count = n(),
+            follow_up = paste(round(quantile(follow_up, 0.5, na.rm = T), digits = 0), " (",
+                              round(quantile(follow_up, 0.25, na.rm = T), digits = 0), "-",
+                              round(quantile(follow_up, 0.75, na.rm = T), digits = 0), ")", sep = ""),
+            
+            covid_positive_test_30_days_post_elig_or_treat_n = sum(covid_positive_test_30_days_post_elig_or_treat, na.rm = T),
+            covid_positive_test_30_days_post_elig_or_treat_py = sum(coalesce(as.numeric(time_to_positive_test), as.numeric(follow_up)), na.rm = T),
+            time_to_positive_test = paste(round(quantile(time_to_positive_test, 0.5, na.rm = T), digits = 0), " (",
+                                          round(quantile(time_to_positive_test, 0.25, na.rm = T), digits = 0), "-",
+                                          round(quantile(time_to_positive_test, 0.75, na.rm = T), digits = 0), ")", sep = ""),
+            
+            covid_hospital_admission_n = sum(covid_hospital_admission, na.rm = T),
+            covid_hospital_admission_py = sum(coalesce(as.numeric(time_to_hospitalisation), as.numeric(follow_up)), na.rm = T),
+            time_to_hospitalisation = paste(round(quantile(time_to_hospitalisation, 0.5, na.rm = T), digits = 0), " (",
+                                            round(quantile(time_to_hospitalisation, 0.25, na.rm = T), digits = 0), "-",
+                                            round(quantile(time_to_hospitalisation, 0.75, na.rm = T), digits = 0), ")", sep = ""),
+            
+            covid_hospitalisation_critical_care_n = sum(covid_hospitalisation_critical_care, na.rm = T),
+            covid_hospitalisation_critical_care_py = sum(coalesce(as.numeric(time_to_itu), as.numeric(follow_up)), na.rm = T),
+            time_to_itu = paste(round(quantile(time_to_itu, 0.5, na.rm = T), digits = 0), " (",
+                                round(quantile(time_to_itu, 0.25, na.rm = T), digits = 0), "-",
+                                round(quantile(time_to_itu, 0.75, na.rm = T), digits = 0), ")", sep = ""),
+            
+            covid_death_n = sum(covid_death, na.rm = T),
+            covid_death_py = sum(coalesce(as.numeric(time_to_covid_death), as.numeric(follow_up)), na.rm = T),
+            time_to_covid_death = paste(round(quantile(time_to_covid_death, 0.5, na.rm = T), digits = 0), " (",
+                                        round(quantile(time_to_covid_death, 0.25, na.rm = T), digits = 0), "-",
+                                        round(quantile(time_to_covid_death, 0.75, na.rm = T), digits = 0), ")", sep = ""),
+            
+            any_death_n = sum(any_death, na.rm = T),
+            any_death_py = sum(coalesce(as.numeric(time_to_any_death), as.numeric(follow_up)), na.rm = T),
+            time_to_any_death = paste(round(quantile(time_to_any_death, 0.5, na.rm = T), digits = 0), " (",
+                                      round(quantile(time_to_any_death, 0.25, na.rm = T), digits = 0), "-",
+                                      round(quantile(time_to_any_death, 0.75, na.rm = T), digits = 0), ")", sep = ""))  %>%
+  select(variable, count, follow_up,
+         covid_positive_test_30_days_post_elig_or_treat_n, covid_positive_test_30_days_post_elig_or_treat_py,
+         covid_hospital_admission_n, covid_hospital_admission_py,
+         covid_hospitalisation_critical_care_n, covid_hospitalisation_critical_care_py, 
+         covid_death_n, covid_death_py, any_death_n, any_death_py) %>%
+  melt(id.var = c("variable", "count", "follow_up")) %>%
+  ungroup() %>%
+  cbind(outcome = c(rep("covid_positive_test", 22),
+                    rep("covid_hospital_admission", 22),
+                    rep("covid_hospitalisation_critical_care", 22),
+                    rep("covid_death", 22),
+                    rep("any_death", 22))) %>%
+  cbind(names = c(rep(c(rep("n", 11), rep("py", 11)), 5))) %>%
+  pivot_wider(names_from = names,
+              values_from = value) %>%
+  mutate(
+    # Redact values < threshold
+    count = ifelse(count < threshold, NA, as.numeric(count)),
+    follow_up = ifelse(count < threshold, NA, follow_up),
+    n = ifelse(n < threshold, NA, as.numeric(n)),
+    py = ifelse(py < threshold, NA, as.numeric(py)),
+    
+    # Round to nearest 5
+    count = plyr::round_any(count, 5),
+    n = plyr::round_any(n, 5),
+    py = plyr::round_any(py, 5),
+  ) %>%
+  mutate(Rate = round(n/count*Y, digits = 2),
+         lower_py = round((n/count - 1.96*sqrt((n/count)*(1-n/count)/count))*Y, digits = 2),
+         upper_py = round((n/count + 1.96*sqrt((n/count)*(1-n/count)/count))*Y, digits = 2),
+         rate = paste(Rate, " (", lower_py, "-", upper_py, ")", sep = "")) %>%
+  select(variable, count, follow_up, n, outcome, rate) %>% 
+  pivot_wider(names_from = outcome,
+              values_from = c(n,rate)) 
+
+outcomes_treated_by_hrc_redacted <- data_processed_clean %>%
+  filter(treated_status == "treated") %>%
+  mutate(all = 1) %>%
+  select(all, downs_syndrome, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
+         hiv_aids, solid_organ_transplant, rare_neurological_conditions,
+         follow_up,
+         covid_positive_test_30_days_post_elig_or_treat, time_to_positive_test,
+         covid_hospital_admission, time_to_hospitalisation,
+         covid_hospitalisation_critical_care, time_to_itu,
+         covid_death, time_to_covid_death,
+         any_death, time_to_any_death
+  ) %>%
+  melt(id.var = c("follow_up",
+                  "covid_positive_test_30_days_post_elig_or_treat", "time_to_positive_test",
+                  "covid_hospital_admission", "time_to_hospitalisation",
+                  "covid_hospitalisation_critical_care", "time_to_itu",
+                  "covid_death", "time_to_covid_death",
+                  "any_death", "time_to_any_death")) %>%
+  filter(!is.na(value)) %>%
+  select(-value) %>%
+  group_by(variable) %>%
+  summarise(count = n(),
+            follow_up = paste(round(quantile(follow_up, 0.5, na.rm = T), digits = 0), " (",
+                              round(quantile(follow_up, 0.25, na.rm = T), digits = 0), "-",
+                              round(quantile(follow_up, 0.75, na.rm = T), digits = 0), ")", sep = ""),
+            
+            covid_positive_test_30_days_post_elig_or_treat_n = sum(covid_positive_test_30_days_post_elig_or_treat, na.rm = T),
+            covid_positive_test_30_days_post_elig_or_treat_py = sum(coalesce(as.numeric(time_to_positive_test), as.numeric(follow_up)), na.rm = T),
+            time_to_positive_test = paste(round(quantile(time_to_positive_test, 0.5, na.rm = T), digits = 0), " (",
+                                          round(quantile(time_to_positive_test, 0.25, na.rm = T), digits = 0), "-",
+                                          round(quantile(time_to_positive_test, 0.75, na.rm = T), digits = 0), ")", sep = ""),
+            
+            covid_hospital_admission_n = sum(covid_hospital_admission, na.rm = T),
+            covid_hospital_admission_py = sum(coalesce(as.numeric(time_to_hospitalisation), as.numeric(follow_up)), na.rm = T),
+            time_to_hospitalisation = paste(round(quantile(time_to_hospitalisation, 0.5, na.rm = T), digits = 0), " (",
+                                            round(quantile(time_to_hospitalisation, 0.25, na.rm = T), digits = 0), "-",
+                                            round(quantile(time_to_hospitalisation, 0.75, na.rm = T), digits = 0), ")", sep = ""),
+            
+            covid_hospitalisation_critical_care_n = sum(covid_hospitalisation_critical_care, na.rm = T),
+            covid_hospitalisation_critical_care_py = sum(coalesce(as.numeric(time_to_itu), as.numeric(follow_up)), na.rm = T),
+            time_to_itu = paste(round(quantile(time_to_itu, 0.5, na.rm = T), digits = 0), " (",
+                                round(quantile(time_to_itu, 0.25, na.rm = T), digits = 0), "-",
+                                round(quantile(time_to_itu, 0.75, na.rm = T), digits = 0), ")", sep = ""),
+            
+            covid_death_n = sum(covid_death, na.rm = T),
+            covid_death_py = sum(coalesce(as.numeric(time_to_covid_death), as.numeric(follow_up)), na.rm = T),
+            time_to_covid_death = paste(round(quantile(time_to_covid_death, 0.5, na.rm = T), digits = 0), " (",
+                                        round(quantile(time_to_covid_death, 0.25, na.rm = T), digits = 0), "-",
+                                        round(quantile(time_to_covid_death, 0.75, na.rm = T), digits = 0), ")", sep = ""),
+            
+            any_death_n = sum(any_death, na.rm = T),
+            any_death_py = sum(coalesce(as.numeric(time_to_any_death), as.numeric(follow_up)), na.rm = T),
+            time_to_any_death = paste(round(quantile(time_to_any_death, 0.5, na.rm = T), digits = 0), " (",
+                                      round(quantile(time_to_any_death, 0.25, na.rm = T), digits = 0), "-",
+                                      round(quantile(time_to_any_death, 0.75, na.rm = T), digits = 0), ")", sep = ""))  %>%
+  select(variable, count, follow_up,
+         covid_positive_test_30_days_post_elig_or_treat_n, covid_positive_test_30_days_post_elig_or_treat_py,
+         covid_hospital_admission_n, covid_hospital_admission_py,
+         covid_hospitalisation_critical_care_n, covid_hospitalisation_critical_care_py, 
+         covid_death_n, covid_death_py, any_death_n, any_death_py) %>%
+  melt(id.var = c("variable", "count", "follow_up")) %>%
+  ungroup() %>%
+  cbind(outcome = c(rep("covid_positive_test", 22),
+                    rep("covid_hospital_admission", 22),
+                    rep("covid_hospitalisation_critical_care", 22),
+                    rep("covid_death", 22),
+                    rep("any_death", 22))) %>%
+  cbind(names = c(rep(c(rep("n", 11), rep("py", 11)), 5))) %>%
+  pivot_wider(names_from = names,
+              values_from = value) %>%
+  mutate(
+    # Redact values < threshold
+    count = ifelse(count < threshold, NA, as.numeric(count)),
+    follow_up = ifelse(count < threshold, NA, follow_up),
+    n = ifelse(n < threshold, NA, as.numeric(n)),
+    py = ifelse(py < threshold, NA, as.numeric(py)),
+    
+    # Round to nearest 5
+    count = plyr::round_any(count, 5),
+    n = plyr::round_any(n, 5),
+    py = plyr::round_any(py, 5),
+  ) %>%
+  mutate(Rate = round(n/count*Y, digits = 2),
+         lower_py = round((n/count - 1.96*sqrt((n/count)*(1-n/count)/count))*Y, digits = 2),
+         upper_py = round((n/count + 1.96*sqrt((n/count)*(1-n/count)/count))*Y, digits = 2),
+         rate = paste(Rate, " (", lower_py, "-", upper_py, ")", sep = "")) %>%
+  select(variable, count, follow_up, n, outcome, rate) %>% 
+  pivot_wider(names_from = outcome,
+              values_from = c(n,rate)) 
+
+# Overall
+test_by_hrc_kable <- outcomes_all_by_hrc_redacted %>%
+  filter(variable == "all") %>%
+  rbind(outcomes_non_treated_by_hrc_redacted %>% filter(variable == "all")) %>%
+  rbind(outcomes_treated_by_hrc_redacted %>% filter(variable == "all")) %>%
+  cbind(group = c("All", "Non-treated", "Treated")) %>%
+  select(group, count, follow_up, 
+         n_covid_positive_test, rate_covid_positive_test,
+         n_covid_hospital_admission, rate_covid_hospital_admission,
+         n_covid_hospitalisation_critical_care, rate_covid_hospitalisation_critical_care,
+         n_covid_death, rate_covid_death,
+         n_any_death, rate_any_death) %>% 
+   kable(row.names = FALSE, 
+        align = c("l", rep("c", 12)),
+        booktabs = TRUE,
+        col.names = c("Group", "N", "Follow-up",
+                      "N", "Rate", "N", "Rate", "N", "Rate", "N", "Rate", "N", "Rate")) %>%
+  kable_styling(position = "center", full_width = T, bootstrap_options = "striped", font_size = 11)  %>%
+  #row_spec(1, bold = T) %>%
+  column_spec(1, bold = T, width = "10em") %>%
+  add_header_above(., c("", "", "", "Positive SARS-CoV-2 test" = 2, "COVID-19-related hospital admission" = 2, 
+                        "COVID-19-related critical care admission" = 2, "COVID-19-related death" = 2,
+                        "All-cause death" = 2)) %>%
+  add_footnote(c("Rates calculated per 1,000 patients, with 95% confidence intervals"), 
+               notation = "symbol")
+
+# Positive test
+pos_test_by_hrc_kable <- outcomes_all_by_hrc_redacted %>%
+  left_join(outcomes_non_treated_by_hrc_redacted, by = "variable") %>%
+  left_join(outcomes_treated_by_hrc_redacted, by = "variable") %>%
+  select(variable, count.x, follow_up.x, n_covid_positive_test.x, rate_covid_positive_test.x,
+         count.y, n_covid_positive_test.y, rate_covid_positive_test.y,
+         count, n_covid_positive_test, rate_covid_positive_test) %>% 
+  mutate(variable = case_when(
+    variable == "all" ~ "All", 
+    variable == "downs_syndrome" ~ "Down's syndrome", 
+    variable == "sickle_cell_disease" ~ "Sickle cell disease", 
+    variable == "solid_cancer" ~ "Solid cancer", 
+    variable == "haematological_disease" ~ "Haematological diseases and stem cell transplant recipients", 
+    variable == "renal_disease" ~ "Renal disease", 
+    variable == "liver_disease" ~ "Liver disease", 
+    variable == "imid" ~ "Immune-mediated inflammatory disorders", 
+    variable == "immunosupression" ~ "Primary immune deficiencies", 
+    variable == "hiv_aids" ~ "Immunosuppression due to HIV or AIDS", 
+    variable == "solid_organ_transplant" ~ "Solid organ transplant recipients",
+    variable == "rare_neurological_conditions" ~ "Rare neurological conditions",
+    TRUE ~ NA_character_)) %>%
+  arrange(variable) %>%
+  kable(row.names = FALSE, 
+        align = c("l", rep("c", 10)),
+        booktabs = TRUE,
+        col.names = c("High risk group", "N", "Follow-up", "Positive SARS-CoV-2 test", "Rate",
+                      "N", "Positive SARS-CoV-2 test", "Rate",
+                      "N", "Positive SARS-CoV-2 test", "Rate")) %>%
+  kable_styling(position = "center", full_width = T, bootstrap_options = "striped", font_size = 11)  %>%
+  #row_spec(1, bold = T) %>%
+  column_spec(1, bold = T, width = "10em") %>%
+  add_header_above(., c("", "All" = 4, "Not treated" = 3, "Treated" = 3)) %>%
+  add_footnote(c("Rates calculated per 1,000 patients, with 95% confidence intervals"), 
+               notation = "symbol") 
+
+# Hospitalisation
+outcomes_by_hrc_kable_hospital <- outcomes_all_by_hrc_redacted %>%
+  left_join(outcomes_non_treated_by_hrc_redacted, by = "variable") %>%
+  left_join(outcomes_treated_by_hrc_redacted, by = "variable") %>%
+  select(variable, count.x, follow_up.x, n_covid_hospital_admission.x, rate_covid_hospital_admission.x,
+         count.y, n_covid_hospital_admission.y, rate_covid_hospital_admission.y,
+         count, n_covid_hospital_admission, rate_covid_hospital_admission) %>% 
+  mutate(variable = case_when(
+    variable == "all" ~ "All", 
+    variable == "downs_syndrome" ~ "Down's syndrome", 
+    variable == "sickle_cell_disease" ~ "Sickle cell disease", 
+    variable == "solid_cancer" ~ "Solid cancer", 
+    variable == "haematological_disease" ~ "Haematological diseases and stem cell transplant recipients", 
+    variable == "renal_disease" ~ "Renal disease", 
+    variable == "liver_disease" ~ "Liver disease", 
+    variable == "imid" ~ "Immune-mediated inflammatory disorders", 
+    variable == "immunosupression" ~ "Primary immune deficiencies", 
+    variable == "hiv_aids" ~ "Immunosuppression due to HIV or AIDS", 
+    variable == "solid_organ_transplant" ~ "Solid organ transplant recipients",
+    variable == "rare_neurological_conditions" ~ "Rare neurological conditions",
+    TRUE ~ NA_character_)) %>%
+  arrange(variable) %>%
+  kable(row.names = FALSE, 
+        align = c("l", rep("c", 10)),
+        booktabs = TRUE,
+        col.names = c("High risk group", "N", "Follow-up", "COVID-19-related hospital admission", "Rate",
+                      "N", "COVID-19-related hospital admission", "Rate",
+                      "N", "COVID-19-related hospital admission", "Rate")) %>%
+  kable_styling(position = "center", full_width = T, bootstrap_options = "striped", font_size = 11)  %>%
+  #row_spec(1, bold = T) %>%
+  column_spec(1, bold = T, width = "10em") %>%
+  add_header_above(., c("", "All" = 4, "Not treated" = 3, "Treated" = 3)) %>%
+ add_footnote(c("Rates calculated per 1,000 patients, with 95% confidence intervals"), 
+               notation = "symbol") 
+
+# Critical care
+outcomes_by_hrc_kable_critical_care <- outcomes_all_by_hrc_redacted %>%
+  left_join(outcomes_non_treated_by_hrc_redacted, by = "variable") %>%
+  left_join(outcomes_treated_by_hrc_redacted, by = "variable") %>%
+  select(variable, count.x, follow_up.x, n_covid_hospitalisation_critical_care.x, rate_covid_hospitalisation_critical_care.x,
+         count.y, n_covid_hospitalisation_critical_care.y, rate_covid_hospitalisation_critical_care.y,
+         count, n_covid_hospitalisation_critical_care, rate_covid_hospitalisation_critical_care) %>% 
+  mutate(variable = case_when(
+    variable == "all" ~ "All", 
+    variable == "downs_syndrome" ~ "Down's syndrome", 
+    variable == "sickle_cell_disease" ~ "Sickle cell disease", 
+    variable == "solid_cancer" ~ "Solid cancer", 
+    variable == "haematological_disease" ~ "Haematological diseases and stem cell transplant recipients", 
+    variable == "renal_disease" ~ "Renal disease", 
+    variable == "liver_disease" ~ "Liver disease", 
+    variable == "imid" ~ "Immune-mediated inflammatory disorders", 
+    variable == "immunosupression" ~ "Primary immune deficiencies", 
+    variable == "hiv_aids" ~ "Immunosuppression due to HIV or AIDS", 
+    variable == "solid_organ_transplant" ~ "Solid organ transplant recipients",
+    variable == "rare_neurological_conditions" ~ "Rare neurological conditions",
+    TRUE ~ NA_character_)) %>%
+  arrange(variable) %>%
+  kable(row.names = FALSE, 
+        align = c("l", rep("c", 10)),
+        booktabs = TRUE,
+        col.names = c("High risk group", "N", "Follow-up", "COVID-19-related critical care admission", "Rate",
+                      "N", "COVID-19-related critical care admission", "Rate",
+                      "N", "COVID-19-related critical care admission", "Rate")) %>%
+  kable_styling(position = "center", full_width = T, bootstrap_options = "striped", font_size = 11)  %>%
+  #row_spec(1, bold = T) %>%
+  column_spec(1, bold = T, width = "10em") %>%
+  add_header_above(., c("", "All" = 4, "Not treated" = 3, "Treated" = 3)) %>%
+  add_footnote(c("Rates calculated per 1,000 patients, with 95% confidence intervals"), 
+               notation = "symbol")
+
+# Covid death
+outcomes_by_hrc_kable_covid_death <- outcomes_all_by_hrc_redacted %>%
+  left_join(outcomes_non_treated_by_hrc_redacted, by = "variable") %>%
+  left_join(outcomes_treated_by_hrc_redacted, by = "variable") %>%
+  select(variable, count.x, follow_up.x, n_covid_death.x, rate_covid_death.x,
+         count.y, n_covid_death.y, rate_covid_death.y,
+         count, n_covid_death, rate_covid_death) %>% 
+  mutate(variable = case_when(
+    variable == "all" ~ "All", 
+    variable == "downs_syndrome" ~ "Down's syndrome", 
+    variable == "sickle_cell_disease" ~ "Sickle cell disease", 
+    variable == "solid_cancer" ~ "Solid cancer", 
+    variable == "haematological_disease" ~ "Haematological diseases and stem cell transplant recipients", 
+    variable == "renal_disease" ~ "Renal disease", 
+    variable == "liver_disease" ~ "Liver disease", 
+    variable == "imid" ~ "Immune-mediated inflammatory disorders", 
+    variable == "immunosupression" ~ "Primary immune deficiencies", 
+    variable == "hiv_aids" ~ "Immunosuppression due to HIV or AIDS", 
+    variable == "solid_organ_transplant" ~ "Solid organ transplant recipients",
+    variable == "rare_neurological_conditions" ~ "Rare neurological conditions",
+    TRUE ~ NA_character_)) %>%
+  arrange(variable) %>%
+  kable(row.names = FALSE, 
+        align = c("l", rep("c", 10)),
+        booktabs = TRUE,
+        col.names = c("High risk group", "N", "Follow-up", "COVID-19-related death", "Rate",
+                      "N", "COVID-19-related death", "Rate",
+                      "N", "COVID-19-related death", "Rate")) %>%
+  kable_styling(position = "center", full_width = T, bootstrap_options = "striped", font_size = 11)  %>%
+  #row_spec(1, bold = T) %>%
+  column_spec(1, bold = T, width = "10em") %>%
+  add_header_above(., c("", "All" = 4, "Not treated" = 3, "Treated" = 3)) %>%
+  add_footnote(c("Rates calculated per 1,000 patients, with 95% confidence intervals"), 
+               notation = "symbol") 
+
+# Any death
+outcomes_by_hrc_kable_any_death <- outcomes_all_by_hrc_redacted %>%
+  left_join(outcomes_non_treated_by_hrc_redacted, by = "variable") %>%
+  left_join(outcomes_treated_by_hrc_redacted, by = "variable") %>%
+  select(variable, count.x, follow_up.x, n_any_death.x, rate_any_death.x,
+         count.y, n_any_death.y, rate_any_death.y,
+         count, n_any_death, rate_any_death) %>% 
+  mutate(variable = case_when(
+    variable == "all" ~ "All", 
+    variable == "downs_syndrome" ~ "Down's syndrome", 
+    variable == "sickle_cell_disease" ~ "Sickle cell disease", 
+    variable == "solid_cancer" ~ "Solid cancer", 
+    variable == "haematological_disease" ~ "Haematological diseases and stem cell transplant recipients", 
+    variable == "renal_disease" ~ "Renal disease", 
+    variable == "liver_disease" ~ "Liver disease", 
+    variable == "imid" ~ "Immune-mediated inflammatory disorders", 
+    variable == "immunosupression" ~ "Primary immune deficiencies", 
+    variable == "hiv_aids" ~ "Immunosuppression due to HIV or AIDS", 
+    variable == "solid_organ_transplant" ~ "Solid organ transplant recipients",
+    variable == "rare_neurological_conditions" ~ "Rare neurological conditions",
+    TRUE ~ NA_character_)) %>%
+  arrange(variable) %>%
+  kable(row.names = FALSE, 
+        align = c("l", rep("c", 10)),
+        booktabs = TRUE,
+        col.names = c("High risk group", "N", "Follow-up", "All-cause death", "Rate",
+                      "N", "All-cause death", "Rate",
+                      "N", "All-cause death", "Rate")) %>%
+  kable_styling(position = "center", full_width = T, bootstrap_options = "striped", font_size = 11)  %>%
+  #row_spec(1, bold = T) %>%
+  column_spec(1, bold = T, width = "10em") %>%
+  add_header_above(., c("", "All" = 4, "Not treated" = 3, "Treated" = 3)) %>%
+ add_footnote(c("Rates calculated per 1,000 patients, with 95% confidence intervals"), 
+               notation = "symbol") 
+
+## Counts by SGTF
+counts_tbl <- data_processed_clean %>%
+  mutate(patient = 1,
+         
+         treated_status = ifelse(!is.na(treatment_type), "treated", "not treated"),
+         
+         sgtf = fct_case_when(
+           sgtf == "1" ~ "Cases with SGTF",
+           sgtf == "0" ~ "Detectable S-gene",
+           sgtf == "9" ~ "Unclassifiable",
+           TRUE ~ "Not avaliable"),
+         
+         study_end = end_date,
+         
+         censor_date = pmin(death_date, 
+                            dereg_date, 
+                            study_end, 
+                            na.rm = TRUE),
+         
+         follow_up = tte(start_date,
+                         study_end,
+                         censor_date),
+         
+         time_to_positive_test = tte(start_date,
+                                     covid_positive_test_30_days_post_elig_or_treat_date,
+                                     censor_date),
+         time_to_positive_test = ifelse(covid_positive_test_30_days_post_elig_or_treat == 1, time_to_positive_test, NA),
+         
+         time_to_hospitalisation = tte(start_date,
+                                       covid_hospitalisation_outcome_date,
+                                       censor_date),
+         time_to_hospitalisation = ifelse(covid_hospital_admission == 1, time_to_hospitalisation, NA),
+         
+         time_to_itu = as.numeric(as.character((ifelse(covid_hospitalisation_critical_care == 1, time_to_hospitalisation, NA)))),
+         
+         covid_death_date = ifelse(covid_death == 1, death_date, NA),
+         covid_death_date = as.Date(covid_death_date, origin = "1970-01-01"),
+         
+         time_to_covid_death = tte(start_date,
+                                   covid_death_date,
+                                   censor_date),
+         time_to_covid_death = ifelse(covid_death == 1, time_to_covid_death, NA),
+         
+         time_to_any_death = tte(start_date,
+                                 death_date,
+                                 censor_date),
+         time_to_any_death = ifelse(any_death == 1, time_to_any_death, NA)
+         
+  ) %>%
+  select(treated_status, sgtf,
+         patient, follow_up,
+         covid_positive_test_30_days_post_elig_or_treat, time_to_positive_test,
+         covid_hospital_admission, time_to_hospitalisation,
+         covid_hospitalisation_critical_care, time_to_itu,
+         covid_death, time_to_covid_death,
+         any_death, time_to_any_death
+  )
+
+sgtf_outcomes <- data_processed_clean %>%
+  mutate(sgtf = ifelse(is.na(sgtf), 100, sgtf)) %>%
+  filter(!is.na(sgtf)) %>%
+  select(treated_status, sgtf,
+         covid_positive_test_30_days_post_elig_or_treat,
+         covid_hospital_admission,
+         covid_hospitalisation_critical_care,
+         covid_death,
+         any_death
+  ) %>%
+  group_by(treated_status, sgtf) %>%
+  summarise(count = n(),
+            covid_positive_test = sum(covid_positive_test_30_days_post_elig_or_treat, na.rm = T),
+            covid_hospital_admission = sum(covid_hospital_admission, na.rm = T),
+            covid_hospitalisation_critical_care = sum(covid_hospitalisation_critical_care, na.rm = T),
+            covid_death = sum(covid_death, na.rm = T),
+            any_death = sum(any_death, na.rm = T)) %>%
+  mutate(
+    # Redact values < threshold
+    count = ifelse(count < threshold, NA, as.numeric(count)),
+    covid_positive_test = ifelse(covid_positive_test < threshold, NA, covid_positive_test),
+    covid_hospital_admission = ifelse(covid_hospital_admission < threshold, NA, as.numeric(covid_hospital_admission)),
+    covid_hospitalisation_critical_care = ifelse(covid_hospitalisation_critical_care < threshold, NA, as.numeric(covid_hospitalisation_critical_care)),
+    covid_death = ifelse(covid_death < threshold, NA, as.numeric(covid_death)),
+    any_death = ifelse(any_death < threshold, NA, as.numeric(any_death)),
+    
+    # Round to nearest 5
+    count = plyr::round_any(count, 5),
+    covid_positive_test = plyr::round_any(covid_positive_test, 5),
+    covid_hospital_admission = plyr::round_any(covid_hospital_admission, 5),
+    covid_hospitalisation_critical_care = ifelse(!is.na(covid_hospitalisation_critical_care),
+                                                 plyr::round_any(covid_hospitalisation_critical_care, 5), covid_hospitalisation_critical_care),
+    covid_death = plyr::round_any(covid_death, 5),
+    any_death = plyr::round_any(any_death, 5)
+    ) %>%
+  melt(id.var = c("treated_status", "sgtf")) %>%
+  ungroup() %>%
+  pivot_wider(names_from = c(treated_status, sgtf),
+              values_from = c(value)) %>%
+  rowwise() %>%
+  mutate(not_treated_all = sum(`not treated_0`, `not treated_1`, `not treated_100`, `not treated_9`, na.rm = T),
+         treated_all = sum(`treated_0`, `treated_1`, `treated_100`, `treated_9`, na.rm = T),
+         all = sum(not_treated_all, treated_all, na.rm = T),
+         `0` = sum(`not treated_0`, `treated_0`, na.rm = T),
+         `1` = sum(`not treated_1`, `treated_1`, na.rm = T),
+         `100` = sum(`not treated_100`, `treated_100`, na.rm = T),
+         `9` = sum(`not treated_9`, `treated_9`, na.rm = T),) %>%
+  cbind(Variable = c("All", "Positive SARS-CoV-2 test" ,"COVID-19-related hospital admission", "COVID-19-related critical care admission",
+        "COVID-19-related death", "All-cause death")) %>%
+  select(Variable, all, sgtf = `0`, s_gene = `1`, unclass = `9`, miss = `100`,
+         untreat_all = not_treated_all, untreat_sgtf = `not treated_0`, untreat_s_gene = `not treated_1`, untreat_unclass = `not treated_9`, untreat_miss = `not treated_100`,
+         treat_all = treated_all, treat_sgtf = `treated_0`, treat_s_gene = `treated_1`, treat_unclass = `treated_9`, treat_miss = `treated_100`)
+
+sgtf_outcomes[sgtf_outcomes == 0] <- NA 
+
+sgtf_outcomes_kable <- sgtf_outcomes %>%
+  kable(row.names = FALSE, 
+        align = c("l", rep("r", 15)),
+        booktabs = TRUE,
+        col.names = c("", "N", "Cases with SGTF", "Detectable S-gene", "Unclassifiable", "Missing",
+                      "N", "Cases with SGTF", "Detectable S-gene", "Unclassifiable", "Missing",
+                      "N", "Cases with SGTF", "Detectable S-gene", "Unclassifiable", "Missing")) %>%
+  kable_styling(position = "center", full_width = T, bootstrap_options = "striped", font_size = 11)  %>%
+  #row_spec(1, bold = T) %>%
+  column_spec(1, bold = T, width = "10em") %>%
+  add_header_above(., c("", "All" = 5, "Not treated" = 5, "Treated" = 5))
+
+```
+
+<br>
+
+### Contents
+* [Overall number of outcomes and crude rates](#overall)
+* [Number of outcomes and crude rates by S-gene target failure](#sgtf)
+    + [Positive SARS-CoV-2 test, 30 days or more since start date](#positive)
+    + [Hospitalisation with COVID-19 recorded as the primary diagnosis, one or more days after start date](#hospitilisation)
+    + [COVID-19-related critical care admission, one or more days after start date](#critical care)
+    + [COVID-19 related death, one or more days after start date](#covid death)
+    + [Any death, one or more days after start date](#any death)
+* [Number of outcomes and crude rates, by high risk cohort](#high risk cohort)
+    + [Positive SARS-CoV-2 test, 30 days or more since start date](#positiveb)
+    + [Hospitalisation with COVID-19 recorded as the primary diagnosis, one or more days after start date](#hospitilisationb)
+    + [COVID-19-related critical care admission, one or more days after start date](#critical careb)
+    + [COVID-19 related death, one or more days after start date](#covid deathb)
+    + [Any death, one or more days after start date](#any deathb)
+
+
+      
+# Overall number of outcomes and crude rates <a name="overall"></a>
+
+* Outcomes as of `r format(max(data_processed_clean$elig_start, na.rm = T), format = "%d-%b-%Y")`.
+    + Positive SARS-CoV-2 test is included as an outcome if it occurs 30 days or more since start date
+    + Hospitalisation with COVID-19 recorded as the primary diagnosis is included as an outcome if it occurs one or more days after start date
+    + COVID-19-related critical care admission is included as an outcome if it occurs one or more days after start date
+    + COVID-19 related death is included as an outcome if it occurs one or more days after start date 
+    + Any death is included as an outcome if it occurs one or more days after start date
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '100%', fig.cap = "**Table 1 Number and crude rate (per 1,000 patients)  of outcomes in potentially eligible patients in OpenSAFELY-TPP who have received treatment for COVID-19, broken down by high risk cohort and treatment status.** Patient counts <= 5 have been redacted and counts > 5 are rounded to the nearest 5", fig.topcaption=TRUE}
+
+test_by_hrc_kable
+
+```
+
+# Outcomes by high risk cohort <a name="overall"></a>
+
+### Positive SARS-CoV-2 test, 30 days or more since start date <a name="positiveb"></a>
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '100%'}
+
+pos_test_by_hrc_kable
+
+```
+
+### Hospitalisation with COVID-19 recorded as the primary diagnosis, one or more days after start date <a name="hospitilisationb"></a>
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '100%'}
+
+outcomes_by_hrc_kable_hospital
+
+```
+
+### COVID-19-related critical care admission, one or more days after start date <a name="critical careb)"></a>
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '100%'}
+
+outcomes_by_hrc_kable_critical_care
+
+```
+
+### COVID-19 related death, one or more days after start date <a name="covid deathb"></a>
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '100%'}
+
+outcomes_by_hrc_kable_covid_death
+
+```
+
+### Any death, one or more days after start date <a name="any deathb"></a>
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '100%'}
+
+outcomes_by_hrc_kable_any_death
+
+```
+
+# Number of outcomes and crude rates, by S-gene target failure <a name="sgtf"></a>
+
+Of the `r format(plyr::round_any(nrow(data_processed_clean), 5), big.mark = ",", scientific = FALSE)` potentially eligible patients, `r format(plyr::round_any(nrow(data_processed_clean %>% filter(!is.na(sgtf))), 5), big.mark = ",", scientific = FALSE)` (**`r round(nrow(data_processed_clean %>% filter(!is.na(sgtf)))/nrow(data_processed_clean)*100, digits = 0)`%**) had S-gene target failure data available via Second Generation Surveillance System (SGSS) data, which captures routine laboratory surveillance data on infectious diseases across England: 
+
+- Cases with SGTF: `r format(plyr::round_any(nrow(data_processed_clean %>% filter(sgtf == 1)), 5), big.mark = ",", scientific = FALSE)` (**`r round(nrow(data_processed_clean %>% filter(sgtf == 1))/nrow(data_processed_clean)*100, digits = 0)`%**);
+- Detectable S-gene: `r format(plyr::round_any(nrow(data_processed_clean %>% filter(sgtf == 0)), 5), big.mark = ",", scientific = FALSE)` (**`r round(nrow(data_processed_clean %>% filter(sgtf == 0))/nrow(data_processed_clean)*100, digits = 0)`%**);
+- Unclassifiable: `r format(plyr::round_any(nrow(data_processed_clean %>% filter(sgtf == 9)), 5), big.mark = ",", scientific = FALSE)` (**`r round(nrow(data_processed_clean %>% filter(sgtf == 9))/nrow(data_processed_clean)*100, digits = 0)`%**).
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '100%'}
+
+sgtf_outcomes_kable
+
+```
+
+<br>
+
+
+
+
+
+

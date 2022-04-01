@@ -751,8 +751,3 @@ all$Outcome <- c("Positive SARS-CoV-2 test, 30 days or more since start date",
                  "Any death, one or more days after start date")
 
 write_csv(all, fs::path(output_dir, "table_covid_outcomes_redacted.csv"))
-
-
-
-
-
