@@ -641,6 +641,10 @@ all <- data_processed_clean %>%
   filter(!is.na(treatment_type)) %>%
   group_by(tb, treatment_type) %>%
   tally() %>%
+  mutate(tb = ifelse(tb < -1, -2, tb),
+         tb = ifelse(tb > 5, 6, tb)) %>%
+  group_by(tb, treatment_type) %>%
+  summarise(n = sum(n, na.rm=T)) %>%
   mutate(high_risk_cohort = "All",
          n = ifelse(n < 8, NA, n),
          n = plyr::round_any(as.numeric(n), 10)) %>%
@@ -662,6 +666,10 @@ groups <- data_processed_clean %>%
     names_to = "high_risk_cohort",
     values_to = "n"
   ) %>%
+  mutate(tb = ifelse(tb < -1, -2, tb),
+         tb = ifelse(tb > 5, 6, tb)) %>%
+  group_by(tb, high_risk_cohort) %>%
+  summarise(n = sum(n, na.rm=T)) %>%
   mutate(n = ifelse(n < 8, NA, n),
          n = plyr::round_any(as.numeric(n), 10)) %>%
   filter(!is.na(n))
@@ -682,6 +690,10 @@ groups2 <- data_processed_clean %>%
     names_to = "group",
     values_to = "n"
   ) %>%
+  mutate(tb = ifelse(tb < -1, -2, tb),
+         tb = ifelse(tb > 5, 6, tb)) %>%
+  group_by(tb, group) %>%
+  summarise(n = sum(n, na.rm=T)) %>%
   mutate(n = ifelse(n < 8, NA, n),
          n = plyr::round_any(as.numeric(n), 10),
          variable = group) %>%
@@ -698,6 +710,10 @@ for (i in 1:length(groups_tte)) {
     select(tb, variable = groups_tte[i]) %>%
     group_by_all() %>% 
     tally() %>%
+    mutate(tb = ifelse(tb < -1, -2, tb),
+           tb = ifelse(tb > 5, 6, tb)) %>%
+    group_by(tb, variable) %>%
+    summarise(n = sum(n, na.rm=T)) %>%
     mutate(n = ifelse(n < 8, NA, n),
            n = plyr::round_any(as.numeric(n), 10),
            group = groups_tte[i]) %>%
