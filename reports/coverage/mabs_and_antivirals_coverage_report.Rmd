@@ -63,9 +63,9 @@ end_date <- report_stats$study_end
 ```
 
 # Overview
-This OpenSAFELY report was rapidly developed to support monitoring the ongoing roll-out of antivirals and neutralising monoclonal antibodies (nMABs) for the treatment of COVID-19, based on the population of 23.4m people registered with practices that use TPP SystmOne software. This report will be updated approximately weekly as new data arrives and there are likely to be some small changes made between the some versions.
+This OpenSAFELY report has been rapidly developed to support monitoring the ongoing roll-out of antivirals and neutralising monoclonal antibodies (nMABs) for the treatment of COVID-19, based on the population of 23.4m people registered with practices that use TPP SystmOne software. This report is updated approximately weekly as new data arrives and there are likely to be some small changes made between the some versions.
 
-Note that currently the clinician-assigned risk group for patients receiving Paxlovid or Remdesivir is not available. While we’re able to assign high risk groups to about 65% (n = 260)  of these patients by implementing the NHS Digital logic, the other 35% (n = 130) are most likely identified via non-digital routes. For now, where results are broken down by high risk cohort, these patients are excluded.
+Note that currently the clinician-assigned risk group for patients receiving Paxlovid or Remdesivir is not available. While we’re able to assign high risk groups to about 70% of these patients by implementing the NHS Digital logic, the other 30% are most likely identified via non-digital routes. For now, where results are broken down by high risk cohort and no high risk cohort is able to assigned, these patients are excluded.
 
 The code and data for this report can be found at the OpenSAFELY [antibody-and-antiviral-deployment repository](https://github.com/opensafely/antibody-and-antiviral-deployment). The accompanying manuscript is available on [MedRXiV](https://reports.opensafely.org/reports/antivirals-and-nmabs-for-non-hospitalised-covid-19-patients-coverage-report/) and will shortly be submitted for peer review. 
 
@@ -371,11 +371,11 @@ table_elig_treat_redacted <- table_elig_treat_redacted %>%
                               sep = "")) %>%
   select(high_risk_cohort, Eligibile, Treated, Treated_perc, Paxlovid, Paxlovid_perc, Sotrovimab, Sotrovimab_perc, Remdesivir, 
          Remdesivir_perc, Molnupiravir, Molnupiravir_perc, Casirivimab, Casirivimab_perc) %>%  
-  mutate(Paxlovid = ifelse(is.na(Paxlovid), "<5", Paxlovid),
+  mutate(Paxlovid = ifelse(is.na(Paxlovid), "<8", Paxlovid),
          Paxlovid_perc = ifelse(Paxlovid_perc == "NA (NA-NA)", "--", Paxlovid_perc),
-         Remdesivir = ifelse(is.na(Remdesivir), "<5", Remdesivir),
+         Remdesivir = ifelse(is.na(Remdesivir), "<8", Remdesivir),
          Remdesivir_perc = ifelse(Remdesivir_perc == "NA (NA-NA)", "--", Remdesivir_perc),
-         Casirivimab = ifelse(is.na(Casirivimab), "<5", Casirivimab),
+         Casirivimab = ifelse(is.na(Casirivimab), "<8", Casirivimab),
          Casirivimab_perc = ifelse(Casirivimab_perc == "NA (NA-NA)", "--", Casirivimab_perc))
          
 colnames(table_elig_treat_redacted) <- c("High risk cohort", "Count", "Count", "%", "Count", "%", 
@@ -404,7 +404,7 @@ write_csv(table_elig_treat_redacted, here::here(output_dir_rmd, "tables", "table
 
 ```
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '100%', fig.cap = "**Table 1 Count and proportion of potentially eligible patients in OpenSAFELY-TPP who have received treatment for COVID-19 between 16th December 2021 23rd February 2022, broken down by high risk cohort and treatment type.** Patient counts >5 are rounded to the nearest 10; as a result percentages may not add up to 100%.", fig.topcaption=TRUE}
+```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '100%', fig.cap = "**Table 1 Count and proportion of potentially eligible patients in OpenSAFELY-TPP who have received treatment for COVID-19 between 16th December 2021 23rd February 2022, broken down by high risk cohort and treatment type.** Patient counts >7 are rounded to the nearest 10; as a result percentages may not add up to 100%.", fig.topcaption=TRUE}
 
 include_graphics(fs::path(output_dir_rmd, "tables", "table_prop_eligible_high_risk_cohort.png"))
 
@@ -416,9 +416,13 @@ The proportion of potentially eligible patients receiving treatment varied over 
 
 ```{r, prop treatment plot, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '100%', fig.cap = "**Figure 3 Weekly proportion of eligible patients receiving an antiviral or nMAB for treating COVID-19 since 11th December 2021, stratified by high risk cohort.** Proportions are rounded to 2 decimal places.", fig.topcaption=TRUE}
 
+max_date <- max(read_csv(here::here(input_dir_os, "table_prop_treated_redacted.csv"))$elig_start)
+
 weekly_treatment_proportion <- read_csv(here::here(input_dir_os, "table_prop_treated_redacted.csv")) %>%
   filter(!is.na(prop_redacted),
-         treatment_type == "All") %>%
+         treatment_type == "All",
+         elig_start != max_date) %>%
+  mutate(prop_redacted = ifelse(prop_redacted == 1, 0.99, prop_redacted)) %>%
   mutate(high_risk_cohort = case_when(
     high_risk_cohort == "All" ~ "All", 
     high_risk_cohort == "downs_syndrome" ~ "Down's syndrome", 
@@ -580,18 +584,18 @@ table_demo_clinc_breakdown_redacted <- read_csv(fs::path(input_dir_os, "table_de
                                   sep = "")) %>%
   select(Group, Variable, Eligibile, Treated, Treated_perc, Paxlovid, Paxlovid_perc, Sotrovimab, Sotrovimab_perc, Remdesivir, 
          Remdesivir_perc, Molnupiravir, Molnupiravir_perc, Casirivimab, Casirivimab_perc) %>%  
-  mutate(Eligibile = ifelse(is.na(Eligibile), "<5", Eligibile),
-         Treated = ifelse(is.na(Treated), "<5", Treated),
+  mutate(Eligibile = ifelse(is.na(Eligibile), "<8", Eligibile),
+         Treated = ifelse(is.na(Treated), "<8", Treated),
          Treated_perc = ifelse(Treated_perc == "NA (NA-NA)", "--", Treated_perc),
-         Paxlovid = ifelse(is.na(Paxlovid), "<5", Paxlovid),
+         Paxlovid = ifelse(is.na(Paxlovid), "<8", Paxlovid),
          Paxlovid_perc = ifelse(Paxlovid_perc == "NA (NA-NA)", "--", Paxlovid_perc),
-         Sotrovimab = ifelse(is.na(Sotrovimab), "<5", Sotrovimab),
+         Sotrovimab = ifelse(is.na(Sotrovimab), "<8", Sotrovimab),
          Sotrovimab_perc = ifelse(Sotrovimab_perc == "NA (NA-NA)", "--", Sotrovimab_perc),
-         Remdesivir = ifelse(is.na(Remdesivir), "<5", Remdesivir),
+         Remdesivir = ifelse(is.na(Remdesivir), "<8", Remdesivir),
          Remdesivir_perc = ifelse(Remdesivir_perc == "NA (NA-NA)", "--", Remdesivir_perc),
-         Molnupiravir = ifelse(is.na(Molnupiravir), "<5", Molnupiravir),
+         Molnupiravir = ifelse(is.na(Molnupiravir), "<8", Molnupiravir),
          Molnupiravir_perc = ifelse(Molnupiravir_perc == "NA (NA-NA)", "--", Molnupiravir_perc),
-         Casirivimab = ifelse(is.na(Casirivimab), "<5", Casirivimab),
+         Casirivimab = ifelse(is.na(Casirivimab), "<8", Casirivimab),
          Casirivimab_perc = ifelse(Casirivimab_perc == "NA (NA-NA)", "--", Casirivimab_perc))
 
 colnames(table_demo_clinc_breakdown_redacted) <- c("Group", "Variable", "Count", "Count", "%", "Count", "%", 
@@ -619,7 +623,7 @@ write_csv(table_demo_clinc_breakdown_redacted, here::here(output_dir_rmd, "table
 
 ```
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '100%', fig.cap = "***Table 2 Count and proportion of potentially eligible patients in OpenSAFELY-TPP who have received treatment for COVID-19 between 11th December 2021 and 23rd February 2022, broken down by demographic and clinical categories and by treatment type.** Patient counts >5 are rounded to the nearest 10; as a result percentages may not add up to 100%.", fig.topcaption=TRUE}
+```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '100%', fig.cap = "***Table 2 Count and proportion of potentially eligible patients in OpenSAFELY-TPP who have received treatment for COVID-19 between 11th December 2021 and 23rd February 2022, broken down by demographic and clinical categories and by treatment type.** Patient counts of 0-7 are shown as <8 with remaining counts rounded to the nearest 10; as a result percentages may not add up to 100%.", fig.topcaption=TRUE}
 
 include_graphics(fs::path(output_dir_rmd, "tables", "table_prop_eligible_clinc_demo.png"))
 
@@ -627,7 +631,7 @@ include_graphics(fs::path(output_dir_rmd, "tables", "table_prop_eligible_clinc_d
 
 ### Consistency with guidance <a name="concordance"></a>
 
-Of the `r format(report_stats$treated_patients,  big.mark = ",", scientific = FALSE)` patients who received treatment for COVID-19 between `r format(report_stats$study_start, format = "%d-%b-%Y")` and `r format(report_stats$study_end, format = "%d-%b-%Y")`,  `r format(as.numeric(flowchart_non_elig[1,2]), big.mark = ",", scientific = FALSE)` patients were missing records needed to confirm eligibility; `r round(as.numeric(subset(flowchart_non_elig, criteria == "c_no_positive_covid_test")$n)/report_stats$treated_patients*100, digits = 0)`% did not have evidence of a positive SARS-CoV-2 test, `r round(as.numeric(subset(flowchart_non_elig, criteria == "c_no_high_risk_group_nhsd")$n)/report_stats$treated_patients*100, digits = 0)`% did not have a high risk cohort identified from their GP records alone, and `r round(as.numeric(subset(flowchart_non_elig, criteria == "c_primary_covid_hospital_admission_last_30_days")$n)/report_stats$treated_patients*100, digits = 0)`% were discharged from hospital within 30 days prior to their positive test or treatment date, where COVID-19 was the primary diagnosis. There were also a small number of other potential inconsistencies with guidance for patients who received treatment, such as having a potential contraindication to the treatment given (Figure 3).
+Of the `r format(report_stats$treated_patients,  big.mark = ",", scientific = FALSE)` patients who received treatment for COVID-19 between `r format(report_stats$study_start, format = "%d-%b-%Y")` and `r format(report_stats$study_end, format = "%d-%b-%Y")`,  `r format(as.numeric(flowchart_non_elig[1,2]), big.mark = ",", scientific = FALSE)` (`r round(as.numeric(flowchart_non_elig[1,2])/report_stats$treated_patients*100, digits = 0)`%) patients were missing records needed to confirm eligibility; `r round(as.numeric(subset(flowchart_non_elig, criteria == "c_no_positive_covid_test")$n)/report_stats$treated_patients*100, digits = 0)`% did not have evidence of a positive SARS-CoV-2 test, `r round(as.numeric(subset(flowchart_non_elig, criteria == "c_no_high_risk_group_nhsd")$n)/report_stats$treated_patients*100, digits = 0)`% did not have a high risk cohort identified from their GP records alone, and `r round(as.numeric(subset(flowchart_non_elig, criteria == "c_primary_covid_hospital_admission_last_30_days")$n)/report_stats$treated_patients*100, digits = 0)`% were discharged from hospital within 30 days prior to their positive test or treatment date, where COVID-19 was the primary diagnosis. There were also a small number of other potential inconsistencies with guidance for patients who received treatment, such as having a potential contraindication to the treatment given (Figure 3).
 
 ```{r non_elig, echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=10, out.width = '100%', fig.cap = "**Figure 3 Breakdown of possible inconsistencies with guidance on eligibility/exclusion criteria in treated COVID-19 patients.** Treatment eligibility window for Paxlovid, sotrovimab and molnupiravir was 5 days from positive SARS-CoV-2 test (used as a proxy for symptom onset date) and 7 days for remdesivir.", fig.topcaption=TRUE}
 
@@ -652,7 +656,7 @@ flowchart_non_elig_plot <- flowchart_non_elig[-c(1,8),] %>%
                        "Treated with molnupiravir outside of treatment eligibility window",
                        "Treated with molnupiravir and pregnant")) %>%
   filter(n != 0) %>%
-  mutate(n = as.numeric(ifelse(n == "<5", 5, n))) %>%
+  mutate(n = as.numeric(ifelse(n == "<8", 8, n))) %>%
   filter(#criteria != "c_no_high_risk_group_match",
     #criteria != "c_no_high_risk_group_nhsd",
     criteria != "c_not_symptomatic_covid_test",
@@ -721,8 +725,8 @@ data_time_between$treatment_type = unlist(lapply(strwrap(data_time_between$treat
 data_time_between_plot <- data_time_between %>%
   filter(high_risk_cohort == "All",
          !is.na(tb),
-         !is.na(n),
-         tb < 15) %>%
+         !is.na(n)) %>%
+  mutate(tb = factor(tb, levels = -2:6, labels = c("-2 or less", -1, 0, 1, 2, 3, 4, 5, "6 or more"))) %>%
   ggplot(aes(tb)) +
   geom_col(aes(x = tb, y = n, fill = treatment_type, group = treatment_type), position = "dodge") + 
   theme_bw(base_size = 8) +
@@ -758,8 +762,8 @@ data_time_between <- read_csv(fs::path(input_dir_os, "table_time_to_treat_redact
 
 time_groups <- data_time_between %>%
   filter(!is.na(high_risk_cohort),
-         !is.na(n),
-         tb < 15)  %>%
+         !is.na(n))  %>%
+    mutate(tb = factor(tb, levels = -2:6, labels = c("-2 or less", -1, 0, 1, 2, 3, 4, 5, "6 or more"))) %>%
   mutate(high_risk_cohort = case_when(
     high_risk_cohort == "All" ~ "All", 
     high_risk_cohort == "downs_syndrome" ~ "Down's syndrome", 
@@ -864,7 +868,7 @@ We also assess consistency with treatment-specific criteria, such as patients ha
 
 ### Descriptive statistics
 
-We generated charts showing the cumulative number of potentially eligible and treated patients per week, stratified by high risk group, and also stratified by treatment type for treated patients. We used simple descriptive statistics to summarise the counts and proportions of potentially eligible patients treated, stratified by treatment type and either high risk cohort or clinical and demographic groups, and to describe potential inconsistencies  with guidelines. Charts and results not presented in this manuscript are available online for inspection in the associated Github [antibody-and-antiviral-deployment](https://github.com/opensafely/antibody-and-antiviral-deployment) repository. Patient counts of 0-5 are shown as “<5” with remaining counts rounded to the nearest 10 to protect against small number differences in our routinely updating data. All percentages (%) are calculated with 95% confidence intervals (CI). 
+We generated charts showing the cumulative number of potentially eligible and treated patients per week, stratified by high risk group, and also stratified by treatment type for treated patients. We used simple descriptive statistics to summarise the counts and proportions of potentially eligible patients treated, stratified by treatment type and either high risk cohort or clinical and demographic groups, and to describe potential inconsistencies  with guidelines. Charts and results not presented in this manuscript are available online for inspection in the associated Github [antibody-and-antiviral-deployment](https://github.com/opensafely/antibody-and-antiviral-deployment) repository. Patient counts of 0-7 are shown as “<8” with remaining counts rounded to the nearest 10 to protect against small number differences in our routinely updating data. All percentages (%) are calculated with 95% confidence intervals (CI). 
 
 
 ### Codelists
