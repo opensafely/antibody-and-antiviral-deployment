@@ -1,168 +1,210 @@
 high_risk_group_nhsd_combined,high_risk_cohort_covid_therapeutics,n
-NA,IMID,600
-NA,solid cancer,320
-primary immune deficiencies,HIV or AIDS,170
-primary immune deficiencies,IMID,135
-NA,NA,130
-NA,"stem cell transplant recipients,haematological diseases",120
-primary immune deficiencies,"stem cell transplant recipients,haematological diseases",110
-IMID,NA,105
-rare neurological conditions,NA,65
-IMID,solid cancer,60
-primary immune deficiencies,NA,55
+NA,IMID,920
+NA,NA,660
+IMID,NA,500
+NA,solid cancer,490
+rare neurological conditions,NA,360
+primary immune deficiencies,HIV or AIDS,210
+primary immune deficiencies,NA,210
+NA,"haematological diseases,stem cell transplant recipients",200
+primary immune deficiencies,IMID,160
+primary immune deficiencies,"haematological diseases,stem cell transplant recipients",150
+solid cancer,NA,100
+"haematological diseases and stem cell transplant recipients,primary immune deficiencies",NA,90
+NA,renal disease,90
+IMID,solid cancer,80
+Down's syndrome,NA,70
+IMID,renal disease,60
 IMID,primary immune deficiencies,50
-NA,renal disease,50
-IMID,renal disease,40
-primary immune deficiencies,solid cancer,35
-IMID,liver disease,30
+haematological diseases and stem cell transplant recipients,NA,50
+NA,rare neurological conditions,40
+primary immune deficiencies,solid cancer,40
+solid organ recipients,renal disease,40
+"haematological diseases and stem cell transplant recipients,primary immune deficiencies",solid cancer,40
+IMID,liver disease,40
+rare neurological conditions,IMID,40
+"IMID,rare neurological conditions",NA,40
 NA,primary immune deficiencies,30
-"haematological diseases and stem cell transplant recipients,primary immune deficiencies",solid cancer,25
-solid organ recipients,renal disease,25
-NA,rare neurological conditions,25
-"haematological diseases and stem cell transplant recipients,primary immune deficiencies",NA,25
-rare neurological conditions,IMID,25
+"solid cancer,haematological diseases and stem cell transplant recipients,primary immune deficiencies",NA,30
+"IMID,primary immune deficiencies",NA,30
 IMID,rare neurological conditions,20
-solid cancer,NA,15
-haematological diseases and stem cell transplant recipients,solid cancer,15
-Down's syndrome,NA,15
-rare neurological conditions,primary immune deficiencies,15
-liver disease,IMID,10
-IMID,"stem cell transplant recipients,haematological diseases",10
-"IMID,solid organ recipients",renal disease,10
-primary immune deficiencies,haematologic malignancy,10
-solid organ recipients,"stem cell transplant recipients,haematological diseases",10
-NA,Downs syndrome,10
+NA,Downs syndrome,20
+haematological diseases and stem cell transplant recipients,solid cancer,20
+IMID,"haematological diseases,stem cell transplant recipients",20
+solid organ recipients,"haematological diseases,stem cell transplant recipients",20
+"IMID,solid organ recipients",renal disease,20
+liver disease,IMID,20
+"solid cancer,haematological diseases and stem cell transplant recipients",NA,10
+rare neurological conditions,primary immune deficiencies,10
 solid organ recipients,solid cancer,10
+liver disease,NA,10
 NA,liver disease,10
-haematological diseases and stem cell transplant recipients,NA,10
+primary immune deficiencies,haematologic malignancy,10
 rare neurological conditions,solid cancer,10
-solid organ recipients,liver disease,5
-"IMID,rare neurological conditions",NA,5
-"haematological diseases and stem cell transplant recipients,primary immune deficiencies",IMID,5
-"primary immune deficiencies,solid organ recipients","stem cell transplant recipients,haematological diseases",5
-NA,haematologic malignancy,5
-"IMID,primary immune deficiencies",NA,5
-haematological diseases and stem cell transplant recipients,IMID,5
-solid organ recipients,IMID,5
-NA,HIV or AIDS,5
-NA,"IMID,solid cancer",5
-NA,sickle cell disease,5
-NA,solid organ recipients,5
-"IMID,primary immune deficiencies","stem cell transplant recipients,haematological diseases",NA
+"solid cancer,IMID",NA,10
+NA,solid organ recipients,10
+solid organ recipients,liver disease,10
+solid organ recipients,NA,10
+NA,"solid cancer,IMID",10
+haematological diseases and stem cell transplant recipients,IMID,10
+"haematological diseases and stem cell transplant recipients,primary immune deficiencies",IMID,10
+"haematological diseases and stem cell transplant recipients,primary immune deficiencies,solid organ recipients",NA,10
+solid cancer,"haematological diseases,stem cell transplant recipients",10
+NA,HIV or AIDS,10
+Down's syndrome,IMID,NA
+"primary immune deficiencies,solid organ recipients","haematological diseases,stem cell transplant recipients",NA
+solid organ recipients,IMID,NA
 "IMID,solid organ recipients",liver disease,NA
-"haematological diseases and stem cell transplant recipients,primary immune deficiencies",renal disease,NA
+"primary immune deficiencies,rare neurological conditions",NA,NA
 solid cancer,IMID,NA
 solid cancer,solid organ recipients,NA
-solid cancer,"stem cell transplant recipients,haematological diseases",NA
-solid organ recipients,NA,NA
-Down's syndrome,IMID,NA
-Down's syndrome,rare neurological conditions,NA
-IMID,solid organ recipients,NA
+NA,haematologic malignancy,NA
+"haematological diseases and stem cell transplant recipients,IMID",NA,NA
+"haematological diseases and stem cell transplant recipients,IMID,primary immune deficiencies",NA,NA
+liver disease,solid cancer,NA
+rare neurological conditions,"haematological diseases,stem cell transplant recipients",NA
+rare neurological conditions,renal disease,NA
+NA,sickle cell disease,NA
+IMID,"liver disease,other",NA
+"IMID,primary immune deficiencies","haematological diseases,stem cell transplant recipients",NA
 "IMID,solid organ recipients",solid cancer,NA
 "IMID,solid organ recipients",NA,NA
-"haematological diseases and stem cell transplant recipients,IMID,primary immune deficiencies",solid cancer,NA
-liver disease,solid cancer,NA
-"liver disease,IMID","stem cell transplant recipients,haematological diseases",NA
-rare neurological conditions,"stem cell transplant recipients,haematological diseases",NA
-renal disease,liver disease,NA
-"renal disease,IMID,solid organ recipients",solid cancer,NA
-"renal disease,solid organ recipients",solid cancer,NA
-"solid cancer,IMID",NA,NA
-"solid cancer,haematological diseases and stem cell transplant recipients",NA,NA
-"solid cancer,haematological diseases and stem cell transplant recipients,primary immune deficiencies",IMID,NA
-"solid cancer,haematological diseases and stem cell transplant recipients,primary immune deficiencies",NA,NA
-"solid cancer,primary immune deficiencies","stem cell transplant recipients,haematological diseases",NA
+"haematological diseases and stem cell transplant recipients,primary immune deficiencies",renal disease,NA
+primary immune deficiencies,"stem cell transplant recipients,haematological diseases,IMID",NA
+"primary immune deficiencies,solid organ recipients",NA,NA
+renal disease,IMID,NA
+NA,"other,IMID",NA
+NA,"renal disease,IMID",NA
+Down's syndrome,rare neurological conditions,NA
 IMID,Downs syndrome,NA
 IMID,HIV or AIDS,NA
-IMID,"liver disease,primary immune deficiencies",NA
-IMID,"other,liver disease",NA
-"IMID,primary immune deficiencies",liver disease,NA
-"IMID,primary immune deficiencies,solid organ recipients",renal disease,NA
+IMID,solid organ recipients,NA
+"IMID,primary immune deficiencies,rare neurological conditions",NA,NA
 haematological diseases and stem cell transplant recipients,rare neurological conditions,NA
-"haematological diseases and stem cell transplant recipients,primary immune deficiencies,solid organ recipients",NA,NA
-liver disease,"stem cell transplant recipients,haematological diseases",NA
-liver disease,NA,NA
-"liver disease,IMID",solid cancer,NA
+"haematological diseases and stem cell transplant recipients,IMID,primary immune deficiencies",solid cancer,NA
+"haematological diseases and stem cell transplant recipients,solid organ recipients",NA,NA
+"liver disease,IMID","haematological diseases,stem cell transplant recipients",NA
+"liver disease,IMID",NA,NA
+"liver disease,primary immune deficiencies",NA,NA
+primary immune deficiencies,"HIV or AIDS,IMID",NA
 primary immune deficiencies,liver disease,NA
+"primary immune deficiencies,HIV or AIDS immunosupression",NA,NA
+renal disease,liver disease,NA
+renal disease,solid cancer,NA
+renal disease,solid organ recipients,NA
+"renal disease,IMID,solid organ recipients",solid cancer,NA
+"renal disease,solid organ recipients",solid cancer,NA
+"solid cancer,haematological diseases and stem cell transplant recipients,primary immune deficiencies",IMID,NA
+"solid cancer,primary immune deficiencies","haematological diseases,stem cell transplant recipients",NA
+"solid cancer,primary immune deficiencies",NA,NA
+NA,"solid cancer,haematological diseases,stem cell transplant recipients",NA
+NA,"stem cell transplant recipients,haematological diseases,IMID",NA
+IMID,"liver disease,primary immune deficiencies",NA
+IMID,"solid cancer,renal disease",NA
+"IMID,primary immune deficiencies",liver disease,NA
+"IMID,primary immune deficiencies",renal disease,NA
+"IMID,primary immune deficiencies,solid organ recipients",renal disease,NA
+"haematological diseases and stem cell transplant recipients,solid organ recipients",solid cancer,NA
+liver disease,"haematological diseases,stem cell transplant recipients",NA
+"liver disease,IMID",solid cancer,NA
+primary immune deficiencies,Downs syndrome,NA
 primary immune deficiencies,"other,IMID",NA
 primary immune deficiencies,rare neurological conditions,NA
-rare neurological conditions,renal disease,NA
-rare neurological conditions,solid organ recipients,NA
-renal disease,primary immune deficiencies,NA
-renal disease,solid cancer,NA
-"renal disease,IMID,solid organ recipients",NA,NA
-"solid cancer,IMID","stem cell transplant recipients,haematological diseases",NA
-solid organ recipients,primary immune deficiencies,NA
-NA,"other,IMID",NA
-Down's syndrome,liver disease,NA
-Down's syndrome,primary immune deficiencies,NA
-IMID,"solid organ recipients,renal disease",NA
-"IMID,primary immune deficiencies",renal disease,NA
-"haematological diseases and stem cell transplant recipients,IMID",renal disease,NA
-"haematological diseases and stem cell transplant recipients,IMID",solid cancer,NA
-"haematological diseases and stem cell transplant recipients,IMID",NA,NA
-"haematological diseases and stem cell transplant recipients,IMID,primary immune deficiencies",rare neurological conditions,NA
-"haematological diseases and stem cell transplant recipients,liver disease,primary immune deficiencies",renal disease,NA
-"haematological diseases and stem cell transplant recipients,primary immune deficiencies,solid organ recipients",HIV or AIDS,NA
-"haematological diseases and stem cell transplant recipients,primary immune deficiencies,solid organ recipients",solid cancer,NA
-"haematological diseases and stem cell transplant recipients,solid organ recipients",renal disease,NA
-"haematological diseases and stem cell transplant recipients,solid organ recipients",solid cancer,NA
-"liver disease,IMID,solid organ recipients",rare neurological conditions,NA
-"liver disease,primary immune deficiencies",renal disease,NA
-"liver disease,primary immune deficiencies",solid cancer,NA
-"liver disease,primary immune deficiencies","stem cell transplant recipients,haematological diseases",NA
-primary immune deficiencies,Downs syndrome,NA
-primary immune deficiencies,"HIV or AIDS,solid cancer",NA
-primary immune deficiencies,"HIV or AIDS,stem cell transplant recipients,haematological diseases",NA
-primary immune deficiencies,"IMID,HIV or AIDS",NA
-primary immune deficiencies,"IMID,stem cell transplant recipients,haematological diseases",NA
-primary immune deficiencies,"liver disease,HIV or AIDS",NA
-primary immune deficiencies,"liver disease,stem cell transplant recipients,haematological diseases",NA
-primary immune deficiencies,"other,stem cell transplant recipients,solid cancer,haematological diseases",NA
 primary immune deficiencies,renal disease,NA
 primary immune deficiencies,solid organ recipients,NA
+"primary immune deficiencies,solid organ recipients",IMID,NA
+"primary immune deficiencies,solid organ recipients",solid cancer,NA
+rare neurological conditions,solid organ recipients,NA
+renal disease,"haematological diseases,stem cell transplant recipients",NA
+renal disease,primary immune deficiencies,NA
+"renal disease,IMID,solid organ recipients",NA,NA
+"solid cancer,IMID","haematological diseases,stem cell transplant recipients",NA
+solid organ recipients,primary immune deficiencies,NA
+NA,"liver disease,IMID",NA
+NA,"solid cancer,renal disease",NA
+Down's syndrome,"haematological diseases,stem cell transplant recipients",NA
+Down's syndrome,liver disease,NA
+Down's syndrome,primary immune deficiencies,NA
+"Down's syndrome,IMID",NA,NA
+IMID,"renal disease,other",NA
+IMID,"solid organ recipients,renal disease",NA
+"IMID,primary immune deficiencies",solid cancer,NA
+"IMID,rare neurological conditions",solid cancer,NA
+"IMID,solid organ recipients","haematological diseases,stem cell transplant recipients",NA
+haematological diseases and stem cell transplant recipients,Downs syndrome,NA
+"haematological diseases and stem cell transplant recipients,IMID",Downs syndrome,NA
+"haematological diseases and stem cell transplant recipients,IMID",renal disease,NA
+"haematological diseases and stem cell transplant recipients,IMID",solid cancer,NA
+"haematological diseases and stem cell transplant recipients,IMID,primary immune deficiencies",rare neurological conditions,NA
+"haematological diseases and stem cell transplant recipients,IMID,primary immune deficiencies,solid organ recipients",rare neurological conditions,NA
+"haematological diseases and stem cell transplant recipients,IMID,solid organ recipients",NA,NA
+"haematological diseases and stem cell transplant recipients,liver disease,primary immune deficiencies",renal disease,NA
+"haematological diseases and stem cell transplant recipients,liver disease,primary immune deficiencies",NA,NA
+"haematological diseases and stem cell transplant recipients,primary immune deficiencies",rare neurological conditions,NA
+"haematological diseases and stem cell transplant recipients,primary immune deficiencies","solid cancer,IMID",NA
+"haematological diseases and stem cell transplant recipients,primary immune deficiencies,HIV or AIDS immunosupression",IMID,NA
+"haematological diseases and stem cell transplant recipients,primary immune deficiencies,solid organ recipients",HIV or AIDS,NA
+"haematological diseases and stem cell transplant recipients,primary immune deficiencies,solid organ recipients",solid cancer,NA
+"haematological diseases and stem cell transplant recipients,rare neurological conditions",NA,NA
+"haematological diseases and stem cell transplant recipients,renal disease,primary immune deficiencies",IMID,NA
+"haematological diseases and stem cell transplant recipients,solid organ recipients",renal disease,NA
+"liver disease,IMID,solid organ recipients",rare neurological conditions,NA
+"liver disease,primary immune deficiencies","haematological diseases,stem cell transplant recipients",NA
+"liver disease,primary immune deficiencies",renal disease,NA
+"liver disease,primary immune deficiencies",solid cancer,NA
+"liver disease,rare neurological conditions",NA,NA
+primary immune deficiencies,"haematological diseases,HIV or AIDS,stem cell transplant recipients",NA
+primary immune deficiencies,"liver disease,HIV or AIDS",NA
+primary immune deficiencies,"liver disease,haematological diseases,stem cell transplant recipients",NA
+primary immune deficiencies,"solid cancer,HIV or AIDS",NA
+primary immune deficiencies,"solid cancer,haematological diseases,stem cell transplant recipients",NA
+primary immune deficiencies,"solid cancer,other,haematological diseases,stem cell transplant recipients",NA
+primary immune deficiencies,"stem cell transplant recipients,renal disease,haematological diseases,IMID",NA
 "primary immune deficiencies,HIV or AIDS immunosupression",Downs syndrome,NA
-"primary immune deficiencies,HIV or AIDS immunosupression,solid organ recipients","stem cell transplant recipients,haematological diseases",NA
+"primary immune deficiencies,HIV or AIDS immunosupression,solid organ recipients","haematological diseases,stem cell transplant recipients",NA
 "primary immune deficiencies,rare neurological conditions",HIV or AIDS,NA
 "primary immune deficiencies,rare neurological conditions",IMID,NA
-"primary immune deficiencies,solid organ recipients",IMID,NA
-"primary immune deficiencies,solid organ recipients","other,liver disease",NA
+"primary immune deficiencies,rare neurological conditions",solid cancer,NA
+"primary immune deficiencies,solid organ recipients","liver disease,other",NA
 "primary immune deficiencies,solid organ recipients",renal disease,NA
-"primary immune deficiencies,solid organ recipients",solid cancer,NA
-"primary immune deficiencies,solid organ recipients","stem cell transplant recipients,solid cancer,haematological diseases",NA
+"primary immune deficiencies,solid organ recipients","solid cancer,haematological diseases,stem cell transplant recipients",NA
 rare neurological conditions,liver disease,NA
 renal disease,Downs syndrome,NA
-renal disease,IMID,NA
-renal disease,solid organ recipients,NA
-renal disease,"stem cell transplant recipients,haematological diseases",NA
+renal disease,NA,NA
+"renal disease,IMID",liver disease,NA
+"renal disease,IMID",solid cancer,NA
+"renal disease,IMID",NA,NA
 "renal disease,IMID,solid organ recipients",rare neurological conditions,NA
 "renal disease,primary immune deficiencies",IMID,NA
-"renal disease,primary immune deficiencies","stem cell transplant recipients,haematological diseases",NA
+"renal disease,primary immune deficiencies","haematological diseases,stem cell transplant recipients",NA
 "renal disease,solid organ recipients",IMID,NA
 "renal disease,solid organ recipients",liver disease,NA
 "renal disease,solid organ recipients",primary immune deficiencies,NA
 solid cancer,haematologic malignancy,NA
 solid cancer,primary immune deficiencies,NA
+solid cancer,renal disease,NA
 "solid cancer,IMID",liver disease,NA
+"solid cancer,IMID,rare neurological conditions",NA,NA
 "solid cancer,haematological diseases and stem cell transplant recipients,IMID,primary immune deficiencies",NA,NA
+"solid cancer,haematological diseases and stem cell transplant recipients,liver disease,primary immune deficiencies",NA,NA
 "solid cancer,haematological diseases and stem cell transplant recipients,primary immune deficiencies",HIV or AIDS,NA
 "solid cancer,haematological diseases and stem cell transplant recipients,primary immune deficiencies","solid organ recipients,renal disease",NA
 "solid cancer,haematological diseases and stem cell transplant recipients,solid organ recipients",IMID,NA
 "solid cancer,liver disease",IMID,NA
 "solid cancer,primary immune deficiencies",IMID,NA
-"solid cancer,primary immune deficiencies","IMID,liver disease",NA
-"solid cancer,primary immune deficiencies",NA,NA
-"solid cancer,primary immune deficiencies,solid organ recipients","stem cell transplant recipients,haematological diseases",NA
+"solid cancer,primary immune deficiencies","liver disease,IMID",NA
+"solid cancer,primary immune deficiencies,solid organ recipients","haematological diseases,stem cell transplant recipients",NA
+"solid cancer,primary immune deficiencies,solid organ recipients",rare neurological conditions,NA
 "solid cancer,solid organ recipients",renal disease,NA
+"solid cancer,solid organ recipients",NA,NA
 solid organ recipients,HIV or AIDS,NA
-NA,"IMID,liver disease",NA
-NA,"IMID,stem cell transplant recipients,haematological diseases",NA
+solid organ recipients,rare neurological conditions,NA
+solid organ recipients,"solid cancer,IMID",NA
+NA,"liver disease,renal disease",NA
 NA,"primary immune deficiencies,renal disease",NA
-NA,"primary immune deficiencies,solid cancer",NA
 NA,"rare neurological conditions,IMID",NA
-NA,"rare neurological conditions,stem cell transplant recipients,haematological diseases",NA
-NA,"solid cancer,renal disease",NA
+NA,"rare neurological conditions,haematological diseases,stem cell transplant recipients",NA
+NA,"renal disease,haematological diseases,stem cell transplant recipients",NA
+NA,"solid cancer,primary immune deficiencies",NA
 NA,"solid cancer,sickle cell disease",NA
 NA,"solid organ recipients,renal disease",NA
-NA,"stem cell transplant recipients,haematological diseases,renal disease",NA
-NA,"stem cell transplant recipients,solid cancer,haematological diseases",NA
