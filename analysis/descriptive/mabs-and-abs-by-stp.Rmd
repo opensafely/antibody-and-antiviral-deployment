@@ -1,0 +1,426 @@
+---
+title: Variation in coverage and uptake of antivirals and neutralising monoclonal antibodies by STP
+output:
+  html_document:
+  theme: journal
+github_document:
+  keep_html: TRUE
+---
+  
+```{css, echo=FALSE}
+pre {
+  max-height: 300px;
+  overflow-y: auto;
+}
+pre[class] {
+  max-height: 200px;
+}
+```
+
+<style>
+  body {
+    text-align: justify;
+     font-size: 11pt}
+</style>
+
+  
+```{r setup, include=FALSE}
+# Document settings ----
+knitr::opts_chunk$set(echo = TRUE)
+
+
+# Preliminaries ----
+
+## Import libraries
+library(tidyverse)
+library(here)
+library(glue)
+library(gt)
+library(gtsummary)
+library(reshape2)
+library(stringr)
+library(scales)
+library(kableExtra)
+library(knitr)
+library(ggplot2)
+library(png)
+library(readr)
+library(htmltools)
+
+## Import custom user functions
+source(here("analysis", "lib", "custom_functions.R"))
+
+## Output directory
+output_dir_rmd <- here("reports", "variation")
+fs::dir_create(output_dir_rmd)
+
+## Redaction threshold
+threshold = 8
+
+## Functions
+quibble <- function(x, q = c(0.25, 0.5, 0.75)) {
+  ## function that takes a vector and returns a tibble of its quantiles
+  tibble("{{ x }}" := quantile(x, q), "{{ x }}_q" := q)
+}
+
+## Import data
+data_processed <- read_rds(here::here("output", "data", "data_processed_clean.rds"))
+
+## Remove patients no longer registered at time of treatment and format variables
+data_processed_clean <- data_processed %>%
+  filter(has_died == 0,
+         registered_eligible == 1 | registered_treated == 1) %>%
+  mutate(
+    
+    # Age groups
+    ageband = cut(
+      age,
+      breaks = c(12, 30, 40, 50, 60, 70, 80, Inf),
+      labels = c("12-29", "30-39", "40-49", "50-59", "60-69", "70-79", "80+"),
+      right = FALSE),
+    
+    # Vaccination status
+    vaccination_status = fct_case_when(
+      vaccination_status == "Un-vaccinated" ~ "Un-vaccinated",
+      vaccination_status == "Un-vaccinated (declined)" ~ "Un-vaccinated (declined)",
+      vaccination_status== "One vaccination" ~ "One vaccination",
+      vaccination_status == "Two vaccinations" ~ "Two vaccinations",
+      vaccination_status == "Three or more vaccinations" ~ "Three or more vaccinations",
+      #TRUE ~ "Unknown",
+      TRUE ~ NA_character_
+    )
+    
+  )
+
+
+```
+
+<br>
+
+This report describes the coverage and uptake of antivirals and neutralising monoclonal antibodies for the treatment of non-hospitalised patients with COVID-19 by STP.
+
+### Overall coverage of COVID-19 treatment
+
+```{r, coverage plot, echo=FALSE, message=FALSE, warning=FALSE, results='asis' , fig.width=10, out.width = '100%', fig.cap = "**Figure 1 Cumulative total of potentially eligible patients for receiving an antiviral or nMABs for treating COVID-19 since 11th December 2021, stratified by (a) STP and (b) STP decile.** Patients are considered eligible on the date of their positive SARS-CoV-2 test. Note, the overall number in each group is likely to be an overestimation due to including SARS-CoV-2 infection confirmed by either lateral flow or PCR test (where only PCR-confirmed infections should have been treated according to guidance in effect prior to 10th February 2022), and potentially including non-symptomatic patients.", fig.topcaption=TRUE}
+
+# Cumulative total of eligible patients by STP 
+plot_data_coverage_stp <- data_processed_clean %>%
+  select(stp, elig_start)  %>%
+  group_by(stp, elig_start) %>%
+  tally() %>%
+  arrange(stp, elig_start) %>%
+  complete(elig_start = seq.Date(min(elig_start, na.rm = T), max(elig_start, na.rm = T), by="day"))  %>%
+  mutate(count = ifelse(is.na(n), 0, n),
+         cum_count = cumsum(count),
+         cum_count_redacted =  plyr::round_any(cum_count, 10)) %>%
+  select(-n)
+
+plot_order <- plot_data_coverage_stp %>%
+  group_by(stp) %>%
+  mutate(order = max(cum_count_redacted, na.rm = T)) %>%
+  arrange(desc(order)) %>%
+  filter(cum_count_redacted == order) %>%
+  select(stp, order) %>%
+  distinct()
+
+plot_data_coverage_stp <- plot_data_coverage_stp %>%
+  mutate(stp = factor(stp, levels = plot_order$stp))
+
+plot_data_coverage_stp %>%
+  filter(elig_start <= Sys.Date()) %>%
+  ggplot(aes(x = elig_start, y = cum_count_redacted, colour = stp, group = stp)) +
+  geom_step(size = 1) +
+  theme_classic(base_size = 8) +
+  scale_x_date(date_breaks = "2 week", date_labels =  "%d %b %Y") +
+  labs(
+    x = "Positive SARS-CoV-2 test date",
+    y = "Number of patients eligible for receiving treatment",
+    colour = "STP",
+    title = "(a)")  +
+  theme(legend.position = "none") +
+  theme(
+    axis.text = element_text(size = 10),
+    axis.text.x = element_text(angle = 60, hjust = 1),
+    axis.title = element_text(size = 10),
+    axis.line.x = element_line(colour = "black"),
+    panel.grid.minor.x = element_blank()) + 
+  scale_y_continuous(labels = comma)
+
+```
+
+<br>
+
+```{r, coverage plot 2, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '100%'}
+
+# Cumulative total of eligible patients by STP decile
+plot_data_coverage_stp <- data_processed_clean %>%
+  select(stp, elig_start)  %>%
+  group_by(stp, elig_start) %>%
+  tally() %>%
+  arrange(stp, elig_start) %>%
+  complete(elig_start = seq.Date(min(elig_start, na.rm = T), max(elig_start, na.rm = T), by="day"))  %>%
+  mutate(count = ifelse(is.na(n), 0, n),
+         cum_count = cumsum(count),
+         cum_count_redacted =  plyr::round_any(cum_count, 10)) %>%
+  select(-n) %>%
+  group_by(elig_start) %>%
+  summarise(quibble(cum_count_redacted, seq(0.1,1.0,0.1))) %>%
+  arrange(cum_count_redacted_q, elig_start)
+
+plot_data_coverage_stp <- plot_data_coverage_stp %>%
+  mutate(line = ifelse(cum_count_redacted_q == "0.5", "Median", "Decile"))
+  
+plot_data_coverage_stp %>%
+  filter(elig_start <= Sys.Date()) %>%
+  ggplot(aes(x = elig_start, y = cum_count_redacted, group = cum_count_redacted_q)) +
+  geom_step(aes(colour = line, linetype = line)) +
+  scale_color_manual(values = c("Decile" = "blue", "Median" = "blue")) +
+  scale_linetype_manual(values = c("Decile" = "dashed", "Median" = "solid")) +
+  theme_classic(base_size = 8) +
+  scale_x_date(date_breaks = "2 week", date_labels =  "%d %b %Y") +
+  labs(
+    x = "Positive SARS-CoV-2 test date",
+    y = "Number of patients eligible for receiving treatment",
+    title = "(b)")  +
+  theme(legend.position = "bottom", 
+        legend.title = element_blank()) +
+  theme(
+    axis.text = element_text(size = 10),
+    axis.text.x = element_text(angle = 60, hjust = 1),
+    axis.title = element_text(size = 10),
+    axis.line.x = element_line(colour = "black"),
+    panel.grid.minor.x = element_blank()) + 
+  scale_y_continuous(labels = comma)
+
+```
+
+<br>
+
+```{r, elig treatment type plot, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '100%', fig.cap = "**Figure 2 Cumulative total of patients who received an antiviral or nMAB for treating COVID-19 since 16th December 2021, stratified by (a) STP and (b) STP decile.**", fig.topcaption=TRUE}
+
+# Cumulative total of treated patients by stp
+plot_data_treatment <- data_processed_clean %>%
+  filter(!is.na(treatment_date)) %>%
+  select(stp, treatment_date)  %>%
+  group_by(stp, treatment_date) %>%
+  tally() %>%
+  ungroup() %>%
+  arrange(treatment_date) %>%
+  complete(treatment_date = seq.Date(min(treatment_date, na.rm = T), max(treatment_date, na.rm = T), by="day"))  %>%
+  mutate(count = ifelse(is.na(n), 0, n),
+         cum_count = cumsum(count),
+         cum_count_redacted =  plyr::round_any(cum_count, 10)) %>%
+  select(-n)
+
+plot_order <- plot_data_treatment %>%
+  group_by(stp) %>%
+  mutate(order = max(cum_count_redacted, na.rm = T)) %>%
+  arrange(desc(order)) %>%
+  filter(cum_count_redacted == order) %>%
+  select(stp, order) %>%
+  distinct()
+
+plot_data_treatment <- plot_data_treatment %>%
+  mutate(stp = factor(stp, levels = plot_order$stp))
+
+plot_data_treatment %>%
+  filter(treatment_date <= Sys.Date()) %>%
+  ggplot(aes(x = treatment_date, y = cum_count_redacted, colour = stp, group = stp)) +
+  geom_step(size = 1) +
+  theme_classic(base_size = 8) +
+  scale_x_date(date_breaks = "2 week", date_labels =  "%d %b %Y") +
+  labs(
+    x = "Positive SARS-CoV-2 test date",
+    y = "Number of patients receiving treatment",
+    colour = "STP",
+    title = "(a)")  +
+  theme(legend.position = "none") +
+  theme(
+    axis.text = element_text(size = 10),
+    axis.text.x = element_text(angle = 60, hjust = 1),
+    axis.title = element_text(size = 10),
+    axis.line.x = element_line(colour = "black"),
+    panel.grid.minor.x = element_blank()) + 
+  scale_y_continuous(labels = comma)
+
+```
+
+<br>
+
+```{r, elig treatment type plot 2 , echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '100%'}
+
+# Cumulative total of treated patients by stp decile
+plot_data_treatment <- data_processed_clean %>%
+  filter(!is.na(treatment_date)) %>%
+  select(stp, treatment_date)  %>%
+  group_by(stp, treatment_date) %>%
+  tally() %>%
+  ungroup() %>%
+  arrange(treatment_date) %>%
+  complete(treatment_date = seq.Date(min(treatment_date, na.rm = T), max(treatment_date, na.rm = T), by="day"))  %>%
+  mutate(count = ifelse(is.na(n), 0, n),
+         cum_count = cumsum(count),
+         cum_count_redacted =  plyr::round_any(cum_count, 10)) %>%
+  select(-n) %>%
+  group_by(treatment_date) %>%
+  summarise(quibble(cum_count_redacted, seq(0.1,1.0,0.1))) %>%
+  arrange(cum_count_redacted_q, treatment_date)
+
+plot_data_treatment <- plot_data_treatment %>%
+  mutate(line = ifelse(cum_count_redacted_q == "0.5", "Median", "Decile"))
+  
+plot_data_treatment %>%
+  filter(treatment_date <= Sys.Date()) %>%
+  ggplot(aes(x = treatment_date, y = cum_count_redacted, group = cum_count_redacted_q)) +
+  geom_step(aes(colour = line, linetype = line)) +
+  scale_color_manual(values = c("Decile" = "blue", "Median" = "blue")) +
+  scale_linetype_manual(values = c("Decile" = "dashed", "Median" = "solid")) +
+  theme_classic(base_size = 8) +
+  scale_x_date(date_breaks = "2 week", date_labels =  "%d %b %Y") +
+  labs(
+    x = "Positive SARS-CoV-2 test date",
+    y = "Number of patients receiving treatment",
+    title = "(b)")  +
+  theme(legend.position = "bottom", 
+        legend.title = element_blank()) +
+  theme(
+    axis.text = element_text(size = 10),
+    axis.text.x = element_text(angle = 60, hjust = 1),
+    axis.title = element_text(size = 10),
+    axis.line.x = element_line(colour = "black"),
+    panel.grid.minor.x = element_blank()) + 
+  scale_y_continuous(labels = comma)
+
+```
+
+
+**Table 1 Count and proportion of potentially eligible patients in OpenSAFELY-TPP who have received treatment for COVID-19 between 16th December 2021 23rd February 2022, broken down by STP decile and treatment type.** Patient counts <8 have been redacted and counts >7 are rounded to the nearest 10; as a result percentages may not add up to 100%."
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '100%'}
+
+# Eligible and treated table
+eligibility_table <- data_processed_clean %>%
+  select(stp, elig_start)  %>%
+  group_by(stp) %>%
+  tally()  %>%
+  summarise(quibble(n, seq(0.1,1.0,0.1))) %>%
+  mutate(n = as.numeric(n),
+         n_q = as.character(n_q)) %>%
+  add_row(n_q = "All", n = (data_processed_clean %>% filter(!is.na(elig_start)) %>% nrow())) %>%
+  arrange(desc(n))
+
+treatment_table <- data_processed_clean %>%
+  filter(!is.na(treatment_type)) %>%
+  select(stp, treatment_type)  %>%
+  group_by(stp, treatment_type) %>%
+  tally()  %>%
+  group_by(treatment_type) %>%
+  summarise(quibble(n, seq(0.1,1.0,0.1))) %>%
+  mutate(n = as.numeric(n),
+         n_q = as.character(n_q)) %>%
+  pivot_wider(
+    id_cols = n_q,
+    names_from = treatment_type,
+    values_from = n) %>%
+  add_row(n_q = "All", 
+          Casirivimab = (data_processed_clean %>% filter(treatment_type == "Casirivimab") %>% nrow()),
+          Molnupiravir = (data_processed_clean %>% filter(treatment_type == "Molnupiravir") %>% nrow()),
+          Paxlovid = (data_processed_clean %>% filter(treatment_type == "Paxlovid") %>% nrow()),
+          Remdesivir = (data_processed_clean %>% filter(treatment_type == "Remdesivir") %>% nrow()),
+          Sotrovimab = (data_processed_clean %>% filter(treatment_type == "Sotrovimab") %>% nrow()))
+
+table_elig_treat_redacted <- left_join(eligibility_table, treatment_table, by = "n_q") %>%
+  mutate(Treated = Casirivimab + Molnupiravir + Sotrovimab + Paxlovid + Remdesivir) %>%
+  select(n_q, Eligibile = n, Treated, Paxlovid, Sotrovimab, Remdesivir, Molnupiravir, Casirivimab) %>%
+  mutate(
+    # Redact values < 8
+    Eligibile = ifelse(Eligibile < threshold, NA, as.numeric(Eligibile)),
+    Treated = ifelse(Treated < threshold, NA, as.numeric(Treated)),
+    Paxlovid = ifelse(Paxlovid < threshold, NA, as.numeric(Paxlovid)),
+    Sotrovimab = ifelse(Sotrovimab < threshold, NA, as.numeric(Sotrovimab)),
+    Remdesivir = ifelse(Remdesivir < threshold, NA, as.numeric(Remdesivir)),
+    Molnupiravir = ifelse(Molnupiravir < threshold, NA, as.numeric(Molnupiravir)),
+    Casirivimab = ifelse(Casirivimab < threshold, NA, as.numeric(Casirivimab)),
+    # Round to nearest 10
+    Eligibile = plyr::round_any(Eligibile, 10),
+    Treated = plyr::round_any(Treated, 10),
+    Paxlovid = plyr::round_any(as.numeric(Paxlovid), 10),
+    Sotrovimab = plyr::round_any(as.numeric(Sotrovimab), 10),
+    Remdesivir = plyr::round_any(as.numeric(Remdesivir), 10),
+    Molnupiravir = plyr::round_any(Molnupiravir, 10),
+    Casirivimab = plyr::round_any(Casirivimab, 10)) %>%
+  arrange(desc(Eligibile))
+
+table_elig_treat_redacted <- table_elig_treat_redacted %>%
+  mutate(Treated_perc = paste(round(Treated/Eligibile*100, digits = 0), " (",
+                              round((Treated/Eligibile - 1.96*sqrt((Treated/Eligibile)*(1-Treated/Eligibile)/Eligibile))*100, digits = 0),
+                              "-",
+                              round((Treated/Eligibile + 1.96*sqrt((Treated/Eligibile)*(1-Treated/Eligibile)/Eligibile))*100, digits = 0), 
+                              ")",
+                              sep = ""),
+         Paxlovid_perc = paste(round(Paxlovid/Treated*100, digits = 0), " (",
+                               round((Paxlovid/Treated - 1.96*sqrt((Paxlovid/Treated)*(1-Paxlovid/Treated)/Treated))*100, digits = 0),
+                               "-",
+                               round((Paxlovid/Treated + 1.96*sqrt((Paxlovid/Treated)*(1-Paxlovid/Treated)/Treated))*100, digits = 0), 
+                               ")",
+                               sep = ""),
+         Sotrovimab_perc = paste(round(Sotrovimab/Treated*100, digits = 0), " (",
+                                 round((Sotrovimab/Treated - 1.96*sqrt((Sotrovimab/Treated)*(1-Sotrovimab/Treated)/Treated))*100, 
+                                       digits = 0),
+                                 "-",
+                                 round((Sotrovimab/Treated + 1.96*sqrt((Sotrovimab/Treated)*(1-Sotrovimab/Treated)/Treated))*100, 
+                                       digits = 0), 
+                                 ")",
+                                 sep = ""),
+         Remdesivir_perc = paste(round(Remdesivir/Treated*100, digits = 0), " (",
+                                 round((Remdesivir/Treated - 1.96*sqrt((Remdesivir/Treated)*(1-Remdesivir/Treated)/Treated))*100, 
+                                       digits = 0),
+                                 "-",
+                                 round((Remdesivir/Treated + 1.96*sqrt((Remdesivir/Treated)*(1-Remdesivir/Treated)/Treated))*100, 
+                                       digits = 0), 
+                                 ")",
+                                 sep = ""),
+         Molnupiravir_perc = paste(round(Molnupiravir/Treated*100, digits = 0), " (",
+                                   round((Molnupiravir/Treated - 1.96*sqrt((Molnupiravir/Treated)*(1-Molnupiravir/Treated)/Treated))*100,
+                                         digits = 0),
+                                   "-",
+                                   round((Molnupiravir/Treated + 1.96*sqrt((Molnupiravir/Treated)*(1-Molnupiravir/Treated)/Treated))*100, 
+                                         digits = 0), 
+                                   ")",
+                                   sep = ""),
+         Casirivimab_perc = paste(round(Casirivimab/Treated*100, digits = 0), " (",
+                                  round((Casirivimab/Treated - 1.96*sqrt((Casirivimab/Treated)*(1-Casirivimab/Treated)/Treated))*100, 
+                                        digits = 0),
+                                  "-",
+                                  round((Casirivimab/Treated + 1.96*sqrt((Casirivimab/Treated)*(1-Casirivimab/Treated)/Treated))*100, 
+                                        digits = 0), 
+                                  ")",
+                                  sep = "")) %>%
+  select(n_q, Eligibile, Treated, Treated_perc, Paxlovid, Paxlovid_perc, Sotrovimab, Sotrovimab_perc, Remdesivir, 
+         Remdesivir_perc, Molnupiravir, Molnupiravir_perc, Casirivimab, Casirivimab_perc) %>%  
+  mutate(Paxlovid = ifelse(is.na(Paxlovid), "<8", Paxlovid),
+         Paxlovid_perc = ifelse(Paxlovid_perc == "NA (NA-NA)", "--", Paxlovid_perc),
+         Remdesivir = ifelse(is.na(Remdesivir), "<8", Remdesivir),
+         Remdesivir_perc = ifelse(Remdesivir_perc == "NA (NA-NA)", "--", Remdesivir_perc),
+         Casirivimab = ifelse(is.na(Casirivimab), "<8", Casirivimab),
+         Casirivimab_perc = ifelse(Casirivimab_perc == "NA (NA-NA)", "--", Casirivimab_perc))
+
+colnames(table_elig_treat_redacted) <- c("STP Decile", "Count", "Count", "%", "Count", "%", 
+                                         "Count", "%", "Count", "%", "Count", "%", 
+                                         "Count", "%")
+table_elig_treat_redacted %>%
+  kable(row.names = FALSE, 
+        align = c("l", rep("c", 13)),
+        booktabs=TRUE) %>%
+  kable_styling(position = "center", full_width = T, bootstrap_options = "striped", font_size = 10)  %>%
+  #row_spec(1, bold = T) %>%
+  column_spec(1, bold = T, width = "10em") %>%
+  column_spec(2, width = "5em") %>%
+  column_spec(4, background = "lightgrey")  %>%
+  add_header_above(., c(" ", "Eligible", "All" = 2, "Paxlovid" = 2, "Sotrovimab" = 2, "Remdesivir" = 2,
+                        "Molnupiravir" = 2, "Casirivimab" = 2)) %>%
+  add_header_above(., c(" ", "", "Treated" = 12)) %>%
+  add_footnote(c("All percentages (%) are caluclated with 95% confidence intervals"), 
+               notation = "symbol")
+
+```
