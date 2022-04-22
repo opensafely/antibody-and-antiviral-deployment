@@ -520,3 +520,36 @@ print_num <- function(x, name, ...) {
   )
   cat("\n\n\n")
 }
+
+## ORs for logistic regression
+calc.or.beta = function(regr.model) {
+  tmp.data = matrix(summary(regr.model)$coeff[,1:2], ncol = 2)
+  output = matrix(NA, ncol=3, nrow=dim(tmp.data)[1])
+  dimnames(output) = list(dimnames(tmp.data)[[1]],c("OR", "lower", "upper"))
+  se = tmp.data[,2]
+  output[,1] = exp(tmp.data[,1])
+  plusmin = 1.96*se
+  output[,2] = exp(tmp.data[,1] - plusmin)
+  output[,3] = exp(tmp.data[,1] + plusmin)
+  dimnames(output)[[1]] = dimnames(summary(regr.model)$coeff)[[1]]
+  output = round(output,4)
+  return(output)
+}
+
+##
+tidy_wald <- function(x, conf.int = TRUE, conf.level = .95, exponentiate = TRUE, ...) {
+  
+  # to use Wald CIs instead of profile CIs.
+  ret <- broom::tidy(x, conf.int = FALSE, conf.level = conf.level, exponentiate = exponentiate)
+  
+  if(conf.int){
+    ci <- confint.default(x, level = conf.level)
+    if(exponentiate){ci = exp(ci)}
+    ci <- as_tibble(ci, rownames = "term")
+    names(ci) <- c("term", "conf.low", "conf.high")
+    
+    ret <- dplyr::left_join(ret, ci, by = "term")
+  }
+  ret
+}
+

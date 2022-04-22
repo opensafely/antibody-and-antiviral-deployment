@@ -63,6 +63,14 @@ actions:
     outputs:
       moderately_sensitive:
         html: output/variation/mabs-and-abs-by-stp.html
+        
+  # Obs vs exp ----
+  obs_vs_exp_report:
+    run: r:latest -e 'rmarkdown::render("analysis/descriptive/obs-vs-exp.Rmd", knit_root_dir = "/workspace", output_dir="/workspace/output/variation")'
+    needs: [data_process]
+    outputs:
+      moderately_sensitive:
+        html: output/variation/obs-vs-exp.html
 
   # Crude count of outcomes ----
   outcomes_report:
