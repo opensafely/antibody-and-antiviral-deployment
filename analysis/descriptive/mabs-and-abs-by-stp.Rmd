@@ -50,7 +50,7 @@ library(htmltools)
 source(here("analysis", "lib", "custom_functions.R"))
 
 ## Output directory
-output_dir_rmd <- here("reports", "variation")
+output_dir_rmd <- here("output", "variation")
 fs::dir_create(output_dir_rmd)
 
 ## Redaction threshold
