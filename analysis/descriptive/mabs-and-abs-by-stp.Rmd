@@ -28,7 +28,6 @@ pre[class] {
 # Document settings ----
 knitr::opts_chunk$set(echo = TRUE)
 
-
 # Preliminaries ----
 
 ## Import libraries
@@ -92,6 +91,8 @@ data_processed_clean <- data_processed %>%
     
   )
 
+## End date
+end_date <- max(data_processed_clean$elig_start, na.rm = T)
 
 ```
 
@@ -99,58 +100,11 @@ data_processed_clean <- data_processed %>%
 
 This report describes the coverage and uptake of antivirals and neutralising monoclonal antibodies for the treatment of non-hospitalised patients with COVID-19 by STP.
 
-### Overall coverage of COVID-19 treatment
+### Overall coverage of COVID-19 treatment by STP decile
 
-```{r, coverage plot, echo=FALSE, message=FALSE, warning=FALSE, results='asis' , fig.width=10, out.width = '100%', fig.cap = "**Figure 1 Cumulative total of potentially eligible patients for receiving an antiviral or nMABs for treating COVID-19 since 11th December 2021, stratified by (a) STP and (b) STP decile.** Patients are considered eligible on the date of their positive SARS-CoV-2 test. Note, the overall number in each group is likely to be an overestimation due to including SARS-CoV-2 infection confirmed by either lateral flow or PCR test (where only PCR-confirmed infections should have been treated according to guidance in effect prior to 10th February 2022), and potentially including non-symptomatic patients.", fig.topcaption=TRUE}
+Between **`r format(min(data_processed_clean$elig_start, na.rm = T), format = "%d-%b-%Y")`** and **`r format(max(data_processed_clean$elig_start, na.rm = T), format = "%d-%b-%Y")`**, a total of `r format(plyr::round_any(data_processed_clean %>% nrow(), 10), big.mark = ",", scientific = FALSE)` non-hospitalised patients registered at a TPP practice in England were identified as potentially being eligible for receiving an antiviral or nMAB for treating COVID-19. Of these `r format(plyr::round_any(data_processed_clean %>% nrow(), 10), big.mark = ",", scientific = FALSE)` potentially eligible patients, `r format(plyr::round_any(data_processed_clean %>% filter(!is.na(treatment_date)) %>% nrow(), 10), big.mark = ",", scientific = FALSE)` (**`r round(plyr::round_any(data_processed_clean %>% filter(!is.na(treatment_date)) %>% nrow(), 10)/plyr::round_any(data_processed_clean %>% nrow(), 10)*100, digits = 0)`%**) received treatment from a CMDU. **`r format(length(unique(data_processed$stp)), big.mark = ",", scientific = FALSE)`** STPs (used as a proxy for CMDU) have been included in the below figures and table.
 
-# Cumulative total of eligible patients by STP 
-plot_data_coverage_stp <- data_processed_clean %>%
-  select(stp, elig_start)  %>%
-  group_by(stp, elig_start) %>%
-  tally() %>%
-  arrange(stp, elig_start) %>%
-  complete(elig_start = seq.Date(min(elig_start, na.rm = T), max(elig_start, na.rm = T), by="day"))  %>%
-  mutate(count = ifelse(is.na(n), 0, n),
-         cum_count = cumsum(count),
-         cum_count_redacted =  plyr::round_any(cum_count, 10)) %>%
-  select(-n)
-
-plot_order <- plot_data_coverage_stp %>%
-  group_by(stp) %>%
-  mutate(order = max(cum_count_redacted, na.rm = T)) %>%
-  arrange(desc(order)) %>%
-  filter(cum_count_redacted == order) %>%
-  select(stp, order) %>%
-  distinct()
-
-plot_data_coverage_stp <- plot_data_coverage_stp %>%
-  mutate(stp = factor(stp, levels = plot_order$stp))
-
-plot_data_coverage_stp %>%
-  filter(elig_start <= Sys.Date()) %>%
-  ggplot(aes(x = elig_start, y = cum_count_redacted, colour = stp, group = stp)) +
-  geom_step(size = 1) +
-  theme_classic(base_size = 8) +
-  scale_x_date(date_breaks = "2 week", date_labels =  "%d %b %Y") +
-  labs(
-    x = "Positive SARS-CoV-2 test date",
-    y = "Number of patients eligible for receiving treatment",
-    colour = "STP",
-    title = "(a)")  +
-  theme(legend.position = "none") +
-  theme(
-    axis.text = element_text(size = 10),
-    axis.text.x = element_text(angle = 60, hjust = 1),
-    axis.title = element_text(size = 10),
-    axis.line.x = element_line(colour = "black"),
-    panel.grid.minor.x = element_blank()) + 
-  scale_y_continuous(labels = comma)
-
-```
-
-<br>
-
-```{r, coverage plot 2, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '100%'}
+```{r, coverage plot, echo=FALSE, message=FALSE, warning=FALSE, results='asis' , fig.width=10, out.width = '100%', fig.cap = "**Figure 1 Cumulative total of potentially eligible patients for receiving an antiviral or nMABs for treating COVID-19 since 11th December 2021, stratified by STP decile.** Patients are considered eligible on the date of their positive SARS-CoV-2 test. Note, the overall number in each group is likely to be an overestimation due to including SARS-CoV-2 infection confirmed by either lateral flow or PCR test (where only PCR-confirmed infections should have been treated according to guidance in effect prior to 10th February 2022), and potentially including non-symptomatic patients.", fig.topcaption=TRUE}
 
 # Cumulative total of eligible patients by STP decile
 plot_data_coverage_stp <- data_processed_clean %>%
@@ -160,19 +114,20 @@ plot_data_coverage_stp <- data_processed_clean %>%
   arrange(stp, elig_start) %>%
   complete(elig_start = seq.Date(min(elig_start, na.rm = T), max(elig_start, na.rm = T), by="day"))  %>%
   mutate(count = ifelse(is.na(n), 0, n),
-         cum_count = cumsum(count),
-         cum_count_redacted =  plyr::round_any(cum_count, 10)) %>%
+         cum_count = cumsum(count)) %>%
   select(-n) %>%
   group_by(elig_start) %>%
-  summarise(quibble(cum_count_redacted, seq(0.1,1.0,0.1))) %>%
-  arrange(cum_count_redacted_q, elig_start)
+  summarise(quibble(cum_count, seq(0.1,0.9,0.1))) %>%
+  arrange(cum_count_q, elig_start) %>%
+  filter(elig_start < end_date)
+
+write_csv(plot_data_coverage_stp, fs::path(output_dir_rmd, "figure_1.csv"))
 
 plot_data_coverage_stp <- plot_data_coverage_stp %>%
-  mutate(line = ifelse(cum_count_redacted_q == "0.5", "Median", "Decile"))
+  mutate(line = ifelse(cum_count_q == "0.5", "Median", "Decile"))
   
 plot_data_coverage_stp %>%
-  filter(elig_start <= Sys.Date()) %>%
-  ggplot(aes(x = elig_start, y = cum_count_redacted, group = cum_count_redacted_q)) +
+  ggplot(aes(x = elig_start, y = cum_count, group = cum_count_q)) +
   geom_step(aes(colour = line, linetype = line)) +
   scale_color_manual(values = c("Decile" = "blue", "Median" = "blue")) +
   scale_linetype_manual(values = c("Decile" = "dashed", "Median" = "solid")) +
@@ -181,7 +136,7 @@ plot_data_coverage_stp %>%
   labs(
     x = "Positive SARS-CoV-2 test date",
     y = "Number of patients eligible for receiving treatment",
-    title = "(b)")  +
+    title = "")  +
   theme(legend.position = "bottom", 
         legend.title = element_blank()) +
   theme(
@@ -196,58 +151,7 @@ plot_data_coverage_stp %>%
 
 <br>
 
-```{r, elig treatment type plot, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '100%', fig.cap = "**Figure 2 Cumulative total of patients who received an antiviral or nMAB for treating COVID-19 since 16th December 2021, stratified by (a) STP and (b) STP decile.**", fig.topcaption=TRUE}
-
-# Cumulative total of treated patients by stp
-plot_data_treatment <- data_processed_clean %>%
-  filter(!is.na(treatment_date)) %>%
-  select(stp, treatment_date)  %>%
-  group_by(stp, treatment_date) %>%
-  tally() %>%
-  ungroup() %>%
-  arrange(treatment_date) %>%
-  complete(treatment_date = seq.Date(min(treatment_date, na.rm = T), max(treatment_date, na.rm = T), by="day"))  %>%
-  mutate(count = ifelse(is.na(n), 0, n),
-         cum_count = cumsum(count),
-         cum_count_redacted =  plyr::round_any(cum_count, 10)) %>%
-  select(-n)
-
-plot_order <- plot_data_treatment %>%
-  group_by(stp) %>%
-  mutate(order = max(cum_count_redacted, na.rm = T)) %>%
-  arrange(desc(order)) %>%
-  filter(cum_count_redacted == order) %>%
-  select(stp, order) %>%
-  distinct()
-
-plot_data_treatment <- plot_data_treatment %>%
-  mutate(stp = factor(stp, levels = plot_order$stp))
-
-plot_data_treatment %>%
-  filter(treatment_date <= Sys.Date()) %>%
-  ggplot(aes(x = treatment_date, y = cum_count_redacted, colour = stp, group = stp)) +
-  geom_step(size = 1) +
-  theme_classic(base_size = 8) +
-  scale_x_date(date_breaks = "2 week", date_labels =  "%d %b %Y") +
-  labs(
-    x = "Positive SARS-CoV-2 test date",
-    y = "Number of patients receiving treatment",
-    colour = "STP",
-    title = "(a)")  +
-  theme(legend.position = "none") +
-  theme(
-    axis.text = element_text(size = 10),
-    axis.text.x = element_text(angle = 60, hjust = 1),
-    axis.title = element_text(size = 10),
-    axis.line.x = element_line(colour = "black"),
-    panel.grid.minor.x = element_blank()) + 
-  scale_y_continuous(labels = comma)
-
-```
-
-<br>
-
-```{r, elig treatment type plot 2 , echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '100%'}
+```{r, elig treatment type plot, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '100%', fig.cap = "**Figure 2 Cumulative total of patients who received an antiviral or nMAB for treating COVID-19 since 16th December 2021, stratified by STP decile.**", fig.topcaption=TRUE}
 
 # Cumulative total of treated patients by stp decile
 plot_data_treatment <- data_processed_clean %>%
@@ -255,23 +159,24 @@ plot_data_treatment <- data_processed_clean %>%
   select(stp, treatment_date)  %>%
   group_by(stp, treatment_date) %>%
   tally() %>%
-  ungroup() %>%
-  arrange(treatment_date) %>%
+  arrange(stp, treatment_date) %>%
   complete(treatment_date = seq.Date(min(treatment_date, na.rm = T), max(treatment_date, na.rm = T), by="day"))  %>%
   mutate(count = ifelse(is.na(n), 0, n),
-         cum_count = cumsum(count),
-         cum_count_redacted =  plyr::round_any(cum_count, 10)) %>%
+         cum_count = cumsum(count)) %>%
   select(-n) %>%
   group_by(treatment_date) %>%
-  summarise(quibble(cum_count_redacted, seq(0.1,1.0,0.1))) %>%
-  arrange(cum_count_redacted_q, treatment_date)
+  summarise(quibble(cum_count, seq(0.1,0.9,0.1))) %>%
+  arrange(cum_count_q, treatment_date) %>%
+  filter(treatment_date < end_date)
+
+write_csv(plot_data_treatment, fs::path(output_dir_rmd, "figure_2.csv"))
+
 
 plot_data_treatment <- plot_data_treatment %>%
-  mutate(line = ifelse(cum_count_redacted_q == "0.5", "Median", "Decile"))
+  mutate(line = ifelse(cum_count_q == "0.5", "Median", "Decile"))
   
 plot_data_treatment %>%
-  filter(treatment_date <= Sys.Date()) %>%
-  ggplot(aes(x = treatment_date, y = cum_count_redacted, group = cum_count_redacted_q)) +
+  ggplot(aes(x = treatment_date, y = cum_count, group = cum_count_q)) +
   geom_step(aes(colour = line, linetype = line)) +
   scale_color_manual(values = c("Decile" = "blue", "Median" = "blue")) +
   scale_linetype_manual(values = c("Decile" = "dashed", "Median" = "solid")) +
@@ -293,8 +198,58 @@ plot_data_treatment %>%
 
 ```
 
+<br>
 
-**Table 1 Count and proportion of potentially eligible patients in OpenSAFELY-TPP who have received treatment for COVID-19 between 16th December 2021 23rd February 2022, broken down by STP decile and treatment type.** Patient counts <8 have been redacted and counts >7 are rounded to the nearest 10; as a result percentages may not add up to 100%."
+```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '100%', fig.cap = "**Figure 3 Weekly proportion of eligible patients receiving an antiviral or nMAB for treating COVID-19 since 11th December 2021, stratified by STP decile.**", fig.topcaption=TRUE}
+
+# Proportion of treated patients by stp decile
+plot_data_treatment <- data_processed_clean %>%
+  mutate(week = cut(elig_start - 2 , "week"),
+         elig = 1, treat = ifelse(!is.na(treatment_date), 1, 0)) %>%
+  select(stp, week, elig, treat) %>%
+  group_by(stp, week) %>%  
+  summarise(elig = sum(elig, na.rm = T),
+            treat = sum(treat, na.rm = T)) %>%
+  mutate(elig = ifelse(is.na(elig), 0, elig),
+         treat = ifelse(is.na(treat), 0, treat)) %>%
+  ungroup() %>%
+  mutate(prop = treat/elig,
+         week = as.Date(week)) %>%
+  group_by(week) %>%
+  summarise(quibble(prop, seq(0.1,0.9,0.1)))  %>%
+  select(week, decile = prop_q, prop) %>%
+  filter(week < end_date)
+
+write_csv(plot_data_treatment, fs::path(output_dir_rmd, "figure_3.csv"))
+
+plot_data_treatment <- plot_data_treatment %>%
+  mutate(line = ifelse(decile == "0.5", "Median", "Decile"))
+  
+plot_data_treatment %>%
+  ggplot(aes(x = week, y = prop, group = decile)) +
+  geom_step(aes(colour = line, linetype = line)) +
+  scale_color_manual(values = c("Decile" = "blue", "Median" = "blue")) +
+  scale_linetype_manual(values = c("Decile" = "dashed", "Median" = "solid")) +
+  theme_classic(base_size = 8) +
+  scale_x_date(date_breaks = "2 week", date_labels =  "%d %b %Y") +
+  labs(
+    x = "Week",
+    y = "Proportion of eligible patients who received treatment",
+    title = "(b)")  +
+  theme(legend.position = "bottom", 
+        legend.title = element_blank()) +
+  theme(
+    axis.text = element_text(size = 10),
+    axis.text.x = element_text(angle = 60, hjust = 1),
+    axis.title = element_text(size = 10),
+    axis.line.x = element_line(colour = "black"),
+    panel.grid.minor.x = element_blank()) + 
+  scale_y_continuous(labels = comma)
+
+```
+
+
+**Table 1 Count and proportion of potentially eligible patients in OpenSAFELY-TPP who have received treatment for COVID-19 between 16th December 2021 23rd February 2022, broken down by STP decile and treatment type.** Counts <8 have been redacted and counts >7 are rounded to the nearest 10; as a result percentages may not add up to 100%."
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '100%'}
 
@@ -303,10 +258,10 @@ eligibility_table <- data_processed_clean %>%
   select(stp, elig_start)  %>%
   group_by(stp) %>%
   tally()  %>%
-  summarise(quibble(n, seq(0.1,1.0,0.1))) %>%
+  summarise(quibble(n, seq(0.1,0.9,0.1))) %>%
   mutate(n = as.numeric(n),
          n_q = as.character(n_q)) %>%
-  add_row(n_q = "All", n = (data_processed_clean %>% filter(!is.na(elig_start)) %>% nrow())) %>%
+  #add_row(n_q = "All", n = (data_processed_clean %>% filter(!is.na(elig_start)) %>% nrow())) %>%
   arrange(desc(n))
 
 treatment_table <- data_processed_clean %>%
@@ -315,14 +270,14 @@ treatment_table <- data_processed_clean %>%
   group_by(stp, treatment_type) %>%
   tally()  %>%
   group_by(treatment_type) %>%
-  summarise(quibble(n, seq(0.1,1.0,0.1))) %>%
+  summarise(quibble(n, seq(0.1,0.9,0.1))) %>%
   mutate(n = as.numeric(n),
          n_q = as.character(n_q)) %>%
   pivot_wider(
     id_cols = n_q,
     names_from = treatment_type,
     values_from = n) %>%
-  add_row(n_q = "All", 
+  add_row(#n_q = "All", 
           Casirivimab = (data_processed_clean %>% filter(treatment_type == "Casirivimab") %>% nrow()),
           Molnupiravir = (data_processed_clean %>% filter(treatment_type == "Molnupiravir") %>% nrow()),
           Paxlovid = (data_processed_clean %>% filter(treatment_type == "Paxlovid") %>% nrow()),
