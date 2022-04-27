@@ -63,6 +63,7 @@ actions:
     outputs:
       moderately_sensitive:
         html: output/variation/mabs-and-abs-by-stp.html
+        csvs: output/variation/*.csv
         
   # Obs vs exp ----
   obs_vs_exp_report:

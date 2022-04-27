@@ -92,7 +92,7 @@ data_processed_clean <- data_processed %>%
   )
 
 ## End date
-end_date <- max(data_processed_clean$elig_start, na.rm = T)
+end_date <- as.Date("2022-04-01")
 
 ```
 
