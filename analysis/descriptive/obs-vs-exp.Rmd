@@ -28,7 +28,6 @@ pre[class] {
 # Document settings ----
 knitr::opts_chunk$set(echo = TRUE)
 
-
 # Preliminaries ----
 
 ## Import libraries
@@ -47,6 +46,7 @@ library(png)
 library(readr)
 library(htmltools)
 library(pROC)
+library(mgcv)
 
 ## Import custom user functions
 source(here("analysis", "lib", "custom_functions.R"))
@@ -76,6 +76,7 @@ data_processed_clean <- data_processed %>%
     age = as.numeric(age),
     
     high_risk_group_combined_count = as.numeric(high_risk_group_combined_count),
+    high_risk_group_combined_count = ifelse(high_risk_group_combined_count > 7, 7, high_risk_group_combined_count),
     
     vaccination_status = fct_case_when(
       vaccination_status == "Un-vaccinated" ~ "Un-vaccinated",
@@ -95,7 +96,11 @@ data_processed_clean <- data_processed %>%
       labels = c("12-29", "30-39", "40-49", "50-59", "60-69", "70-79", "80+"),
       right = FALSE),
     
-    days_since_test_positive = as.numeric(as.Date("2021-12-16") - covid_test_positive_date)
+    days_since_test_positive = as.numeric(as.Date("2021-12-16") - covid_test_positive_date),
+    
+    week = lubridate::week(covid_test_positive_date) + 3,
+    week = ifelse(week %in% c(53:55), week - 53, week)
+    
     ) 
 
 # Model variables
@@ -103,15 +108,20 @@ variables = c("ageband","sex", "ethnicity", "imd", "rural_urban", "region_nhs", 
               "haematological_disease", "renal_disease", "liver_disease", "imid", "immunosupression", "hiv_aids", "solid_organ_transplant", 
               "rare_neurological_conditions", "high_risk_group_combined_count", "autism_nhsd", "care_home_primis", "dementia_nhsd", 
               "housebound_opensafely", "learning_disability_primis", "shielded_primis", "serious_mental_illness_nhsd", 
-              "sickle_cell_disease_nhsd", "vaccination_status")
+              "sickle_cell_disease_nhsd", "vaccination_status", "week")
 
+# Model data
+data_model <- data_processed_clean %>% 
+  select(patient_id, treated_observed, all_of(variables)) %>%
+  filter(complete.cases(.)) 
 
 # Table 1 template
-table_demo_clinc_breakdown <- data_processed_clean %>%
+table_demo_clinc_breakdown <- data_model %>%
   filter(!is.na(treated_observed)) %>%
   select(treated_observed, all_of(variables)) %>%
   tbl_summary(by = treated_observed,
-              type = list(high_risk_group_combined_count ~ "continuous")) %>%
+              type = list(high_risk_group_combined_count ~ "continuous",
+                          week ~ "continuous")) %>%
   add_overall()
 
 table_demo_clinc_breakdown$inputs$data <- NULL
@@ -141,7 +151,7 @@ table.mod.unadj <- list()
 
 for (i in 1:length(variables)){
   formula    <- as.formula(paste("treated_observed ~", variables[i]))
-  res.logist <- glm(formula, data = data_processed_clean, family = binomial(link = 'logit'),)
+  res.logist <- glm(formula, data = data_model, family = binomial(link = 'logit'),)
   
   mod.unadj <- tidy_wald(res.logist, exponentiate = TRUE)
   table.mod.unadj <-rbind(table.mod.unadj, mod.unadj[-1,])
@@ -153,20 +163,58 @@ mod.adj <- glm(treated_observed ~ ageband + sex + ethnicity + imd + rural_urban 
                downs_syndrome + solid_cancer + haematological_disease + renal_disease + liver_disease + imid +immunosupression +
                hiv_aids + solid_organ_transplant + rare_neurological_conditions + high_risk_group_combined_count + autism_nhsd +
                care_home_primis + dementia_nhsd + housebound_opensafely + learning_disability_primis + shielded_primis +
-               serious_mental_illness_nhsd + sickle_cell_disease_nhsd + vaccination_status,
+               serious_mental_illness_nhsd + vaccination_status + week,
              family = binomial(link = 'logit'),
-             data = data_processed_clean)
+             data = data_model)
 
-table.mod.adj <- tidy_wald(mod.adj, exponentiate = TRUE)[-1,]
+table.mod.adj <- broom::tidy(mod.adj, parametric = TRUE, exponentiate = TRUE, conf.int = TRUE) %>%
+  as.data.frame()
+
 
 # Results
+results.table <- data.frame(cutoff = c(seq(0.1:1, by = 0.1)),
+                            Accuracy = NA,
+                            Sensitivity = NA,
+                            Specificity = NA,
+                            AUC = NA,
+                            misClasificError = NA,
+                            Brierscore = NA)
+
+cutoffs <- seq(0.1:1, by = 0.1)
+
+for (i in 1:length(cutoffs)){
+  
+  results <- data_processed_clean %>%
+    mutate(fitted.results = predict(mod.adj, newdata = data_processed_clean, type = 'response'),
+         treated_expected = ifelse(fitted.results > cutoffs[i], 1, 0))
+  
+  results.table[i,2] <- round(results %>% filter(treated_expected == treated_observed) %>% nrow()/results %>% nrow(), digits = 2)
+  results.table[i,3] <- round(results %>% filter(treated_observed == 1, 
+                                              treated_expected == treated_observed) %>% nrow()/
+                             results %>% filter(treated_observed == 1) %>% nrow(), digits = 2)
+  results.table[i,4] <- round(results %>% filter(treated_observed == 0, 
+                                              treated_expected == treated_observed) %>% nrow()/
+                             results %>% filter(treated_observed == 0) %>% nrow(), digits = 2)
+  results.table[i,5] <- round(as.numeric(auc(results$treated_observed, results$treated_expected)), digits = 2)
+  results.table[i,6] <- round(1 - mean(results$treated_expected == results$treated_observed, na.rm = T), digits = 2)
+  results.table[i,7] <- mean((results$fitted.results - results$treated_observed)^2, na.rm = T)
+
+}
+
+print(results.table)
+
 results <- data_processed_clean %>%
-  mutate(fitted.results = predict(mod.adj, newdata = data_processed_clean, type = 'response'),
-         treated_expected = ifelse(fitted.results > 0.9,1,0))
+    mutate(fitted.results = predict(mod.adj, newdata = data_processed_clean, type = 'response'),
+         treated_expected = ifelse(fitted.results >= subset(results.table, AUC == max(results.table$AUC))$cutoff, 1, 0))
 
+accuracy <- round(results %>% filter(treated_expected == treated_observed) %>% nrow()/results %>% nrow(), digits = 2)
+sensitivity <- round(results %>% filter(treated_observed == 1, treated_expected == treated_observed) %>% nrow()/
+                             results %>% filter(treated_observed == 1) %>% nrow(), digits = 2)
+specificity <- round(results %>% filter(treated_observed == 0, treated_expected == treated_observed) %>% nrow()/
+                             results %>% filter(treated_observed == 0) %>% nrow(), digits = 2)
 auc <- round(as.numeric(auc(results$treated_observed, results$treated_expected)), digits = 2)
-
 misClasificError <- round(1 - mean(results$treated_expected == results$treated_observed, na.rm = T), digits = 2)
+brierscore <- mean((results$fitted.results - results$treated_observed)^2, na.rm = T)
 
 overall <- results %>% 
   select(treated_observed, treated_expected) %>%
@@ -188,7 +236,7 @@ Preliminary results have shown that there is some variation in which eligible pa
 The aim of this bit of work is to attempt to describe any variation in eligible patients receiving an nMAB or antiviral as treatment for COVID-19 by developing a model to predict treatment status and comparing observed to expected values.
 
 # Method
-Treatment was modelled using logistic regression. Candidate risk-adjustment variables considered were
+The primary outcome was treatment status (either treated with a mabs/antiviral or not treated). Treatment was modelled using logistic regression with candidate predictor variables considered as follows:
 
 * Age
 * Sex
@@ -198,13 +246,13 @@ Treatment was modelled using logistic regression. Candidate risk-adjustment vari
 * Region
 * STP
 * High risk cohort
-* Comorbid conditions (including high-risk conditions); autism, care home, dementia, housebound, learning disability, shielded, serious mental illness, sickle cell disease
+* Comorbid conditions (including high-risk conditions); autism, care home, dementia, housebound, learning disability, shielded, serious mental illness
 * Vaccination status
 
 
 # Results
 
-**Table 1 Count and proportion of eligible patients in OpenSAFELY-TPP between 16th December 2021 23rd February 2022, stratified by treatment status, along with odds ratios from a univariable and multivariable logistic regression model** The multivariable logistic model for treatment had an AUC of `r auc`, a misclassification error rate of `r misClasificError`% and an overall observed to expected ration of `r round(overall$y, digits = 2)`, (95% CI `r `round(overall$ymin, digits = 2)` - `r round(overall$ymax, digits = 2)`). Patient counts <8 have been redacted and counts >7 are rounded to the nearest 10; as a result percentages may not add up to 100%."
+**Table 1 Count and proportion of eligible patients in OpenSAFELY-TPP between 16th December 2021 23rd February 2022, stratified by treatment status, along with odds ratios from a univariable and multivariable logistic regression model** The multivariable logistic model for treatment had an AUC of `r auc`, a misclassification error rate of `r misClasificError`% and an overall observed to expected ratio of `r round(overall$y, digits = 2)`, (95% CI `r `round(overall$ymin, digits = 2)` - `r round(overall$ymax, digits = 2)`). Patient counts <8 have been redacted and counts >7 are rounded to the nearest 10; as a result percentages may not add up to 100%."
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', out.width = '100%'}
  table1.full <- full_join(table1, table.mod.unadj, by = "term") %>%
@@ -226,10 +274,10 @@ Treatment was modelled using logistic regression. Candidate risk-adjustment vari
                                    "imid", "immunosupression", "hiv_aids", "solid_organ_transplant", "rare_neurological_conditions",
                                    "high_risk_group_combined_count", "autism_nhsd", "care_home_primis",
                                    "dementia_nhsd", "learning_disability_primis", "serious_mental_illness_nhsd", 
-                                   "housebound_opensafely", "shielded_primis", "sickle_cell_disease_nhsd", "vaccination_status"),
+                                   "housebound_opensafely", "shielded_primis", "sickle_cell_disease_nhsd", "vaccination_status", "week"),
                         labels = c("Age band", "Sex", "Ethnicity", "IMD", "Rurality", "Region", rep("High risk cohort", 10),
                                    "High risk cohort count", rep("Clinical group", 8),
-                                   "Vaccination status")),
+                                   "Vaccination status", "Week")),
          Variable = factor(Variable, 
                            levels = c("12-29", "30-39", "40-49", "50-59", "60-69", "70-79", "80+", 
                                       "Female", "Male" ,
@@ -245,7 +293,7 @@ Treatment was modelled using logistic regression. Candidate risk-adjustment vari
                                       "dementia_nhsd", "learning_disability_primis", "serious_mental_illness_nhsd", 
                                       "housebound_opensafely", "shielded_primis", "sickle_cell_disease_nhsd",
                                       "Un-vaccinated (declined)", "Un-vaccinated" , "One vaccination", "Two vaccinations", 
-                                      "Three or more vaccinations", "Unknown"),
+                                      "Three or more vaccinations", "Unknown", "week"),
                            labels = c("12-29", "30-39", "40-49", "50-59", "60-69", "70-79", "80+", 
                                       "Female", "Male" ,
                                       "White", "Asian or Asian British", "Black or Black British", "Mixed", "Other ethnic groups",
@@ -259,8 +307,7 @@ Treatment was modelled using logistic regression. Candidate risk-adjustment vari
                                       "-", "Autism", "Care home", "Dementia", "Learning disability ", "Serious mental illness",
                                       "Housebound", "CEV", "Sickle cell disease",
                                       "Un-vaccinated (declined)", "Un-vaccinated" , "One vaccination", "Two vaccinations", 
-                                      "Three or more vaccinations", "Unknown")))  %>%
-  arrange(Group, Variable) %>%
+                                      "Three or more vaccinations", "Unknown", "-")))  %>%
   mutate(
     # Redact values < 8
     All = ifelse(All < threshold, NA, as.numeric(All)),
@@ -414,7 +461,6 @@ results %>%
     axis.title = element_text(size = 10),
     axis.line.x = element_line(colour = "black"),
     panel.grid.minor.x = element_blank())
-
 
 ```
 
