@@ -104,10 +104,10 @@ This report describes the coverage and uptake of antivirals and neutralising mon
 
 Between **`r format(min(data_processed_clean$elig_start, na.rm = T), format = "%d-%b-%Y")`** and **`r format(max(data_processed_clean$elig_start, na.rm = T), format = "%d-%b-%Y")`**, a total of `r format(plyr::round_any(data_processed_clean %>% nrow(), 10), big.mark = ",", scientific = FALSE)` non-hospitalised patients registered at a TPP practice in England were identified as potentially being eligible for receiving an antiviral or nMAB for treating COVID-19. Of these `r format(plyr::round_any(data_processed_clean %>% nrow(), 10), big.mark = ",", scientific = FALSE)` potentially eligible patients, `r format(plyr::round_any(data_processed_clean %>% filter(!is.na(treatment_date)) %>% nrow(), 10), big.mark = ",", scientific = FALSE)` (**`r round(plyr::round_any(data_processed_clean %>% filter(!is.na(treatment_date)) %>% nrow(), 10)/plyr::round_any(data_processed_clean %>% nrow(), 10)*100, digits = 0)`%**) received treatment from a CMDU. STP (used as a proxy for CMDU) was available for `r format(plyr::round_any(data_processed_clean %>% filter(!is.na(stp)) %>% nrow(), 10), big.mark = ",", scientific = FALSE)` (`r round(round(data_processed_clean %>% filter(!is.na(stp)) %>% nrow(), 10)/plyr::round_any(data_processed_clean %>% nrow(), 10)*100, digits = 0)`%) of eligible patients and `r format(plyr::round_any(data_processed_clean %>% filter(!is.na(stp), !is.na(treatment_date)) %>% nrow(), 10), big.mark = ",", scientific = FALSE)` (`r round(round(data_processed_clean %>% filter(!is.na(stp), !is.na(treatment_date)) %>% nrow(), 10)/plyr::round_any(data_processed_clean %>% filter(!is.na(treatment_date)) %>% nrow(), 10)*100, digits = 0)`%) of treated patients A total of **`r format(length(unique(data_processed$stp)), big.mark = ",", scientific = FALSE)`** STPs were able to be identified. 
 
-```{r, coverage plot, echo=FALSE, message=FALSE, warning=FALSE, results='asis' , fig.width=10, out.width = '100%', fig.cap = "**Figure 1 Cumulative total of potentially eligible patients for receiving an antiviral or nMABs for treating COVID-19 since 11th December 2021, stratified by STP decile.** Patients are considered eligible on the date of their positive SARS-CoV-2 test. Note, the overall number in each group is likely to be an overestimation due to including SARS-CoV-2 infection confirmed by either lateral flow or PCR test (where only PCR-confirmed infections should have been treated according to guidance in effect prior to 10th February 2022), and potentially including non-symptomatic patients.", fig.topcaption=TRUE}
+```{r, coverage plot, echo=FALSE, message=FALSE, warning=FALSE, results='asis' , fig.width=10, out.width = '100%', fig.cap = "**Figure 1 Cumulative total of potentially eligible patients for receiving an antiviral or nMABs for treating COVID-19 since 11th December 2021, stratified by STP decile.** Patients are considered eligible on the date of their positive SARS-CoV-2 test. Note, the overall number in each group is likely to be an overestimation due to including SARS-CoV-2 infection confirmed by either lateral flow or PCR test (where only PCR-confirmed infections should have been treated according to guidance in effect prior to 10th February 2022), and potentially including non-symptomatic patients. Decile values relating to patient counts of 0-7 have been redacted.", fig.topcaption=TRUE}
 
 # Cumulative total of eligible patients by STP decile
-plot_data_coverage_stp <- data_processed_clean %>%
+eligible_stp_decile_n <- data_processed_clean %>%
   select(stp, elig_start)  %>%
   group_by(stp, elig_start) %>%
   tally() %>%
@@ -117,17 +117,39 @@ plot_data_coverage_stp <- data_processed_clean %>%
          cum_count = cumsum(count)) %>%
   select(-n) %>%
   group_by(elig_start) %>%
-  summarise(quibble(cum_count, seq(0.1,0.9,0.1))) %>%
+  mutate(cum_count_q = ntile(cum_count,10)/10) %>%
+  ungroup() %>%
+  select(decile = cum_count_q, elig_start, count, cum_count, stp) %>%
+  arrange(decile, elig_start) %>%
+  group_by(decile, elig_start) %>%
+  summarise(n_patients = sum(cum_count, na.rm = T),
+            n_stp = n_distinct(stp))
+
+eligible_stp_decile <- data_processed_clean %>%
+  select(stp, elig_start)  %>%
+  group_by(stp, elig_start) %>%
+  tally() %>%
+  arrange(stp, elig_start) %>%
+  complete(elig_start = seq.Date(min(elig_start, na.rm = T), max(elig_start, na.rm = T), by="day"))  %>%
+  mutate(count = ifelse(is.na(n), 0, n),
+         cum_count = cumsum(count)) %>%
+  select(-n) %>%
+  group_by(elig_start) %>%
+    summarise(quibble(cum_count, seq(0.1,0.9,0.1))) %>%
   arrange(cum_count_q, elig_start) %>%
-  filter(elig_start < end_date)
+  filter(elig_start < end_date) %>%
+  rename(decile = cum_count_q) %>%
+  left_join(eligible_stp_decile_n, by = c("elig_start", "decile")) %>%
+  select(decile, elig_start, n_stp, n_patients, cum_count_decile = cum_count) #%>%
+  #mutate(cum_count = ifelse(cum_count < 8, NA, plyr::round_any(cum_count, 10))) %>%
 
-write_csv(plot_data_coverage_stp, fs::path(output_dir_rmd, "figure_1.csv"))
+write_csv(eligible_stp_decile, fs::path(output_dir_rmd, "figure_1.csv"))
 
-plot_data_coverage_stp <- plot_data_coverage_stp %>%
-  mutate(line = ifelse(cum_count_q == "0.5", "Median", "Decile"))
+eligible_stp_decile <- eligible_stp_decile %>%
+  mutate(line = ifelse(decile == "0.5", "Median", "Decile"))
   
-plot_data_coverage_stp %>%
-  ggplot(aes(x = elig_start, y = cum_count, group = cum_count_q)) +
+eligible_stp_decile %>%
+  ggplot(aes(x = elig_start, y = cum_count_decile, group = decile)) +
   geom_step(aes(colour = line, linetype = line)) +
   scale_color_manual(values = c("Decile" = "blue", "Median" = "blue")) +
   scale_linetype_manual(values = c("Decile" = "dashed", "Median" = "solid")) +
@@ -151,11 +173,10 @@ plot_data_coverage_stp %>%
 
 <br>
 
-```{r, elig treatment type plot, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '100%', fig.cap = "**Figure 2 Cumulative total of patients who received an antiviral or nMAB for treating COVID-19 since 16th December 2021, stratified by STP decile.**", fig.topcaption=TRUE}
+```{r, elig treatment type plot, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '100%', fig.cap = "**Figure 2 Cumulative total of patients who received an antiviral or nMAB for treating COVID-19 since 16th December 2021, stratified by STP decile. Decile values relating to patient counts of 0-7 have been redacted.**", fig.topcaption=TRUE}
 
 # Cumulative total of treated patients by stp decile
-plot_data_treatment <- data_processed_clean %>%
-  filter(!is.na(treatment_date)) %>%
+treated_stp_decile_n <- data_processed_clean %>%
   select(stp, treatment_date)  %>%
   group_by(stp, treatment_date) %>%
   tally() %>%
@@ -165,18 +186,39 @@ plot_data_treatment <- data_processed_clean %>%
          cum_count = cumsum(count)) %>%
   select(-n) %>%
   group_by(treatment_date) %>%
-  summarise(quibble(cum_count, seq(0.1,0.9,0.1))) %>%
+  mutate(cum_count_q = ntile(cum_count,10)/10) %>%
+  ungroup() %>%
+  select(decile = cum_count_q, treatment_date, count, cum_count, stp) %>%
+  arrange(decile, treatment_date) %>%
+  group_by(decile, treatment_date) %>%
+  summarise(n_patients = sum(cum_count, na.rm = T),
+            n_stp = n_distinct(stp))
+
+treated_stp_decile <- data_processed_clean %>%
+  select(stp, treatment_date)  %>%
+  group_by(stp, treatment_date) %>%
+  tally() %>%
+  arrange(stp, treatment_date) %>%
+  complete(treatment_date = seq.Date(min(treatment_date, na.rm = T), max(treatment_date, na.rm = T), by="day"))  %>%
+  mutate(count = ifelse(is.na(n), 0, n),
+         cum_count = cumsum(count)) %>%
+  select(-n) %>%
+  group_by(treatment_date) %>%
+    summarise(quibble(cum_count, seq(0.1,0.9,0.1))) %>%
   arrange(cum_count_q, treatment_date) %>%
-  filter(treatment_date < end_date)
+  filter(treatment_date < end_date) %>%
+  rename(decile = cum_count_q) %>%
+  left_join(treated_stp_decile_n, by = c("treatment_date", "decile")) %>%
+  select(decile, treatment_date, n_stp, n_patients, cum_count_decile = cum_count) #%>%
+  #mutate(cum_count = ifelse(cum_count < 8, NA, plyr::round_any(cum_count, 10))) %>%
 
-write_csv(plot_data_treatment, fs::path(output_dir_rmd, "figure_2.csv"))
+write_csv(treated_stp_decile, fs::path(output_dir_rmd, "figure_1.csv"))
 
-
-plot_data_treatment <- plot_data_treatment %>%
-  mutate(line = ifelse(cum_count_q == "0.5", "Median", "Decile"))
+treated_stp_decile <- treated_stp_decile %>%
+  mutate(line = ifelse(decile == "0.5", "Median", "Decile"))
   
-plot_data_treatment %>%
-  ggplot(aes(x = treatment_date, y = cum_count, group = cum_count_q)) +
+treated_stp_decile %>%
+  ggplot(aes(x = treatment_date, y = cum_count_decile, group = decile)) +
   geom_step(aes(colour = line, linetype = line)) +
   scale_color_manual(values = c("Decile" = "blue", "Median" = "blue")) +
   scale_linetype_manual(values = c("Decile" = "dashed", "Median" = "solid")) +
@@ -203,7 +245,7 @@ plot_data_treatment %>%
 ```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '100%', fig.cap = "**Figure 3 Weekly proportion of eligible patients receiving an antiviral or nMAB for treating COVID-19 since 11th December 2021, stratified by STP decile.**", fig.topcaption=TRUE}
 
 # Proportion of treated patients by stp decile
-plot_data_treatment <- data_processed_clean %>%
+proportion_stp_decile_n_stp <- data_processed_clean %>%
   mutate(week = cut(elig_start - 2 , "week"),
          elig = 1, treat = ifelse(!is.na(treatment_date), 1, 0)) %>%
   select(stp, week, elig, treat) %>%
@@ -215,18 +257,41 @@ plot_data_treatment <- data_processed_clean %>%
   ungroup() %>%
   mutate(prop = treat/elig,
          week = as.Date(week)) %>%
+  mutate(prop_q = ntile(prop,10)/10) %>%
+  group_by(prop_q, week) %>%
+  summarise(n_stp = n_distinct(stp),
+            n_elig = sum(elig, na.rm = T),
+            n_treat = sum(treat, na.rm = T))
+
+proportion_stp_decile <- data_processed_clean %>%
+  mutate(week = cut(elig_start - 2 , "week"),
+         elig = 1, treat = ifelse(!is.na(treatment_date), 1, 0)) %>%
+  select(stp, week, elig, treat) %>%
+  group_by(stp, week) %>%  
+  summarise(elig = sum(elig, na.rm = T),
+            treat = sum(treat, na.rm = T)) %>%
+  mutate(elig = ifelse(is.na(elig), 0, elig),
+         treat = ifelse(is.na(treat), 0, treat)) %>%
+  ungroup() %>%
+  mutate(prop = treat/elig,
+         week = as.Date(week)) %>%
+  mutate(prop_q = ntile(prop,10)) %>%
   group_by(week) %>%
-  summarise(quibble(prop, seq(0.1,0.9,0.1)))  %>%
-  select(week, decile = prop_q, prop) %>%
+  summarise(quantile = scales::percent(c(seq(0.1,0.9,0.1))),
+            prop = quantile(prop, c(seq(0.1,0.9,0.1))))  %>%
+  mutate(decile = as.numeric(gsub("%", "", quantile))/100) %>%
+  left_join(proportion_stp_decile_n_stp, by = c("decile" = "prop_q", "week" = "week")) %>%
+  select(decile, week, n_stp, n_elig, n_treat, prop_decile = prop) %>%
+  arrange(decile, week) %>%
   filter(week < end_date)
 
-write_csv(plot_data_treatment, fs::path(output_dir_rmd, "figure_3.csv"))
+write_csv(proportion_stp_decile, fs::path(output_dir_rmd, "figure_3.csv"))
 
-plot_data_treatment <- plot_data_treatment %>%
+proportion_stp_decile <- proportion_stp_decile %>%
   mutate(line = ifelse(decile == "0.5", "Median", "Decile"))
   
-plot_data_treatment %>%
-  ggplot(aes(x = week, y = prop, group = decile)) +
+proportion_stp_decile %>%
+  ggplot(aes(x = week, y = prop_decile, group = decile)) +
   geom_step(aes(colour = line, linetype = line)) +
   scale_color_manual(values = c("Decile" = "blue", "Median" = "blue")) +
   scale_linetype_manual(values = c("Decile" = "dashed", "Median" = "solid")) +
