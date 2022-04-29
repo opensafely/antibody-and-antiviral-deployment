@@ -212,7 +212,7 @@ treated_stp_decile <- data_processed_clean %>%
   select(decile, treatment_date, n_stp, n_patients, cum_count_decile = cum_count) #%>%
   #mutate(cum_count = ifelse(cum_count < 8, NA, plyr::round_any(cum_count, 10))) %>%
 
-write_csv(treated_stp_decile, fs::path(output_dir_rmd, "figure_1.csv"))
+write_csv(treated_stp_decile, fs::path(output_dir_rmd, "figure_2.csv"))
 
 treated_stp_decile <- treated_stp_decile %>%
   mutate(line = ifelse(decile == "0.5", "Median", "Decile"))
@@ -285,7 +285,7 @@ proportion_stp_decile <- data_processed_clean %>%
   arrange(decile, week) %>%
   filter(week < end_date)
 
-write_csv(proportion_stp_decile, fs::path(output_dir_rmd, "figure_3.csv"))
+write_csv(proportion_stp_decile %>% select(decile, week, prop_decile), fs::path(output_dir_rmd, "figure_3.csv"))
 
 proportion_stp_decile <- proportion_stp_decile %>%
   mutate(line = ifelse(decile == "0.5", "Median", "Decile"))
@@ -314,7 +314,7 @@ proportion_stp_decile %>%
 ```
 
 
-**Table 1 Count and proportion of potentially eligible patients in OpenSAFELY-TPP who have received treatment for COVID-19 between 16th December 2021 23rd February 2022, broken down by STP decile and treatment type.** Counts <8 have been redacted and counts >7 are rounded to the nearest 10; as a result percentages may not add up to 100%."
+**Table 1 Count and proportion of potentially eligible patients in OpenSAFELY-TPP who have received treatment for COVID-19 since 16th December 2021, broken down by STP decile and treatment type.** Counts <8 have been redacted and counts >7 are rounded to the nearest 10; as a result percentages may not add up to 100%."
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '100%'}
 
