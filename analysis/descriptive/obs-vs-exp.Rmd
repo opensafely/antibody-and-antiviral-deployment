@@ -201,7 +201,7 @@ for (i in 1:length(cutoffs)){
 
 results <- data_processed_clean %>%
     mutate(fitted.results = predict(mod.adj, newdata = data_processed_clean, type = 'response'),
-         treated_expected = ifelse(fitted.results >= subset(results.table, AUC == max(results.table$AUC))$cutoff, 1, 0))
+         treated_expected = ifelse(fitted.results >= 0.3, 1, 0))
 
 accuracy <- round(results %>% filter(treated_expected == treated_observed) %>% nrow()/results %>% nrow(), digits = 2)
 sensitivity <- round(results %>% filter(treated_observed == 1, treated_expected == treated_observed) %>% nrow()/
