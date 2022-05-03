@@ -176,7 +176,8 @@ results.table <- data.frame(cutoff = c(seq(0.1:1, by = 0.1)),
                             Specificity = NA,
                             AUC = NA,
                             misClasificError = NA,
-                            Brierscore = NA)
+                            Brierscore = NA,
+                            OE = NA)
 
 cutoffs <- seq(0.1:1, by = 0.1)
 
@@ -196,6 +197,7 @@ for (i in 1:length(cutoffs)){
   results.table[i,5] <- round(as.numeric(auc(results$treated_observed, results$treated_expected)), digits = 2)
   results.table[i,6] <- round(1 - mean(results$treated_expected == results$treated_observed, na.rm = T), digits = 2)
   results.table[i,7] <- mean((results$fitted.results - results$treated_observed)^2, na.rm = T)
+  results.table[i,8] <- sum(results$treated_observed, na.rm = T)/sum(results$treated_expected, na.rm = T)
 
 }
 
