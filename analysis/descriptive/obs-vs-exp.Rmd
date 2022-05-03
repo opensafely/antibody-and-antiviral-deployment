@@ -250,10 +250,6 @@ The primary outcome was treatment status (either treated with a mabs/antiviral o
 
 # Results
 
-```{r,}
-print(results.table)
-```
-
 **Table 1 Count and proportion of eligible patients in OpenSAFELY-TPP between 16th December 2021 23rd February 2022, stratified by treatment status, along with odds ratios from a univariable and multivariable logistic regression model** The multivariable logistic model for treatment had an AUC of `r auc`, a misclassification error rate of `r misClasificError`% and an overall observed to expected ratio of `r round(overall$y, digits = 2)`, (95% CI `r round(overall$ymin, digits = 2)` - `r round(overall$ymax, digits = 2)`). Patient counts <8 have been redacted and counts >7 are rounded to the nearest 10; as a result percentages may not add up to 100%."
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', out.width = '100%'}
