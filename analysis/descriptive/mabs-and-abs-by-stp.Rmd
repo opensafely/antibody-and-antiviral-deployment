@@ -296,7 +296,7 @@ proportion_stp_decile <- proportion_stp_decile %>%
   
 proportion_stp_decile %>%
   ggplot(aes(x = week, y = prop_decile, group = decile)) +
-  geom_step(aes(colour = line, linetype = line)) +
+  geom_line(aes(colour = line, linetype = line)) +
   scale_color_manual(values = c("Decile" = "blue", "Median" = "blue")) +
   scale_linetype_manual(values = c("Decile" = "dashed", "Median" = "solid")) +
   theme_classic(base_size = 8) +
