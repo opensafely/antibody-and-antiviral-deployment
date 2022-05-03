@@ -132,16 +132,18 @@ eligible_stp_decile <- data_processed_clean %>%
   arrange(stp, elig_start) %>%
   complete(elig_start = seq.Date(min(elig_start, na.rm = T), max(elig_start, na.rm = T), by="day"))  %>%
   mutate(count = ifelse(is.na(n), 0, n),
-         cum_count = cumsum(count)) %>%
+         cum_count = cumsum(count),
+         cum_count_rounded = plyr::round_any(cum_count, 5)) %>%
   select(-n) %>%
   group_by(elig_start) %>%
-    summarise(quibble(cum_count, seq(0.1,0.9,0.1))) %>%
+    summarise(quibble(cum_count, seq(0.1,0.9,0.1)),
+              quibble(cum_count_rounded, seq(0.1,0.9,0.1))) %>%
   arrange(cum_count_q, elig_start) %>%
   filter(elig_start < end_date) %>%
   rename(decile = cum_count_q) %>%
   left_join(eligible_stp_decile_n, by = c("elig_start", "decile")) %>%
-  select(decile, elig_start, n_stp, n_patients, cum_count_decile = cum_count) #%>%
-  #mutate(cum_count = ifelse(cum_count < 8, NA, plyr::round_any(cum_count, 10))) %>%
+  mutate(cum_count_decile_redacted = ifelse(cum_count < 8, NA, cum_count_rounded)) %>%
+  select(decile, elig_start, n_stp, n_patients, cum_count_decile = cum_count, cum_count_decile_redacted)
 
 write_csv(eligible_stp_decile, fs::path(output_dir_rmd, "figure_1.csv"))
 
@@ -149,7 +151,7 @@ eligible_stp_decile <- eligible_stp_decile %>%
   mutate(line = ifelse(decile == "0.5", "Median", "Decile"))
   
 eligible_stp_decile %>%
-  ggplot(aes(x = elig_start, y = cum_count_decile, group = decile)) +
+  ggplot(aes(x = elig_start, y = cum_count_decile_redacted, group = decile)) +
   geom_step(aes(colour = line, linetype = line)) +
   scale_color_manual(values = c("Decile" = "blue", "Median" = "blue")) +
   scale_linetype_manual(values = c("Decile" = "dashed", "Median" = "solid")) +
@@ -201,16 +203,18 @@ treated_stp_decile <- data_processed_clean %>%
   arrange(stp, treatment_date) %>%
   complete(treatment_date = seq.Date(min(treatment_date, na.rm = T), max(treatment_date, na.rm = T), by="day"))  %>%
   mutate(count = ifelse(is.na(n), 0, n),
-         cum_count = cumsum(count)) %>%
+         cum_count = cumsum(count),
+         cum_count_rounded = plyr::round_any(cum_count, 5)) %>%
   select(-n) %>%
   group_by(treatment_date) %>%
-    summarise(quibble(cum_count, seq(0.1,0.9,0.1))) %>%
+    summarise(quibble(cum_count, seq(0.1,0.9,0.1)),
+              quibble(cum_count_rounded, seq(0.1,0.9,0.1))) %>%
   arrange(cum_count_q, treatment_date) %>%
   filter(treatment_date < end_date) %>%
   rename(decile = cum_count_q) %>%
   left_join(treated_stp_decile_n, by = c("treatment_date", "decile")) %>%
-  select(decile, treatment_date, n_stp, n_patients, cum_count_decile = cum_count) #%>%
-  #mutate(cum_count = ifelse(cum_count < 8, NA, plyr::round_any(cum_count, 10))) %>%
+  mutate(cum_count_decile_redacted = ifelse(cum_count < 8, NA, cum_count_rounded)) %>%
+  select(decile, treatment_date, n_stp, n_patients, cum_count_decile = cum_count, cum_count_decile_redacted)
 
 write_csv(treated_stp_decile, fs::path(output_dir_rmd, "figure_2.csv"))
 
@@ -218,7 +222,7 @@ treated_stp_decile <- treated_stp_decile %>%
   mutate(line = ifelse(decile == "0.5", "Median", "Decile"))
   
 treated_stp_decile %>%
-  ggplot(aes(x = treatment_date, y = cum_count_decile, group = decile)) +
+  ggplot(aes(x = treatment_date, y = cum_count_decile_redacted, group = decile)) +
   geom_step(aes(colour = line, linetype = line)) +
   scale_color_manual(values = c("Decile" = "blue", "Median" = "blue")) +
   scale_linetype_manual(values = c("Decile" = "dashed", "Median" = "solid")) +
