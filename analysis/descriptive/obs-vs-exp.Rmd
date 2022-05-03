@@ -106,22 +106,20 @@ data_processed_clean <- data_processed %>%
 # Model variables
 variables = c("ageband","sex", "ethnicity", "imd", "rural_urban", "region_nhs", "stp", "downs_syndrome", "solid_cancer", 
               "haematological_disease", "renal_disease", "liver_disease", "imid", "immunosupression", "hiv_aids", "solid_organ_transplant", 
-              "rare_neurological_conditions", "high_risk_group_combined_count", "autism_nhsd", "care_home_primis", "dementia_nhsd", 
+              "rare_neurological_conditions", "autism_nhsd", "care_home_primis", "dementia_nhsd", 
               "housebound_opensafely", "learning_disability_primis", "shielded_primis", "serious_mental_illness_nhsd", 
-              "sickle_cell_disease_nhsd", "vaccination_status", "week")
+              "sickle_cell_disease_nhsd", "vaccination_status")
 
 # Model data
 data_model <- data_processed_clean %>% 
-  select(patient_id, treated_observed, all_of(variables)) %>%
+  select(patient_id, treated_observed, all_of(variables), week) %>%
   filter(complete.cases(.)) 
 
 # Table 1 template
 table_demo_clinc_breakdown <- data_model %>%
   filter(!is.na(treated_observed)) %>%
   select(treated_observed, all_of(variables)) %>%
-  tbl_summary(by = treated_observed,
-              type = list(high_risk_group_combined_count ~ "continuous",
-                          week ~ "continuous")) %>%
+  tbl_summary(by = treated_observed) %>%
   add_overall()
 
 table_demo_clinc_breakdown$inputs$data <- NULL
@@ -159,11 +157,11 @@ for (i in 1:length(variables)){
 }
 
 ## Logistic model - adjusted
-mod.adj <- glm(treated_observed ~ ageband + sex + ethnicity + imd + rural_urban + region_nhs + stp + 
+mod.adj <- gam(treated_observed ~ ageband + sex + ethnicity + imd + rural_urban + region_nhs + stp + 
                downs_syndrome + solid_cancer + haematological_disease + renal_disease + liver_disease + imid +immunosupression +
-               hiv_aids + solid_organ_transplant + rare_neurological_conditions + high_risk_group_combined_count + autism_nhsd +
+               hiv_aids + solid_organ_transplant + rare_neurological_conditions + autism_nhsd +
                care_home_primis + dementia_nhsd + housebound_opensafely + learning_disability_primis + shielded_primis +
-               serious_mental_illness_nhsd + vaccination_status + week,
+               serious_mental_illness_nhsd + vaccination_status + s(week),
              family = binomial(link = 'logit'),
              data = data_model)
 
@@ -250,10 +248,13 @@ The primary outcome was treatment status (either treated with a mabs/antiviral o
 
 # Results
 
+```{r,}
+print(results.table)
+```
+
 **Table 1 Count and proportion of eligible patients in OpenSAFELY-TPP between 16th December 2021 23rd February 2022, stratified by treatment status, along with odds ratios from a univariable and multivariable logistic regression model** The multivariable logistic model for treatment had an AUC of `r auc`, a misclassification error rate of `r misClasificError`% and an overall observed to expected ratio of `r round(overall$y, digits = 2)`, (95% CI `r round(overall$ymin, digits = 2)` - `r round(overall$ymax, digits = 2)`). Patient counts <8 have been redacted and counts >7 are rounded to the nearest 10; as a result percentages may not add up to 100%."
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', out.width = '100%'}
- print(results.table)
 
 table1.full <- full_join(table1, table.mod.unadj, by = "term") %>%
   full_join(table.mod.adj, by = "term") %>%
@@ -272,12 +273,12 @@ table1.full <- full_join(table1, table.mod.unadj, by = "term") %>%
                         levels = c("ageband", "sex", "ethnicity", "imd", "rural_urban", "region_nhs",
                                    "downs_syndrome", "solid_cancer", "haematological_disease", "renal_disease", "liver_disease",
                                    "imid", "immunosupression", "hiv_aids", "solid_organ_transplant", "rare_neurological_conditions",
-                                   "high_risk_group_combined_count", "autism_nhsd", "care_home_primis",
+                                   "autism_nhsd", "care_home_primis",
                                    "dementia_nhsd", "learning_disability_primis", "serious_mental_illness_nhsd", 
-                                   "housebound_opensafely", "shielded_primis", "sickle_cell_disease_nhsd", "vaccination_status", "week"),
+                                   "housebound_opensafely", "shielded_primis", "sickle_cell_disease_nhsd", "vaccination_status"),
                         labels = c("Age band", "Sex", "Ethnicity", "IMD", "Rurality", "Region", rep("High risk cohort", 10),
-                                   "High risk cohort count", rep("Clinical group", 8),
-                                   "Vaccination status", "Week")),
+                                   rep("Clinical group", 8),
+                                   "Vaccination status")),
          Variable = factor(Variable, 
                            levels = c("12-29", "30-39", "40-49", "50-59", "60-69", "70-79", "80+", 
                                       "Female", "Male" ,
@@ -289,11 +290,11 @@ table1.full <- full_join(table1, table.mod.unadj, by = "term") %>%
                                       "South West", "West Midlands", "Yorkshire and the Humber",
                                       "downs_syndrome", "solid_cancer", "haematological_disease", "renal_disease", "liver_disease",
                                       "imid", "immunosupression", "hiv_aids", "solid_organ_transplant", "rare_neurological_conditions",
-                                      "high_risk_group_combined_count", "autism_nhsd", "care_home_primis",
+                                      "autism_nhsd", "care_home_primis",
                                       "dementia_nhsd", "learning_disability_primis", "serious_mental_illness_nhsd", 
                                       "housebound_opensafely", "shielded_primis", "sickle_cell_disease_nhsd",
                                       "Un-vaccinated (declined)", "Un-vaccinated" , "One vaccination", "Two vaccinations", 
-                                      "Three or more vaccinations", "Unknown", "week"),
+                                      "Three or more vaccinations", "Unknown"),
                            labels = c("12-29", "30-39", "40-49", "50-59", "60-69", "70-79", "80+", 
                                       "Female", "Male" ,
                                       "White", "Asian or Asian British", "Black or Black British", "Mixed", "Other ethnic groups",
@@ -304,10 +305,10 @@ table1.full <- full_join(table1, table.mod.unadj, by = "term") %>%
                                       "South West", "West Midlands", "Yorkshire and the Humber",
                                       "Downs syndrome", "Solid cancer", "Haematological disease", "Renal disease", "Liver disease",
                                       "IMID", "Immunosupression", "Hiv/aids", "Solid Organ transplant", "Rare neurological conditions",
-                                      "-", "Autism", "Care home", "Dementia", "Learning disability ", "Serious mental illness",
+                                      "Autism", "Care home", "Dementia", "Learning disability ", "Serious mental illness",
                                       "Housebound", "CEV", "Sickle cell disease",
                                       "Un-vaccinated (declined)", "Un-vaccinated" , "One vaccination", "Two vaccinations", 
-                                      "Three or more vaccinations", "Unknown", "-")))  %>%
+                                      "Three or more vaccinations", "Unknown")))  %>%
   mutate(
     # Redact values < 8
     All = ifelse(All < threshold, NA, as.numeric(All)),
@@ -346,7 +347,7 @@ table1.full %>%
 <br>
  
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', out.width = '100%', fig.cap = "**Fig 1. Observed to expected (O:E) ratio of treated patients, stratified by (a) ethnicity, (b) high risk cohort and (c) region.** The squares represent the point estimates, and the areas of the squares are proportional to the observed number of treated patients The vertical lines display 95% confidence intervals. The solid and dashed horizontal blue lines represent the overall observed to expected ratio of treated patients with a 95% CI, respectively. An O:E ratio >1.0 indicates that treatment uptake is higher than would be expected, while an O:E ratio <1.0 indicates that treatment uptake is lower than would be expected.", fig.topcaption=TRUE}
+```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', out.width = '100%', fig.cap = "**Fig 1. Observed to expected (O:E) ratio of treated patients, stratified by (a) ethnicity, (b) high risk cohort and (c) region.** The squares represent the point estimates, and the areas of the squares are proportional to the observed number of treated patients The vertical lines display 95% confidence intervals. The solid and dashed horizontal blue lines represent the overall observed to expected ratio of treated patients with a 95% CI, respectively.", fig.topcaption=TRUE}
   
 # Ethnicity
 results %>% 
@@ -368,9 +369,9 @@ results %>%
     size = "Observed number of treated patients",
     title = "(a)") +
   geom_hline(yintercept = 1, linetype = "dashed")  +
-  #geom_hline(yintercept = overall$y, colour = "steelblue2") +
-  #geom_hline(yintercept = overall$ymin, linetype = "dashed", colour = "steelblue2") +
-  #geom_hline(yintercept = overall$ymax, linetype = "dashed", colour = "steelblue2") +
+  geom_hline(yintercept = overall$y, colour = "steelblue2") +
+  geom_hline(yintercept = overall$ymin, linetype = "dashed", colour = "steelblue2") +
+  geom_hline(yintercept = overall$ymax, linetype = "dashed", colour = "steelblue2") +
   theme(
     legend.position = "bottom",
     axis.text = element_text(size = 10),
@@ -451,9 +452,9 @@ results %>%
     size = "Observed number of treated patients",
     title = "(b)") +
   geom_hline(yintercept = 1, linetype = "dashed") +
-  #geom_hline(yintercept = overall$y, colour = "steelblue2") +
-  #geom_hline(yintercept = overall$ymin, linetype = "dashed", colour = "steelblue2") +
-  #geom_hline(yintercept = overall$ymax, linetype = "dashed", colour = "steelblue2") +
+  geom_hline(yintercept = overall$y, colour = "steelblue2") +
+  geom_hline(yintercept = overall$ymin, linetype = "dashed", colour = "steelblue2") +
+  geom_hline(yintercept = overall$ymax, linetype = "dashed", colour = "steelblue2") +
   theme(
     legend.position = "bottom",
     axis.text = element_text(size = 10),
@@ -487,9 +488,9 @@ results %>%
     size = "Observed number of treated patients",
     title = "(c)") +
   geom_hline(yintercept = 1, linetype = "dashed") +
-  #geom_hline(yintercept = overall$y, colour = "steelblue2") +
-  #geom_hline(yintercept = overall$ymin, linetype = "dashed", colour = "steelblue2") +
-  #geom_hline(yintercept = overall$ymax, linetype = "dashed", colour = "steelblue2") +
+  geom_hline(yintercept = overall$y, colour = "steelblue2") +
+  geom_hline(yintercept = overall$ymin, linetype = "dashed", colour = "steelblue2") +
+  geom_hline(yintercept = overall$ymax, linetype = "dashed", colour = "steelblue2") +
   theme(
     legend.position = "bottom",
     axis.text = element_text(size = 10),
