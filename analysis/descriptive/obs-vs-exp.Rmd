@@ -208,7 +208,7 @@ for (i in 1:length(cutoffs)){
 
 results <- data_processed_clean %>%
     mutate(fitted.results = predict(mod.adj, newdata = data_processed_clean, type = 'response'),
-         treated_expected = ifelse(fitted.results >= 0.3, 1, 0))
+         treated_expected = ifelse(fitted.results >= 0.25, 1, 0))
 
 accuracy <- round(results %>% filter(treated_expected == treated_observed) %>% nrow()/results %>% nrow(), digits = 2)
 sensitivity <- round(results %>% filter(treated_observed == 1, treated_expected == treated_observed) %>% nrow()/
@@ -272,8 +272,8 @@ table1.full <- full_join(table1, table.mod.unadj, by = "term") %>%
   mutate(estimate.x = round(estimate.x, digits = 2),
          conf.x = paste("(", round(conf.low.x, digits = 2), " - ", round(conf.high.x, digits = 2), ")", sep = ""),
          p.value.x = round(p.value.x, digits = 4),
-         estimate.y = round(estimate.y, digits = 2),
-         conf.y = paste("(", round(conf.low.y, digits = 2), " - ", round(conf.high.y, digits = 2), ")", sep = ""),
+         estimate.y = round(exp(estimate.y), digits = 2),
+         conf.y = paste("(", round(exp(conf.low.y), digits = 2), " - ", round(exp(conf.high.y), digits = 2), ")", sep = ""),
          p.value.y = round(p.value.y, digits = 4)) %>%
   select(Group, Variable, All, Untreated, Treated,
          Unadjusted_OR = estimate.x, Unadjusted_95CI = conf.x, Unadjusted_p = p.value.x,
@@ -362,7 +362,7 @@ table1.full %>%
 # Ethnicity
 funnel_plot <- rbind(data_processed_clean %>%
                        mutate(fitted.results = predict(mod.unadj, newdata = data_processed_clean, type = 'response'),
-                              treated_expected = ifelse(fitted.results >= 0.3, 1, 0)) %>% 
+                              treated_expected = ifelse(fitted.results >= 0.25, 1, 0)) %>% 
                      select(ethnicity, treated_observed, treated_expected) %>%
                      group_by(ethnicity) %>%
                      summarise(treated_observed = sum(treated_observed, na.rm = T),
@@ -374,7 +374,7 @@ funnel_plot <- rbind(data_processed_clean %>%
                      filter(!is.na(ethnicity)),
                      data_processed_clean %>%
                        mutate(fitted.results = predict(mod.adj, newdata = data_processed_clean, type = 'response'),
-                              treated_expected = ifelse(fitted.results >= 0.3, 1, 0)) %>% 
+                              treated_expected = ifelse(fitted.results >= 0.25, 1, 0)) %>% 
                      select(ethnicity, treated_observed, treated_expected) %>%
                      group_by(ethnicity) %>%
                      summarise(treated_observed = sum(treated_observed, na.rm = T),
@@ -516,7 +516,7 @@ funnel_plot %>%
 # Region
 funnel_plot <- rbind(data_processed_clean %>%
                        mutate(fitted.results = predict(mod.unadj, newdata = data_processed_clean, type = 'response'),
-                              treated_expected = ifelse(fitted.results >= 0.3, 1, 0)) %>% 
+                              treated_expected = ifelse(fitted.results >= 0.25, 1, 0)) %>% 
                      select(region_nhs, treated_observed, treated_expected) %>%
                      group_by(region_nhs) %>%
                      summarise(treated_observed = sum(treated_observed, na.rm = T),
@@ -528,7 +528,7 @@ funnel_plot <- rbind(data_processed_clean %>%
                      filter(!is.na(region_nhs)),
                      data_processed_clean %>%
                        mutate(fitted.results = predict(mod.adj, newdata = data_processed_clean, type = 'response'),
-                              treated_expected = ifelse(fitted.results >= 0.3, 1, 0)) %>% 
+                              treated_expected = ifelse(fitted.results >= 0.25, 1, 0)) %>% 
                      select(region_nhs, treated_observed, treated_expected) %>%
                      group_by(region_nhs) %>%
                      summarise(treated_observed = sum(treated_observed, na.rm = T),
