@@ -240,10 +240,6 @@ overall_unadjusted <- data_processed_clean %>%
 
 ```
 
-```{r}
-overall_unadjusted
-```
-
 <br>
 
 # Background
@@ -272,7 +268,7 @@ Unadjusted and adjusted ORs were calculated from the two models, respectively. I
 
 
 # Results
-The  unadjusted and adjusted logistic models for treatment status had an overall observed to expected ratio of `r round(overall_unadjusted$y, digits = 2)`, (95% CI `r round(overall_unadjusted$ymin, digits = 2)` - `r round(overall_unadjusted$ymax, digits = 2)`) and `r round(overall$y, digits = 2)`, (95% CI `r round(overall$ymin, digits = 2)` - `r round(overall$ymax, digits = 2)`), respectively. The multivariable logistic model (with an AUC of `r auc`, a misclassification error rate of `r misClasificError`%) indicated that several variables were associated with being treated (Table 1). After adjustment for all demographic and clinical variables, `r round((1-summary(mod.adj)$dev.expl)*100, digits = 0)`% of the variation remained unexplained with the observed to expected (adjusted) ratios of the number of patients receiving treatment varying widely across ethnic, high risk cohort and region specific groups  (Figures 1 and 2).
+The multivariable logistic model for treatment status had an overall observed to expected ratio of `r round(overall$y, digits = 2)`, (95% CI `r round(overall$ymin, digits = 2)` - `r round(overall$ymax, digits = 2)`), an AUC of `r auc`, and a misclassification error rate of `r misClasificError`%). As shown in Table 1, several variables were associated with treatment status. After adjustment for all demographic and clinical variables, `r round((1-summary(mod.adj)$dev.expl)*100, digits = 0)`% of the variation remained unexplained with the observed to expected (adjusted) ratios of the number of patients receiving treatment varying widely across high risk cohort and region specific groups  (Figures 1 and 2).
 
 **Table 1 Count and proportion of the total number of eligible patients in OpenSAFELY-TPP since 16th December 2021, stratified by treatment status, along with odds ratios from a univariable and multivariable logistic regression model** Patient counts <8 have been redacted and counts >7 are rounded to the nearest 10; as a result percentages may not add up to 100%."
 
