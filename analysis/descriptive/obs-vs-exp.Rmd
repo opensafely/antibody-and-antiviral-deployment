@@ -255,6 +255,14 @@ The primary outcome was treatment status (either treated with a mabs/antiviral o
 
 # Results
 
+overdispersion: `r sum(mod.adj$weights * mod.adj$residuals^2)/mod.adj$df.residual`
+
+
+```{r}
+head(table.mod.adj)
+```
+
+
 **Table 1 Count and proportion of eligible patients in OpenSAFELY-TPP between 16th December 2021 23rd February 2022, stratified by treatment status, along with odds ratios from a univariable and multivariable logistic regression model** The multivariable logistic model for treatment had an AUC of `r auc`, a misclassification error rate of `r misClasificError`% and an overall observed to expected ratio of `r round(overall$y, digits = 2)`, (95% CI `r round(overall$ymin, digits = 2)` - `r round(overall$ymax, digits = 2)`). Patient counts <8 have been redacted and counts >7 are rounded to the nearest 10; as a result percentages may not add up to 100%."
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', out.width = '100%'}
@@ -377,7 +385,9 @@ funnel_plot <- rbind(data_processed_clean %>%
                             mod = "adjusted") %>%
                      filter(!is.na(ethnicity)))
 
-dfCI <- data.frame(number.seq = seq(0, plyr::round_any(max(funnel_plot$treated_expected, funnel_plot$treated_expected, na.rm = T), 100, ceiling), 1)) %>%
+dfCI <- data.frame(number.seq = seq(plyr::round_any(min(funnel_plot$treated_expected, funnel_plot$treated_expected, na.rm = T), 100, floor), 
+                                    plyr::round_any(max(funnel_plot$treated_expected, funnel_plot$treated_expected, na.rm = T), 100, ceiling), 
+                                    1)) %>%
   mutate(number.ll95 = overall$y - 1.96 * sqrt(overall$y/number.seq),
          number.ul95 = overall$y + 1.96 * sqrt(overall$y/number.seq),
          number.ll999 = overall$y - 3.29 * sqrt(overall$y/number.seq),
@@ -399,7 +409,7 @@ funnel_plot %>%
   theme(legend.position = "bottom",
         legend.title = element_blank()) +
   #guides(shape = "none") +
-  geom_segment(aes(x = 0, xend =  plyr::round_any(max(funnel_plot$treated_expected, na.rm = T), 100, ceiling), 
+  geom_segment(aes(x = min(dfCI$number.seq), xend =  max(dfCI$number.seq), 
                    y = overall$y, yend = overall$y),
                colour = "steelblue2") +
   ggtitle("(a)")
@@ -469,7 +479,9 @@ funnel_plot <- results %>%
     TRUE ~ NA_character_)) %>%
   mutate(high_risk_cohort = unlist(lapply(strwrap(high_risk_cohort, width=20, simplify=FALSE), paste, collapse="\n")))
 
-dfCI <- data.frame(number.seq = seq(0, plyr::round_any(max(funnel_plot$treated_expected, funnel_plot$treated_expected, na.rm = T), 100, ceiling), 1)) %>%
+dfCI <- data.frame(number.seq = seq(plyr::round_any(min(funnel_plot$treated_expected, funnel_plot$treated_expected, na.rm = T), 100, floor), 
+                                    plyr::round_any(max(funnel_plot$treated_expected, funnel_plot$treated_expected, na.rm = T), 100, ceiling), 
+                                    1)) %>%
   mutate(number.ll95 = overall$y - 1.96 * sqrt(overall$y/number.seq),
          number.ul95 = overall$y + 1.96 * sqrt(overall$y/number.seq),
          number.ll999 = overall$y - 3.29 * sqrt(overall$y/number.seq),
@@ -490,7 +502,7 @@ funnel_plot %>%
   theme(legend.position = "bottom",
         legend.title = element_blank()) +
   #guides(shape = "none") +
-  geom_segment(aes(x = 0, xend =  plyr::round_any(max(treated_expected, na.rm = T), 100, ceiling), 
+  geom_segment(aes(min(dfCI$number.seq), xend =  max(dfCI$number.seq), 
                    y = overall$y, yend = overall$y),
                colour = "steelblue2") +
   ggtitle("(b)")
@@ -527,7 +539,9 @@ funnel_plot <- rbind(data_processed_clean %>%
                             mod = "adjusted") %>%
                      filter(!is.na(region_nhs)))
 
-dfCI <- data.frame(number.seq = seq(0, plyr::round_any(max(funnel_plot$treated_expected, funnel_plot$treated_expected, na.rm = T), 100, ceiling), 1)) %>%
+dfCI <- data.frame(number.seq = seq(plyr::round_any(min(funnel_plot$treated_expected, funnel_plot$treated_expected, na.rm = T), 100, floor), 
+                                    plyr::round_any(max(funnel_plot$treated_expected, funnel_plot$treated_expected, na.rm = T), 100, ceiling), 
+                                    1)) %>%
   mutate(number.ll95 = overall$y - 1.96 * sqrt(overall$y/number.seq),
          number.ul95 = overall$y + 1.96 * sqrt(overall$y/number.seq),
          number.ll999 = overall$y - 3.29 * sqrt(overall$y/number.seq),
@@ -549,7 +563,7 @@ funnel_plot %>%
   theme(legend.position = "bottom",
         legend.title = element_blank()) +
   #guides(shape = "none") +
-  geom_segment(aes(x = 0, xend =  plyr::round_any(max(funnel_plot$treated_expected, na.rm = T), 100, ceiling), 
+  geom_segment(aes(min(dfCI$number.seq), xend =  max(dfCI$number.seq), 
                    y = overall$y, yend = overall$y),
                colour = "steelblue2") +
   ggtitle("(c)")
