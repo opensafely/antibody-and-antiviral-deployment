@@ -250,7 +250,7 @@ Preliminary results have shown that there is some variation in which eligible pa
 The aim of this bit of work is to attempt to describe any variation in eligible patients receiving an nMAB or antiviral as treatment for COVID-19 by developing a model to predict treatment status and comparing observed to expected values.
 
 # Method
-Logistic regression was used to model and predict each patients treatment status (either not treated or treated with a mabs/antiviral), firstly unadjusted, and secondly adjusted for the following demographic and clinical covariates:
+Logistic regression was used to model and predict each patients treatment status (either did not receive a nMAB or antiviral as treatment for COVID-19 or received a nMAB or antiviral as treatment for COVID-19), firstly unadjusted, and secondly adjusted for the following demographic and clinical covariates:
 
 * Age
 * Sex
@@ -264,17 +264,11 @@ Logistic regression was used to model and predict each patients treatment status
 * Vaccination status
 * Week of treatment
 
-Unadjusted and adjusted ORs were calculated from the two models, respectively. In addition, the ratio of the observed to expected number of treated patients was calculated for the ethnicity, high risk cohort and regional groups. To do this, the expected number of treated patients for each group (adjusted) was calculated by predicting the treatment status for every patient using the above model, and then summing over all patients within each group. In this way, it is possible to obtain the expected value E, which can then be compared to the observed value O, highlighting those groups with treatment rates that differed from the expected rate for the population. Both caterpillar plots and funnel plots were constructed to compare the ratio of the observed to expected number of treated patients. 
+Unadjusted and adjusted ORs were calculated from the two models, respectively. In addition, the ratio of the observed to expected number of patients receiving treatment was calculated for the ethnicity, high risk cohort and regional groups. To do this, the expected number of patients receiving treatment for each group (adjusted) was calculated by predicting the treatment status for every patient using the above model, and then summing over all patients within each group. In this way, it is possible to obtain the expected value E, which can then be compared to the observed value O, highlighting those groups with treatment rates that differed from the expected rate for the eligible population. Both caterpillar plots and funnel plots were constructed to compare the ratio of the observed to expected number of patients receiving treatment. 
 
 
 # Results
-The unadjusted and adjusted logistic models for treatment had an overall observed to expected ratio of `r round(overall_unadjusted$y, digits = 2)`, (95% CI `r round(overall_unadjusted$ymin, digits = 2)` - `r round(overall_unadjusted$ymax, digits = 2)`) and `r round(overall$y, digits = 2)`, (95% CI `r round(overall$ymin, digits = 2)` - `r round(overall$ymax, digits = 2)`), respectively. The multivariable logistic model (with an AUC of `r auc`, a misclassification error rate of `r misClasificError`%) indicated that several variables were associated with being treated (Table 1). After adjustment for all demographic and clinical variables, `r round((1-summary(mod.adj)$dev.expl)*100, digits = 0)`% of the variation remained unexplained.
-
-
-Ethnic, high risk cohort and region specific observed to expected (adjusted) ratios varied widely (Figure 1).
-
-
-
+The unadjusted and adjusted logistic models for treatment status had an overall observed to expected ratio of `r round(overall_unadjusted$y, digits = 2)`, (95% CI `r round(overall_unadjusted$ymin, digits = 2)` - `r round(overall_unadjusted$ymax, digits = 2)`) and `r round(overall$y, digits = 2)`, (95% CI `r round(overall$ymin, digits = 2)` - `r round(overall$ymax, digits = 2)`), respectively. The multivariable logistic model (with an AUC of `r auc`, a misclassification error rate of `r misClasificError`%) indicated that several variables were associated with being treated (Table 1). After adjustment for all demographic and clinical variables, `r round((1-summary(mod.adj)$dev.expl)*100, digits = 0)`% of the variation remained unexplained with the observed to expected (adjusted) ratios of the number of patients receiving treatment varying widely across ethnic, high risk cohort and region specific groups  (Figures 1 and 2).
 
 **Table 1 Count and proportion of the total number of eligible patients in OpenSAFELY-TPP since 16th December 2021, stratified by treatment status, along with odds ratios from a univariable and multivariable logistic regression model** Patient counts <8 have been redacted and counts >7 are rounded to the nearest 10; as a result percentages may not add up to 100%."
 
@@ -368,7 +362,7 @@ table1.full %>%
 
 <br>
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', out.width = '100%', fig.cap = "**Figure 1. Observed to expected (adjusted) ratio of treated patients, stratified by (a) ethnicity, (b) high risk cohort and (c) region.** The squares represent the point estimates, and the areas of the squares are proportional to the observed number of treated patients The vertical lines display 95% confidence intervals. The solid and dashed horizontal blue lines represent the overall observed to expected ratio of treated patients with a 95% CI, respectively.", fig.topcaption=TRUE}
+```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', out.width = '100%', fig.cap = "**Figure 1. Observed to expected (adjusted) ratio of the number of patients receiving treatment, stratified by (a) ethnicity, (b) high risk cohort and (c) region.** The squares represent the point estimates, and the areas of the squares are proportional to the observed number of patients receiving treatment. The vertical lines display 95% confidence intervals. The solid and dashed horizontal blue lines represent the overall observed to expected ratio of the number of patients receiving treatment with a 95% CI, respectively.", fig.topcaption=TRUE}
   
 # Ethnicity
 results %>% 
@@ -525,7 +519,7 @@ results %>%
 
 <br>
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', out.width = '100%', fig.cap = "**Figure 2.  Adjusted (right) funnel plots showing ratio of the observed to expected number of treated patients, stratified by (a) ethnicity, (b) high risk cohort and (c) region.** Coloured points represent adjusted ratios, respectivly. Solid black lines are 95% intervals and black dotted lines are 99.9% intervals, derived using the Poisson distribution. The solid horizontal blue line represent the overall observed:expected ratio of treated patients", fig.topcaption=TRUE}
+```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', out.width = '100%', fig.cap = "**Figure 2.  Adjusted funnel plots showing the ratio of the observed to expected number of patients receiving treatment, stratified by (a) ethnicity, (b) high risk cohort and (c) region.** Coloured points represent adjusted ratios. Solid black lines are 95% intervals and black dotted lines are 99.9% intervals, derived using the Poisson distribution. The solid horizontal blue line represent the overall observed to expected ratio of the number of patients receiving treatment", fig.topcaption=TRUE}
 
 # Ethnicity
 funnel_plot <- rbind(data_processed_clean %>%
@@ -569,8 +563,8 @@ funnel_plot %>%
   geom_line(aes(x = number.seq, y = number.ul95), data = dfCI) +
   geom_line(aes(x = number.seq, y = number.ll999), linetype = "dashed", data = dfCI) +
   geom_line(aes(x = number.seq, y = number.ul999), linetype = "dashed", data = dfCI) +
-  #xlim(0, plyr::round_any(max(funnel_plot$treated_expected, na.rm = T), 100, ceiling)) +
-  #ylim(-11,1) +
+  xlim(min(dfCI$number.seq), max(dfCI$number.seq)) +
+  ylim(min(dfCI$number.ll999), max(dfCI$number.ul999)) +
   xlab("Expected number of treated patients") + 
   ylab("Observed to expected ratio of treated patients") + 
   theme_bw() +
@@ -661,8 +655,8 @@ funnel_plot %>%
   geom_line(aes(x = number.seq, y = number.ul95), data = dfCI) +
   geom_line(aes(x = number.seq, y = number.ll999), linetype = "dashed", data = dfCI) +
   geom_line(aes(x = number.seq, y = number.ul999), linetype = "dashed", data = dfCI) +
-  #xlim(0, plyr::round_any(max(funnel_plot$treated_expected, na.rm = T), 100, ceiling)) +
-  #ylim(-11,1) +
+  xlim(min(dfCI$number.seq), max(dfCI$number.seq)) +
+  ylim(min(dfCI$number.ll999), max(dfCI$number.ul999)) +
   xlab("Expected number of treated patients") + 
   ylab("Observed to expected ratio of treated patients") + 
   theme_bw() +
@@ -722,8 +716,8 @@ funnel_plot %>%
   geom_line(aes(x = number.seq, y = number.ul95), data = dfCI) +
   geom_line(aes(x = number.seq, y = number.ll999), linetype = "dashed", data = dfCI) +
   geom_line(aes(x = number.seq, y = number.ul999), linetype = "dashed", data = dfCI) +
-  #xlim(0, plyr::round_any(max(funnel_plot$treated_expected, na.rm = T), 100, ceiling)) +
-  #ylim(-11,1) +
+  xlim(min(dfCI$number.seq), max(dfCI$number.seq)) +
+  ylim(min(dfCI$number.ll999), max(dfCI$number.ul999)) +
   xlab("Expected number of treated patients") + 
   ylab("Observed to expected ratio of treated patients") + 
   theme_bw() +
@@ -739,12 +733,18 @@ funnel_plot %>%
 <br>
 
 
-# Limitations/next steps
-* Model variables/performance/validity needs more work
-    - Minimal assessment made of variables included in models
-    - all variables included in final model and no interaction terms considered
+# Conclusions
+* Several variables appear to be associated with receiving treatment 
+* Even after adjustment for clinical and demographic variables, there was wide variation in O/E ratios for high risk cohorts and regions, suggesting that there are large differences in these groups with respect to receiving treatment and that relatively little of the observed variation can be explained by these variables considered in the adjusted model.
+
+# Limitations
 * O:E ratios should be used only to compare each group to the average - they are not, in theory, suitable for comparisons across groups with different patient mixes, as they are standardised to the mix of the group under evaluation
-* Funnel plots might be better for displaying O:E ratios
+
+# Next steps
+* Write up as is OR
+* Develop "better" model
+    - Minimal assessment made of variables included in models
+    - All variables included in final model and no interaction terms considered
 
 
 
