@@ -165,7 +165,7 @@ mod.adj <- gam(treated_observed ~ ageband + sex + ethnicity + imd + rural_urban 
                downs_syndrome + solid_cancer + haematological_disease + renal_disease + liver_disease + imid +immunosupression +
                hiv_aids + solid_organ_transplant + rare_neurological_conditions + autism_nhsd +
                care_home_primis + dementia_nhsd + housebound_opensafely + learning_disability_primis + shielded_primis +
-               serious_mental_illness_nhsd + vaccination_status + s(week),
+               serious_mental_illness_nhsd + sickle_cell_disease_nhsd + vaccination_status + s(week),
              family = binomial(link = 'logit'),
              data = data_model)
 
@@ -208,7 +208,7 @@ for (i in 1:length(cutoffs)){
 
 results <- data_processed_clean %>%
     mutate(fitted.results = predict(mod.adj, newdata = data_processed_clean, type = 'response'),
-         treated_expected = ifelse(fitted.results >= 0.35, 1, 0))
+         treated_expected = ifelse(fitted.results >= 0.3, 1, 0))
 
 accuracy <- round(results %>% filter(treated_expected == treated_observed) %>% nrow()/results %>% nrow(), digits = 2)
 sensitivity <- round(results %>% filter(treated_observed == 1, treated_expected == treated_observed) %>% nrow()/
@@ -252,26 +252,10 @@ The primary outcome was treatment status (either treated with a mabs/antiviral o
 * Comorbid conditions (including high-risk conditions); autism, care home, dementia, housebound, learning disability, shielded, serious mental illness
 * Vaccination status
 
-The ratio of observed to expected number of treated patients was calculated for ethnicity, high risk cohort and regional groups. To do this, the expected number of treated patients for each group (adjusted) was calculated by multiplying the national epilepsy admission rate
-per thousand CYP by the total catchment population
-for that Trust. The adjusted values for expected admission rates used a similar approach, based on the national
-epilepsy admission rate per thousand and the Trust catchment population within each age-sex-IMD group. The
-expected total number of admissions for each Trust was
-the sum of expected admissions within each age-sex-IMD
-group.
-In each case, we then derived the ratio of observed
-versus expected epilepsy admissions, highlighting those
-Trusts with admission rates that differed by more than 2
-or 3 SD from the expected rate for the population served.
-All analyses were performed using SAS. No ethical
-permission was needed for these secondary analyses of
-anonymised, routinely collected data.
-
+The ratio of the observed to expected number of treated patients was calculated for ethnicity, high risk cohort and regional groups. To do this, the expected number of treated patients for each group (adjusted) was calculated by predicting the treatment status for every patient using the above model, and then summing over all patients within each group In this way, we obtain the expected value E, which we can then
+compare to the observed value O, highlighting those groups with treatment rates that differed from the expected rate for the population. For example, if O differs more from E than would be expected from chance alone, we can conclude that the group does not perform according to the model benchmark.
 
 # Results
-
-overdispersion: `r sum(mod.adj$weights * mod.adj$residuals^2)/mod.adj$df.residual`
-
 
 **Table 1 Count and proportion of eligible patients in OpenSAFELY-TPP between 16th December 2021 23rd February 2022, stratified by treatment status, along with odds ratios from a univariable and multivariable logistic regression model** The multivariable logistic model for treatment had an AUC of `r auc`, a misclassification error rate of `r misClasificError`% and an overall observed to expected ratio of `r round(overall$y, digits = 2)`, (95% CI `r round(overall$ymin, digits = 2)` - `r round(overall$ymax, digits = 2)`). Patient counts <8 have been redacted and counts >7 are rounded to the nearest 10; as a result percentages may not add up to 100%."
 
@@ -294,9 +278,8 @@ table1.full <- full_join(table1, table.mod.unadj, by = "term") %>%
                         levels = c("ageband", "sex", "ethnicity", "imd", "rural_urban", "region_nhs",
                                    "downs_syndrome", "solid_cancer", "haematological_disease", "renal_disease", "liver_disease",
                                    "imid", "immunosupression", "hiv_aids", "solid_organ_transplant", "rare_neurological_conditions",
-                                   "autism_nhsd", "care_home_primis",
-                                   "dementia_nhsd", "learning_disability_primis", "serious_mental_illness_nhsd", 
-                                   "housebound_opensafely", "shielded_primis", "sickle_cell_disease_nhsd", "vaccination_status"),
+                                   "autism_nhsd", "care_home_primis", "dementia_nhsd",  "housebound_opensafely", "learning_disability_primis",
+                                   "shielded_primis", "serious_mental_illness_nhsd", "sickle_cell_disease_nhsd", "vaccination_status"),
                         labels = c("Age band", "Sex", "Ethnicity", "IMD", "Rurality", "Region", rep("High risk cohort", 10),
                                    rep("Clinical group", 8),
                                    "Vaccination status")),
@@ -311,9 +294,8 @@ table1.full <- full_join(table1, table.mod.unadj, by = "term") %>%
                                       "South West", "West Midlands", "Yorkshire and the Humber",
                                       "downs_syndrome", "solid_cancer", "haematological_disease", "renal_disease", "liver_disease",
                                       "imid", "immunosupression", "hiv_aids", "solid_organ_transplant", "rare_neurological_conditions",
-                                      "autism_nhsd", "care_home_primis",
-                                      "dementia_nhsd", "learning_disability_primis", "serious_mental_illness_nhsd", 
-                                      "housebound_opensafely", "shielded_primis", "sickle_cell_disease_nhsd",
+                                      "autism_nhsd", "care_home_primis", "dementia_nhsd", "housebound_opensafely", "learning_disability_primis",
+                                      "shielded_primis", "serious_mental_illness_nhsd", "sickle_cell_disease_nhsd", 
                                       "Un-vaccinated (declined)", "Un-vaccinated" , "One vaccination", "Two vaccinations", 
                                       "Three or more vaccinations", "Unknown"),
                            labels = c("12-29", "30-39", "40-49", "50-59", "60-69", "70-79", "80+", 
@@ -326,8 +308,8 @@ table1.full <- full_join(table1, table.mod.unadj, by = "term") %>%
                                       "South West", "West Midlands", "Yorkshire and the Humber",
                                       "Downs syndrome", "Solid cancer", "Haematological disease", "Renal disease", "Liver disease",
                                       "IMID", "Immunosupression", "Hiv/aids", "Solid Organ transplant", "Rare neurological conditions",
-                                      "Autism", "Care home", "Dementia", "Learning disability ", "Serious mental illness",
-                                      "Housebound", "CEV", "Sickle cell disease",
+                                      "Autism", "Care home", "Dementia", "Housebound", "Learning disability ", "CEV", "Serious mental illness",
+                                      "Sickle cell disease",
                                       "Un-vaccinated (declined)", "Un-vaccinated" , "One vaccination", "Two vaccinations", 
                                       "Three or more vaccinations", "Unknown")))  %>%
   mutate(
@@ -372,7 +354,7 @@ table1.full %>%
 # Ethnicity
 funnel_plot <- rbind(data_processed_clean %>%
                        mutate(fitted.results = predict(mod.unadj, newdata = data_processed_clean, type = 'response'),
-                              treated_expected = ifelse(fitted.results >= 0.35, 1, 0)) %>% 
+                              treated_expected = ifelse(fitted.results >= 0.3, 1, 0)) %>% 
                      select(ethnicity, treated_observed, treated_expected) %>%
                      group_by(ethnicity) %>%
                      summarise(treated_observed = sum(treated_observed, na.rm = T),
@@ -384,7 +366,7 @@ funnel_plot <- rbind(data_processed_clean %>%
                      filter(!is.na(ethnicity)),
                      data_processed_clean %>%
                        mutate(fitted.results = predict(mod.adj, newdata = data_processed_clean, type = 'response'),
-                              treated_expected = ifelse(fitted.results >= 0.35, 1, 0)) %>% 
+                              treated_expected = ifelse(fitted.results >= 0.3, 1, 0)) %>% 
                      select(ethnicity, treated_observed, treated_expected) %>%
                      group_by(ethnicity) %>%
                      summarise(treated_observed = sum(treated_observed, na.rm = T),
@@ -395,22 +377,13 @@ funnel_plot <- rbind(data_processed_clean %>%
                             mod = "adjusted") %>%
                      filter(!is.na(ethnicity)))
 
-group <- results %>% 
-  filter(!is.na(ethnicity)) %>%
-  select(treated_observed, treated_expected) %>%
-  summarise(treated_observed = sum(treated_observed, na.rm = T),
-            treated_expected = sum(treated_expected, na.rm = T)) %>%
-  mutate(y = sum(treated_observed, na.rm = T)/sum(treated_expected, na.rm = T),
-         ymin = y - 1.96*sqrt(treated_observed)/treated_expected,
-         ymax = y + 1.96*sqrt(treated_observed)/treated_expected)
-
 dfCI <- data.frame(number.seq = seq(plyr::round_any(min(funnel_plot$treated_expected, funnel_plot$treated_expected, na.rm = T), 100, floor), 
                                     plyr::round_any(max(funnel_plot$treated_expected, funnel_plot$treated_expected, na.rm = T), 100, ceiling), 
                                     1)) %>%
-  mutate(number.ll95 = group$y - 1.96 * sqrt(group$y/number.seq),
-         number.ul95 = group$y + 1.96 * sqrt(group$y/number.seq),
-         number.ll999 = group$y - 3.29 * sqrt(group$y/number.seq),
-         number.ul999 = group$y + 3.29 * sqrt(group$y/number.seq))
+  mutate(number.ll95 = overall$y - 1.96 * sqrt(overall$y/number.seq),
+         number.ul95 = overall$y + 1.96 * sqrt(overall$y/number.seq),
+         number.ll999 = overall$y - 3.29 * sqrt(overall$y/number.seq),
+         number.ul999 = overall$y + 3.29 * sqrt(overall$y/number.seq))
 
 funnel_plot %>%
   filter(mod == "adjusted") %>%
@@ -429,7 +402,7 @@ funnel_plot %>%
         legend.title = element_blank()) +
   #guides(shape = "none") +
   geom_segment(aes(x = min(dfCI$number.seq), xend =  max(dfCI$number.seq), 
-                   y = group$y, yend = group$y),
+                   y = overall$y, yend = overall$y),
                colour = "steelblue2") +
   ggtitle("(a)")
 
@@ -498,21 +471,13 @@ funnel_plot <- results %>%
     TRUE ~ NA_character_)) %>%
   mutate(high_risk_cohort = unlist(lapply(strwrap(high_risk_cohort, width=20, simplify=FALSE), paste, collapse="\n")))
 
-group <- funnel_plot %>% 
-  select(treated_observed, treated_expected) %>%
-  summarise(treated_observed = sum(treated_observed, na.rm = T),
-            treated_expected = sum(treated_expected, na.rm = T)) %>%
-  mutate(y = sum(treated_observed, na.rm = T)/sum(treated_expected, na.rm = T),
-         ymin = y - 1.96*sqrt(treated_observed)/treated_expected,
-         ymax = y + 1.96*sqrt(treated_observed)/treated_expected)
-
 dfCI <- data.frame(number.seq = seq(plyr::round_any(min(funnel_plot$treated_expected, funnel_plot$treated_expected, na.rm = T), 100, floor), 
                                     plyr::round_any(max(funnel_plot$treated_expected, funnel_plot$treated_expected, na.rm = T), 100, ceiling), 
                                     1)) %>%
-  mutate(number.ll95 = group$y - 1.96 * sqrt(group$y/number.seq),
-         number.ul95 = group$y + 1.96 * sqrt(group$y/number.seq),
-         number.ll999 = group$y - 3.29 * sqrt(group$y/number.seq),
-         number.ul999 = group$y + 3.29 * sqrt(group$y/number.seq))
+  mutate(number.ll95 = overall$y - 1.96 * sqrt(overall$y/number.seq),
+         number.ul95 = overall$y + 1.96 * sqrt(overall$y/number.seq),
+         number.ll999 = overall$y - 3.29 * sqrt(overall$y/number.seq),
+         number.ul999 = overall$y + 3.29 * sqrt(overall$y/number.seq))
 
 funnel_plot %>%
   ggplot(aes(x = treated_expected, y = obs_exp_ratio)) + 
@@ -530,7 +495,7 @@ funnel_plot %>%
         legend.title = element_blank()) +
   #guides(shape = "none") +
   geom_segment(aes(min(dfCI$number.seq), xend =  max(dfCI$number.seq), 
-                   y = group$y, yend = group$y),
+                   y = overall$y, yend = overall$y),
                colour = "steelblue2") +
   ggtitle("(b)")
 ```
@@ -543,7 +508,7 @@ funnel_plot %>%
 # Region
 funnel_plot <- rbind(data_processed_clean %>%
                        mutate(fitted.results = predict(mod.unadj, newdata = data_processed_clean, type = 'response'),
-                              treated_expected = ifelse(fitted.results >= 0.35, 1, 0)) %>% 
+                              treated_expected = ifelse(fitted.results >= 0.3, 1, 0)) %>% 
                      select(region_nhs, treated_observed, treated_expected) %>%
                      group_by(region_nhs) %>%
                      summarise(treated_observed = sum(treated_observed, na.rm = T),
@@ -555,7 +520,7 @@ funnel_plot <- rbind(data_processed_clean %>%
                      filter(!is.na(region_nhs)),
                      data_processed_clean %>%
                        mutate(fitted.results = predict(mod.adj, newdata = data_processed_clean, type = 'response'),
-                              treated_expected = ifelse(fitted.results >= 0.35, 1, 0)) %>% 
+                              treated_expected = ifelse(fitted.results >= 0.3, 1, 0)) %>% 
                      select(region_nhs, treated_observed, treated_expected) %>%
                      group_by(region_nhs) %>%
                      summarise(treated_observed = sum(treated_observed, na.rm = T),
@@ -566,22 +531,13 @@ funnel_plot <- rbind(data_processed_clean %>%
                             mod = "adjusted") %>%
                      filter(!is.na(region_nhs)))
 
-group <- results %>% 
-  filter(!is.na(region_nhs)) %>%
-  select(treated_observed, treated_expected) %>%
-  summarise(treated_observed = sum(treated_observed, na.rm = T),
-            treated_expected = sum(treated_expected, na.rm = T)) %>%
-  mutate(y = sum(treated_observed, na.rm = T)/sum(treated_expected, na.rm = T),
-         ymin = y - 1.96*sqrt(treated_observed)/treated_expected,
-         ymax = y + 1.96*sqrt(treated_observed)/treated_expected)
-
 dfCI <- data.frame(number.seq = seq(plyr::round_any(min(funnel_plot$treated_expected, funnel_plot$treated_expected, na.rm = T), 100, floor), 
                                     plyr::round_any(max(funnel_plot$treated_expected, funnel_plot$treated_expected, na.rm = T), 100, ceiling), 
                                     1)) %>%
-  mutate(number.ll95 = group$y - 1.96 * sqrt(group$y/number.seq),
-         number.ul95 = group$y + 1.96 * sqrt(group$y/number.seq),
-         number.ll999 = group$y - 3.29 * sqrt(group$y/number.seq),
-         number.ul999 = group$y + 3.29 * sqrt(group$y/number.seq))
+  mutate(number.ll95 = overall$y - 1.96 * sqrt(overall$y/number.seq),
+         number.ul95 = overall$y + 1.96 * sqrt(overall$y/number.seq),
+         number.ll999 = overall$y - 3.29 * sqrt(overall$y/number.seq),
+         number.ul999 = overall$y + 3.29 * sqrt(overall$y/number.seq))
 
 funnel_plot %>%
   filter(mod == "adjusted") %>%
@@ -600,7 +556,7 @@ funnel_plot %>%
         legend.title = element_blank()) +
   #guides(shape = "none") +
   geom_segment(aes(min(dfCI$number.seq), xend =  max(dfCI$number.seq), 
-                   y = group$y, yend = group$y),
+                   y = overall$y, yend = overall$y),
                colour = "steelblue2") +
   ggtitle("(c)")
 ```
@@ -628,7 +584,7 @@ results %>%
     y = "Observed/Expected ratio of treated patients",
     size = "Observed number of treated patients",
     title = "(a)") +
-  geom_hline(yintercept = 1, linetype = "dashed")  +
+  #geom_hline(yintercept = 1, linetype = "dashed")  +
   geom_hline(yintercept = overall$y, colour = "steelblue2") +
   geom_hline(yintercept = overall$ymin, linetype = "dashed", colour = "steelblue2") +
   geom_hline(yintercept = overall$ymax, linetype = "dashed", colour = "steelblue2") +
@@ -712,7 +668,7 @@ results %>%
     y = "Observed/Expected ratio of treated patients",
     size = "Observed number of treated patients",
     title = "(b)") +
-  geom_hline(yintercept = 1, linetype = "dashed") +
+  #geom_hline(yintercept = 1, linetype = "dashed") +
   geom_hline(yintercept = overall$y, colour = "steelblue2") +
   geom_hline(yintercept = overall$ymin, linetype = "dashed", colour = "steelblue2") +
   geom_hline(yintercept = overall$ymax, linetype = "dashed", colour = "steelblue2") +
@@ -748,7 +704,7 @@ results %>%
     y = "Observed/Expected ratio of treated patients",
     size = "Observed number of treated patients",
     title = "(c)") +
-  geom_hline(yintercept = 1, linetype = "dashed") +
+  #geom_hline(yintercept = 1, linetype = "dashed") +
   geom_hline(yintercept = overall$y, colour = "steelblue2") +
   geom_hline(yintercept = overall$ymin, linetype = "dashed", colour = "steelblue2") +
   geom_hline(yintercept = overall$ymax, linetype = "dashed", colour = "steelblue2") +
