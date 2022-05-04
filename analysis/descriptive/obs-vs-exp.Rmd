@@ -47,6 +47,7 @@ library(readr)
 library(htmltools)
 library(pROC)
 library(mgcv)
+library(gridExtra)
 
 ## Import custom user functions
 source(here("analysis", "lib", "custom_functions.R"))
@@ -208,7 +209,7 @@ for (i in 1:length(cutoffs)){
 
 results <- data_processed_clean %>%
     mutate(fitted.results = predict(mod.adj, newdata = data_processed_clean, type = 'response'),
-         treated_expected = ifelse(fitted.results >= 0.3, 1, 0))
+         treated_expected = ifelse(fitted.results >= 0.4, 1, 0))
 
 accuracy <- round(results %>% filter(treated_expected == treated_observed) %>% nrow()/results %>% nrow(), digits = 2)
 sensitivity <- round(results %>% filter(treated_observed == 1, treated_expected == treated_observed) %>% nrow()/
@@ -229,7 +230,7 @@ overall <- results %>%
 
 overall_unadjusted <- data_processed_clean %>%
     mutate(fitted.results = predict(mod.unadj, newdata = data_processed_clean, type = 'response'),
-         treated_expected = ifelse(fitted.results >= 0.3, 1, 0)) %>% 
+         treated_expected = ifelse(fitted.results >= 0.4, 1, 0)) %>% 
   select(treated_observed, treated_expected) %>%
   summarise(treated_observed = sum(treated_observed, na.rm = T),
             treated_expected = sum(treated_expected, na.rm = T)) %>%
@@ -239,9 +240,6 @@ overall_unadjusted <- data_processed_clean %>%
 
 ```
 
-```{r}
-results.table
-```
 <br>
 
 # Background
@@ -262,7 +260,7 @@ Logistic regression was used to model and predict each patients treatment status
 * Region
 * STP
 * High risk cohort
-* Comorbid conditions (including high-risk conditions); autism, care home, dementia, housebound, learning disability, shielded, serious mental illness
+* High-risk groups/conditions; autism, care home, dementia, housebound, learning disability, shielded, serious mental illness
 * Vaccination status
 * Week of treatment
 
@@ -270,8 +268,7 @@ Unadjusted and adjusted ORs were calculated from the two models. In addition, th
 
 
 # Results
-
-The unadjusted and adjusted logistic models for treatment had an overall observed to expected ratio of `r round(overall$y, digits = 2)`, (95% CI `r round(overall$ymin, digits = 2)` - `r round(overall$ymax, digits = 2)`) and `r round(overall_unadjusted$y, digits = 2)`, (95% CI `r round(overall_unadjusted$ymin, digits = 2)` - `r round(overall$ymax, digits = 2)`), respectively. The multivariable logistic model (with an AUC of `r auc`, a misclassification error rate of `r misClasificError`%) indicated that several variables were associated with being treated (Table 1). After adjustment for all demographic and clinical variables, `r round((1-summary(mod.adj)$dev.expl)*100, digits = 0)` of the variation remained unexplained.
+The unadjusted and adjusted logistic models for treatment had an overall observed to expected ratio of `r round(overall_unadjusted$y, digits = 2)`, (95% CI `r round(overall_unadjusted$ymin, digits = 2)` - `r round(overall_unadjusted$ymax, digits = 2)`) and `r round(overall$y, digits = 2)`, (95% CI `r round(overall$ymin, digits = 2)` - `r round(overall$ymax, digits = 2)`), respectively. The multivariable logistic model (with an AUC of `r auc`, a misclassification error rate of `r misClasificError`%) indicated that several variables were associated with being treated (Table 1). After adjustment for all demographic and clinical variables, `r round((1-summary(mod.adj)$dev.expl)*100, digits = 0)`% of the variation remained unexplained.
 
 
 Adjusted ethnic, high risk cohort and regional specific observed to expected ratios varied widely (Figure 1).
@@ -528,62 +525,95 @@ results %>%
 
 <br>
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', out.width = '100%', fig.cap = "**Figure 2. Funnel plot showing ratio of observed:expected treated patients, stratified by (a) ethnicity, (b) high risk cohort and (c) region.** Coloured points represent adjusted ratios, respectivly. Solid black lines are 95% intervals and black dotted lines are 99.9% intervals, derived using the Poisson distribution. The solid horizontal blue line represent the overall observed:expected ratio of treated patients", fig.topcaption=TRUE}
-  
+```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', out.width = '100%', fig.cap = "**Figure 2. Unadjusted (left) and adjusted (right) funnel plots showing ratio of the observed to expected number of treated patients, stratified by (a) ethnicity, (b) high risk cohort and (c) region.** Coloured points represent adjusted ratios, respectivly. Solid black lines are 95% intervals and black dotted lines are 99.9% intervals, derived using the Poisson distribution. The solid horizontal blue line represent the overall observed:expected ratio of treated patients", fig.topcaption=TRUE}
+
 # Ethnicity
 funnel_plot <- rbind(data_processed_clean %>%
                        mutate(fitted.results = predict(mod.unadj, newdata = data_processed_clean, type = 'response'),
-                              treated_expected = ifelse(fitted.results >= 0.3, 1, 0)) %>% 
-                     select(ethnicity, treated_observed, treated_expected) %>%
-                     group_by(ethnicity) %>%
-                     summarise(treated_observed = sum(treated_observed, na.rm = T),
-                               treated_expected = sum(treated_expected, na.rm = T)) %>%
-                     mutate(obs_exp_ratio = treated_observed/treated_expected,
-                            lower_ci = obs_exp_ratio - 1.96*sqrt(treated_observed)/treated_expected,
-                            upper_ci = obs_exp_ratio + 1.96*sqrt(treated_observed)/treated_expected,
-                            mod = "unadjusted") %>%
-                     filter(!is.na(ethnicity)),
+                              treated_expected = ifelse(fitted.results >= 0.4, 1, 0)) %>% 
+                       select(ethnicity, treated_observed, treated_expected) %>%
+                       group_by(ethnicity) %>%
+                       summarise(treated_observed = sum(treated_observed, na.rm = T),
+                                 treated_expected = sum(treated_expected, na.rm = T)) %>%
+                       mutate(obs_exp_ratio = treated_observed/treated_expected,
+                              lower_ci = obs_exp_ratio - 1.96*sqrt(treated_observed)/treated_expected,
+                              upper_ci = obs_exp_ratio + 1.96*sqrt(treated_observed)/treated_expected,
+                              mod = "unadjusted") %>%
+                       filter(!is.na(ethnicity)),
                      data_processed_clean %>%
                        mutate(fitted.results = predict(mod.adj, newdata = data_processed_clean, type = 'response'),
-                              treated_expected = ifelse(fitted.results >= 0.3, 1, 0)) %>% 
-                     select(ethnicity, treated_observed, treated_expected) %>%
-                     group_by(ethnicity) %>%
-                     summarise(treated_observed = sum(treated_observed, na.rm = T),
-                               treated_expected = sum(treated_expected, na.rm = T)) %>%
-                     mutate(obs_exp_ratio = treated_observed/treated_expected,
-                            lower_ci = obs_exp_ratio - 1.96*sqrt(treated_observed)/treated_expected,
-                            upper_ci = obs_exp_ratio + 1.96*sqrt(treated_observed)/treated_expected,
-                            mod = "adjusted") %>%
-                     filter(!is.na(ethnicity)))
+                              treated_expected = ifelse(fitted.results >= 0.4, 1, 0)) %>% 
+                       select(ethnicity, treated_observed, treated_expected) %>%
+                       group_by(ethnicity) %>%
+                       summarise(treated_observed = sum(treated_observed, na.rm = T),
+                                 treated_expected = sum(treated_expected, na.rm = T)) %>%
+                       mutate(obs_exp_ratio = treated_observed/treated_expected,
+                              lower_ci = obs_exp_ratio - 1.96*sqrt(treated_observed)/treated_expected,
+                              upper_ci = obs_exp_ratio + 1.96*sqrt(treated_observed)/treated_expected,
+                              mod = "adjusted") %>%
+                       filter(!is.na(ethnicity)))
 
-dfCI <- data.frame(number.seq = seq(plyr::round_any(min(funnel_plot$treated_expected, funnel_plot$treated_expected, na.rm = T), 100, floor), 
-                                    plyr::round_any(max(funnel_plot$treated_expected, funnel_plot$treated_expected, na.rm = T), 100, ceiling), 
+dfCI_unadj <- data.frame(number.seq = seq(plyr::round_any(min(funnel_plot$treated_expected, na.rm = T), 100, floor), 
+                                       plyr::round_any(max(funnel_plot$treated_expected, na.rm = T), 100, ceiling), 
+                                       1)) %>%
+  mutate(number.ll95 = overall_unadjusted$y - 1.96 * sqrt(overall_unadjusted$y/number.seq),
+         number.ul95 = overall_unadjusted$y + 1.96 * sqrt(overall_unadjusted$y/number.seq),
+         number.ll999 = overall_unadjusted$y - 3.29 * sqrt(overall_unadjusted$y/number.seq),
+         number.ul999 = overall_unadjusted$y + 3.29 * sqrt(overall_unadjusted$y/number.seq))
+
+dfCI_adj <- data.frame(number.seq = seq(plyr::round_any(min(funnel_plot$treated_expected, na.rm = T), 100, floor), 
+                                    plyr::round_any(max(funnel_plot$treated_expected, na.rm = T), 100, ceiling), 
                                     1)) %>%
   mutate(number.ll95 = overall$y - 1.96 * sqrt(overall$y/number.seq),
          number.ul95 = overall$y + 1.96 * sqrt(overall$y/number.seq),
          number.ll999 = overall$y - 3.29 * sqrt(overall$y/number.seq),
          number.ul999 = overall$y + 3.29 * sqrt(overall$y/number.seq))
 
-funnel_plot %>%
-  filter(mod == "adjusted") %>%
+unadj_plot <- funnel_plot %>%
+  filter(mod == "unadjusted") %>%
   ggplot(aes(x = treated_expected, y = obs_exp_ratio)) + 
   geom_point(aes(colour = ethnicity), size = 2) +
-  geom_line(aes(x = number.seq, y = number.ll95), data = dfCI) +
-  geom_line(aes(x = number.seq, y = number.ul95), data = dfCI) +
-  geom_line(aes(x = number.seq, y = number.ll999), linetype = "dashed", data = dfCI) +
-  geom_line(aes(x = number.seq, y = number.ul999), linetype = "dashed", data = dfCI) +
-  #xlim(0, plyr::round_any(max(funnel_plot$treated_expected, na.rm = T), 100, ceiling)) +
-  #ylim(-11,1) +
+  geom_line(aes(x = number.seq, y = number.ll95), data = dfCI_unadj) +
+  geom_line(aes(x = number.seq, y = number.ul95), data = dfCI_unadj) +
+  geom_line(aes(x = number.seq, y = number.ll999), linetype = "dashed", data = dfCI_unadj) +
+  geom_line(aes(x = number.seq, y = number.ul999), linetype = "dashed", data = dfCI_unadj) +
+  ylim(min(dfCI_adj$number.ll999, dfCI_unadj$number.ll999), max(dfCI_adj$number.ul999, dfCI_unadj$number.ul999)) +
+  xlim(plyr::round_any(min(funnel_plot$treated_expected, na.rm = T), 100, floor), 
+        plyr::round_any(max(funnel_plot$treated_expected, na.rm = T), 100, ceiling)) +
   xlab("Expected number of treated patients") + 
-  ylab("Observed to expected ratio of treated patients") + 
+  ylab("Unadjusted observed to expected ratio of treated patients") + 
   theme_bw() +
   theme(legend.position = "bottom",
         legend.title = element_blank()) +
   #guides(shape = "none") +
-  geom_segment(aes(x = min(dfCI$number.seq), xend =  max(dfCI$number.seq), 
-                   y = overall$y, yend = overall$y),
+  geom_segment(aes(x = min(dfCI_unadj$number.seq), xend =  max(dfCI_unadj$number.seq), 
+                   y = overall_unadjusted$y, yend = overall_unadjusted$y),
                colour = "steelblue2") +
   ggtitle("(a)")
+
+adj_plot <- funnel_plot %>%
+  filter(mod == "adjusted") %>%
+  ggplot(aes(x = treated_expected, y = obs_exp_ratio)) + 
+  geom_point(aes(colour = ethnicity), size = 2) +
+  geom_line(aes(x = number.seq, y = number.ll95), data = dfCI_adj) +
+  geom_line(aes(x = number.seq, y = number.ul95), data = dfCI_adj) +
+  geom_line(aes(x = number.seq, y = number.ll999), linetype = "dashed", data = dfCI_adj) +
+  geom_line(aes(x = number.seq, y = number.ul999), linetype = "dashed", data = dfCI_adj) +
+  ylim(min(dfCI_adj$number.ll999, dfCI_unadj$number.ll999), max(dfCI_adj$number.ul999, dfCI_unadj$number.ul999)) +
+  xlim(plyr::round_any(min(funnel_plot$treated_expected, na.rm = T), 100, floor), 
+        plyr::round_any(max(funnel_plot$treated_expected, na.rm = T), 100, ceiling)) +
+  xlab("Expected number of treated patients") + 
+  ylab("Adjusted observed to expected ratio of treated patients") + 
+  theme_bw() +
+  theme(legend.position = "bottom",
+        legend.title = element_blank()) +
+  #guides(shape = "none") +
+  geom_segment(aes(x = min(dfCI_adj$number.seq), xend =  max(dfCI_adj$number.seq), 
+                   y = overall$y, yend = overall$y),
+               colour = "steelblue2") +
+  ggtitle(" ")
+
+grid.arrange(unadj_plot, adj_plot, ncol = 2)
 
 ```
 
@@ -687,7 +717,7 @@ funnel_plot %>%
 # Region
 funnel_plot <- rbind(data_processed_clean %>%
                        mutate(fitted.results = predict(mod.unadj, newdata = data_processed_clean, type = 'response'),
-                              treated_expected = ifelse(fitted.results >= 0.3, 1, 0)) %>% 
+                              treated_expected = ifelse(fitted.results >= 0.4, 1, 0)) %>% 
                      select(region_nhs, treated_observed, treated_expected) %>%
                      group_by(region_nhs) %>%
                      summarise(treated_observed = sum(treated_observed, na.rm = T),
@@ -699,7 +729,7 @@ funnel_plot <- rbind(data_processed_clean %>%
                      filter(!is.na(region_nhs)),
                      data_processed_clean %>%
                        mutate(fitted.results = predict(mod.adj, newdata = data_processed_clean, type = 'response'),
-                              treated_expected = ifelse(fitted.results >= 0.3, 1, 0)) %>% 
+                              treated_expected = ifelse(fitted.results >= 0.4, 1, 0)) %>% 
                      select(region_nhs, treated_observed, treated_expected) %>%
                      group_by(region_nhs) %>%
                      summarise(treated_observed = sum(treated_observed, na.rm = T),
