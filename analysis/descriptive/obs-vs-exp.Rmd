@@ -227,6 +227,16 @@ overall <- results %>%
          ymin = y - 1.96*sqrt(treated_observed)/treated_expected,
          ymax = y + 1.96*sqrt(treated_observed)/treated_expected)
 
+overall_unadjusted <- data_processed_clean %>%
+    mutate(fitted.results = predict(mod.unadj, newdata = data_processed_clean, type = 'response'),
+         treated_expected = ifelse(fitted.results >= 0.3, 1, 0)) %>% 
+  select(treated_observed, treated_expected) %>%
+  summarise(treated_observed = sum(treated_observed, na.rm = T),
+            treated_expected = sum(treated_expected, na.rm = T)) %>%
+  mutate(y = sum(treated_observed, na.rm = T)/sum(treated_expected, na.rm = T),
+         ymin = y - 1.96*sqrt(treated_observed)/treated_expected,
+         ymax = y + 1.96*sqrt(treated_observed)/treated_expected)
+
 ```
 
 <br>
@@ -239,7 +249,9 @@ Preliminary results have shown that there is some variation in which eligible pa
 The aim of this bit of work is to attempt to describe any variation in eligible patients receiving an nMAB or antiviral as treatment for COVID-19 by developing a model to predict treatment status and comparing observed to expected values.
 
 # Method
-The primary outcome was treatment status (either treated with a mabs/antiviral or not treated). Treatment was modelled using logistic regression with candidate predictor variables considered as follows:
+The primary outcome was 
+
+Logistic regression was used to model and predict each patients treatment status (either not treated or treated with a mabs/antiviral), firstly unadjusted, and secondly adjusted for the following demographic and clinical covariates:
 
 * Age
 * Sex
@@ -251,13 +263,22 @@ The primary outcome was treatment status (either treated with a mabs/antiviral o
 * High risk cohort
 * Comorbid conditions (including high-risk conditions); autism, care home, dementia, housebound, learning disability, shielded, serious mental illness
 * Vaccination status
+* Week of treatment
 
-The ratio of the observed to expected number of treated patients was calculated for ethnicity, high risk cohort and regional groups. To do this, the expected number of treated patients for each group (adjusted) was calculated by predicting the treatment status for every patient using the above model, and then summing over all patients within each group In this way, we obtain the expected value E, which we can then
-compare to the observed value O, highlighting those groups with treatment rates that differed from the expected rate for the population. For example, if O differs more from E than would be expected from chance alone, we can conclude that the group does not perform according to the model benchmark.
+Unadjusted and adjusted ORs were calculated from the two models. In addition, the ratio of the observed to expected number of treated patients was calculated for the ethnicity, high risk cohort and regional groups. To do this, the expected number of treated patients for each group (adjusted) was calculated by predicting the treatment status for every patient using the above model, and then summing over all patients within each group. In this way, it is possible to obtain the expected value E, which can then be compared to the observed value O, highlighting those groups with treatment rates that differed from the expected rate for the population. Both caterpillar plots and funnel plots were constructed to compare the ratio of the observed to expected number of treated patients. 
+
 
 # Results
 
-**Table 1 Count and proportion of eligible patients in OpenSAFELY-TPP between 16th December 2021 23rd February 2022, stratified by treatment status, along with odds ratios from a univariable and multivariable logistic regression model** The multivariable logistic model for treatment had an AUC of `r auc`, a misclassification error rate of `r misClasificError`% and an overall observed to expected ratio of `r round(overall$y, digits = 2)`, (95% CI `r round(overall$ymin, digits = 2)` - `r round(overall$ymax, digits = 2)`). Patient counts <8 have been redacted and counts >7 are rounded to the nearest 10; as a result percentages may not add up to 100%."
+The unadjusted and adjusted logistic models for treatment had an overall observed to expected ratio of `r round(overall$y, digits = 2)`, (95% CI `r round(overall$ymin, digits = 2)` - `r round(overall$ymax, digits = 2)`) and `r round(overall_unadjusted$y, digits = 2)`, (95% CI `r round(overall_unadjusted$ymin, digits = 2)` - `r round(overall$ymax, digits = 2)`), respectively. The multivariable logistic model (with an AUC of `r auc`, a misclassification error rate of `r misClasificError`%) indicated that several variables were associated with being treated (Table 1). After adjustment for all demographic and clinical variables, `r round((1-summary(mod.adj)$dev.expl)*100, digits = 0)` of the variation remained unexplained.
+
+
+Adjusted ethnic, high risk cohort and regional specific observed to expected ratios varied widely (Figure 1).
+
+
+
+
+**Table 1 Count and proportion of eligible patients in OpenSAFELY-TPP between 16th December 2021 23rd February 2022, stratified by treatment status, along with odds ratios from a univariable and multivariable logistic regression model** Patient counts <8 have been redacted and counts >7 are rounded to the nearest 10; as a result percentages may not add up to 100%."
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', out.width = '100%'}
 
@@ -349,7 +370,164 @@ table1.full %>%
 
 <br>
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', out.width = '100%', fig.cap = "**Fig 1. Funnel plot showing ratio of observed:expected treated patients, stratified by (a) ethnicity, (b) high risk cohort and (c) region.** Coloured points represent adjusted ratios, respectivly. Solid black lines are 95% intervals and black dotted lines are 99.9% intervals, derived using the Poisson distribution. The solid horizontal blue line represent the overall observed:expected ratio of treated patients", fig.topcaption=TRUE}
+```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', out.width = '100%', fig.cap = "**Figure 1. Observed to expected ratio of treated patients, stratified by (a) ethnicity, (b) high risk cohort and (c) region.** The squares represent the point estimates, and the areas of the squares are proportional to the observed number of treated patients The vertical lines display 95% confidence intervals. The solid and dashed horizontal blue lines represent the overall observed to expected ratio of treated patients with a 95% CI, respectively.", fig.topcaption=TRUE}
+  
+# Ethnicity
+results %>% 
+  select(ethnicity, treated_observed, treated_expected) %>%
+  group_by(ethnicity) %>%
+  summarise(treated_observed = sum(treated_observed, na.rm = T),
+            treated_expected = sum(treated_expected, na.rm = T)) %>%
+  mutate(obs_exp_ratio = treated_observed/treated_expected,
+         lower_ci = obs_exp_ratio - 1.96*sqrt(treated_observed)/treated_expected,
+         upper_ci = obs_exp_ratio + 1.96*sqrt(treated_observed)/treated_expected) %>%
+  filter(!is.na(ethnicity)) %>%
+  ggplot(aes(x = ethnicity, y = obs_exp_ratio)) + 
+  geom_point(aes(size = treated_observed), shape = "square") +
+  geom_errorbar(aes(ymin = lower_ci, ymax = upper_ci), width=.1) +
+  theme_classic(base_size = 8) +
+  labs(
+    x = "Ethnicity",
+    y = "Observed/Expected ratio of treated patients",
+    size = "Observed number of treated patients",
+    title = "(a)") +
+  #geom_hline(yintercept = 1, linetype = "dashed")  +
+  geom_hline(yintercept = overall$y, colour = "steelblue2") +
+  geom_hline(yintercept = overall$ymin, linetype = "dashed", colour = "steelblue2") +
+  geom_hline(yintercept = overall$ymax, linetype = "dashed", colour = "steelblue2") +
+  theme(
+    legend.position = "bottom",
+    axis.text = element_text(size = 10),
+    axis.text.x = element_text(angle = 60, hjust = 1),
+    axis.title = element_text(size = 10),
+    axis.line.x = element_line(colour = "black"),
+    panel.grid.minor.x = element_blank())
+
+```
+
+<br>
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', out.width = '100%'}
+
+# High risk cohort
+results %>% 
+  select(treated_observed, downs_syndrome, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
+         hiv_aids, solid_organ_transplant, rare_neurological_conditions)  %>%
+  mutate(across(
+    .cols = c(where(is.factor)),
+    .fns = ~as.numeric(as.character(.x))
+  )) %>%
+  group_by(treated_observed) %>%
+  summarise(
+    across(.fns=sum, na.rm = T)
+  ) %>%
+  filter(treated_observed == 1) %>%
+  select(-treated_observed) %>%
+  pivot_longer(
+    cols = c(downs_syndrome, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
+             hiv_aids, solid_organ_transplant, rare_neurological_conditions),
+    names_to = "high_risk_cohort",
+    values_to = "treated_observed"
+  ) %>%
+  full_join(results %>% 
+              select(treated_expected, downs_syndrome, solid_cancer, haematological_disease, renal_disease, liver_disease, imid,
+                     immunosupression, hiv_aids, solid_organ_transplant, rare_neurological_conditions)  %>%
+              mutate(across(
+                .cols = c(where(is.factor)),
+                .fns = ~as.numeric(as.character(.x))
+              )) %>%
+              group_by(treated_expected) %>%
+              summarise(
+                across(.fns=sum, na.rm = T)
+              ) %>%
+              filter(treated_expected == 1) %>%
+              select(-treated_expected) %>%
+              pivot_longer(
+                cols = c(downs_syndrome, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
+                         hiv_aids, solid_organ_transplant, rare_neurological_conditions),
+                names_to = "high_risk_cohort",
+                values_to = "treated_expected"
+              ), by = "high_risk_cohort") %>%
+  mutate(obs_exp_ratio = treated_observed/treated_expected,
+         lower_ci = obs_exp_ratio - 1.96*sqrt(treated_observed)/treated_expected,
+         upper_ci = obs_exp_ratio + 1.96*sqrt(treated_observed)/treated_expected) %>%
+  mutate(high_risk_cohort = case_when(
+    high_risk_cohort == "All" ~ "All", 
+    high_risk_cohort == "downs_syndrome" ~ "Down's syndrome", 
+    high_risk_cohort == "sickle_cell_disease" ~ "Sickle cell disease", 
+    high_risk_cohort == "solid_cancer" ~ "Solid cancer", 
+    high_risk_cohort == "haematological_disease" ~ "Haematological diseases and stem cell transplant recipients", 
+    high_risk_cohort == "renal_disease" ~ "Renal disease", 
+    high_risk_cohort == "liver_disease" ~ "Liver disease", 
+    high_risk_cohort == "imid" ~ "Immune-mediated inflammatory disorders", 
+    high_risk_cohort == "immunosupression" ~ "Primary immune deficiencies", 
+    high_risk_cohort == "hiv_aids" ~ "Immunosuppression due to HIV or AIDS", 
+    high_risk_cohort == "solid_organ_transplant" ~ "Solid organ transplant recipients",
+    high_risk_cohort == "rare_neurological_conditions" ~ "Rare neurological conditions",
+    TRUE ~ NA_character_)) %>%
+  mutate(high_risk_cohort = unlist(lapply(strwrap(high_risk_cohort, width=20, simplify=FALSE), paste, collapse="\n"))) %>%
+  ggplot(aes(x = high_risk_cohort, y = obs_exp_ratio)) + 
+  geom_point(aes(size = treated_observed), shape = "square") +
+  geom_errorbar(aes(ymin = lower_ci, ymax = upper_ci), width=.1) +
+  theme_classic(base_size = 8) +
+  labs(
+    x = "High risk cohort",
+    y = "Observed/Expected ratio of treated patients",
+    size = "Observed number of treated patients",
+    title = "(b)") +
+  #geom_hline(yintercept = 1, linetype = "dashed") +
+  geom_hline(yintercept = overall$y, colour = "steelblue2") +
+  geom_hline(yintercept = overall$ymin, linetype = "dashed", colour = "steelblue2") +
+  geom_hline(yintercept = overall$ymax, linetype = "dashed", colour = "steelblue2") +
+  theme(
+    legend.position = "bottom",
+    axis.text = element_text(size = 10),
+    axis.text.x = element_text(angle = 60, hjust = 1),
+    axis.title = element_text(size = 10),
+    axis.line.x = element_line(colour = "black"),
+    panel.grid.minor.x = element_blank())
+
+```
+
+<br>
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '100%'}
+
+# Region
+results %>% 
+  select(region_nhs, treated_observed, treated_expected) %>%
+  group_by(region_nhs) %>%
+  summarise(treated_observed = sum(treated_observed, na.rm = T),
+            treated_expected = sum(treated_expected, na.rm = T)) %>%
+  mutate(obs_exp_ratio = treated_observed/treated_expected,
+         lower_ci = obs_exp_ratio - 1.96*sqrt(treated_observed)/treated_expected,
+         upper_ci = obs_exp_ratio + 1.96*sqrt(treated_observed)/treated_expected) %>%
+  ggplot(aes(x = region_nhs, y = obs_exp_ratio)) + 
+  geom_point(aes(size = treated_observed), shape = "square") +
+  geom_errorbar(aes(ymin = lower_ci, ymax = upper_ci), width=.1) +
+  theme_classic(base_size = 8) +
+  labs(
+    x = "Region",
+    y = "Observed/Expected ratio of treated patients",
+    size = "Observed number of treated patients",
+    title = "(c)") +
+  #geom_hline(yintercept = 1, linetype = "dashed") +
+  geom_hline(yintercept = overall$y, colour = "steelblue2") +
+  geom_hline(yintercept = overall$ymin, linetype = "dashed", colour = "steelblue2") +
+  geom_hline(yintercept = overall$ymax, linetype = "dashed", colour = "steelblue2") +
+  theme(
+    legend.position = "bottom",
+    axis.text = element_text(size = 10),
+    axis.text.x = element_text(angle = 60, hjust = 1),
+    axis.title = element_text(size = 10),
+    axis.line.x = element_line(colour = "black"),
+    panel.grid.minor.x = element_blank())
+
+```
+
+<br>
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', out.width = '100%', fig.cap = "**Figure 2. Funnel plot showing ratio of observed:expected treated patients, stratified by (a) ethnicity, (b) high risk cohort and (c) region.** Coloured points represent adjusted ratios, respectivly. Solid black lines are 95% intervals and black dotted lines are 99.9% intervals, derived using the Poisson distribution. The solid horizontal blue line represent the overall observed:expected ratio of treated patients", fig.topcaption=TRUE}
   
 # Ethnicity
 funnel_plot <- rbind(data_processed_clean %>%
@@ -563,160 +741,6 @@ funnel_plot %>%
 
 <br>
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', out.width = '100%', fig.cap = "**Fig 2. Observed to expected ratio of treated patients, stratified by (a) ethnicity, (b) high risk cohort and (c) region.** The squares represent the point estimates, and the areas of the squares are proportional to the observed number of treated patients The vertical lines display 95% confidence intervals. The solid and dashed horizontal blue lines represent the overall observed to expected ratio of treated patients with a 95% CI, respectively.", fig.topcaption=TRUE}
-  
-# Ethnicity
-results %>% 
-  select(ethnicity, treated_observed, treated_expected) %>%
-  group_by(ethnicity) %>%
-  summarise(treated_observed = sum(treated_observed, na.rm = T),
-            treated_expected = sum(treated_expected, na.rm = T)) %>%
-  mutate(obs_exp_ratio = treated_observed/treated_expected,
-         lower_ci = obs_exp_ratio - 1.96*sqrt(treated_observed)/treated_expected,
-         upper_ci = obs_exp_ratio + 1.96*sqrt(treated_observed)/treated_expected) %>%
-  filter(!is.na(ethnicity)) %>%
-  ggplot(aes(x = ethnicity, y = obs_exp_ratio)) + 
-  geom_point(aes(size = treated_observed), shape = "square") +
-  geom_errorbar(aes(ymin = lower_ci, ymax = upper_ci), width=.1) +
-  theme_classic(base_size = 8) +
-  labs(
-    x = "Ethnicity",
-    y = "Observed/Expected ratio of treated patients",
-    size = "Observed number of treated patients",
-    title = "(a)") +
-  #geom_hline(yintercept = 1, linetype = "dashed")  +
-  geom_hline(yintercept = overall$y, colour = "steelblue2") +
-  geom_hline(yintercept = overall$ymin, linetype = "dashed", colour = "steelblue2") +
-  geom_hline(yintercept = overall$ymax, linetype = "dashed", colour = "steelblue2") +
-  theme(
-    legend.position = "bottom",
-    axis.text = element_text(size = 10),
-    axis.text.x = element_text(angle = 60, hjust = 1),
-    axis.title = element_text(size = 10),
-    axis.line.x = element_line(colour = "black"),
-    panel.grid.minor.x = element_blank())
-
-```
-
-<br>
-
-```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', out.width = '100%'}
-
-# High risk cohort
-results %>% 
-  select(treated_observed, downs_syndrome, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
-         hiv_aids, solid_organ_transplant, rare_neurological_conditions)  %>%
-  mutate(across(
-    .cols = c(where(is.factor)),
-    .fns = ~as.numeric(as.character(.x))
-  )) %>%
-  group_by(treated_observed) %>%
-  summarise(
-    across(.fns=sum, na.rm = T)
-  ) %>%
-  filter(treated_observed == 1) %>%
-  select(-treated_observed) %>%
-  pivot_longer(
-    cols = c(downs_syndrome, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
-             hiv_aids, solid_organ_transplant, rare_neurological_conditions),
-    names_to = "high_risk_cohort",
-    values_to = "treated_observed"
-  ) %>%
-  full_join(results %>% 
-              select(treated_expected, downs_syndrome, solid_cancer, haematological_disease, renal_disease, liver_disease, imid,
-                     immunosupression, hiv_aids, solid_organ_transplant, rare_neurological_conditions)  %>%
-              mutate(across(
-                .cols = c(where(is.factor)),
-                .fns = ~as.numeric(as.character(.x))
-              )) %>%
-              group_by(treated_expected) %>%
-              summarise(
-                across(.fns=sum, na.rm = T)
-              ) %>%
-              filter(treated_expected == 1) %>%
-              select(-treated_expected) %>%
-              pivot_longer(
-                cols = c(downs_syndrome, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
-                         hiv_aids, solid_organ_transplant, rare_neurological_conditions),
-                names_to = "high_risk_cohort",
-                values_to = "treated_expected"
-              ), by = "high_risk_cohort") %>%
-  mutate(obs_exp_ratio = treated_observed/treated_expected,
-         lower_ci = obs_exp_ratio - 1.96*sqrt(treated_observed)/treated_expected,
-         upper_ci = obs_exp_ratio + 1.96*sqrt(treated_observed)/treated_expected) %>%
-  mutate(high_risk_cohort = case_when(
-    high_risk_cohort == "All" ~ "All", 
-    high_risk_cohort == "downs_syndrome" ~ "Down's syndrome", 
-    high_risk_cohort == "sickle_cell_disease" ~ "Sickle cell disease", 
-    high_risk_cohort == "solid_cancer" ~ "Solid cancer", 
-    high_risk_cohort == "haematological_disease" ~ "Haematological diseases and stem cell transplant recipients", 
-    high_risk_cohort == "renal_disease" ~ "Renal disease", 
-    high_risk_cohort == "liver_disease" ~ "Liver disease", 
-    high_risk_cohort == "imid" ~ "Immune-mediated inflammatory disorders", 
-    high_risk_cohort == "immunosupression" ~ "Primary immune deficiencies", 
-    high_risk_cohort == "hiv_aids" ~ "Immunosuppression due to HIV or AIDS", 
-    high_risk_cohort == "solid_organ_transplant" ~ "Solid organ transplant recipients",
-    high_risk_cohort == "rare_neurological_conditions" ~ "Rare neurological conditions",
-    TRUE ~ NA_character_)) %>%
-  mutate(high_risk_cohort = unlist(lapply(strwrap(high_risk_cohort, width=20, simplify=FALSE), paste, collapse="\n"))) %>%
-  ggplot(aes(x = high_risk_cohort, y = obs_exp_ratio)) + 
-  geom_point(aes(size = treated_observed), shape = "square") +
-  geom_errorbar(aes(ymin = lower_ci, ymax = upper_ci), width=.1) +
-  theme_classic(base_size = 8) +
-  labs(
-    x = "High risk cohort",
-    y = "Observed/Expected ratio of treated patients",
-    size = "Observed number of treated patients",
-    title = "(b)") +
-  #geom_hline(yintercept = 1, linetype = "dashed") +
-  geom_hline(yintercept = overall$y, colour = "steelblue2") +
-  geom_hline(yintercept = overall$ymin, linetype = "dashed", colour = "steelblue2") +
-  geom_hline(yintercept = overall$ymax, linetype = "dashed", colour = "steelblue2") +
-  theme(
-    legend.position = "bottom",
-    axis.text = element_text(size = 10),
-    axis.text.x = element_text(angle = 60, hjust = 1),
-    axis.title = element_text(size = 10),
-    axis.line.x = element_line(colour = "black"),
-    panel.grid.minor.x = element_blank())
-
-```
-
-<br>
-
-```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '100%'}
-
-# Region
-results %>% 
-  select(region_nhs, treated_observed, treated_expected) %>%
-  group_by(region_nhs) %>%
-  summarise(treated_observed = sum(treated_observed, na.rm = T),
-            treated_expected = sum(treated_expected, na.rm = T)) %>%
-  mutate(obs_exp_ratio = treated_observed/treated_expected,
-         lower_ci = obs_exp_ratio - 1.96*sqrt(treated_observed)/treated_expected,
-         upper_ci = obs_exp_ratio + 1.96*sqrt(treated_observed)/treated_expected) %>%
-  ggplot(aes(x = region_nhs, y = obs_exp_ratio)) + 
-  geom_point(aes(size = treated_observed), shape = "square") +
-  geom_errorbar(aes(ymin = lower_ci, ymax = upper_ci), width=.1) +
-  theme_classic(base_size = 8) +
-  labs(
-    x = "Region",
-    y = "Observed/Expected ratio of treated patients",
-    size = "Observed number of treated patients",
-    title = "(c)") +
-  #geom_hline(yintercept = 1, linetype = "dashed") +
-  geom_hline(yintercept = overall$y, colour = "steelblue2") +
-  geom_hline(yintercept = overall$ymin, linetype = "dashed", colour = "steelblue2") +
-  geom_hline(yintercept = overall$ymax, linetype = "dashed", colour = "steelblue2") +
-  theme(
-    legend.position = "bottom",
-    axis.text = element_text(size = 10),
-    axis.text.x = element_text(angle = 60, hjust = 1),
-    axis.title = element_text(size = 10),
-    axis.line.x = element_line(colour = "black"),
-    panel.grid.minor.x = element_blank())
-
-```
 
 # Limitations/next steps
 * Model variables/performance/validity needs more work
