@@ -239,6 +239,9 @@ overall_unadjusted <- data_processed_clean %>%
 
 ```
 
+```{r}
+results.table
+```
 <br>
 
 # Background
@@ -249,8 +252,6 @@ Preliminary results have shown that there is some variation in which eligible pa
 The aim of this bit of work is to attempt to describe any variation in eligible patients receiving an nMAB or antiviral as treatment for COVID-19 by developing a model to predict treatment status and comparing observed to expected values.
 
 # Method
-The primary outcome was 
-
 Logistic regression was used to model and predict each patients treatment status (either not treated or treated with a mabs/antiviral), firstly unadjusted, and secondly adjusted for the following demographic and clinical covariates:
 
 * Age
@@ -278,7 +279,7 @@ Adjusted ethnic, high risk cohort and regional specific observed to expected rat
 
 
 
-**Table 1 Count and proportion of eligible patients in OpenSAFELY-TPP between 16th December 2021 23rd February 2022, stratified by treatment status, along with odds ratios from a univariable and multivariable logistic regression model** Patient counts <8 have been redacted and counts >7 are rounded to the nearest 10; as a result percentages may not add up to 100%."
+**Table 1 Count and proportion of the total number of eligible patients in OpenSAFELY-TPP since 16th December 2021, stratified by treatment status, along with odds ratios from a univariable and multivariable logistic regression model** Patient counts <8 have been redacted and counts >7 are rounded to the nearest 10; as a result percentages may not add up to 100%."
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', out.width = '100%'}
 
