@@ -48,6 +48,8 @@ library(htmltools)
 library(pROC)
 library(mgcv)
 library(gridExtra)
+library(cowplot)
+library(ggpubr)
 
 ## Import custom user functions
 source(here("analysis", "lib", "custom_functions.R"))
@@ -268,7 +270,7 @@ Unadjusted and adjusted ORs were calculated from the two models, respectively. I
 
 
 # Results
-The multivariable logistic model for treatment status had an overall observed to expected ratio of `r round(overall$y, digits = 2)`, (95% CI `r round(overall$ymin, digits = 2)` - `r round(overall$ymax, digits = 2)`), an AUC of `r auc`, and a misclassification error rate of `r misClasificError`%). As shown in Table 1, several variables were associated with treatment status. After adjustment for all demographic and clinical variables, `r round((1-summary(mod.adj)$dev.expl)*100, digits = 0)`% of the variation remained unexplained with the observed to expected (adjusted) ratios of the number of patients receiving treatment varying widely across high risk cohort and region specific groups  (Figures 1 and 2).
+The multivariable logistic model for treatment status had an overall observed to expected ratio of `r round(overall$y, digits = 2)`, (95% CI `r round(overall$ymin, digits = 2)` - `r round(overall$ymax, digits = 2)`), an AUC of `r auc`, and a misclassification error rate of `r misClasificError`%). As shown in Table 1, several variables were associated with treatment status. After adjustment for all demographic and clinical variables, `r round((1-summary(mod.adj)$dev.expl)*100, digits = 0)`% of the variation remained unexplained with the observed to expected (adjusted) ratios of the number of patients receiving treatment varying widely across high risk cohort and region specific groups  (Figures 1-3).
 
 **Table 1 Count and proportion of the total number of eligible patients in OpenSAFELY-TPP since 16th December 2021, stratified by treatment status, along with odds ratios from a univariable and multivariable logistic regression model** Patient counts <8 have been redacted and counts >7 are rounded to the nearest 10; as a result percentages may not add up to 100%."
 
@@ -362,7 +364,58 @@ table1.full %>%
 
 <br>
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', out.width = '100%', fig.cap = "**Figure 1. Observed to expected (adjusted) ratio of the number of patients receiving treatment, stratified by (a) ethnicity, (b) high risk cohort and (c) region.** The squares represent the point estimates, and the areas of the squares are proportional to the observed number of patients receiving treatment. The vertical lines display 95% confidence intervals. The solid and dashed horizontal blue lines represent the overall observed to expected ratio of the number of patients receiving treatment with a 95% CI, respectively.", fig.topcaption=TRUE}
+```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', out.width = '50%', fig.show = "hold", fig.cap = "**Figure 1. Distribution of propensity scores in patients who did/did not recieved received treatment for COVID-19**" , fig.topcaption=TRUE}
+
+# 1. Create the histogram plot
+phist <- data_processed_clean %>%
+  mutate(fitted.results = predict(mod.adj, newdata = data_processed_clean, type = 'response'),
+         treatment_status = ifelse(treated_observed == 1, "Untreated", "Treated")) %>%
+  gghistogram(
+    x = "fitted.results", y = "..density..",
+    fill = "treatment_status", palette = c("#00AFBB", "#E7B800"),
+    add_density = FALSE) +
+  xlab("Propensity score") + 
+  ylab("Number of patients") + 
+  theme_bw() +
+  theme(legend.position = "right",
+        legend.title = element_blank())
+
+# 2. Create the density plot with y-axis on the right
+pdensity <- data_processed_clean %>%
+  mutate(fitted.results = predict(mod.adj, newdata = data_processed_clean, type = 'response'),
+         treatment_status = ifelse(treated_observed == 1, "Untreated", "Treated")) %>%
+  ggdensity(
+    x = "fitted.results", 
+  color= "treatment_status", palette = c("#00AFBB", "#E7B800"),
+  alpha = 0) +  
+  scale_y_continuous(expand = expansion(mult = c(0, 0.05)), position = "right")  +
+  theme_half_open(11, rel_small = 1) +
+  rremove("x.axis")+
+  rremove("xlab") +
+  rremove("x.text") +
+  rremove("x.ticks") +
+  rremove("legend")
+
+# 3. Align the two plots and then overlay them.
+aligned_plots <- align_plots(phist, pdensity, align="hv", axis="tblr")
+ggdraw(aligned_plots[[1]]) + draw_plot(aligned_plots[[2]])
+
+# Box plot 
+data_processed_clean %>%
+  mutate(fitted.results = predict(mod.adj, newdata = data_processed_clean, type = 'response'),
+         treatment_status = ifelse(treated_observed == 1, "Treated", "Untreated")) %>%
+  ggplot(aes(x=treatment_status, y=fitted.results, colour = treatment_status)) + 
+  geom_boxplot()  +
+  xlab("Treatment status") + 
+  ylab("Propensity score") + 
+  theme_bw()  +
+  rremove("legend") +
+  scale_colour_manual(values = c("#00AFBB", "#E7B800"))
+```
+
+<br>
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', out.width = '100%', fig.cap = "**Figure 2. Observed to expected (adjusted) ratio of the number of patients receiving treatment, stratified by (a) ethnicity, (b) high risk cohort and (c) region.** The squares represent the point estimates, and the areas of the squares are proportional to the observed number of patients receiving treatment. The vertical lines display 95% confidence intervals. The solid and dashed horizontal blue lines represent the overall observed to expected ratio of the number of patients receiving treatment with a 95% CI, respectively.", fig.topcaption=TRUE}
   
 # Ethnicity
 results %>% 
@@ -519,7 +572,7 @@ results %>%
 
 <br>
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', out.width = '100%', fig.cap = "**Figure 2.  Adjusted funnel plots showing the ratio of the observed to expected number of patients receiving treatment, stratified by (a) ethnicity, (b) high risk cohort and (c) region.** Coloured points represent adjusted ratios. Solid black lines are 95% intervals and black dotted lines are 99.9% intervals, derived using the Poisson distribution. The solid horizontal blue line represent the overall observed to expected ratio of the number of patients receiving treatment", fig.topcaption=TRUE}
+```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', out.width = '100%', fig.cap = "**Figure 3.  Adjusted funnel plots showing the ratio of the observed to expected number of patients receiving treatment, stratified by (a) ethnicity, (b) high risk cohort and (c) region.** Coloured points represent adjusted ratios. Solid black lines are 95% intervals and black dotted lines are 99.9% intervals, derived using the Poisson distribution. The solid horizontal blue line represent the overall observed to expected ratio of the number of patients receiving treatment", fig.topcaption=TRUE}
 
 # Ethnicity
 funnel_plot <- rbind(data_processed_clean %>%
