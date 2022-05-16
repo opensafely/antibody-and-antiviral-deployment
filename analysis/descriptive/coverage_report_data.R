@@ -227,7 +227,7 @@ treatment_plot_data <- rbind(plot_data_treatment, plot_data_treatment_groups) %>
 
 write_csv(treatment_plot_data %>% 
             select(treatment_date, cum_count_redacted, high_risk_cohort) %>%
-            filter(elig_start >= as.Date("2021-12-16") & elig_start <= as.Date("2022-04-30")), 
+            filter(treatment_date >= as.Date("2021-12-16") & treatment_date <= as.Date("2022-04-30")), 
           fs::path(output_dir, "table_cum_treatment_redacted.csv"))
 write_csv(treatment_plot_data, fs::path(output_dir2, "table_cum_treatment.csv"))
 
