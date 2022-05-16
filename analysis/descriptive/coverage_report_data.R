@@ -266,7 +266,7 @@ treatment_plot_data <- plot_data_treatment_type %>%
 
 write_csv(treatment_plot_data %>% 
             select(treatment_date, cum_count_redacted, treatment_type) %>%
-            filter(elig_start >= as.Date("2021-12-16") & elig_start <= as.Date("2022-04-30")),
+            filter(treatment_date >= as.Date("2021-12-16") & treatment_date <= as.Date("2022-04-30")),
           fs::path(output_dir, "table_cum_treatment_type_redacted.csv"))
 write_csv(treatment_plot_data, fs::path(output_dir2, "table_cum_treatment_type.csv"))
 
