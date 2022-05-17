@@ -23,6 +23,12 @@ actions:
       highly_sensitive:
         cohort: output/data/input.csv.gz
   
+  extract_stp_data:
+    run: cohortextractor:latest generate_cohort --study-definition study_definition_stp --output-dir=output/data --output-format=csv.gz
+    outputs:
+      highly_sensitive:
+        cohort: output/data/input_stp.csv.gz
+  
   # Data processing ----
   data_process:
     run: r:latest analysis/process/process_data.R
@@ -59,11 +65,12 @@ actions:
   # Variation by STP ----
   stp_report:
     run: r:latest -e 'rmarkdown::render("analysis/descriptive/mabs-and-abs-by-stp.Rmd", knit_root_dir = "/workspace", output_dir="/workspace/output/variation")'
-    needs: [data_process]
+    needs: [data_process, extract_stp_data]
     outputs:
       moderately_sensitive:
         html: output/variation/mabs-and-abs-by-stp.html
-        csvs: output/variation/figure_*.csv
+        figures: output/variation/figure_*.csv
+        csvs: output/variation/stp_coverage.csv
         
   # Obs vs exp ----
   obs_vs_exp_report:
