@@ -122,14 +122,22 @@ data_stp <- left_join(data_stp_all, data_stp_tpp, by = c("stp_id" = "stp")) %>%
          perc = round(n_tpp/total_list_size*100, digits = 0)) %>%
   left_join(eligibility_stp, by = c("stp_id" = "stp")) %>%
   left_join(treatment_stp, by = c("stp_id" = "stp")) %>%
-  mutate(prop = round(n.y/n.y, digits = 0 )) %>%
-  select(name, n_tpp, total_list_size, perc, n.y, n.x, prop)
+  mutate(prop = round(n.y/n.y, digits = 0 )) 
 
-data_stp_clean <- data_stp
+stp_exclude <- data_stp %>%
+  filter(perc < 10) %>%
+  select(stp_id)
+
+data_stp_clean <- data_stp %>%
+  select(name, n_tpp, total_list_size, perc, n.y, n.x, prop)
 colnames(data_stp_clean) <- c("STP", "Number of patients in TPP", "Total population", "Percentage of population included in TPP (%)",
                         "Number of eligble patients in TPP", "Number of treated patients in TPP", "Percentage treated (%)")
 
 write_csv(data_stp_clean, fs::path(output_dir_rmd, "stp_coverage.csv"))
+
+## Exclude STPs with <10% coverage
+data_processed_clean <- data_processed_clean %>%
+  filter(!(stp %in% stp_exclude$stp_id))
 ```
 
 <br>
