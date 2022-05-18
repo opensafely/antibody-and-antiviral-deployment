@@ -122,7 +122,7 @@ data_stp <- left_join(data_stp_all, data_stp_tpp, by = c("stp_id" = "stp")) %>%
          perc = round(n_tpp/total_list_size*100, digits = 0)) %>%
   left_join(eligibility_stp, by = c("stp_id" = "stp")) %>%
   left_join(treatment_stp, by = c("stp_id" = "stp")) %>%
-  mutate(prop = round(n.y/n.y, digits = 0 )) 
+  mutate(prop = round(n.y/n.x*100, digits = 0 )) 
 
 stp_exclude <- data_stp %>%
   filter(perc < 10) %>%
@@ -131,13 +131,14 @@ stp_exclude <- data_stp %>%
 data_stp_clean <- data_stp %>%
   select(name, n_tpp, total_list_size, perc, n.y, n.x, prop)
 colnames(data_stp_clean) <- c("STP", "Number of patients in TPP", "Total population", "Percentage of population included in TPP (%)",
-                        "Number of eligble patients in TPP", "Number of treated patients in TPP", "Percentage treated (%)")
+                        "Number of treated patients in TPP", "Number of eligible patients in TPP", "Percentage treated (%)")
 
-write_csv(data_stp_clean, fs::path(output_dir_rmd, "stp_coverage.csv"))
+write_csv(data_stp_clean, fs::path(output_dir_rmd, "table_stp_coverage.csv"))
 
 ## Exclude STPs with <10% coverage
 data_processed_clean <- data_processed_clean %>%
-  filter(!(stp %in% stp_exclude$stp_id))
+  filter(!(stp %in% stp_exclude$stp_id),
+         elig_start <= end_date)
 ```
 
 <br>
@@ -377,15 +378,17 @@ proportion_stp_decile %>%
 ```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '100%'}
 
 # Eligible and treated table
+stp_prop_deciles_lkup <- data_stp %>%
+  filter(!is.na(prop)) %>% 
+  mutate(prop = n.y/n.x*100,
+         decile = ntile(prop, 9)/10,
+         decile = as.numeric(as.character(decile))) %>%
+  select(stp = stp_id, decile)
+
 eligibility_table <- data_processed_clean %>%
   select(stp, elig_start)  %>%
   group_by(stp) %>%
-  tally()  %>%
-  summarise(quibble(n, seq(0.1,0.9,0.1))) %>%
-  mutate(n = as.numeric(n),
-         n_q = as.character(n_q)) %>%
-  #add_row(n_q = "All", n = (data_processed_clean %>% filter(!is.na(elig_start)) %>% nrow())) %>%
-  arrange(desc(n))
+  tally()
 
 treatment_table <- data_processed_clean %>%
   filter(!is.na(treatment_type)) %>%
@@ -393,23 +396,44 @@ treatment_table <- data_processed_clean %>%
   group_by(stp, treatment_type) %>%
   tally()  %>%
   group_by(treatment_type) %>%
-  summarise(quibble(n, seq(0.1,0.9,0.1))) %>%
-  mutate(n = as.numeric(n),
-         n_q = as.character(n_q)) %>%
   pivot_wider(
-    id_cols = n_q,
+    id_cols = stp,
     names_from = treatment_type,
     values_from = n) %>%
-  add_row(#n_q = "All", 
-          Casirivimab = (data_processed_clean %>% filter(treatment_type == "Casirivimab") %>% nrow()),
-          Molnupiravir = (data_processed_clean %>% filter(treatment_type == "Molnupiravir") %>% nrow()),
-          Paxlovid = (data_processed_clean %>% filter(treatment_type == "Paxlovid") %>% nrow()),
-          Remdesivir = (data_processed_clean %>% filter(treatment_type == "Remdesivir") %>% nrow()),
-          Sotrovimab = (data_processed_clean %>% filter(treatment_type == "Sotrovimab") %>% nrow()))
+  mutate(Casirivimab = ifelse(is.na(Casirivimab), 0, Casirivimab),
+         Molnupiravir = ifelse(is.na(Molnupiravir), 0, Molnupiravir),
+         Paxlovid = ifelse(is.na(Paxlovid), 0, Paxlovid),
+         Remdesivir = ifelse(is.na(Remdesivir), 0, Remdesivir),
+         Sotrovimab = ifelse(is.na(Sotrovimab), 0, Sotrovimab))
 
-table_elig_treat_redacted <- left_join(eligibility_table, treatment_table, by = "n_q") %>%
+table_elig_treat <- left_join(eligibility_table, treatment_table, by = "stp") %>%
   mutate(Treated = Casirivimab + Molnupiravir + Sotrovimab + Paxlovid + Remdesivir) %>%
-  select(n_q, Eligibile = n, Treated, Paxlovid, Sotrovimab, Remdesivir, Molnupiravir, Casirivimab) %>%
+  select(stp, Eligibile = n, Treated, Paxlovid, Sotrovimab, Remdesivir, Molnupiravir, Casirivimab) %>%
+  right_join(stp_prop_deciles_lkup, by = "stp") %>%
+  group_by(decile) %>%
+  summarise(Eligibile = sum(Eligibile, na.rm = T),
+            Treated = sum(Treated, na.rm = T),
+            Paxlovid = sum(Paxlovid, na.rm = T),
+            Sotrovimab = sum(Sotrovimab, na.rm = T),
+            Remdesivir = sum(Remdesivir, na.rm = T),
+            Molnupiravir = sum(Molnupiravir, na.rm = T),
+            Casirivimab = sum(Casirivimab, na.rm = T)) %>%
+  left_join(data_stp %>%
+              filter(!is.na(prop)) %>% 
+              mutate(lci = round((n.y/n.x - 1.96*sqrt((n.y/n.x)*(1-n.y/n.x)/n.x))*100, digits = 0),
+                     uci = round((n.y/n.x + 1.96*sqrt((n.y/n.x)*(1-n.y/n.x)/n.x))*100, digits = 0)) %>%
+              summarise(quibble(prop, seq(0.1,0.9,0.1)),
+                        quibble(lci, seq(0.1,0.9,0.1)),
+                        quibble(uci, seq(0.1,0.9,0.1))) %>%
+              mutate(prop = round(prop, digits = 0),
+                     lci = round(lci, digits = 0),
+                     uci = round(uci, digits = 0),
+                     prop_q = as.numeric(as.character(prop_q))) %>%
+              mutate(decile_value = paste(prop, " (", lci, "-", uci,  ")", sep = "")) %>%
+              select(decile = prop_q,  decile_value), by = "decile") %>%
+  select(decile, Eligibile, Treated, decile_value, Paxlovid, Sotrovimab, Remdesivir, Molnupiravir, Casirivimab) 
+
+table_elig_treat_redacted <- table_elig_treat %>%
   mutate(
     # Redact values < 8
     Eligibile = ifelse(Eligibile < threshold, NA, as.numeric(Eligibile)),
@@ -427,16 +451,8 @@ table_elig_treat_redacted <- left_join(eligibility_table, treatment_table, by = 
     Remdesivir = plyr::round_any(as.numeric(Remdesivir), 10),
     Molnupiravir = plyr::round_any(Molnupiravir, 10),
     Casirivimab = plyr::round_any(Casirivimab, 10)) %>%
-  arrange(desc(Eligibile))
-
-table_elig_treat_redacted <- table_elig_treat_redacted %>%
-  mutate(Treated_perc = paste(round(Treated/Eligibile*100, digits = 0), " (",
-                              round((Treated/Eligibile - 1.96*sqrt((Treated/Eligibile)*(1-Treated/Eligibile)/Eligibile))*100, digits = 0),
-                              "-",
-                              round((Treated/Eligibile + 1.96*sqrt((Treated/Eligibile)*(1-Treated/Eligibile)/Eligibile))*100, digits = 0), 
-                              ")",
-                              sep = ""),
-         Paxlovid_perc = paste(round(Paxlovid/Treated*100, digits = 0), " (",
+  arrange(desc(decile)) %>%
+  mutate(Paxlovid_perc = paste(round(Paxlovid/Treated*100, digits = 0), " (",
                                round((Paxlovid/Treated - 1.96*sqrt((Paxlovid/Treated)*(1-Paxlovid/Treated)/Treated))*100, digits = 0),
                                "-",
                                round((Paxlovid/Treated + 1.96*sqrt((Paxlovid/Treated)*(1-Paxlovid/Treated)/Treated))*100, digits = 0), 
@@ -474,7 +490,7 @@ table_elig_treat_redacted <- table_elig_treat_redacted %>%
                                         digits = 0), 
                                   ")",
                                   sep = "")) %>%
-  select(n_q, Eligibile, Treated, Treated_perc, Paxlovid, Paxlovid_perc, Sotrovimab, Sotrovimab_perc, Remdesivir, 
+  select(decile, Eligibile, Treated, decile_value, Paxlovid, Paxlovid_perc, Sotrovimab, Sotrovimab_perc, Remdesivir, 
          Remdesivir_perc, Molnupiravir, Molnupiravir_perc, Casirivimab, Casirivimab_perc) %>%  
   mutate(Paxlovid = ifelse(is.na(Paxlovid), "<8", Paxlovid),
          Paxlovid_perc = ifelse(Paxlovid_perc == "NA (NA-NA)", "--", Paxlovid_perc),
@@ -482,6 +498,8 @@ table_elig_treat_redacted <- table_elig_treat_redacted %>%
          Remdesivir_perc = ifelse(Remdesivir_perc == "NA (NA-NA)", "--", Remdesivir_perc),
          Casirivimab = ifelse(is.na(Casirivimab), "<8", Casirivimab),
          Casirivimab_perc = ifelse(Casirivimab_perc == "NA (NA-NA)", "--", Casirivimab_perc))
+
+write_csv(table_elig_treat_redacted, fs::path(output_dir_rmd, "table_1.csv"))
 
 colnames(table_elig_treat_redacted) <- c("STP Decile", "Count", "Count", "%", "Count", "%", 
                                          "Count", "%", "Count", "%", "Count", "%", 
