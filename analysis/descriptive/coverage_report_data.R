@@ -66,9 +66,7 @@ data_processed_clean <- read_rds(here::here("output", "data", "data_processed_cl
       TRUE ~ NA_character_
     )
     
-  ) %>%
-  filter(elig_start >= as.Date("2021-12-11") & elig_start <= as.Date("2022-04-30"))
-
+  )
 
 # Numbers for text ----
 print(dim(data_processed_clean))
