@@ -492,9 +492,7 @@ print(length(unique(date_ids$patient_id)))
 data_processed_clean <- data_processed_combined %>%
   filter(elig_start <= Sys.Date(),
          !(patient_id %in% unique(dup_ids$patient_id)),
-         !(patient_id %in% unique(date_ids$patient_id)),
-         !(patient_id %in% unique(dereg_ids$patient_id)),
-         !(patient_id %in% unique(death_ids$patient_id))) %>%
+         !(patient_id %in% unique(date_ids$patient_id))) %>%
   select(
     
     # ID
