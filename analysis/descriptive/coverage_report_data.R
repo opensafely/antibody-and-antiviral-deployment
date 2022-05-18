@@ -69,7 +69,8 @@ data_processed_clean <- data_processed %>%
       TRUE ~ NA_character_
     )
     
-  )
+  ) %>%
+  filter(elig_start <= as.Date("2022-04-30"))
 
 
 # Numbers for text ----
