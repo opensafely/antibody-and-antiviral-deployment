@@ -67,7 +67,6 @@ data_processed_clean <- read_rds(here::here("output", "data", "data_processed_cl
     )
     
   ) %>%
-  mutate(treatment_date = ifelse(treatment_date < as.Date("2021-12-16"), NA, treatment_date)) %>%
   filter(elig_start >= as.Date("2021-12-11") & elig_start <= as.Date("2022-04-30"))
 
 
@@ -99,7 +98,7 @@ high_risk_cohort_2plus <- plyr::round_any(subset(data_processed_clean, high_risk
 high_risk_cohort_lower <- min(hrc_counts$high_risk_group_combined_count, na.rm = T)
 high_risk_cohort_upper <- max(hrc_counts$high_risk_group_combined_count, na.rm = T)
 
-text <- data.frame(study_start, study_end, study_end_data,
+text <- data.frame(study_start, study_end,
                    eligible_patients, treated_patients, treated_paxlovid, treated_sotrovimab, treated_remdesivir, treated_molnupiravir, 
                    treated_casirivimab, high_risk_cohort_2plus, high_risk_cohort_lower, high_risk_cohort_upper)
 
@@ -674,40 +673,3 @@ groups2 <- groups2 %>%
 
 write_csv(rbind(all, groups) %>% filter(!is.na(tb)), fs::path(output_dir, "table_time_to_treat_redacted.csv"))
 write_csv(groups2, fs::path(output_dir, "table_time_to_treat_groups_redacted.csv"))
-
-
-# COVID-19 related events ----
-all <- data_processed_clean %>%
-  mutate(treated_status = ifelse(!is.na(treatment_type), "treated", "not treated"),
-         covid_hospitalisation_outcome = ifelse(covid_hospitalisation_outcome_date > covid_test_positive_date, 1, 0),
-         covid_hospitalisation_outcome = ifelse(is.na(covid_hospitalisation_outcome), 0, covid_hospitalisation_outcome),
-         covid_hospitalisation_critical_care = ifelse(!is.na(covid_hospitalisation_critical_care), 1, 0)) %>%
-  select(covid_positive_test_30_days_post_elig_or_treat, covid_hospitalisation_outcome, covid_hospitalisation_critical_care, 
-         covid_death, any_death, treated_status) %>%
-  tibble() %>%
-  group_by(treated_status) %>%
-  summarise(
-    across(.fns=sum, na.rm = T)
-  ) %>%
-  pivot_longer(
-    cols = c(covid_positive_test_30_days_post_elig_or_treat, covid_hospitalisation_outcome, covid_hospitalisation_critical_care,
-             covid_death, any_death),
-    names_to = "Outcome",
-    values_to = "Count"
-  ) %>%
-  mutate(Count = ifelse(Count < 5, NA, Count),
-         Count = plyr::round_any(as.numeric(Count), 10)) %>%
-  pivot_wider(names_from = treated_status, values_from = Count) %>%
-  mutate(treated_tot = data_processed_clean %>% filter(!is.na(treatment_type)) %>% nrow(),
-         treated_perc = round(treated/treated_tot*100, digits = 0),
-         untreated_tot = data_processed_clean %>% filter(is.na(treatment_type)) %>% nrow(),
-         untreated_perc = round(`not treated`/untreated_tot*100, digits = 0)) %>%
-  select(Outcome, `not treated`, untreated_perc, treated, treated_perc)
-
-all$Outcome <- c("Positive SARS-CoV-2 test, 30 days or more since start date",
-                 "Required hospitalisation with COVID-19 recorded as the primary diagnosis, one or more days after start date",
-                 "COVID-19-related critical care admission, one or more days after start date",
-                 "COVID-19 related death, one or more days after start date",
-                 "Any death, one or more days after start date")
-
-write_csv(all, fs::path(output_dir, "table_covid_outcomes_redacted.csv"))
