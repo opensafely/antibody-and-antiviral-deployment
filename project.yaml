@@ -70,7 +70,7 @@ actions:
       moderately_sensitive:
         html: output/variation/mabs-and-abs-by-stp.html
         figures: output/variation/figure_*.csv
-        csvs: output/variation/stp_coverage.csv
+        csvs: output/variation/table_*.csv
         
   # Obs vs exp ----
   obs_vs_exp_report:
