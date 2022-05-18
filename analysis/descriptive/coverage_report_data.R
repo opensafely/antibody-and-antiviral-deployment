@@ -42,13 +42,10 @@ fs::dir_create(output_dir2)
 ## Redaction threshold
 threshold = 8
 
-## Import data
-data_processed <- read_rds(here::here("output", "data", "data_processed_clean.rds"))
-
-## Remove patients no longer registered at time of treatment and format variables
-data_processed_clean <- data_processed %>%
-  filter(has_died == 0,
-         registered_eligible == 1 | registered_treated == 1) %>%
+## Import and format data
+data_processed_clean <- read_rds(here::here("output", "data", "data_processed_clean.rds")) %>%
+  filter(elig_start >= as.Date("2021-12-11") & elig_start <= as.Date("2022-04-30")) %>%
+  
   mutate(
     
     # Age groups
@@ -70,7 +67,8 @@ data_processed_clean <- data_processed %>%
     )
     
   ) %>%
-  filter(elig_start <= as.Date("2022-04-30"))
+  mutate(treatment_date = ifelse(treatment_date < as.Date("2021-12-16"), NA, treatment_date)) %>%
+  filter(elig_start >= as.Date("2021-12-11") & elig_start <= as.Date("2022-04-30"))
 
 
 # Numbers for text ----
@@ -78,8 +76,7 @@ print(dim(data_processed_clean))
 print(length(unique(data_processed_clean$patient_id)))
 
 study_start <- min(data_processed_clean$elig_start, na.rm = T)
-study_end <- as.Date("2022-04-30")
-study_end_data <- max(data_processed_clean$elig_start, na.rm = T)
+study_end <- max(data_processed_clean$elig_start, na.rm = T)
 
 eligible_patients <- plyr::round_any(data_processed_clean %>% nrow(), 10)
 treated_patients <- plyr::round_any(data_processed_clean %>% filter(!is.na(treatment_date)) %>% nrow(), 10)
@@ -102,12 +99,9 @@ high_risk_cohort_2plus <- plyr::round_any(subset(data_processed_clean, high_risk
 high_risk_cohort_lower <- min(hrc_counts$high_risk_group_combined_count, na.rm = T)
 high_risk_cohort_upper <- max(hrc_counts$high_risk_group_combined_count, na.rm = T)
 
-deregistered <- plyr::round_any(print(length(unique(subset(data_processed, !is.na(treatment_date))$patient_id)) -
-                        length(unique(subset(data_processed_clean, !is.na(treatment_date))$patient_id))), 10)
-
 text <- data.frame(study_start, study_end, study_end_data,
                    eligible_patients, treated_patients, treated_paxlovid, treated_sotrovimab, treated_remdesivir, treated_molnupiravir, 
-                   treated_casirivimab, high_risk_cohort_2plus, high_risk_cohort_lower, high_risk_cohort_upper, deregistered)
+                   treated_casirivimab, high_risk_cohort_2plus, high_risk_cohort_lower, high_risk_cohort_upper)
 
 write_csv(text, fs::path(output_dir, "table_report_stats_redacted.csv"))
 
