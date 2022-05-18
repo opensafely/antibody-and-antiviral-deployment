@@ -482,8 +482,7 @@ print(length(unique(dup_ids$patient_id)))
 ## Exclude patients with implausible treatment date
 date_ids <- data_processed_combined %>%
   select(patient_id, treatment_date, covid_test_positive_date) %>%
-  filter((treatment_date <= covid_test_positive_date - 21 | treatment_date >= Sys.Date()) |
-         is.na(treatment_date))
+  filter((treatment_date <= covid_test_positive_date - 21 | treatment_date >= Sys.Date()))
 
 cat("#### patients with implausible treatment date ####\n")
 print(length(unique(date_ids$patient_id)))
