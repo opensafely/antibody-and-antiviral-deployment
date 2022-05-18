@@ -482,28 +482,11 @@ print(length(unique(dup_ids$patient_id)))
 ## Exclude patients with implausible treatment date
 date_ids <- data_processed_combined %>%
   select(patient_id, treatment_date, covid_test_positive_date) %>%
-  filter((treatment_date <= covid_test_positive_date - 21 | treatment_date >= Sys.Date()),
+  filter((treatment_date <= covid_test_positive_date - 21 | treatment_date >= Sys.Date()) |
          is.na(treatment_date))
 
 cat("#### patients with implausible treatment date ####\n")
 print(length(unique(date_ids$patient_id)))
-
-## Exclude patients no longer registered at time of treatment
-dereg_ids <- data_processed_combined %>%
-  select(patient_id, registered_treated) %>%
-  filter(registered_treated == 0)
-
-cat("#### patients no longer registered at time of treatment ####\n")
-print(length(unique(dereg_ids$patient_id)))
-
-## Exclude patients who died before receiving treatment
-death_ids <- data_processed_combined %>%
-  select(patient_id, has_died) %>%
-  filter(has_died == 1)
-
-cat("#### patients  who died before receiving treatment ####\n")
-print(length(unique(death_ids$patient_id)))
-
 
 ## Clean data
 data_processed_clean <- data_processed_combined %>%
