@@ -101,7 +101,7 @@ data_processed_clean <- data_processed %>%
   )
 
 ## End date
-end_date <- as.Date("2022-04-30")
+end_date <- as.Date("2022-04-28")
 
 
 ## STP population coverage in TPP
@@ -195,7 +195,7 @@ eligible_stp_decile <- data_processed_clean %>%
 write_csv(eligible_stp_decile, fs::path(output_dir_rmd, "figure_1.csv"))
 write_csv(eligible_stp_decile %>% 
             select(decile, elig_start, cum_count_decile_redacted) %>%
-            filter(elig_start >= as.Date("2021-12-11") & elig_start <= as.Date("2022-04-30")), 
+            filter(elig_start >= as.Date("2021-12-11") & elig_start <= as.Date("2022-04-28")), 
           fs::path(output_dir_rmd, "figure_1_redacted.csv"))
 
 eligible_stp_decile <- eligible_stp_decile %>%
@@ -270,7 +270,7 @@ treated_stp_decile <- data_processed_clean %>%
 write_csv(treated_stp_decile, fs::path(output_dir_rmd, "figure_2.csv"))
 write_csv(treated_stp_decile %>% 
             select(decile, treatment_date, cum_count_decile_redacted) %>%
-            filter(treatment_date >= as.Date("2021-12-11") & treatment_date <= as.Date("2022-04-30")), 
+            filter(treatment_date >= as.Date("2021-12-11") & treatment_date <= as.Date("2022-04-28")), 
           fs::path(output_dir_rmd, "figure_2_redacted.csv"))
 
 treated_stp_decile <- treated_stp_decile %>%

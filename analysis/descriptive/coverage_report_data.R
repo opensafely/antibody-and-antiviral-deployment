@@ -44,7 +44,7 @@ threshold = 8
 
 ## Import and format data
 data_processed_clean <- read_rds(here::here("output", "data", "data_processed_clean.rds")) %>%
-  filter(elig_start >= as.Date("2021-12-11") & elig_start <= as.Date("2022-04-30")) %>%
+  filter(elig_start >= as.Date("2021-12-11") & elig_start <= as.Date("2022-04-28")) %>%
   
   mutate(
     
@@ -159,7 +159,7 @@ coverage_plot_data <- rbind(plot_data_coverage, plot_data_coverage_groups) %>%
 
 write_csv(coverage_plot_data %>% 
             select(elig_start, cum_count_redacted, high_risk_cohort) %>%
-            filter(elig_start >= as.Date("2021-12-11") & elig_start <= as.Date("2022-04-30")), 
+            filter(elig_start >= as.Date("2021-12-11") & elig_start <= as.Date("2022-04-28")), 
           fs::path(output_dir, "table_cum_eligiblity_redacted.csv"))
 write_csv(coverage_plot_data, fs::path(output_dir2, "table_cum_eligiblity.csv"))
 
@@ -219,7 +219,7 @@ treatment_plot_data <- rbind(plot_data_treatment, plot_data_treatment_groups) %>
 
 write_csv(treatment_plot_data %>% 
             select(treatment_date, cum_count_redacted, high_risk_cohort) %>%
-            filter(treatment_date >= as.Date("2021-12-16") & treatment_date <= as.Date("2022-04-30")), 
+            filter(treatment_date >= as.Date("2021-12-16") & treatment_date <= as.Date("2022-04-28")), 
           fs::path(output_dir, "table_cum_treatment_redacted.csv"))
 write_csv(treatment_plot_data, fs::path(output_dir2, "table_cum_treatment.csv"))
 
@@ -258,7 +258,7 @@ treatment_plot_data <- plot_data_treatment_type %>%
 
 write_csv(treatment_plot_data %>% 
             select(treatment_date, cum_count_redacted, treatment_type) %>%
-            filter(treatment_date >= as.Date("2021-12-16") & treatment_date <= as.Date("2022-04-30")),
+            filter(treatment_date >= as.Date("2021-12-16") & treatment_date <= as.Date("2022-04-28")),
           fs::path(output_dir, "table_cum_treatment_type_redacted.csv"))
 write_csv(treatment_plot_data, fs::path(output_dir2, "table_cum_treatment_type.csv"))
 
@@ -290,7 +290,7 @@ plot_data_prop_treated <- data_processed_clean %>%
 
 write_csv(plot_data_prop_treated %>% 
             select(high_risk_cohort, elig_start = week, prop_redacted) %>% 
-            filter(elig_start >= as.Date("2021-12-11") & elig_start <= as.Date("2022-04-30")), 
+            filter(elig_start >= as.Date("2021-12-11") & elig_start <= as.Date("2022-04-28")), 
           fs::path(output_dir, "table_prop_treated_redacted.csv"))
 
 write_csv(plot_data_prop_treated, fs::path(output_dir2, "table_prop_treated.csv"))
