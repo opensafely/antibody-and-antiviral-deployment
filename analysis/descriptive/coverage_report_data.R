@@ -218,8 +218,7 @@ treatment_plot_data <- rbind(plot_data_treatment, plot_data_treatment_groups) %>
   mutate(high_risk_cohort = factor(high_risk_cohort, levels = plot_order$high_risk_cohort))
 
 write_csv(treatment_plot_data %>% 
-            select(treatment_date, cum_count_redacted, high_risk_cohort) %>%
-            filter(treatment_date >= as.Date("2021-12-16") & treatment_date <= as.Date("2022-04-28")), 
+            select(treatment_date, cum_count_redacted, high_risk_cohort), 
           fs::path(output_dir, "table_cum_treatment_redacted.csv"))
 write_csv(treatment_plot_data, fs::path(output_dir2, "table_cum_treatment.csv"))
 
@@ -257,8 +256,7 @@ treatment_plot_data <- plot_data_treatment_type %>%
   mutate(treatment_type = factor(treatment_type, levels = plot_order$treatment_type))
 
 write_csv(treatment_plot_data %>% 
-            select(treatment_date, cum_count_redacted, treatment_type) %>%
-            filter(treatment_date >= as.Date("2021-12-16") & treatment_date <= as.Date("2022-04-28")),
+            select(treatment_date, cum_count_redacted, treatment_type),
           fs::path(output_dir, "table_cum_treatment_type_redacted.csv"))
 write_csv(treatment_plot_data, fs::path(output_dir2, "table_cum_treatment_type.csv"))
 
