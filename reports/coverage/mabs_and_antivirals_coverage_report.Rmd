@@ -63,11 +63,11 @@ end_date <- report_stats$study_end
 ```
 
 # Overview
-This OpenSAFELY report has been rapidly developed to support monitoring the ongoing roll-out of antivirals and neutralising monoclonal antibodies (nMABs) for the treatment of COVID-19, based on the population of 23.4m people registered with practices that use TPP SystmOne software. This report is updated approximately weekly as new data arrives and there are likely to be some small changes made between the some versions.
+This OpenSAFELY report has been rapidly developed to support monitoring the ongoing roll-out of antivirals and neutralising monoclonal antibodies (nMABs) for the treatment of COVID-19, based on the population of 23.4m people registered with practices that use TPP SystmOne software. Since January 2022, this report has been updated approximately bi-monthly, as new data arrives, and will continue to be updated as needed. Consequently, there are likely to be some small changes made between the some versions.
 
 Note that currently the clinician-assigned risk group for patients receiving Paxlovid or Remdesivir is not available. While we’re able to assign high risk groups to about 70% of these patients by implementing the NHS Digital logic, the other 30% are most likely identified via non-digital routes. For now, where results are broken down by high risk cohort and no high risk cohort is able to assigned, these patients are excluded.
 
-The code and data for this report can be found at the OpenSAFELY [antibody-and-antiviral-deployment repository](https://github.com/opensafely/antibody-and-antiviral-deployment). The accompanying manuscript is available on [MedRXiV](https://reports.opensafely.org/reports/antivirals-and-nmabs-for-non-hospitalised-covid-19-patients-coverage-report/) and will shortly be submitted for peer review. 
+The code and data for this report can be found at the OpenSAFELY [antibody-and-antiviral-deployment repository](https://github.com/opensafely/antibody-and-antiviral-deployment). The accompanying manuscript is available on [MedRXiV](https://www.medrxiv.org/content/10.1101/2022.03.07.22272026v1) and is currently undergoing review at BMC Medicine.
 
 
 ##### Contents
@@ -78,6 +78,8 @@ The code and data for this report can be found at the OpenSAFELY [antibody-and-a
   + [Key demographic and clinical characteristics of treated patients](#demographic)
   + [Consistency with guidance](#concordance)
   + [Time to treatment](#time)
+  + [Variation by STP](#stp)
+
 * [Methods](#methods)
 
       
@@ -235,7 +237,7 @@ include_graphics(fs::path(output_dir_rmd, "figures", "figure_cum_treatment_type.
 
 <br>
 
-```{r, elig treatment plot, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '100%', fig.cap = "**(b)**"}
+```{r, elig treatment plot, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '100%'}
 
 treatment_plot_data_therapeutics <- read_csv(here::here(input_dir_os, "table_cum_treatment_redacted.csv")) %>%
   filter(!is.na(treatment_date),
@@ -404,7 +406,7 @@ write_csv(table_elig_treat_redacted, here::here(output_dir_rmd, "tables", "table
 
 ```
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '100%', fig.cap = "**Table 1 Count and proportion of potentially eligible patients in OpenSAFELY-TPP who have received treatment for COVID-19 between 16th December 2021 23rd February 2022, broken down by high risk cohort and treatment type.** Patient counts >7 are rounded to the nearest 10; as a result percentages may not add up to 100%.", fig.topcaption=TRUE}
+```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '100%', fig.cap = "**Table 1 Count and proportion of potentially eligible patients in OpenSAFELY-TPP who have received treatment for COVID-19 between 16th December 2021 23rd February 2022, broken down by high risk cohort and treatment type.** Patient counts of 0-7 are shown as <8 with remaining counts rounded to the nearest 10; as a result percentages may not add up to 100%", fig.topcaption=TRUE}
 
 include_graphics(fs::path(output_dir_rmd, "tables", "table_prop_eligible_high_risk_cohort.png"))
 
@@ -420,11 +422,10 @@ max_date <- max(read_csv(here::here(input_dir_os, "table_prop_treated_redacted.c
 
 weekly_treatment_proportion <- read_csv(here::here(input_dir_os, "table_prop_treated_redacted.csv")) %>%
   filter(!is.na(prop_redacted),
-         treatment_type == "All",
          elig_start != max_date) %>%
   mutate(prop_redacted = ifelse(prop_redacted == 1, 0.99, prop_redacted)) %>%
   mutate(high_risk_cohort = case_when(
-    high_risk_cohort == "All" ~ "All", 
+    high_risk_cohort == "all" ~ "All", 
     high_risk_cohort == "downs_syndrome" ~ "Down's syndrome", 
     high_risk_cohort == "sickle_cell_disease" ~ "Sickle cell disease", 
     high_risk_cohort == "solid_cancer" ~ "Solid cancer", 
@@ -439,15 +440,7 @@ weekly_treatment_proportion <- read_csv(here::here(input_dir_os, "table_prop_tre
     TRUE ~ NA_character_),
     
     high_risk_cohort = unlist(lapply(strwrap(high_risk_cohort, width=30, simplify=FALSE), paste, 
-                                     collapse="\n"))) %>%
-  mutate(treatment_type = case_when(
-    treatment_type == "All" ~ "All", 
-    treatment_type == "Paxlovid" ~ "Paxlovid", 
-    treatment_type == "Sotrovimab" ~ "Sotrovimab", 
-    treatment_type == "Remdesivir" ~ "Remdesivir", 
-    treatment_type == "Molnupiravir" ~ "Molnupiravir", 
-    treatment_type == "Casirivimab" ~ "Casirivimab", 
-    TRUE ~ NA_character_))
+                                     collapse="\n"))) 
 
 plot_order <- weekly_treatment_proportion %>%
   group_by(high_risk_cohort) %>%
@@ -463,8 +456,6 @@ weekly_treatment_proportion <- weekly_treatment_proportion %>%
   mutate(high_risk_cohort = factor(high_risk_cohort, levels = plot_order$high_risk_cohort)) 
 
 weekly_treatment_proportion_plot <- weekly_treatment_proportion %>%
-  mutate(treatment_type = factor(treatment_type, levels = c("All", "Paxlovid", "Sotrovimab", "Remdesivir", 
-                                                            "Molnupiravir", "Casirivimab"))) %>%
   ggplot(aes(x = elig_start, y = prop_redacted, colour = high_risk_cohort, group = high_risk_cohort)) +
   geom_line(size = 1) +
   facet_wrap(~high_risk_cohort, scales = "free_y") +
@@ -492,8 +483,6 @@ ggsave(
 
 include_graphics(fs::path(output_dir_rmd, "figures", "figure_prop_treatment.png"))
 ```
-
-
 
 ### Key demographic and clinical characteristics of treated patients <a name="demographic"></a>
 
@@ -822,6 +811,73 @@ include_graphics(fs::path(output_dir_rmd, "figures", "figure_time_to_treatment_c
 
 
 <br>
+
+### COVID-19 Medicines Delivery Units <a name="stp"></a>
+
+Details of all COVID-19 Medicines Delivery Units (CMDUs) can be found on the . As data on CMDU was not available, Sustainability and Transformation Plan (STP), which has almost a 1:1 mapping, was used as a proxy. 
+
+Details of all CMDUs can be found on the [national website](https://digital.nhs.uk/coronavirus/covid-medicine-delivery-unit-directory?key=h58vqkRUup40o27K04xOrtfh7ZXqwRQoOLhXTkGWlbOrVSkwzfTeetw39uGFlc28). As data on CMDU was not available, Sustainability and Transformation Plan (STP), which has almost a 1:1 mapping, was used as a proxy to identify any variation in the proportion of patients treated between CMDUs. Note, the subset of the population covered by TPP in each STP may not be representative of the whole STP and STPs were only included if they had greater than 10% population coverage in TPP practices. Practice-STP mappings, used to calculate the coverage, were calculated as of March 2020 and it is likely that since then some borders and population sizes may have changed.
+
+
+<br>
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '100%', fig.cap = "**Figure 5 Weekly proportion of eligible patients receiving an antiviral or nMAB for treating COVID-19 since 11th December 2021, stratified by STP decile.**", fig.topcaption=TRUE}
+
+proportion_stp_decile <- read_csv(here::here(input_dir_os, "figure_stp.csv"))
+
+proportion_stp_decile <- proportion_stp_decile %>%
+  mutate(line = ifelse(decile == "0.5", "Median", "Decile"))
+  
+proportion_stp_decile %>%
+  ggplot(aes(x = week, y = prop_decile, group = decile)) +
+  geom_line(aes(colour = line, linetype = line)) +
+  scale_color_manual(values = c("Decile" = "blue", "Median" = "blue")) +
+  scale_linetype_manual(values = c("Decile" = "dashed", "Median" = "solid")) +
+  theme_classic(base_size = 8) +
+  scale_x_date(date_breaks = "2 week", date_labels =  "%d %b %Y") +
+  labs(
+    x = "Week",
+    y = "Proportion of eligible patients who received treatment",
+    title = "(b)")  +
+  theme(legend.position = "bottom", 
+        legend.title = element_blank()) +
+  theme(
+    axis.text = element_text(size = 10),
+    axis.text.x = element_text(angle = 60, hjust = 1),
+    axis.title = element_text(size = 10),
+    axis.line.x = element_line(colour = "black"),
+    panel.grid.minor.x = element_blank()) + 
+  scale_y_continuous(labels = comma)
+
+```
+
+
+<!-- **Table 3 Count and proportion of potentially eligible patients in OpenSAFELY-TPP who have received treatment for COVID-19 since 16th December 2021, broken down by STP decile and treatment type.** Counts <8 have been redacted and counts >7 are rounded to the nearest 10; as a result percentages may not add up to 100%." -->
+
+<!-- ```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '100%'} -->
+
+<!-- table_elig_treat_redacted <- read_csv(here::here(input_dir_os, "table_stp.csv")) -->
+
+<!-- colnames(table_elig_treat_redacted) <- c("STP Decile", "Count", "Count", "%", "Count", "%",  -->
+<!--                                          "Count", "%", "Count", "%", "Count", "%",  -->
+<!--                                          "Count", "%") -->
+<!-- table_elig_treat_redacted %>% -->
+<!--   kable(row.names = FALSE,  -->
+<!--         align = c("l", rep("c", 13)), -->
+<!--         booktabs=TRUE) %>% -->
+<!--   kable_styling(position = "center", full_width = T, bootstrap_options = "striped", font_size = 10)  %>% -->
+<!--   #row_spec(1, bold = T) %>% -->
+<!--   column_spec(1, bold = T, width = "10em") %>% -->
+<!--   column_spec(2, width = "5em") %>% -->
+<!--   column_spec(4, background = "lightgrey")  %>% -->
+<!--   add_header_above(., c(" ", "Eligible", "All" = 2, "Paxlovid" = 2, "Sotrovimab" = 2, "Remdesivir" = 2, -->
+<!--                         "Molnupiravir" = 2, "Casirivimab" = 2)) %>% -->
+<!--   add_header_above(., c(" ", "", "Treated" = 12)) %>% -->
+<!--   add_footnote(c("All percentages (%) are caluclated with 95% confidence intervals"),  -->
+<!--                notation = "symbol") -->
+
+<!-- ``` -->
+
 <br>
 
 
@@ -874,5 +930,6 @@ We generated charts showing the cumulative number of potentially eligible and tr
 ### Codelists
 
 Detailed information on compilation and sources for every individual codelist are available at https://www.opencodelists.org/.
+
 
 
