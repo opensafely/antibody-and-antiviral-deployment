@@ -264,7 +264,7 @@ print("treatment_type_plot_data saved")
 
 ## Proportion treated
 plot_data_prop_treated <- data_processed_clean %>%
-  mutate(week = cut(elig_start - 2 , "week"),
+  mutate(week = cut(elig_start + 2 , "week"),
          elig = 1, 
          all = 1,
          treat = ifelse(!is.na(treatment_date), 1, 0)) %>%

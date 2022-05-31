@@ -305,7 +305,7 @@ treated_stp_decile %>%
 
 # Proportion of treated patients by stp decile
 proportion_stp_decile_n_stp <- data_processed_clean %>%
-  mutate(week = cut(elig_start - 2 , "week"),
+  mutate(week = cut(elig_start + 2 , "week"),
          elig = 1, treat = ifelse(!is.na(treatment_date), 1, 0)) %>%
   select(stp, week, elig, treat) %>%
   group_by(stp, week) %>%  
@@ -323,7 +323,7 @@ proportion_stp_decile_n_stp <- data_processed_clean %>%
             n_treat = sum(treat, na.rm = T))
 
 proportion_stp_decile <- data_processed_clean %>%
-  mutate(week = cut(elig_start - 2 , "week"),
+  mutate(week = cut(elig_start + 2 , "week"),
          elig = 1, treat = ifelse(!is.na(treatment_date), 1, 0)) %>%
   select(stp, week, elig, treat) %>%
   group_by(stp, week) %>%  
