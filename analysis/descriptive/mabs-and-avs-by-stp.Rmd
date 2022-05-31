@@ -315,7 +315,7 @@ proportion_stp_decile_n_stp <- data_processed_clean %>%
          treat = ifelse(is.na(treat), 0, treat)) %>%
   ungroup() %>%
   mutate(prop = treat/elig,
-         week = as.Date(week)) %>%
+         week = as.Date(week)-2) %>%
   mutate(prop_q = ntile(prop,10)/10) %>%
   group_by(prop_q, week) %>%
   summarise(n_stp = n_distinct(stp),
@@ -333,7 +333,7 @@ proportion_stp_decile <- data_processed_clean %>%
          treat = ifelse(is.na(treat), 0, treat)) %>%
   ungroup() %>%
   mutate(prop = treat/elig,
-         week = as.Date(week)) %>%
+         week = as.Date(week)-2) %>%
   mutate(prop_q = ntile(prop,10)) %>%
   group_by(week) %>%
   summarise(quantile = scales::percent(c(seq(0.1,0.9,0.1))),
