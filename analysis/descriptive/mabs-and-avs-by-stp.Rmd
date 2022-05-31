@@ -344,6 +344,7 @@ proportion_stp_decile <- data_processed_clean %>%
   arrange(decile, week) %>%
   filter(week < end_date)
 
+write_csv(proportion_stp_decile, fs::path(output_dir_rmd, "figure_3_counts.csv"))
 write_csv(proportion_stp_decile %>% select(decile, week, prop_decile), fs::path(output_dir_rmd, "figure_3.csv"))
 
 proportion_stp_decile <- proportion_stp_decile %>%

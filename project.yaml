@@ -64,11 +64,11 @@ actions:
   
   # Variation by STP ----
   stp_report:
-    run: r:latest -e 'rmarkdown::render("analysis/descriptive/mabs-and-abs-by-stp.Rmd", knit_root_dir = "/workspace", output_dir="/workspace/output/variation")'
+    run: r:latest -e 'rmarkdown::render("analysis/descriptive/mabs-and-avs-by-stp.Rmd", knit_root_dir = "/workspace", output_dir="/workspace/output/variation")'
     needs: [data_process, extract_stp_data]
     outputs:
       moderately_sensitive:
-        html: output/variation/mabs-and-abs-by-stp.html
+        html: output/variation/mabs-and-avs-by-stp.html
         figures: output/variation/figure_*.csv
         csvs: output/variation/table_*.csv
         
