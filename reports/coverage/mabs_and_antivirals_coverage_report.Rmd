@@ -627,8 +627,8 @@ Of the `r format(report_stats$treated_patients,  big.mark = ",", scientific = FA
 flowchart_non_elig_plot <- flowchart_non_elig[-c(1,8),] %>%
   mutate(criteria2 = c("No positive SARS-CoV-2 test record", 
                        "Positive SARS-CoV-2 test record in previous 30 days",
-                       "No high risk cohort identified within records",                      
-                       "High risk cohort identified within records does not match high risk cohort associated with treatment",
+                       "No high risk cohort identified within GP records",                      
+                       "High risk cohort identified within GP records does not match clinician-assigned high risk group",
                        "Required hospitalisation within 30 days prior to treatment with COVID-19 recorded as the primary diagnosis",
                        "Required hospitalisation within 30 days prior to treatment with any diagnosis",
                        "Non symptomatic positive SARS-CoV-2 test record",
