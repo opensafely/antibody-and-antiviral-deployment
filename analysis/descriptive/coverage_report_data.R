@@ -264,7 +264,7 @@ print("treatment_type_plot_data saved")
 
 ## Proportion treated
 plot_data_prop_treated <- data_processed_clean %>%
-  mutate(week = cut(elig_start - 2 , "week"),
+  mutate(week = cut(elig_start + 2 , "week"),
          elig = 1, 
          all = 1,
          treat = ifelse(!is.na(treatment_date), 1, 0)) %>%
@@ -284,7 +284,7 @@ plot_data_prop_treated <- data_processed_clean %>%
          treat_redacted =  plyr::round_any(treat, 10),
          treat_redacted = ifelse(treat < threshold, NA, treat_redacted),
          prop_redacted = round(treat_redacted/elig_redacted, digits = 4),
-         week = as.Date(week))
+         week = as.Date(week) - 2)
 
 write_csv(plot_data_prop_treated %>% 
             select(high_risk_cohort, elig_start = week, prop_redacted) %>% 
