@@ -67,7 +67,7 @@ This OpenSAFELY report has been rapidly developed to support monitoring the ongo
 
 Note that currently the clinician-assigned risk group for patients receiving Paxlovid or Remdesivir is not available. While we’re able to assign high risk groups to about 70% of these patients by implementing the NHS Digital logic, the other 30% are most likely identified via non-digital routes. For now, where results are broken down by high risk cohort and no high risk cohort is able to assigned, these patients are excluded.
 
-The code and data for this report can be found at the OpenSAFELY [antibody-and-antiviral-deployment repository](https://github.com/opensafely/antibody-and-antiviral-deployment). The accompanying manuscript is available on [MedRXiV](https://www.medrxiv.org/content/10.1101/2022.03.07.22272026v1) and is currently undergoing review at BMC Medicine.
+The code and data for this report can be found at the OpenSAFELY [antibody-and-antiviral-deployment repository](https://github.com/opensafely/antibody-and-antiviral-deployment). The accompanying manuscript is available on [MedRXiV](https://www.medrxiv.org/content/10.1101/2022.03.07.22272026v2) and is currently undergoing review at a peer-reviewed journal.
 
 
 ##### Contents
