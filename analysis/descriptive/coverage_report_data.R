@@ -284,7 +284,11 @@ plot_data_prop_treated <- data_processed_clean %>%
          treat_redacted =  plyr::round_any(treat, 10),
          treat_redacted = ifelse(treat < threshold, NA, treat_redacted),
          prop_redacted = round(treat_redacted/elig_redacted, digits = 4),
+<<<<<<< HEAD
+         week = as.Date(week)-2)
+=======
          week = as.Date(week) - 2)
+>>>>>>> 27cd171870fdd161468d1cabd1eaee76f1943593
 
 write_csv(plot_data_prop_treated %>% 
             select(high_risk_cohort, elig_start = week, prop_redacted) %>% 
