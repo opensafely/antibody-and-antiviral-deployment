@@ -315,7 +315,11 @@ proportion_stp_decile_n_stp <- data_processed_clean %>%
          treat = ifelse(is.na(treat), 0, treat)) %>%
   ungroup() %>%
   mutate(prop = treat/elig,
+<<<<<<< HEAD:analysis/descriptive/mabs-and-abs-by-stp.Rmd
          week = as.Date(week)-2) %>%
+=======
+         week = as.Date(week) - 2) %>%
+>>>>>>> 27cd171870fdd161468d1cabd1eaee76f1943593:analysis/descriptive/mabs-and-avs-by-stp.Rmd
   mutate(prop_q = ntile(prop,10)/10) %>%
   group_by(prop_q, week) %>%
   summarise(n_stp = n_distinct(stp),
@@ -333,7 +337,11 @@ proportion_stp_decile <- data_processed_clean %>%
          treat = ifelse(is.na(treat), 0, treat)) %>%
   ungroup() %>%
   mutate(prop = treat/elig,
+<<<<<<< HEAD:analysis/descriptive/mabs-and-abs-by-stp.Rmd
          week = as.Date(week)-2) %>%
+=======
+         week = as.Date(week) - 2) %>%
+>>>>>>> 27cd171870fdd161468d1cabd1eaee76f1943593:analysis/descriptive/mabs-and-avs-by-stp.Rmd
   mutate(prop_q = ntile(prop,10)) %>%
   group_by(week) %>%
   summarise(quantile = scales::percent(c(seq(0.1,0.9,0.1))),
@@ -344,6 +352,7 @@ proportion_stp_decile <- data_processed_clean %>%
   arrange(decile, week) %>%
   filter(week < end_date)
 
+write_csv(proportion_stp_decile, fs::path(output_dir_rmd, "figure_3_counts.csv"))
 write_csv(proportion_stp_decile %>% select(decile, week, prop_decile), fs::path(output_dir_rmd, "figure_3.csv"))
 
 proportion_stp_decile <- proportion_stp_decile %>%
