@@ -694,19 +694,20 @@ include_graphics(fs::path(output_dir_rmd, "figures", "figure_non_elig_breakdown.
 ### Time to treatment <a name="time"></a>
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE, include=FALSE}
-data_time_between <- read_csv(fs::path(input_dir_os, "table_time_to_treat_redacted.csv"))
+data_time_between <- read_csv(fs::path(input_dir_os, "table_time_to_treat_redacted.csv")) %>%
+  filter(treatment_type %in% c("Paxlovid", "Sotrovimab", "Molnupiravir"))
 
 tbt_num <- data_time_between %>% 
   filter(high_risk_cohort == "All",
-         (tb >= 0 & tb <= 5 & treatment_type %in% c("Paxlovid", "Sotrovimab")) |
-           (tb >= 0 & tb <= 7 & treatment_type %in% c("Remdesivir", "Molnupiravir"))) %>%
+         (tb >= 0 & tb <= 5 & treatment_type %in% c("Paxlovid", "Sotrovimab", "Molnupiravir")) |
+           (tb >= 0 & tb <= 7 & treatment_type %in% c("Remdesivir"))) %>%
   summarise(n = sum(n, na.rm = T))
 
 ```
 
 Overall, of the `r format(report_stats$treated_patients,  big.mark = ",", scientific = FALSE)` patients who received treatment, `r round(tbt_num$n/report_stats$treated_patients*100, digits = 0)`% did so within the respective treatment-specific eligibility window as estimated from test date (as symptom date is not consistently available) (Figure 4).
 
-```{r time to treatment, echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=10, out.width = '100%', fig.cap = "**Figure 4 Time (number of days) between positive SARS-CoV-2 test and treatment for COVID-19, broken down by (a) treatment type and (b) high risk cohort.**", fig.topcaption=TRUE}
+```{r time to treatment, echo=FALSE, warning=FALSE, message=FALSE, results='asis', fig.width=10, out.width = '100%', fig.cap = "**Figure 4 Time (number of days) between positive SARS-CoV-2 test and treatment for COVID-19, broken down by (a) treatment type and (b) high risk cohort.** Treatment types are restricted to the three most commonly used treatments.", fig.topcaption=TRUE}
 
 data_time_between$treatment_type = unlist(lapply(strwrap(data_time_between$treatment_type, width=20, simplify=FALSE), paste, 
                                                   collapse="\n"))
@@ -838,7 +839,7 @@ proportion_stp_decile %>%
   labs(
     x = "Week",
     y = "Proportion of eligible patients who received treatment",
-    title = "(b)")  +
+    title = "")  +
   theme(legend.position = "bottom", 
         legend.title = element_blank()) +
   theme(
