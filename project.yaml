@@ -79,14 +79,6 @@ actions:
     outputs:
       moderately_sensitive:
         html: output/variation/obs-vs-exp.html
-
-  # Crude count of outcomes ----
-  outcomes_report:
-    run: r:latest -e 'rmarkdown::render("analysis/descriptive/crude_outcomes.Rmd", knit_root_dir = "/workspace", output_dir="/workspace/output/effectiveness/counts")'
-    needs: [data_process]
-    outputs:
-      moderately_sensitive:
-        html: output/effectiveness/counts/crude_outcomes.html
   
   
 
