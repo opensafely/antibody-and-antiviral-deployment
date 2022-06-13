@@ -174,7 +174,38 @@ mod.adj <- gam(treated_observed ~ ageband + sex + ethnicity + imd + rural_urban 
 
 table.mod.adj <- broom::tidy(mod.adj, parametric = TRUE, exponentiate = TRUE, conf.int = TRUE) %>%
   as.data.frame()
-  
+
+## Logistic model - adjusted (without ethnicity)
+mod.adj.1 <- gam(treated_observed ~ ageband + sex + imd + rural_urban + region_nhs + stp + 
+               downs_syndrome + solid_cancer + haematological_disease + renal_disease + liver_disease + imid +immunosupression +
+               hiv_aids + solid_organ_transplant + rare_neurological_conditions + autism_nhsd +
+               care_home_primis + dementia_nhsd + housebound_opensafely + learning_disability_primis + shielded_primis +
+               serious_mental_illness_nhsd + sickle_cell_disease_nhsd + vaccination_status + s(week),
+             family = binomial(link = 'logit'),
+             data = data_model)
+
+table.mod.adj.1 <- broom::tidy(mod.adj, parametric = TRUE, exponentiate = TRUE, conf.int = TRUE) %>%
+  as.data.frame()
+
+## Logistic model - adjusted (without high risk cohort)
+mod.adj.2 <- gam(treated_observed ~ ageband + sex + ethnicity + imd + rural_urban + region_nhs + stp + autism_nhsd +
+               care_home_primis + dementia_nhsd + housebound_opensafely + learning_disability_primis + shielded_primis +
+               serious_mental_illness_nhsd + sickle_cell_disease_nhsd + vaccination_status + s(week),
+             family = binomial(link = 'logit'),
+             data = data_model)
+
+table.mod.adj.2 <- broom::tidy(mod.adj, parametric = TRUE, exponentiate = TRUE, conf.int = TRUE) %>%
+  as.data.frame()
+
+## Logistic model - adjusted (without region
+mod.adj.3 <- gam(treated_observed ~ ageband + sex + ethnicity + imd + rural_urban + stp + autism_nhsd +
+               care_home_primis + dementia_nhsd + housebound_opensafely + learning_disability_primis + shielded_primis +
+               serious_mental_illness_nhsd + sickle_cell_disease_nhsd + vaccination_status + s(week),
+             family = binomial(link = 'logit'),
+             data = data_model)
+
+table.mod.adj.3 <- broom::tidy(mod.adj, parametric = TRUE, exponentiate = TRUE, conf.int = TRUE) %>%
+  as.data.frame()
 
 
 # Results
@@ -418,7 +449,19 @@ data_processed_clean %>%
 ```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', out.width = '100%', fig.cap = "**Figure 2. Observed to expected (adjusted) ratio of the number of patients receiving treatment, stratified by (a) ethnicity, (b) high risk cohort and (c) region.** The squares represent the point estimates, and the areas of the squares are proportional to the observed number of patients receiving treatment. The vertical lines display 95% confidence intervals. The solid and dashed horizontal blue lines represent the overall observed to expected ratio of the number of patients receiving treatment with a 95% CI, respectively.", fig.topcaption=TRUE}
   
 # Ethnicity
-results %>% 
+ethnicity_overall <- data_processed_clean %>%
+    mutate(fitted.results = predict(mod.adj.1, newdata = data_processed_clean, type = 'response'),
+         treated_expected = ifelse(fitted.results >= 0.5, 1, 0)) %>% 
+  select(treated_observed, treated_expected) %>%
+  summarise(treated_observed = sum(treated_observed, na.rm = T),
+            treated_expected = sum(treated_expected, na.rm = T)) %>%
+  mutate(y = sum(treated_observed, na.rm = T)/sum(treated_expected, na.rm = T),
+         ymin = y - 1.96*sqrt(treated_observed)/treated_expected,
+         ymax = y + 1.96*sqrt(treated_observed)/treated_expected)
+
+data_processed_clean %>%
+    mutate(fitted.results = predict(mod.adj.1, newdata = data_processed_clean, type = 'response'),
+         treated_expected = ifelse(fitted.results >= 0.5, 1, 0))  %>% 
   select(ethnicity, treated_observed, treated_expected) %>%
   group_by(ethnicity) %>%
   summarise(treated_observed = sum(treated_observed, na.rm = T),
@@ -437,9 +480,9 @@ results %>%
     size = "Observed number of treated patients",
     title = "(a)") +
   #geom_hline(yintercept = 1, linetype = "dashed")  +
-  geom_hline(yintercept = overall$y, colour = "steelblue2") +
-  geom_hline(yintercept = overall$ymin, linetype = "dashed", colour = "steelblue2") +
-  geom_hline(yintercept = overall$ymax, linetype = "dashed", colour = "steelblue2") +
+  geom_hline(yintercept = ethnicity_overall$y, colour = "steelblue2") +
+  geom_hline(yintercept = ethnicity_overall$ymin, linetype = "dashed", colour = "steelblue2") +
+  geom_hline(yintercept = ethnicity_overall$ymax, linetype = "dashed", colour = "steelblue2") +
   theme(
     legend.position = "bottom",
     axis.text = element_text(size = 10),
