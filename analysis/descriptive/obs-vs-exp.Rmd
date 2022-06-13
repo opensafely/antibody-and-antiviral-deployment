@@ -187,7 +187,7 @@ mod.adj.1 <- gam(treated_observed ~ ageband + sex + imd + rural_urban + region_n
 table.mod.adj.1 <- broom::tidy(mod.adj, parametric = TRUE, exponentiate = TRUE, conf.int = TRUE) %>%
   as.data.frame()
 
-## Logistic model - adjusted (without high risk cohort)
+## Logistic model - adjusted (without high risk group)
 mod.adj.2 <- gam(treated_observed ~ ageband + sex + ethnicity + imd + rural_urban + region_nhs + stp + autism_nhsd +
                care_home_primis + dementia_nhsd + housebound_opensafely + learning_disability_primis + shielded_primis +
                serious_mental_illness_nhsd + sickle_cell_disease_nhsd + vaccination_status + s(week),
@@ -242,7 +242,7 @@ for (i in 1:length(cutoffs)){
 
 results <- data_processed_clean %>%
     mutate(fitted.results = predict(mod.adj, newdata = data_processed_clean, type = 'response'),
-         treated_expected = ifelse(fitted.results >= 0.4, 1, 0))
+         treated_expected = ifelse(fitted.results >= 0.5, 1, 0))
 
 accuracy <- round(results %>% filter(treated_expected == treated_observed) %>% nrow()/results %>% nrow(), digits = 2)
 sensitivity <- round(results %>% filter(treated_observed == 1, treated_expected == treated_observed) %>% nrow()/
@@ -263,7 +263,7 @@ overall <- results %>%
 
 overall_unadjusted <- data_processed_clean %>%
     mutate(fitted.results = predict(mod.unadj, newdata = data_processed_clean, type = 'response'),
-         treated_expected = ifelse(fitted.results >= 0.4, 1, 0)) %>% 
+         treated_expected = ifelse(fitted.results >= 0.5, 1, 0)) %>% 
   select(treated_observed, treated_expected) %>%
   summarise(treated_observed = sum(treated_observed, na.rm = T),
             treated_expected = sum(treated_expected, na.rm = T)) %>%
@@ -276,14 +276,16 @@ overall_unadjusted <- data_processed_clean %>%
 <br>
 
 # Background
-As is well known, treatment selection in most observational studies is often influenced by subject characteristics. Eligible patients who receive a nMAB or antiviral as treatment for COVID-19 are therefore likely to be very different to eligible patients who do not receive treatment and baseline characteristics of treated patients will likely differ systematically from those of untreated subjects. For example, patients who are offered treatment will be those who are less likely to be severely ill with COVID-19.
+As is well known, in most observational studies treatment selection/assignment is not random and is often influenced by subject characteristics (i.e., measured and unmeasured characteristics of individuals are associated with likelihood of receiving treatment and with the outcome). Eligible patients who receive a nMAB or antiviral as treatment for COVID-19 are therefore likely to be very different to eligible patients who do not receive treatment and baseline characteristics of treated patients will likely differ systematically from those of untreated subjects. For example, patients who are offered treatment will be those who are less likely to be severely ill with COVID-19.
 
-Preliminary results have shown that there is some variation in which eligible patients are receiving treatment. Variation is appearing across high risk cohorts and regions, but it is possible that other factors such as ethnicity are driving these inequalities. Currently numbers are too small to look at results broken down by more than one category (i.e a breakdown of ethnicity by high risk cohort by region would have too few numbers in each group) so there is a need for another method to try to ascertain whether any real variation exists and if so, where it is occurring.
+Preliminary results have shown that there is some variation in which eligible patients are receiving treatment. Variation is appearing across high risk groups and regions, but it is possible that other factors such as ethnicity are driving these inequalities. Currently numbers are too small to look at results broken down by more than one category (i.e a breakdown of ethnicity by high risk group by region would have too few numbers in each group) so there is a need for another method to try to ascertain whether any real variation exists and if so, where it is occurring.
 
 The aim of this bit of work is to attempt to describe any variation in eligible patients receiving an nMAB or antiviral as treatment for COVID-19 by developing a model to predict treatment status and comparing observed to expected values.
 
 # Method
-Logistic regression was used to model and predict each patients treatment status (either did not receive a nMAB or antiviral as treatment for COVID-19 or received a nMAB or antiviral as treatment for COVID-19), firstly unadjusted, and secondly adjusted for the following demographic and clinical covariates:
+Logistic regression was used to model and predict each patients treatment status (either did not receive a nMAB or antiviral as treatment for COVID-19 or received a nMAB or antiviral as treatment for COVID-19), firstly unadjusted, then by adjusting for all covariates simultaneously to identify independent associations between covariates and the outcome. To explore the variations seen in patients receiving treatment across different ethnicities, high risk groups and regions, separate multivariate logistic models were fitted for each of the groups with the variable of interest (ethnicity, high risk group or region) omitted from the model.
+
+The following demographic and clinical covariates were considered for inclusion in models:
 
 * Age
 * Sex
@@ -292,16 +294,18 @@ Logistic regression was used to model and predict each patients treatment status
 * Urban/rural classification
 * Region
 * STP
-* High risk cohort
+* High risk group
 * High-risk groups/conditions; autism, care home, dementia, housebound, learning disability, shielded, serious mental illness
 * Vaccination status
 * Week of treatment
 
-Unadjusted and adjusted ORs were calculated from the two models, respectively. In addition, the ratio of the observed to expected number of patients receiving treatment was calculated for the ethnicity, high risk cohort and regional groups. To do this, the expected number of patients receiving treatment for each group (adjusted) was calculated by predicting the treatment status for every patient using the above model, and then summing over all patients within each group. In this way, it is possible to obtain the expected value E, which can then be compared to the observed value O, highlighting those groups with treatment rates that differed from the expected rate for the eligible population. Both caterpillar plots and funnel plots were constructed to compare the ratio of the observed to expected number of patients receiving treatment. 
+Unadjusted and adjusted ORs were calculated, and the distribution of the probabilities/propensity scores for patients who did/did not recieved received treatment for COVID-19 were plotted. In addition, ratios of observed to expected number of patients receiving treatment were calculated. To do this, the expected number of patients receiving treatment for each group was calculated by predicting the treatment status for every patient using the relevant adjusted model, and then summing over all patients within each group. In this way, it was possible to obtain the expected value E, which could then be compared to the observed value O, highlighting the groups with treatment rates that differed from the expected rate for the eligible population. Both caterpillar plots and funnel plots were constructed to compare the ratio of the observed to expected number of patients receiving treatment. 
 
 
 # Results
-The multivariable logistic model for treatment status had an overall observed to expected ratio of `r round(overall$y, digits = 2)`, (95% CI `r round(overall$ymin, digits = 2)` - `r round(overall$ymax, digits = 2)`), an AUC of `r auc`, and a misclassification error rate of `r misClasificError`%). As shown in Table 1, several variables were associated with treatment status. After adjustment for all demographic and clinical variables, `r round((1-summary(mod.adj)$dev.expl)*100, digits = 0)`% of the variation remained unexplained with the observed to expected (adjusted) ratios of the number of patients receiving treatment varying widely across high risk cohort and region specific groups  (Figures 1-3).
+
+## Logistic regression
+As shown in Table 1, several variables were associated with treatment status. After adjustment for all demographic and clinical variables, `r round((1-summary(mod.adj)$dev.expl)*100, digits = 0)`% of the variation remained unexplained. The distributions of the propensity scores are shown in Figure 1, showing a large overlap between the scores for patients who did/did not recieved received treatment for COVID-19, indicating a minor difference in the associated covariates between the two groups.
 
 **Table 1 Count and proportion of the total number of eligible patients in OpenSAFELY-TPP since 16th December 2021, stratified by treatment status, along with odds ratios from a univariable and multivariable logistic regression model** Patient counts <8 have been redacted and counts >7 are rounded to the nearest 10; as a result percentages may not add up to 100%."
 
@@ -326,7 +330,7 @@ table1.full <- full_join(table1, table.mod.unadj, by = "term") %>%
                                    "imid", "immunosupression", "hiv_aids", "solid_organ_transplant", "rare_neurological_conditions",
                                    "autism_nhsd", "care_home_primis", "dementia_nhsd",  "housebound_opensafely", "learning_disability_primis",
                                    "shielded_primis", "serious_mental_illness_nhsd", "sickle_cell_disease_nhsd", "vaccination_status"),
-                        labels = c("Age band", "Sex", "Ethnicity", "IMD", "Rurality", "Region", rep("High risk cohort", 10),
+                        labels = c("Age band", "Sex", "Ethnicity", "IMD", "Rurality", "Region", rep("High risk group", 10),
                                    rep("Clinical group", 8),
                                    "Vaccination status")),
          Variable = factor(Variable, 
@@ -395,7 +399,7 @@ table1.full %>%
 
 <br>
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', out.width = '50%', fig.show = "hold", fig.cap = "**Figure 1. Distribution of propensity scores in patients who did/did not recieved received treatment for COVID-19**" , fig.topcaption=TRUE}
+```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', out.width = '50%', fig.show = "hold", fig.cap = "**Figure 1. Distribution of propensity scores (calculated using multivariate logistic model) in patients who did/did not recieved received treatment for COVID-19**" , fig.topcaption=TRUE}
 
 # 1. Create the histogram plot
 phist <- data_processed_clean %>%
@@ -444,15 +448,19 @@ data_processed_clean %>%
   scale_colour_manual(values = c("#00AFBB", "#E7B800"))
 ```
 
-<br>
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', out.width = '100%', fig.cap = "**Figure 2. Observed to expected (adjusted) ratio of the number of patients receiving treatment, stratified by (a) ethnicity, (b) high risk cohort and (c) region.** The squares represent the point estimates, and the areas of the squares are proportional to the observed number of patients receiving treatment. The vertical lines display 95% confidence intervals. The solid and dashed horizontal blue lines represent the overall observed to expected ratio of the number of patients receiving treatment with a 95% CI, respectively.", fig.topcaption=TRUE}
+
+## Observed to expected ratios
+
+### Ethnicity
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', out.width = '100%', fig.cap = "**Figure 2a. Observed to expected (adjusted) ratio of the number of patients receiving treatment, stratified by ethnicity.** The squares represent the point estimates, and the areas of the squares are proportional to the observed number of patients receiving treatment. The vertical lines display 95% confidence intervals. The solid and dashed horizontal blue lines represent the overall observed to expected ratio of the number of patients receiving treatment with a 95% CI, respectively.", fig.topcaption=TRUE}
   
-# Ethnicity
+# Caterpillar plot
 ethnicity_overall <- data_processed_clean %>%
     mutate(fitted.results = predict(mod.adj.1, newdata = data_processed_clean, type = 'response'),
-         treated_expected = ifelse(fitted.results >= 0.5, 1, 0)) %>% 
-  select(treated_observed, treated_expected) %>%
+         treated_expected = ifelse(fitted.results >= 0.5, 1, 0))  %>% 
+  select(ethnicity, treated_observed, treated_expected) %>%
   summarise(treated_observed = sum(treated_observed, na.rm = T),
             treated_expected = sum(treated_expected, na.rm = T)) %>%
   mutate(y = sum(treated_observed, na.rm = T)/sum(treated_expected, na.rm = T),
@@ -476,7 +484,7 @@ data_processed_clean %>%
   theme_classic(base_size = 8) +
   labs(
     x = "Ethnicity",
-    y = "Observed/Expected ratio of treated patients",
+    y = "Observed to expected ratio of treated patients",
     size = "Observed number of treated patients",
     title = "(a)") +
   #geom_hline(yintercept = 1, linetype = "dashed")  +
@@ -495,10 +503,84 @@ data_processed_clean %>%
 
 <br>
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', out.width = '100%'}
+```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', out.width = '100%', fig.cap = "**Figure 2b.  Adjusted funnel plots showing the ratio of the observed to expected number of patients receiving treatment,  stratified by ethnicity.** Coloured points represent adjusted ratios. Solid black lines are 95% intervals and black dotted lines are 99.9% intervals, derived using the Poisson distribution. The solid horizontal blue line represent the overall observed to expected ratio of the number of patients receiving treatment", fig.topcaption=TRUE}
 
-# High risk cohort
-results %>% 
+# Funnel plot
+funnel_plot <- rbind(data_processed_clean %>%
+                       mutate(fitted.results = predict(mod.unadj, newdata = data_processed_clean, type = 'response'),
+                              treated_expected = ifelse(fitted.results >= 0.5, 1, 0)) %>% 
+                     select(ethnicity, treated_observed, treated_expected) %>%
+                     group_by(ethnicity) %>%
+                     summarise(treated_observed = sum(treated_observed, na.rm = T),
+                               treated_expected = sum(treated_expected, na.rm = T)) %>%
+                     mutate(obs_exp_ratio = treated_observed/treated_expected,
+                            lower_ci = obs_exp_ratio - 1.96*sqrt(treated_observed)/treated_expected,
+                            upper_ci = obs_exp_ratio + 1.96*sqrt(treated_observed)/treated_expected,
+                            mod = "unadjusted") %>%
+                     filter(!is.na(ethnicity)),
+                     data_processed_clean %>%
+                       mutate(fitted.results = predict(mod.adj.1, newdata = data_processed_clean, type = 'response'),
+                              treated_expected = ifelse(fitted.results >= 0.5, 1, 0)) %>% 
+                     select(ethnicity, treated_observed, treated_expected) %>%
+                     group_by(ethnicity) %>%
+                     summarise(treated_observed = sum(treated_observed, na.rm = T),
+                               treated_expected = sum(treated_expected, na.rm = T)) %>%
+                     mutate(obs_exp_ratio = treated_observed/treated_expected,
+                            lower_ci = obs_exp_ratio - 1.96*sqrt(treated_observed)/treated_expected,
+                            upper_ci = obs_exp_ratio + 1.96*sqrt(treated_observed)/treated_expected,
+                            mod = "adjusted") %>%
+                     filter(!is.na(ethnicity)))
+
+dfCI <- data.frame(number.seq = seq(plyr::round_any(min(subset(funnel_plot, mod =="adjusted")$treated_expected, na.rm = T), 100, floor), 
+                                    plyr::round_any(max(subset(funnel_plot, mod =="adjusted")$treated_expected, na.rm = T), 100, ceiling), 
+                                    1)) %>%
+  mutate(number.ll95 = overall$y - 1.96 * sqrt(overall$y/number.seq),
+         number.ul95 = overall$y + 1.96 * sqrt(overall$y/number.seq),
+         number.ll999 = overall$y - 3.29 * sqrt(overall$y/number.seq),
+         number.ul999 = overall$y + 3.29 * sqrt(overall$y/number.seq))
+
+funnel_plot %>%
+  filter(mod == "adjusted") %>%
+  ggplot(aes(x = treated_expected, y = obs_exp_ratio)) + 
+  geom_point(aes(colour = ethnicity), size = 2) +
+  geom_line(aes(x = number.seq, y = number.ll95), data = dfCI) +
+  geom_line(aes(x = number.seq, y = number.ul95), data = dfCI) +
+  geom_line(aes(x = number.seq, y = number.ll999), linetype = "dashed", data = dfCI) +
+  geom_line(aes(x = number.seq, y = number.ul999), linetype = "dashed", data = dfCI) +
+  #xlim(min(dfCI$number.seq), max(dfCI$number.seq)) +
+  #ylim(min(dfCI$number.ll999), max(dfCI$number.ul999)) +
+  xlab("Expected number of treated patients") + 
+  ylab("Observed to expected ratio of treated patients") + 
+  theme_bw() +
+  theme(legend.position = "bottom",
+        legend.title = element_blank()) +
+  #guides(shape = "none") +
+  geom_segment(aes(min(dfCI$number.seq), xend =  max(dfCI$number.seq), 
+                   y = ethnicity_overall$y, yend = ethnicity_overall$y),
+               colour = "steelblue2")
+
+```
+
+
+### High risk groups
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', out.width = '100%', fig.cap = "**Figure 3a. Observed to expected (adjusted) ratio of the number of patients receiving treatment, stratified by high risk group.** The squares represent the point estimates, and the areas of the squares are proportional to the observed number of patients receiving treatment. The vertical lines display 95% confidence intervals. The solid and dashed horizontal blue lines represent the overall observed to expected ratio of the number of patients receiving treatment with a 95% CI, respectively.", fig.topcaption=TRUE}
+
+# Caterpillar plot
+hrc_overall <- data_processed_clean %>%
+    mutate(fitted.results = predict(mod.adj.2, newdata = data_processed_clean, type = 'response'),
+         treated_expected = ifelse(fitted.results >= 0.5, 1, 0))  %>% 
+  select(treated_observed, treated_expected) %>%
+  summarise(treated_observed = sum(treated_observed, na.rm = T),
+            treated_expected = sum(treated_expected, na.rm = T)) %>%
+  mutate(y = sum(treated_observed, na.rm = T)/sum(treated_expected, na.rm = T),
+         ymin = y - 1.96*sqrt(treated_observed)/treated_expected,
+         ymax = y + 1.96*sqrt(treated_observed)/treated_expected)
+
+# High risk group
+data_processed_clean %>%
+    mutate(fitted.results = predict(mod.adj.2, newdata = data_processed_clean, type = 'response'),
+         treated_expected = ifelse(fitted.results >= 0.5, 1, 0)) %>% 
   select(treated_observed, downs_syndrome, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
          hiv_aids, solid_organ_transplant, rare_neurological_conditions)  %>%
   mutate(across(
@@ -517,7 +599,9 @@ results %>%
     names_to = "high_risk_cohort",
     values_to = "treated_observed"
   ) %>%
-  full_join(results %>% 
+  full_join(data_processed_clean %>%
+    mutate(fitted.results = predict(mod.adj.2, newdata = data_processed_clean, type = 'response'),
+         treated_expected = ifelse(fitted.results >= 0.5, 1, 0)) %>% 
               select(treated_expected, downs_syndrome, solid_cancer, haematological_disease, renal_disease, liver_disease, imid,
                      immunosupression, hiv_aids, solid_organ_transplant, rare_neurological_conditions)  %>%
               mutate(across(
@@ -559,14 +643,14 @@ results %>%
   geom_errorbar(aes(ymin = lower_ci, ymax = upper_ci), width=.1) +
   theme_classic(base_size = 8) +
   labs(
-    x = "High risk cohort",
-    y = "Observed/Expected ratio of treated patients",
+    x = "High risk group",
+    y = "Observed to expected ratio of treated patients",
     size = "Observed number of treated patients",
     title = "(b)") +
   #geom_hline(yintercept = 1, linetype = "dashed") +
-  geom_hline(yintercept = overall$y, colour = "steelblue2") +
-  geom_hline(yintercept = overall$ymin, linetype = "dashed", colour = "steelblue2") +
-  geom_hline(yintercept = overall$ymax, linetype = "dashed", colour = "steelblue2") +
+  geom_hline(yintercept = hrc_overall$y, colour = "steelblue2") +
+  geom_hline(yintercept = hrc_overall$ymin, linetype = "dashed", colour = "steelblue2") +
+  geom_hline(yintercept = hrc_overall$ymax, linetype = "dashed", colour = "steelblue2") +
   theme(
     legend.position = "bottom",
     axis.text = element_text(size = 10),
@@ -579,107 +663,12 @@ results %>%
 
 <br>
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '100%'}
+```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', out.width = '100%', fig.cap = "**Figure 3b.  Adjusted funnel plots showing the ratio of the observed to expected number of patients receiving treatment,  stratified by high risk group** Coloured points represent adjusted ratios. Solid black lines are 95% intervals and black dotted lines are 99.9% intervals, derived using the Poisson distribution. The solid horizontal blue line represent the overall observed to expected ratio of the number of patients receiving treatment", fig.topcaption=TRUE}
 
-# Region
-results %>% 
-  select(region_nhs, treated_observed, treated_expected) %>%
-  group_by(region_nhs) %>%
-  summarise(treated_observed = sum(treated_observed, na.rm = T),
-            treated_expected = sum(treated_expected, na.rm = T)) %>%
-  mutate(obs_exp_ratio = treated_observed/treated_expected,
-         lower_ci = obs_exp_ratio - 1.96*sqrt(treated_observed)/treated_expected,
-         upper_ci = obs_exp_ratio + 1.96*sqrt(treated_observed)/treated_expected) %>%
-  ggplot(aes(x = region_nhs, y = obs_exp_ratio)) + 
-  geom_point(aes(size = treated_observed), shape = "square") +
-  geom_errorbar(aes(ymin = lower_ci, ymax = upper_ci), width=.1) +
-  theme_classic(base_size = 8) +
-  labs(
-    x = "Region",
-    y = "Observed/Expected ratio of treated patients",
-    size = "Observed number of treated patients",
-    title = "(c)") +
-  #geom_hline(yintercept = 1, linetype = "dashed") +
-  geom_hline(yintercept = overall$y, colour = "steelblue2") +
-  geom_hline(yintercept = overall$ymin, linetype = "dashed", colour = "steelblue2") +
-  geom_hline(yintercept = overall$ymax, linetype = "dashed", colour = "steelblue2") +
-  theme(
-    legend.position = "bottom",
-    axis.text = element_text(size = 10),
-    axis.text.x = element_text(angle = 60, hjust = 1),
-    axis.title = element_text(size = 10),
-    axis.line.x = element_line(colour = "black"),
-    panel.grid.minor.x = element_blank())
-
-```
-
-<br>
-
-```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', out.width = '100%', fig.cap = "**Figure 3.  Adjusted funnel plots showing the ratio of the observed to expected number of patients receiving treatment, stratified by (a) ethnicity, (b) high risk cohort and (c) region.** Coloured points represent adjusted ratios. Solid black lines are 95% intervals and black dotted lines are 99.9% intervals, derived using the Poisson distribution. The solid horizontal blue line represent the overall observed to expected ratio of the number of patients receiving treatment", fig.topcaption=TRUE}
-
-# Ethnicity
-funnel_plot <- rbind(data_processed_clean %>%
-                       mutate(fitted.results = predict(mod.unadj, newdata = data_processed_clean, type = 'response'),
-                              treated_expected = ifelse(fitted.results >= 0.4, 1, 0)) %>% 
-                     select(ethnicity, treated_observed, treated_expected) %>%
-                     group_by(ethnicity) %>%
-                     summarise(treated_observed = sum(treated_observed, na.rm = T),
-                               treated_expected = sum(treated_expected, na.rm = T)) %>%
-                     mutate(obs_exp_ratio = treated_observed/treated_expected,
-                            lower_ci = obs_exp_ratio - 1.96*sqrt(treated_observed)/treated_expected,
-                            upper_ci = obs_exp_ratio + 1.96*sqrt(treated_observed)/treated_expected,
-                            mod = "unadjusted") %>%
-                     filter(!is.na(ethnicity)),
-                     data_processed_clean %>%
-                       mutate(fitted.results = predict(mod.adj, newdata = data_processed_clean, type = 'response'),
-                              treated_expected = ifelse(fitted.results >= 0.4, 1, 0)) %>% 
-                     select(ethnicity, treated_observed, treated_expected) %>%
-                     group_by(ethnicity) %>%
-                     summarise(treated_observed = sum(treated_observed, na.rm = T),
-                               treated_expected = sum(treated_expected, na.rm = T)) %>%
-                     mutate(obs_exp_ratio = treated_observed/treated_expected,
-                            lower_ci = obs_exp_ratio - 1.96*sqrt(treated_observed)/treated_expected,
-                            upper_ci = obs_exp_ratio + 1.96*sqrt(treated_observed)/treated_expected,
-                            mod = "adjusted") %>%
-                     filter(!is.na(ethnicity)))
-
-dfCI <- data.frame(number.seq = seq(plyr::round_any(min(subset(funnel_plot, mod =="adjusted")$treated_expected, na.rm = T), 100, floor), 
-                                    plyr::round_any(max(subset(funnel_plot, mod =="adjusted")$treated_expected, na.rm = T), 100, ceiling), 
-                                    1)) %>%
-  mutate(number.ll95 = overall$y - 1.96 * sqrt(overall$y/number.seq),
-         number.ul95 = overall$y + 1.96 * sqrt(overall$y/number.seq),
-         number.ll999 = overall$y - 3.29 * sqrt(overall$y/number.seq),
-         number.ul999 = overall$y + 3.29 * sqrt(overall$y/number.seq))
-
-funnel_plot %>%
-  filter(mod == "adjusted") %>%
-  ggplot(aes(x = treated_expected, y = obs_exp_ratio)) + 
-  geom_point(aes(colour = ethnicity), size = 2) +
-  geom_line(aes(x = number.seq, y = number.ll95), data = dfCI) +
-  geom_line(aes(x = number.seq, y = number.ul95), data = dfCI) +
-  geom_line(aes(x = number.seq, y = number.ll999), linetype = "dashed", data = dfCI) +
-  geom_line(aes(x = number.seq, y = number.ul999), linetype = "dashed", data = dfCI) +
-  #xlim(min(dfCI$number.seq), max(dfCI$number.seq)) +
-  #ylim(min(dfCI$number.ll999), max(dfCI$number.ul999)) +
-  xlab("Expected number of treated patients") + 
-  ylab("Observed to expected ratio of treated patients") + 
-  theme_bw() +
-  theme(legend.position = "bottom",
-        legend.title = element_blank()) +
-  #guides(shape = "none") +
-  geom_segment(aes(min(dfCI$number.seq), xend =  max(dfCI$number.seq), 
-                   y = overall$y, yend = overall$y),
-               colour = "steelblue2") +
-  ggtitle("(a)")
-
-```
-
-<br>
-
-```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', out.width = '100%'}
-
-# High risk cohort
-funnel_plot <- results %>% 
+# Funnel plot
+funnel_plot <- data_processed_clean %>%
+    mutate(fitted.results = predict(mod.adj.2, newdata = data_processed_clean, type = 'response'),
+         treated_expected = ifelse(fitted.results >= 0.5, 1, 0)) %>% 
   select(treated_observed, downs_syndrome, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
          hiv_aids, solid_organ_transplant, rare_neurological_conditions)  %>%
   mutate(across(
@@ -698,7 +687,9 @@ funnel_plot <- results %>%
     names_to = "high_risk_cohort",
     values_to = "treated_observed"
   ) %>%
-  full_join(results %>% 
+  full_join(data_processed_clean %>%
+    mutate(fitted.results = predict(mod.adj.2, newdata = data_processed_clean, type = 'response'),
+         treated_expected = ifelse(fitted.results >= 0.5, 1, 0)) %>% 
               select(treated_expected, downs_syndrome, solid_cancer, haematological_disease, renal_disease, liver_disease, imid,
                      immunosupression, hiv_aids, solid_organ_transplant, rare_neurological_conditions)  %>%
               mutate(across(
@@ -739,10 +730,10 @@ funnel_plot <- results %>%
 dfCI <- data.frame(number.seq = seq(plyr::round_any(min(funnel_plot$treated_expected, funnel_plot$treated_expected, na.rm = T), 100, floor), 
                                     plyr::round_any(max(funnel_plot$treated_expected, funnel_plot$treated_expected, na.rm = T), 100, ceiling), 
                                     1)) %>%
-  mutate(number.ll95 = overall$y - 1.96 * sqrt(overall$y/number.seq),
-         number.ul95 = overall$y + 1.96 * sqrt(overall$y/number.seq),
-         number.ll999 = overall$y - 3.29 * sqrt(overall$y/number.seq),
-         number.ul999 = overall$y + 3.29 * sqrt(overall$y/number.seq))
+  mutate(number.ll95 = hrc_overall$y - 1.96 * sqrt(hrc_overall$y/number.seq),
+         number.ul95 = hrc_overall$y + 1.96 * sqrt(hrc_overall$y/number.seq),
+         number.ll999 = hrc_overall$y - 3.29 * sqrt(hrc_overall$y/number.seq),
+         number.ul999 = hrc_overall$y + 3.29 * sqrt(hrc_overall$y/number.seq))
 
 funnel_plot %>%
   ggplot(aes(x = treated_expected, y = obs_exp_ratio)) + 
@@ -760,41 +751,89 @@ funnel_plot %>%
         legend.title = element_blank()) +
   #guides(shape = "none") +
   geom_segment(aes(min(dfCI$number.seq), xend =  max(dfCI$number.seq), 
-                   y = overall$y, yend = overall$y),
-               colour = "steelblue2") +
-  ggtitle("(b)")
+                   y = hrc_overall$y, yend = hrc_overall$y),
+               colour = "steelblue2")
+
+```
+
+
+### Region
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', out.width = '100%', fig.cap = "**Figure 4a. Observed to expected (adjusted) ratio of the number of patients receiving treatment, stratified by region** The squares represent the point estimates, and the areas of the squares are proportional to the observed number of patients receiving treatment. The vertical lines display 95% confidence intervals. The solid and dashed horizontal blue lines represent the overall observed to expected ratio of the number of patients receiving treatment with a 95% CI, respectively.", fig.topcaption=TRUE}
+  
+# Caterpillar plot
+region_overall <- data_processed_clean %>%
+    mutate(fitted.results = predict(mod.adj.3, newdata = data_processed_clean, type = 'response'),
+         treated_expected = ifelse(fitted.results >= 0.5, 1, 0))  %>% 
+  select(region_nhs, treated_observed, treated_expected) %>%
+  summarise(treated_observed = sum(treated_observed, na.rm = T),
+            treated_expected = sum(treated_expected, na.rm = T)) %>%
+  mutate(y = sum(treated_observed, na.rm = T)/sum(treated_expected, na.rm = T),
+         ymin = y - 1.96*sqrt(treated_observed)/treated_expected,
+         ymax = y + 1.96*sqrt(treated_observed)/treated_expected)
+
+data_processed_clean %>%
+    mutate(fitted.results = predict(mod.adj.3, newdata = data_processed_clean, type = 'response'),
+         treated_expected = ifelse(fitted.results >= 0.5, 1, 0)) %>% 
+  select(region_nhs, treated_observed, treated_expected) %>%
+  group_by(region_nhs) %>%
+  summarise(treated_observed = sum(treated_observed, na.rm = T),
+            treated_expected = sum(treated_expected, na.rm = T)) %>%
+  mutate(obs_exp_ratio = treated_observed/treated_expected,
+         lower_ci = obs_exp_ratio - 1.96*sqrt(treated_observed)/treated_expected,
+         upper_ci = obs_exp_ratio + 1.96*sqrt(treated_observed)/treated_expected) %>%
+  ggplot(aes(x = region_nhs, y = obs_exp_ratio)) + 
+  geom_point(aes(size = treated_observed), shape = "square") +
+  geom_errorbar(aes(ymin = lower_ci, ymax = upper_ci), width=.1) +
+  theme_classic(base_size = 8) +
+  labs(
+    x = "Region",
+    y = "Observed to expected ratio of treated patients",
+    size = "Observed number of treated patients",
+    title = "(c)") +
+  #geom_hline(yintercept = 1, linetype = "dashed") +
+  geom_hline(yintercept = region_overall$y, colour = "steelblue2") +
+  geom_hline(yintercept = region_overall$ymin, linetype = "dashed", colour = "steelblue2") +
+  geom_hline(yintercept = region_overall$ymax, linetype = "dashed", colour = "steelblue2") +
+  theme(
+    legend.position = "bottom",
+    axis.text = element_text(size = 10),
+    axis.text.x = element_text(angle = 60, hjust = 1),
+    axis.title = element_text(size = 10),
+    axis.line.x = element_line(colour = "black"),
+    panel.grid.minor.x = element_blank())
+
 ```
 
 <br>
 
+```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', out.width = '100%', fig.cap = "**Figure 4b.  Adjusted funnel plots showing the ratio of the observed to expected number of patients receiving treatment, stratified by region** Coloured points represent adjusted ratios. Solid black lines are 95% intervals and black dotted lines are 99.9% intervals, derived using the Poisson distribution. The solid horizontal blue line represent the overall observed to expected ratio of the number of patients receiving treatment", fig.topcaption=TRUE}
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', out.width = '100%'}
-
-# Region
+# Funnel plot
 funnel_plot <- rbind(data_processed_clean %>%
                        mutate(fitted.results = predict(mod.unadj, newdata = data_processed_clean, type = 'response'),
-                              treated_expected = ifelse(fitted.results >= 0.4, 1, 0)) %>% 
-                     select(region_nhs, treated_observed, treated_expected) %>%
-                     group_by(region_nhs) %>%
+                              treated_expected = ifelse(fitted.results >= 0.5, 1, 0)) %>% 
+                     select(ethnicity, treated_observed, treated_expected) %>%
+                     group_by(ethnicity) %>%
                      summarise(treated_observed = sum(treated_observed, na.rm = T),
                                treated_expected = sum(treated_expected, na.rm = T)) %>%
                      mutate(obs_exp_ratio = treated_observed/treated_expected,
                             lower_ci = obs_exp_ratio - 1.96*sqrt(treated_observed)/treated_expected,
                             upper_ci = obs_exp_ratio + 1.96*sqrt(treated_observed)/treated_expected,
                             mod = "unadjusted") %>%
-                     filter(!is.na(region_nhs)),
+                     filter(!is.na(ethnicity)),
                      data_processed_clean %>%
-                       mutate(fitted.results = predict(mod.adj, newdata = data_processed_clean, type = 'response'),
-                              treated_expected = ifelse(fitted.results >= 0.4, 1, 0)) %>% 
-                     select(region_nhs, treated_observed, treated_expected) %>%
-                     group_by(region_nhs) %>%
+                       mutate(fitted.results = predict(mod.adj.3, newdata = data_processed_clean, type = 'response'),
+                              treated_expected = ifelse(fitted.results >= 0.5, 1, 0)) %>% 
+                     select(ethnicity, treated_observed, treated_expected) %>%
+                     group_by(ethnicity) %>%
                      summarise(treated_observed = sum(treated_observed, na.rm = T),
                                treated_expected = sum(treated_expected, na.rm = T)) %>%
                      mutate(obs_exp_ratio = treated_observed/treated_expected,
                             lower_ci = obs_exp_ratio - 1.96*sqrt(treated_observed)/treated_expected,
                             upper_ci = obs_exp_ratio + 1.96*sqrt(treated_observed)/treated_expected,
                             mod = "adjusted") %>%
-                     filter(!is.na(region_nhs)))
+                     filter(!is.na(ethnicity)))
 
 dfCI <- data.frame(number.seq = seq(plyr::round_any(min(subset(funnel_plot, mod =="adjusted")$treated_expected, na.rm = T), 100, floor), 
                                     plyr::round_any(max(subset(funnel_plot, mod =="adjusted")$treated_expected, na.rm = T), 100, ceiling), 
@@ -807,7 +846,7 @@ dfCI <- data.frame(number.seq = seq(plyr::round_any(min(subset(funnel_plot, mod 
 funnel_plot %>%
   filter(mod == "adjusted") %>%
   ggplot(aes(x = treated_expected, y = obs_exp_ratio)) + 
-  geom_point(aes(colour = region_nhs), size = 2) +
+  geom_point(aes(colour = ethnicity), size = 2) +
   geom_line(aes(x = number.seq, y = number.ll95), data = dfCI) +
   geom_line(aes(x = number.seq, y = number.ul95), data = dfCI) +
   geom_line(aes(x = number.seq, y = number.ll999), linetype = "dashed", data = dfCI) +
@@ -822,16 +861,14 @@ funnel_plot %>%
   #guides(shape = "none") +
   geom_segment(aes(min(dfCI$number.seq), xend =  max(dfCI$number.seq), 
                    y = overall$y, yend = overall$y),
-               colour = "steelblue2") +
-  ggtitle("(c)")
-```
+               colour = "steelblue2")
 
-<br>
+```
 
 
 # Conclusions
 * Several variables appear to be associated with receiving treatment 
-* Even after adjustment for clinical and demographic variables, there was wide variation in O/E ratios for high risk cohorts and regions, suggesting that there are large differences in these groups with respect to receiving treatment and that relatively little of the observed variation can be explained by these variables considered in the adjusted model.
+* Even after adjustment for clinical and demographic variables, there was wide variation in O/E ratios for high risk groups and regions, suggesting that there are large differences in these groups with respect to receiving treatment and that relatively little of the observed variation can be explained by these variables considered in the adjusted model.
 
 # Limitations
 * O:E ratios should be used only to compare each group to the average - they are not, in theory, suitable for comparisons across groups with different patient mixes, as they are standardised to the mix of the group under evaluation
