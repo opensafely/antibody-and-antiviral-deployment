@@ -816,9 +816,6 @@ include_graphics(fs::path(output_dir_rmd, "figures", "figure_time_to_treatment_c
 <br>
 
 ### COVID-19 Medicines Delivery Units <a name="stp"></a>
-
-Details of all COVID-19 Medicines Delivery Units (CMDUs) can be found on the . As data on CMDU was not available, Sustainability and Transformation Plan (STP), which has almost a 1:1 mapping, was used as a proxy. 
-
 Details of all CMDUs can be found on the [national website](https://digital.nhs.uk/coronavirus/covid-medicine-delivery-unit-directory?key=h58vqkRUup40o27K04xOrtfh7ZXqwRQoOLhXTkGWlbOrVSkwzfTeetw39uGFlc28). As data on CMDU was not available, Sustainability and Transformation Plan (STP), which has almost a 1:1 mapping, was used as a proxy to identify any variation in the proportion of patients treated between CMDUs. Note, the subset of the population covered by TPP in each STP may not be representative of the whole STP and STPs were only included if they had greater than 10% population coverage in TPP practices. Practice-STP mappings, used to calculate the coverage, were calculated as of March 2020 and it is likely that since then some borders and population sizes may have changed.
 
 
