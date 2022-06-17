@@ -346,6 +346,7 @@ proportion_stp_decile <- data_processed_clean %>%
 
 write_csv(proportion_stp_decile, fs::path(output_dir_rmd, "figure_3_counts.csv"))
 write_csv(proportion_stp_decile %>% select(decile, week, prop_decile), fs::path(output_dir_rmd, "figure_3.csv"))
+write_csv(proportion_stp_decile %>% select(decile, week, prop_decile), fs::path(output_dir_rmd, "figure_stp.csv"))
 
 proportion_stp_decile <- proportion_stp_decile %>%
   mutate(line = ifelse(decile == "0.5", "Median", "Decile"))
