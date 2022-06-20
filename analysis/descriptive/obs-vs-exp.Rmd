@@ -813,27 +813,27 @@ data_processed_clean %>%
 funnel_plot <- rbind(data_processed_clean %>%
                        mutate(fitted.results = predict(mod.unadj, newdata = data_processed_clean, type = 'response'),
                               treated_expected = ifelse(fitted.results >= 0.5, 1, 0)) %>% 
-                     select(ethnicity, treated_observed, treated_expected) %>%
-                     group_by(ethnicity) %>%
+                     select(region_nhs, treated_observed, treated_expected) %>%
+                     group_by(region_nhs) %>%
                      summarise(treated_observed = sum(treated_observed, na.rm = T),
                                treated_expected = sum(treated_expected, na.rm = T)) %>%
                      mutate(obs_exp_ratio = treated_observed/treated_expected,
                             lower_ci = obs_exp_ratio - 1.96*sqrt(treated_observed)/treated_expected,
                             upper_ci = obs_exp_ratio + 1.96*sqrt(treated_observed)/treated_expected,
                             mod = "unadjusted") %>%
-                     filter(!is.na(ethnicity)),
+                     filter(!is.na(region_nhs)),
                      data_processed_clean %>%
                        mutate(fitted.results = predict(mod.adj.3, newdata = data_processed_clean, type = 'response'),
                               treated_expected = ifelse(fitted.results >= 0.5, 1, 0)) %>% 
-                     select(ethnicity, treated_observed, treated_expected) %>%
-                     group_by(ethnicity) %>%
+                     select(region_nhs, treated_observed, treated_expected) %>%
+                     group_by(region_nhs) %>%
                      summarise(treated_observed = sum(treated_observed, na.rm = T),
                                treated_expected = sum(treated_expected, na.rm = T)) %>%
                      mutate(obs_exp_ratio = treated_observed/treated_expected,
                             lower_ci = obs_exp_ratio - 1.96*sqrt(treated_observed)/treated_expected,
                             upper_ci = obs_exp_ratio + 1.96*sqrt(treated_observed)/treated_expected,
                             mod = "adjusted") %>%
-                     filter(!is.na(ethnicity)))
+                     filter(!is.na(region_nhs)))
 
 dfCI <- data.frame(number.seq = seq(plyr::round_any(min(subset(funnel_plot, mod =="adjusted")$treated_expected, na.rm = T), 100, floor), 
                                     plyr::round_any(max(subset(funnel_plot, mod =="adjusted")$treated_expected, na.rm = T), 100, ceiling), 
@@ -846,7 +846,7 @@ dfCI <- data.frame(number.seq = seq(plyr::round_any(min(subset(funnel_plot, mod 
 funnel_plot %>%
   filter(mod == "adjusted") %>%
   ggplot(aes(x = treated_expected, y = obs_exp_ratio)) + 
-  geom_point(aes(colour = ethnicity), size = 2) +
+  geom_point(aes(colour = region_nhs), size = 2) +
   geom_line(aes(x = number.seq, y = number.ll95), data = dfCI) +
   geom_line(aes(x = number.seq, y = number.ul95), data = dfCI) +
   geom_line(aes(x = number.seq, y = number.ll999), linetype = "dashed", data = dfCI) +

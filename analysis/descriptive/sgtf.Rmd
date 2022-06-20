@@ -1,0 +1,181 @@
+---
+title: SGTF availability among non-hospitalised patients with COVID-19 eligible for antivirals and neutralising monoclonal antibodies
+output:
+  html_document:
+  theme: journal
+github_document:
+  keep_html: TRUE
+---
+  
+```{css, echo=FALSE}
+pre {
+  max-height: 300px;
+  overflow-y: auto;
+}
+pre[class] {
+  max-height: 200px;
+}
+```
+
+<style>
+  body {
+    text-align: justify;
+     font-size: 11pt}
+</style>
+
+  
+```{r setup, include=FALSE}
+# Document settings ----
+knitr::opts_chunk$set(echo = TRUE)
+
+# Preliminaries ----
+
+## Import libraries
+library(tidyverse)
+library(here)
+library(glue)
+library(gt)
+library(gtsummary)
+library(reshape2)
+library(stringr)
+library(kableExtra)
+library(knitr)
+library(ggplot2)
+library(png)
+library(readr)
+library(htmltools)
+library(scales)
+
+## Import custom user functions
+source(here("analysis", "lib", "custom_functions.R"))
+
+## Create directory
+dir.create(here::here("output", "coverage", "counts"), showWarnings = FALSE, recursive=TRUE)
+
+## Redaction threshold
+threshold = 8
+
+## IR per Y years
+Y = 1000
+
+## Import data
+data_processed <- read_rds(here::here("output", "data", "data_processed_clean.rds"))
+
+## End date
+end_date <- max(data_processed$start_date, na.rm = T)
+
+## Remove patients no longer registered at time of treatment and format variables
+data_processed_clean <- data_processed %>%
+  filter(has_died == 0,
+         registered_eligible == 1 | registered_treated == 1) %>%
+  mutate(
+    
+    # Age groups
+    ageband = cut(
+      age,
+      breaks = c(12, 30, 40, 50, 60, 70, 80, Inf),
+      labels = c("12-29", "30-39", "40-49", "50-59", "60-69", "70-79", "80+"),
+      right = FALSE),
+    
+    # Vaccination status
+    vaccination_status = fct_case_when(
+      vaccination_status == "Un-vaccinated" ~ "Un-vaccinated",
+      vaccination_status == "Un-vaccinated (declined)" ~ "Un-vaccinated (declined)",
+      vaccination_status== "One vaccination" ~ "One vaccination",
+      vaccination_status == "Two vaccinations" ~ "Two vaccinations",
+      vaccination_status == "Three or more vaccinations" ~ "Three or more vaccinations",
+      #TRUE ~ "Unknown",
+      TRUE ~ NA_character_
+    ),
+    
+    # Treated status
+    treated_status = ifelse(!is.na(treatment_type), "treated", "not treated"),
+    
+    # Censoring
+    start_date = coalesce(covid_test_positive_date, treatment_date),
+    study_end = end_date,
+    
+    censor_date = pmin(death_date, 
+                       dereg_date, 
+                       study_end, 
+                       na.rm = TRUE),
+    
+    # Follow up time 
+    follow_up = tte(start_date,
+                    study_end,
+                    censor_date),
+    
+    time_to_positive_test = tte(start_date,
+                                covid_positive_test_30_days_post_elig_or_treat_date,
+                                censor_date),
+    
+    time_to_positive_test = ifelse(covid_positive_test_30_days_post_elig_or_treat == 1, time_to_positive_test, NA),
+    
+    time_to_hospitalisation = tte(start_date,
+                                  covid_hospitalisation_outcome_date,
+                                  censor_date),
+    time_to_hospitalisation = ifelse(covid_hospital_admission == 1, time_to_hospitalisation, NA),
+    
+    time_to_itu = as.numeric(as.character((ifelse(covid_hospitalisation_critical_care == 1, time_to_hospitalisation, NA)))),
+    
+    covid_death_date = ifelse(covid_death == 1, death_date, NA),
+    covid_death_date = as.Date(covid_death_date, origin = "1970-01-01"),
+    
+    time_to_covid_death = tte(start_date,
+                              covid_death_date,
+                              censor_date),
+    time_to_covid_death = ifelse(covid_death == 1, time_to_covid_death, NA),
+    
+    time_to_any_death = tte(start_date,
+                            death_date,
+                            censor_date),
+    time_to_any_death = ifelse(any_death == 1, time_to_any_death, NA)
+    
+  )
+
+
+
+
+
+```
+
+
+Between **`r format(min(data_processed_clean$start_date, na.rm = T), format = "%d-%b-%Y")`** and **`r format(max(data_processed_clean$start_date, na.rm = T), format = "%d-%b-%Y")`**, a total of `r format(plyr::round_any(nrow(data_processed_clean), 5), big.mark = ",", scientific = FALSE)` non-hospitalised patients registered at a TPP practice in England were identified as potentially being eligible for receiving an antiviral or nMAB for treating COVID-19. Of these `r format(plyr::round_any(nrow(data_processed_clean), 5), big.mark = ",", scientific = FALSE)` potentially eligible patients, `r format(plyr::round_any(nrow(data_processed_clean %>% filter(!is.na(sgtf))), 5), big.mark = ",", scientific = FALSE)` (**`r round(nrow(data_processed_clean %>% filter(!is.na(sgtf)))/nrow(data_processed_clean)*100, digits = 0)`%**) had S-gene target failure data available via Second Generation Surveillance System (SGSS) data, which captures routine laboratory surveillance data on infectious diseases across England. Table 1 shows the breakdown of SGTF availability in eligible patients, stratified by treatment status. 
+
+**Table 1 Breakdown of SGTF availability in eligible patients, stratified by treatment status.**
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '100%'}
+
+data_processed_clean %>%
+  mutate(patient = 1,
+         
+         treated_status = ifelse(!is.na(treatment_type), "Treated", "Untreated"),
+         
+         sgtf = fct_case_when(
+           sgtf == "1" ~ "Cases with SGTF",
+           sgtf == "0" ~ "Detectable S-gene",
+           sgtf == "9" ~ "Unclassifiable",
+           TRUE ~ "Not avaliable"),
+         
+         sgtf_first = fct_case_when(
+           sgtf_first == "1" ~ "Cases with SGTF",
+           sgtf_first == "0" ~ "Detectable S-gene",
+           sgtf_first == "9" ~ "Unclassifiable",
+           TRUE ~ "Not avaliable")
+         ) %>%
+  select(treated_status, `All Tests Dataset` = sgtf, `Earliest Specimen Dataset` = sgtf_first) %>%
+  tbl_summary(by = treated_status) %>%
+  add_overall() %>%
+  modify_header(label ~ "**S-gene target failure data**") %>%
+  modify_spanning_header(c("stat_1", "stat_2") ~ "**Treatment status**") %>%
+  bold_labels()
+
+```
+
+<br>
+
+
+
+
+
+

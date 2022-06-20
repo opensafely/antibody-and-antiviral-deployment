@@ -79,6 +79,14 @@ actions:
     outputs:
       moderately_sensitive:
         html: output/variation/obs-vs-exp.html
+        
+  # SGTF ----
+  sgtf_report:
+    run: r:latest -e 'rmarkdown::render("analysis/descriptive/sgtf.Rmd", knit_root_dir = "/workspace", output_dir="/workspace/output/coverage")'
+    needs: [data_process]
+    outputs:
+      moderately_sensitive:
+        html: output/coverage/sgtf.html
   
   
 

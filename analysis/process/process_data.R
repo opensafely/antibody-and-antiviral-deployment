@@ -119,6 +119,7 @@ data_extract0 <- read_csv(
     
     # COVID VARIENT
     sgtf = col_character(),
+    sgtf_first = col_character(),
     variant = col_character(),
     
     # OUTCOMES ----
@@ -522,7 +523,7 @@ data_processed_clean <- data_processed_combined %>%
     serious_mental_illness_nhsd, sickle_cell_disease_nhsd, vaccination_status,
     
     # COVID variant
-    sgtf, variant,
+    sgtf, sgtf_first, variant,
     
     # Outcomes
     covid_positive_test_30_days_post_elig_or_treat, covid_positive_test_30_days_post_elig_or_treat_date,
