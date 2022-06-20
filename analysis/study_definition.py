@@ -1343,6 +1343,20 @@ study = StudyDefinition(
     find_first_match_in_period = True,
     between = ["covid_test_positive_date", "covid_test_positive_date"],
     returning = "s_gene_target_failure",
+    restrict_to_earliest_specimen_date = False,
+    return_expectations = {
+      "rate": "universal",
+      "category": {"ratios": {"0": 0.7, "1": 0.1, "9": 0.1, "": 0.1}},
+    },
+  ), 
+  
+  sgtf_first = patients.with_test_result_in_sgss(
+    pathogen = "SARS-CoV-2",
+    test_result = "positive",
+    find_first_match_in_period = True,
+    between = ["covid_test_positive_date", "covid_test_positive_date"],
+    returning = "s_gene_target_failure",
+    restrict_to_earliest_specimen_date = True,
     return_expectations = {
       "rate": "universal",
       "category": {"ratios": {"0": 0.7, "1": 0.1, "9": 0.1, "": 0.1}},
