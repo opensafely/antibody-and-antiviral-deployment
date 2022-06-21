@@ -203,6 +203,20 @@ study = StudyDefinition(
     },
   ),
   
+  covid_first_test_positive_date = patients.with_test_result_in_sgss(
+    pathogen = "SARS-CoV-2",
+    test_result = "positive",
+    find_first_match_in_period = True,
+    restrict_to_earliest_specimen_date = True,
+    returning = "date",
+    date_format = "YYYY-MM-DD",
+    on_or_after = "index_date - 5 days",
+    return_expectations = {
+      "date": {"earliest": "2021-12-20"},
+      "incidence": 0.9
+    },
+  ),
+  
   ### Second positive SARS-CoV-2 test
   covid_test_positive_date2 = patients.with_test_result_in_sgss(
     pathogen = "SARS-CoV-2",

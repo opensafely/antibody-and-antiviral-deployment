@@ -63,6 +63,7 @@ data_extract0 <- read_csv(
     # ELIGIBILITY CRITERIA VARIABLES ----
     covid_test_positive = col_logical(),
     covid_test_positive_date = col_date(format = "%Y-%m-%d"),
+    covid_first_test_positive_date = col_date(format = "%Y-%m-%d"),
     covid_test_positive_date2 = col_date(format = "%Y-%m-%d"),
     #covid_positive_test_type = col_character(),
     covid_positive_previous_30_days = col_logical(),
@@ -502,7 +503,7 @@ data_processed_clean <- data_processed_combined %>%
     start_date, has_died, death_date, dereg_date, registered_eligible, registered_treated,
     
     # Eligibility
-    covid_test_positive, symptomatic_covid_test, covid_test_positive_date, covid_positive_previous_30_days, tb_postest_treat, 
+    covid_test_positive, symptomatic_covid_test, covid_test_positive_date, covid_first_test_positive_date, covid_positive_previous_30_days, tb_postest_treat, 
     tb_symponset_treat, elig_start, primary_covid_hospital_discharge_date, any_covid_hospital_discharge_date, pregnancy,
     weight,
     
