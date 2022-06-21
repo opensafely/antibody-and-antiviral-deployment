@@ -55,9 +55,6 @@ dir.create(here::here("output", "coverage", "counts"), showWarnings = FALSE, rec
 ## Redaction threshold
 threshold = 8
 
-## IR per Y years
-Y = 1000
-
 ## Import data
 data_processed <- read_rds(here::here("output", "data", "data_processed_clean.rds"))
 
@@ -93,51 +90,93 @@ data_processed_clean <- data_processed %>%
     
     # Censoring
     start_date = coalesce(covid_test_positive_date, treatment_date),
-    study_end = end_date,
-    
-    censor_date = pmin(death_date, 
-                       dereg_date, 
-                       study_end, 
-                       na.rm = TRUE),
-    
-    # Follow up time 
-    follow_up = tte(start_date,
-                    study_end,
-                    censor_date),
-    
-    time_to_positive_test = tte(start_date,
-                                covid_positive_test_30_days_post_elig_or_treat_date,
-                                censor_date),
-    
-    time_to_positive_test = ifelse(covid_positive_test_30_days_post_elig_or_treat == 1, time_to_positive_test, NA),
-    
-    time_to_hospitalisation = tte(start_date,
-                                  covid_hospitalisation_outcome_date,
-                                  censor_date),
-    time_to_hospitalisation = ifelse(covid_hospital_admission == 1, time_to_hospitalisation, NA),
-    
-    time_to_itu = as.numeric(as.character((ifelse(covid_hospitalisation_critical_care == 1, time_to_hospitalisation, NA)))),
-    
-    covid_death_date = ifelse(covid_death == 1, death_date, NA),
-    covid_death_date = as.Date(covid_death_date, origin = "1970-01-01"),
-    
-    time_to_covid_death = tte(start_date,
-                              covid_death_date,
-                              censor_date),
-    time_to_covid_death = ifelse(covid_death == 1, time_to_covid_death, NA),
-    
-    time_to_any_death = tte(start_date,
-                            death_date,
-                            censor_date),
-    time_to_any_death = ifelse(any_death == 1, time_to_any_death, NA)
-    
+    study_end = end_date
   )
 
 
+```
 
 
+## Simple summaires of SGTF data
+
+## covid_first_test_positive_date versus covid_test_positive_date
+```{r, message=FALSE, warning=FALSE}
+
+# Counts
+colSums(!is.na(data_processed_clean[,c("covid_first_test_positive_date", "covid_test_positive_date")]))
+
+# Date ranges
+data_processed_clean %>% 
+  select(covid_first_test_positive_date, covid_test_positive_date) %>%
+  summary()
+
+# Same date
+data_processed_clean %>%
+  filter(covid_first_test_positive_date == covid_test_positive_date) %>%
+  nrow()
+
+# covid_first_test_positive_date but no covid_test_positive_date (bias because of study pop inclusion criteria)
+data_processed_clean %>%
+  filter(!is.na(covid_first_test_positive_date),
+         is.na(covid_test_positive_date)) %>%
+  nrow()
 
 ```
+
+## sgft versus sgtf_first
+```{r, message=FALSE, warning=FALSE}
+
+# Counts
+colSums(!is.na(data_processed_clean[,c("sgtf_first", "sgtf")]))
+
+full_join(data_processed_clean %>% 
+            select(sgtf_first) %>%
+            group_by(sgtf_first) %>%
+            tally() %>%
+            select(value = sgtf_first, n_sgtf_first = n),
+          data_processed_clean %>% 
+            select(sgtf) %>%
+            group_by(sgtf) %>%
+            tally() %>%
+            select(value = sgtf, n_sgtf = n),
+          by = "value")
+
+```
+
+## covid_first_test_positive_date versus sgtf_first
+```{r, message=FALSE, warning=FALSE}
+
+# Counts
+colSums(!is.na(data_processed_clean[,c("covid_first_test_positive_date", "sgtf_first")]))
+
+# covid_first_test_positive_date (present/absent) versus sgtf_first
+data_processed_clean %>% 
+  select(covid_first_test_positive_date, sgtf_first) %>%
+  mutate(covid_first_test_positive_date = ifelse(is.na(covid_first_test_positive_date), 0 ,1)) %>%
+  group_by(covid_first_test_positive_date, sgtf_first) %>%
+  tally()
+
+```
+
+## covid_first_test_positive_date versus sgtf_first
+```{r, message=FALSE, warning=FALSE}
+
+# Counts
+colSums(!is.na(data_processed_clean[,c("covid_test_positive_date", "sgtf")]))
+
+# covid_first_test_positive_date (present/absent) versus sgtf_first
+data_processed_clean %>% 
+  select(covid_test_positive_date, sgtf) %>%
+  mutate(covid_test_positive_date = ifelse(is.na(covid_test_positive_date), 0 ,1)) %>%
+  group_by(covid_test_positive_date, sgtf) %>%
+  tally()
+
+```
+
+
+
+<br>
+
 
 
 Between **`r format(min(data_processed_clean$start_date, na.rm = T), format = "%d-%b-%Y")`** and **`r format(max(data_processed_clean$start_date, na.rm = T), format = "%d-%b-%Y")`**, a total of `r format(plyr::round_any(nrow(data_processed_clean), 5), big.mark = ",", scientific = FALSE)` non-hospitalised patients registered at a TPP practice in England were identified as potentially being eligible for receiving an antiviral or nMAB for treating COVID-19. Of these `r format(plyr::round_any(nrow(data_processed_clean), 5), big.mark = ",", scientific = FALSE)` potentially eligible patients, `r format(plyr::round_any(nrow(data_processed_clean %>% filter(!is.na(sgtf))), 5), big.mark = ",", scientific = FALSE)` (**`r round(nrow(data_processed_clean %>% filter(!is.na(sgtf)))/nrow(data_processed_clean)*100, digits = 0)`%**) had S-gene target failure data available via Second Generation Surveillance System (SGSS) data, which captures routine laboratory surveillance data on infectious diseases across England. Table 1 shows the breakdown of SGTF availability in eligible patients, stratified by treatment status. 
@@ -154,6 +193,7 @@ data_processed_clean %>%
          sgtf = fct_case_when(
            sgtf == "1" ~ "Cases with SGTF",
            sgtf == "0" ~ "Detectable S-gene",
+           sgtf == "8" ~ "Classified as 8",
            sgtf == "9" ~ "Unclassifiable",
            TRUE ~ "Not avaliable"),
          
