@@ -95,7 +95,7 @@ study = StudyDefinition(
   ),
   
   ## Most recent positive SARS-CoV-2 test
-  covid_lastest_test_positive_date_alltests = patients.with_test_result_in_sgss(
+  covid_latest_test_positive_date_alltests = patients.with_test_result_in_sgss(
     pathogen = "SARS-CoV-2",
     test_result = "positive",
     find_last_match_in_period = True,
@@ -109,7 +109,7 @@ study = StudyDefinition(
     },
   ),
   
-  covid_lastest_test_positive_date_earliestspecimen = patients.with_test_result_in_sgss(
+  covid_latest_test_positive_date_earliestspecimen = patients.with_test_result_in_sgss(
     pathogen = "SARS-CoV-2",
     test_result = "positive",
     find_last_match_in_period = True,
@@ -169,11 +169,11 @@ study = StudyDefinition(
   ), 
   
   ## SGTF for latest covid test
-  sgtf_lastest_alltests = patients.with_test_result_in_sgss(
+  sgtf_latest_alltests = patients.with_test_result_in_sgss(
     pathogen = "SARS-CoV-2",
     test_result = "positive",
     find_last_match_in_period = True,
-    between = ["covid_lastest_test_positive_date_alltests", "covid_lastest_test_positive_date_alltests"],
+    between = ["covid_latest_test_positive_date_alltests", "covid_latest_test_positive_date_alltests"],
     returning = "s_gene_target_failure",
     restrict_to_earliest_specimen_date = False,
     return_expectations = {
@@ -186,7 +186,7 @@ study = StudyDefinition(
     pathogen = "SARS-CoV-2",
     test_result = "positive",
     find_first_match_in_period = True,
-    between = ["covid_lastest_test_positive_date_earliestspecimen", "covid_lastest_test_positive_date_earliestspecimen"],
+    between = ["covid_latest_test_positive_date_earliestspecimen", "covid_latest_test_positive_date_earliestspecimen"],
     returning = "s_gene_target_failure",
     restrict_to_earliest_specimen_date = True,
     return_expectations = {
@@ -229,7 +229,7 @@ study = StudyDefinition(
     pathogen = "SARS-CoV-2",
     test_result = "positive",
     find_first_match_in_period = True,
-    between = ["covid_lastest_test_positive_date_alltests", "covid_lastest_test_positive_date_alltests"],
+    between = ["covid_latest_test_positive_date_alltests", "covid_latest_test_positive_date_alltests"],
     restrict_to_earliest_specimen_date = False,
     returning = "variant",
     return_expectations = {
