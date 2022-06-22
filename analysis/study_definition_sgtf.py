@@ -122,6 +122,21 @@ study = StudyDefinition(
       "incidence": 0.9
     },
   ),
+
+
+    
+  # COUNTS OF POSITIVE TESTS
+  tests_conducted_positive_alltests = patients.with_test_result_in_sgss(
+    pathogen = "SARS-CoV-2",
+    test_result = "positive",
+    returning = "number_of_matches_in_period",
+    on_or_before = "index_date",
+    restrict_to_earliest_specimen_date = False,
+    return_expectations={
+      "int": {"distribution": "normal", "mean": 2, "stddev": 0.1},
+      "incidence": 0.01,
+    },
+  ),
   
   
   # S-GENE TARGET FAILURE Target
