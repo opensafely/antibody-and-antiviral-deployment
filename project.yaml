@@ -12,7 +12,7 @@
 version: '3.0'
 
 expectations:
-  population_size: 100000
+  population_size: 1000000
 
 actions:
   
@@ -88,12 +88,20 @@ actions:
         html: output/variation/obs-vs-exp.html
         
   # SGTF ----
-  sgtf_report:
+  sgtf_mabs_report:
     run: r:latest -e 'rmarkdown::render("analysis/descriptive/sgtf.Rmd", knit_root_dir = "/workspace", output_dir="/workspace/output/coverage")'
-    needs: [extract_sgtf_data, data_process]
+    needs: [data_process]
     outputs:
       moderately_sensitive:
         html: output/coverage/sgtf.html
+  
+  sgtf_report:
+    run: r:latest -e 'rmarkdown::render("analysis/descriptive/sgtf_report.Rmd", knit_root_dir = "/workspace", output_dir="/workspace/output/coverage")'
+    needs: [extract_sgtf_data]
+    outputs:
+      moderately_sensitive:
+        html: output/coverage/sgtf_report.html
+  
   
   
 

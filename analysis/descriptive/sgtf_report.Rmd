@@ -1,0 +1,304 @@
+---
+title: S-gene Target Failure data in OpenSAFELY
+output:
+  html_document:
+  theme: journal
+github_document:
+  keep_html: TRUE
+---
+  
+```{css, echo=FALSE}
+pre {
+  max-height: 300px;
+  overflow-y: auto;
+}
+pre[class] {
+  max-height: 200px;
+}
+```
+
+<style>
+  body {
+    text-align: justify;
+     font-size: 11pt}
+</style>
+
+  
+```{r setup, include=FALSE}
+
+# Document settings ----
+knitr::opts_chunk$set(echo = TRUE)
+
+
+# Preliminaries ----
+
+## Import libraries
+library('tidyverse')
+library('gt')
+library('gtsummary')
+library('here')
+library('tidyverse')
+library('lubridate')
+library('arrow')
+library('reshape2')
+library('dplyr')
+library('readr')
+library('survival')
+library('survminer')
+
+## Custom functions
+source(here("analysis", "lib", "custom_functions.R"))
+
+## Create directory
+dir.create(here::here("output", "coverage"), showWarnings = FALSE, recursive=TRUE)
+
+## Redaction threshold
+threshold = 8
+
+
+# Process data ----
+
+## Read in data (don't rely on defaults)
+data_sgtf <- read_csv(
+  here::here("output", "data", "input_sgtf.csv.gz"),
+  col_types = cols_only(                      
+    
+    # PATIENT ID ----
+    patient_id = col_integer(),
+    
+    # POSITIVE SARS-CoV-2 TEST RESULTS ----
+    covid_first_test_positive_date_alltests = col_date(format = "%Y-%m-%d"),
+    covid_first_test_positive_date_earliestspecimen = col_date(format = "%Y-%m-%d"),
+    covid_latest_test_positive_date_alltests = col_date(format = "%Y-%m-%d"),
+    covid_latest_test_positive_date_earliestspecimen = col_date(format = "%Y-%m-%d"),
+    
+    # COUNTS OF POSITIVE TESTS
+    tests_conducted_positive_alltests = col_integer(),
+    
+    # S-GENE TARGET FAILURE Target
+    sgtf_first_alltests = col_character(),
+    sgtf_first_earliestspecimen = col_character(),                  
+    sgtf_latest_alltests = col_character(),   
+    sgtf_latest_earliestspecimen = col_character(),                  
+    
+    # CASE CATEGORY (type of test used)
+    covid_positive_test_type_earliestspecimen = col_character(), 
+    
+    # COVID VARIENT
+    variant_first_alltests = col_character(),                    
+    variant_latest_alltests = col_character()
+    
+  ),
+)
+
+```
+
+
+## Comparisons of positive SARS-CoV-2 test dates 
+
+### First positive SARS-CoV-2 test date
+```{r, message=FALSE, warning=FALSE}
+
+# Counts
+colSums(!is.na(data_sgtf[,c("covid_first_test_positive_date_earliestspecimen", "covid_first_test_positive_date_alltests")]))
+
+# Date ranges
+data_sgtf %>% 
+  select(covid_first_test_positive_date_earliestspecimen, covid_first_test_positive_date_alltests) %>%
+  summary()
+
+# Same date
+data_sgtf %>%
+  filter(covid_first_test_positive_date_earliestspecimen == covid_first_test_positive_date_alltests) %>%
+  nrow()
+
+# Different date
+data_sgtf %>%
+  filter(covid_first_test_positive_date_earliestspecimen != covid_first_test_positive_date_alltests) %>%
+  nrow()
+
+# Date in earliest specimen dataset but not in all tests dataset
+data_sgtf %>%
+  filter(!is.na(covid_first_test_positive_date_earliestspecimen),
+         is.na(covid_first_test_positive_date_alltests)) %>%
+  nrow()
+
+# No date in earliest specimen dataset but date in all tests dataset
+data_sgtf %>%
+  filter(is.na(covid_first_test_positive_date_earliestspecimen),
+         !is.na(covid_first_test_positive_date_alltests)) %>%
+  nrow()
+
+```
+
+### Latest positive SARS-CoV-2 test date
+```{r, message=FALSE, warning=FALSE}
+
+# Counts
+colSums(!is.na(data_sgtf[,c("covid_latest_test_positive_date_earliestspecimen", "covid_latest_test_positive_date_alltests")]))
+
+# Date ranges
+data_sgtf %>% 
+  select(covid_latest_test_positive_date_earliestspecimen, covid_latest_test_positive_date_alltests) %>%
+  summary()
+
+# Same date
+data_sgtf %>%
+  filter(covid_latest_test_positive_date_earliestspecimen == covid_latest_test_positive_date_alltests) %>%
+  nrow()
+
+# Different date
+data_sgtf %>%
+  filter(covid_latest_test_positive_date_earliestspecimen != covid_latest_test_positive_date_alltests) %>%
+  nrow()
+
+# Date in earliest specimen dataset but not in all tests dataset
+data_sgtf %>%
+  filter(!is.na(covid_latest_test_positive_date_earliestspecimen),
+         is.na(covid_latest_test_positive_date_alltests)) %>%
+  nrow()
+
+# No date in earliest specimen dataset but date in all tests dataset
+data_sgtf %>%
+  filter(is.na(covid_latest_test_positive_date_earliestspecimen),
+         !is.na(covid_latest_test_positive_date_alltests)) %>%
+  nrow()
+
+```
+
+
+## Comparisons of S-gene target failure data
+
+### SGTF for first positive SARS-CoV-2 test
+```{r, message=FALSE, warning=FALSE}
+
+# Counts
+colSums(!is.na(data_sgtf[,c("sgtf_first_earliestspecimen", "sgtf_first_alltests")]))
+
+## Values
+tbls <- list(data_sgtf %>%
+  select(patient_id, `Earliest Specimen Dataset` = sgtf_first_earliestspecimen, `All Tests Dataset` = sgtf_first_alltests) %>%
+  melt(id.var = "patient_id") %>%
+  filter(variable == "Earliest Specimen Dataset") %>%
+  select(`S-gene target failure` = value) %>%
+  mutate(`S-gene target failure` = fct_case_when(
+           `S-gene target failure` == "1" ~ "Cases with SGTF",
+           `S-gene target failure` == "0" ~ "Detectable S-gene",
+           `S-gene target failure` == "8" ~ "Classified as 8",
+           `S-gene target failure` == "9" ~ "Unclassifiable",
+           TRUE ~ "Not avaliable")) %>%
+  tbl_summary(),
+  data_sgtf %>%
+  select(patient_id, `Earliest Specimen Dataset` = sgtf_first_earliestspecimen, `All Tests Dataset` = sgtf_first_alltests) %>%
+  melt(id.var = "patient_id") %>%
+  filter(variable == "All Tests Dataset") %>%
+  select(`S-gene target failure` = value) %>%
+  mutate(`S-gene target failure` = fct_case_when(
+           `S-gene target failure` == "1" ~ "Cases with SGTF",
+           `S-gene target failure` == "0" ~ "Detectable S-gene",
+           `S-gene target failure` == "8" ~ "Classified as 8",
+           `S-gene target failure` == "9" ~ "Unclassifiable",
+           TRUE ~ "Not avaliable")) %>%
+  tbl_summary())
+  
+tbl_merge(tbls, tab_spanner = c("**Earliest Specimen Dataset**", "**All Tests Dataset**"))
+
+
+## Restricted to those with same positive test date
+tbls <- list(data_sgtf %>%
+  filter(covid_first_test_positive_date_earliestspecimen == covid_first_test_positive_date_alltests) %>%
+  select(patient_id, `Earliest Specimen Dataset` = sgtf_first_earliestspecimen, `All Tests Dataset` = sgtf_first_alltests) %>%
+  melt(id.var = "patient_id") %>%
+  filter(variable == "Earliest Specimen Dataset") %>%
+  select(`S-gene target failure` = value) %>%
+  mutate(`S-gene target failure` = fct_case_when(
+           `S-gene target failure` == "1" ~ "Cases with SGTF",
+           `S-gene target failure` == "0" ~ "Detectable S-gene",
+           `S-gene target failure` == "8" ~ "Classified as 8",
+           `S-gene target failure` == "9" ~ "Unclassifiable",
+           TRUE ~ "Not avaliable")) %>%
+  tbl_summary(),
+  data_sgtf %>%
+  filter(covid_first_test_positive_date_earliestspecimen == covid_first_test_positive_date_alltests) %>%
+  select(patient_id, `Earliest Specimen Dataset` = sgtf_first_earliestspecimen, `All Tests Dataset` = sgtf_first_alltests) %>%
+  melt(id.var = "patient_id") %>%
+  filter(variable == "All Tests Dataset") %>%
+  select(`S-gene target failure` = value) %>%
+  mutate(`S-gene target failure` = fct_case_when(
+           `S-gene target failure` == "1" ~ "Cases with SGTF",
+           `S-gene target failure` == "0" ~ "Detectable S-gene",
+           `S-gene target failure` == "8" ~ "Classified as 8",
+           `S-gene target failure` == "9" ~ "Unclassifiable",
+           TRUE ~ "Not avaliable")) %>%
+  tbl_summary())
+  
+tbl_merge(tbls, tab_spanner = c("**Earliest Specimen Dataset**", "**All Tests Dataset**"))
+
+```
+
+### SGTF for latest positive SARS-CoV-2 test
+```{r, message=FALSE, warning=FALSE}
+
+# Counts
+colSums(!is.na(data_sgtf[,c("sgtf_latest_earliestspecimen", "sgtf_latest_alltests")]))
+
+## Values
+tbls <- list(data_sgtf %>%
+  select(patient_id, `Earliest Specimen Dataset` = sgtf_latest_earliestspecimen, `All Tests Dataset` = sgtf_latest_alltests) %>%
+  melt(id.var = "patient_id") %>%
+  filter(variable == "Earliest Specimen Dataset") %>%
+  select(`S-gene target failure` = value) %>%
+  mutate(`S-gene target failure` = fct_case_when(
+           `S-gene target failure` == "1" ~ "Cases with SGTF",
+           `S-gene target failure` == "0" ~ "Detectable S-gene",
+           `S-gene target failure` == "8" ~ "Classified as 8",
+           `S-gene target failure` == "9" ~ "Unclassifiable",
+           TRUE ~ "Not avaliable")) %>%
+  tbl_summary(),
+  data_sgtf %>%
+  select(patient_id, `Earliest Specimen Dataset` = sgtf_latest_earliestspecimen, `All Tests Dataset` = sgtf_latest_alltests) %>%
+  melt(id.var = "patient_id") %>%
+  filter(variable == "All Tests Dataset") %>%
+  select(`S-gene target failure` = value) %>%
+  mutate(`S-gene target failure` = fct_case_when(
+           `S-gene target failure` == "1" ~ "Cases with SGTF",
+           `S-gene target failure` == "0" ~ "Detectable S-gene",
+           `S-gene target failure` == "8" ~ "Classified as 8",
+           `S-gene target failure` == "9" ~ "Unclassifiable",
+           TRUE ~ "Not avaliable")) %>%
+  tbl_summary())
+  
+tbl_merge(tbls, tab_spanner = c("**Earliest Specimen Dataset**", "**All Tests Dataset**"))
+
+
+## Restricted to those with same positive test date
+tbls <- list(data_sgtf %>%
+  filter(covid_latest_test_positive_date_earliestspecimen == covid_latest_test_positive_date_alltests) %>%
+  select(patient_id, `Earliest Specimen Dataset` = sgtf_latest_earliestspecimen, `All Tests Dataset` = sgtf_latest_alltests) %>%
+  melt(id.var = "patient_id") %>%
+  filter(variable == "Earliest Specimen Dataset") %>%
+  select(`S-gene target failure` = value) %>%
+  mutate(`S-gene target failure` = fct_case_when(
+           `S-gene target failure` == "1" ~ "Cases with SGTF",
+           `S-gene target failure` == "0" ~ "Detectable S-gene",
+           `S-gene target failure` == "8" ~ "Classified as 8",
+           `S-gene target failure` == "9" ~ "Unclassifiable",
+           TRUE ~ "Not avaliable")) %>%
+  tbl_summary(),
+  data_sgtf %>%
+  filter(covid_latest_test_positive_date_earliestspecimen == covid_latest_test_positive_date_alltests) %>%
+  select(patient_id, `Earliest Specimen Dataset` = sgtf_latest_earliestspecimen, `All Tests Dataset` = sgtf_latest_alltests) %>%
+  melt(id.var = "patient_id") %>%
+  filter(variable == "All Tests Dataset") %>%
+  select(`S-gene target failure` = value) %>%
+  mutate(`S-gene target failure` = fct_case_when(
+           `S-gene target failure` == "1" ~ "Cases with SGTF",
+           `S-gene target failure` == "0" ~ "Detectable S-gene",
+           `S-gene target failure` == "8" ~ "Classified as 8",
+           `S-gene target failure` == "9" ~ "Unclassifiable",
+           TRUE ~ "Not avaliable")) %>%
+  tbl_summary())
+  
+tbl_merge(tbls, tab_spanner = c("**Earliest Specimen Dataset**", "**All Tests Dataset**"))
+
+```
