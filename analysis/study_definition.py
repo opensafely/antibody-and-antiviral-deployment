@@ -1360,7 +1360,7 @@ study = StudyDefinition(
     restrict_to_earliest_specimen_date = False,
     return_expectations = {
       "rate": "universal",
-      "category": {"ratios": {"0": 0.7, "1": 0.1, "9": 0.1, "": 0.1}},
+      "category": {"ratios": {"0": 0.7, "1": 0.1, "8": 0.05, "9": 0.05, "": 0.1}},
     },
   ), 
   
