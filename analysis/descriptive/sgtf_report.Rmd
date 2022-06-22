@@ -167,6 +167,20 @@ data_sgtf %>%
 ```
 
 
+### Distribution of SARS-CoV-2 positive test results
+```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '100%', fig.cap = "**Figure 1 Distribution of the the number of positive SARS-CoV-2 tests individals have recorded.** Note, this is only available for the positive tests in the _All Tests Dataset_ and no attempts have been made to define epidsodes therefore it is posible that individuals have multiple positive test results for the same infection.", fig.topcaption=TRUE}
+
+data_sgtf %>%
+  select(patient_id, tests_conducted_positive_alltests) %>%
+  mutate(tests_conducted_positive_alltests = ifelse(is.na(tests_conducted_positive_alltests), 0, tests_conducted_positive_alltests)) %>%
+  ggplot(aes(tests_conducted_positive_alltests)) +
+  geom_histogram(binwidth = 1) +
+  theme_bw() +
+  labs(x = "Number of positive SARS-CoV-2 test results", y = "Count")
+
+```
+
+
 ## Comparisons of S-gene target failure data
 
 ### SGTF for first positive SARS-CoV-2 test
