@@ -29,6 +29,13 @@ actions:
       highly_sensitive:
         cohort: output/data/input_stp.csv.gz
   
+    
+  extract_sgtf_data:
+    run: cohortextractor:latest generate_cohort --study-definition study_definition_sgtf --output-dir=output/data --output-format=csv.gz
+    outputs:
+      highly_sensitive:
+        cohort: output/data/input_sgtf.csv.gz
+  
   # Data processing ----
   data_process:
     run: r:latest analysis/process/process_data.R
@@ -83,7 +90,7 @@ actions:
   # SGTF ----
   sgtf_report:
     run: r:latest -e 'rmarkdown::render("analysis/descriptive/sgtf.Rmd", knit_root_dir = "/workspace", output_dir="/workspace/output/coverage")'
-    needs: [data_process]
+    needs: [extract_sgtf_data, data_process]
     outputs:
       moderately_sensitive:
         html: output/coverage/sgtf.html
