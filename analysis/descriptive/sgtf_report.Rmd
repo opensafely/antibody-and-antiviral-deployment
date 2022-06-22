@@ -166,6 +166,20 @@ data_sgtf %>%
 
 ```
 
+### Earliest specimen SARS-CoV-2 positive test dates
+```{r, message=FALSE, warning=FALSE}
+
+# Same date
+data_sgtf %>%
+  filter(covid_first_test_positive_date_earliestspecimen == covid_latest_test_positive_date_earliestspecimen) %>%
+  nrow()
+
+# Different date
+data_sgtf %>%
+  filter(covid_first_test_positive_date_earliestspecimen != covid_latest_test_positive_date_earliestspecimen) %>%
+  nrow()
+
+```
 
 ### Distribution of SARS-CoV-2 positive test results
 ```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '100%', fig.cap = "**Figure 1 Distribution of the the number of positive SARS-CoV-2 tests individals have recorded.** Note, this is only available for the positive tests in the _All Tests Dataset_ and no attempts have been made to define epidsodes therefore it is posible that individuals have multiple positive test results for the same infection.", fig.topcaption=TRUE}
