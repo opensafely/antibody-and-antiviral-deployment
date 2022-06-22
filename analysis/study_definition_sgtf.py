@@ -140,7 +140,7 @@ study = StudyDefinition(
     },
   ), 
   
-  sgtf_first_earliestspeciment = patients.with_test_result_in_sgss(
+  sgtf_first_earliestspecimen = patients.with_test_result_in_sgss(
     pathogen = "SARS-CoV-2",
     test_result = "positive",
     find_first_match_in_period = True,
@@ -167,7 +167,7 @@ study = StudyDefinition(
     },
   ), 
   
-  sgtf_latest_earliestspeciment = patients.with_test_result_in_sgss(
+  sgtf_latest_earliestspecimen = patients.with_test_result_in_sgss(
     pathogen = "SARS-CoV-2",
     test_result = "positive",
     find_first_match_in_period = True,
