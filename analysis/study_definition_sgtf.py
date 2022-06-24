@@ -141,8 +141,62 @@ study = StudyDefinition(
   
   # S-GENE TARGET FAILURE Target
   
-  ## SGTF for first covid test
+  ## First SGTF
   sgtf_first_alltests = patients.with_test_result_in_sgss(
+    pathogen = "SARS-CoV-2",
+    test_result = "positive",
+    find_first_match_in_period = True,
+    on_or_before = "index_date",
+    returning = "s_gene_target_failure",
+    restrict_to_earliest_specimen_date = False,
+    return_expectations = {
+      "rate": "universal",
+      "category": {"ratios": {"0": 0.7, "1": 0.1, "8": 0.05, "9": 0.05, "": 0.1}},
+    },
+  ), 
+  
+  sgtf_first_earliestspecimen = patients.with_test_result_in_sgss(
+    pathogen = "SARS-CoV-2",
+    test_result = "positive",
+    find_first_match_in_period = True,
+    on_or_before = "index_date",
+    returning = "s_gene_target_failure",
+    restrict_to_earliest_specimen_date = True,
+    return_expectations = {
+      "rate": "universal",
+      "category": {"ratios": {"0": 0.7, "1": 0.1, "9": 0.1, "": 0.1}},
+    },
+  ), 
+  
+  ## Latest SGTF
+  sgtf_latest_alltests = patients.with_test_result_in_sgss(
+    pathogen = "SARS-CoV-2",
+    test_result = "positive",
+    find_last_match_in_period = True,
+    on_or_before = "index_date",
+    returning = "s_gene_target_failure",
+    restrict_to_earliest_specimen_date = False,
+    return_expectations = {
+      "rate": "universal",
+      "category": {"ratios": {"0": 0.7, "1": 0.1, "8": 0.05, "9": 0.05, "": 0.1}},
+    },
+  ), 
+  
+  sgtf_latest_earliestspecimen = patients.with_test_result_in_sgss(
+    pathogen = "SARS-CoV-2",
+    test_result = "positive",
+    find_first_match_in_period = True,
+    on_or_before = "index_date",
+    returning = "s_gene_target_failure",
+    restrict_to_earliest_specimen_date = True,
+    return_expectations = {
+      "rate": "universal",
+      "category": {"ratios": {"0": 0.7, "1": 0.1, "9": 0.1, "": 0.1}},
+    },
+  ), 
+  
+  ## SGTF for first covid test
+  sgtf_first_covid_test_date_alltests = patients.with_test_result_in_sgss(
     pathogen = "SARS-CoV-2",
     test_result = "positive",
     find_first_match_in_period = True,
@@ -155,7 +209,7 @@ study = StudyDefinition(
     },
   ), 
   
-  sgtf_first_earliestspecimen = patients.with_test_result_in_sgss(
+  sgtf_first_covid_test_date_earliestspecimen = patients.with_test_result_in_sgss(
     pathogen = "SARS-CoV-2",
     test_result = "positive",
     find_first_match_in_period = True,
@@ -169,7 +223,7 @@ study = StudyDefinition(
   ), 
   
   ## SGTF for latest covid test
-  sgtf_latest_alltests = patients.with_test_result_in_sgss(
+  sgtf_latest_covid_test_date_alltests = patients.with_test_result_in_sgss(
     pathogen = "SARS-CoV-2",
     test_result = "positive",
     find_last_match_in_period = True,
@@ -182,7 +236,7 @@ study = StudyDefinition(
     },
   ), 
   
-  sgtf_latest_earliestspecimen = patients.with_test_result_in_sgss(
+  sgtf_latest_covid_test_date_earliestspecimen = patients.with_test_result_in_sgss(
     pathogen = "SARS-CoV-2",
     test_result = "positive",
     find_first_match_in_period = True,
