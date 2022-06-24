@@ -12,7 +12,7 @@
 version: '3.0'
 
 expectations:
-  population_size: 100000
+  population_size: 500000
 
 actions:
   
@@ -28,10 +28,16 @@ actions:
     outputs:
       highly_sensitive:
         cohort: output/data/input_stp.csv.gz
-  
     
   extract_sgtf_data:
     run: cohortextractor:latest generate_cohort --study-definition study_definition_sgtf --output-dir=output/data --output-format=csv.gz
+    outputs:
+      highly_sensitive:
+        cohort: output/data/input_sgtf.csv.gz
+  
+  extract_sgtf_weekly_data:
+    run: cohortextractor:latest generate_cohort --study-definition study_definition --index-date-range "2019-01-01 to 2021-12-01 by month" --output-dir=output/data --output-format=feather
+    run: cohortextractor:latest generate_cohort --study-definition study_definition_sgtf --index-date-range "2019-01-01 to 2021-12-01 by month" --output-dir=output/data --output-format=csv.gz
     outputs:
       highly_sensitive:
         cohort: output/data/input_sgtf.csv.gz
@@ -97,7 +103,7 @@ actions:
   
   sgtf_report:
     run: r:latest -e 'rmarkdown::render("analysis/descriptive/sgtf_report.Rmd", knit_root_dir = "/workspace", output_dir="/workspace/output/coverage")'
-    needs: [extract_sgtf_data]
+    needs: [extract_sgtf_data, extract_sgtf_weekly_data]
     outputs:
       moderately_sensitive:
         html: output/coverage/sgtf_report.html
