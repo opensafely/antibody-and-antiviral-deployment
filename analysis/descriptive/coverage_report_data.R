@@ -44,7 +44,7 @@ threshold = 8
 
 ## Import and format data
 data_processed_clean <- read_rds(here::here("output", "data", "data_processed_clean.rds")) %>%
-  filter(elig_start >= as.Date("2021-12-11") & elig_start <= as.Date("2022-04-28")) %>%
+  filter(elig_start >= as.Date("2021-12-11")) %>%
   
   mutate(
     
