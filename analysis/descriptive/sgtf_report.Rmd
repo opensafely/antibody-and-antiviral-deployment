@@ -79,7 +79,12 @@ data_sgtf <- read_csv(
     sgtf_first_alltests = col_character(),
     sgtf_first_earliestspecimen = col_character(),                  
     sgtf_latest_alltests = col_character(),   
-    sgtf_latest_earliestspecimen = col_character(),                  
+    sgtf_latest_earliestspecimen = col_character(),  
+    
+    sgtf_first_covid_test_date_alltests = col_character(),
+    sgtf_first_covid_test_date_earliestspecimen = col_character(),
+    sgtf_latest_covid_test_date_alltests = col_character(),
+    sgtf_latest_covid_test_date_earliestspecimen = col_character(),
     
     # CASE CATEGORY (type of test used)
     covid_positive_test_type_earliestspecimen = col_character(), 
@@ -187,17 +192,20 @@ data_sgtf %>%
 data_sgtf %>%
   select(patient_id, tests_conducted_positive_alltests) %>%
   mutate(tests_conducted_positive_alltests = ifelse(is.na(tests_conducted_positive_alltests), 0, tests_conducted_positive_alltests)) %>%
-  ggplot(aes(tests_conducted_positive_alltests)) +
-  geom_histogram(binwidth = 1) +
+  group_by(tests_conducted_positive_alltests) %>%
+  summarise(n_pos_tests = n()) %>%
+  filter(n_pos_tests >= 5) %>%
+  ggplot(aes(x = tests_conducted_positive_alltests, y = n_pos_tests)) +
+  geom_col() +
   theme_bw() +
-  labs(x = "Number of positive SARS-CoV-2 test results", y = "Count")
+  labs(x = "Number of positive SARS-CoV-2 test results", y = "Frequency")
 
 ```
 
 
 ## Comparisons of S-gene target failure data
 
-### SGTF for first positive SARS-CoV-2 test
+### First SGTF result
 ```{r, message=FALSE, warning=FALSE}
 
 # Counts
@@ -205,10 +213,7 @@ colSums(!is.na(data_sgtf[,c("sgtf_first_earliestspecimen", "sgtf_first_alltests"
 
 ## Values
 tbls <- list(data_sgtf %>%
-  select(patient_id, `Earliest Specimen Dataset` = sgtf_first_earliestspecimen, `All Tests Dataset` = sgtf_first_alltests) %>%
-  melt(id.var = "patient_id") %>%
-  filter(variable == "Earliest Specimen Dataset") %>%
-  select(`S-gene target failure` = value) %>%
+  select(`S-gene target failure` = sgtf_first_earliestspecimen) %>%
   mutate(`S-gene target failure` = fct_case_when(
            `S-gene target failure` == "1" ~ "Cases with SGTF",
            `S-gene target failure` == "0" ~ "Detectable S-gene",
@@ -217,10 +222,35 @@ tbls <- list(data_sgtf %>%
            TRUE ~ "Not avaliable")) %>%
   tbl_summary(),
   data_sgtf %>%
-  select(patient_id, `Earliest Specimen Dataset` = sgtf_first_earliestspecimen, `All Tests Dataset` = sgtf_first_alltests) %>%
-  melt(id.var = "patient_id") %>%
-  filter(variable == "All Tests Dataset") %>%
-  select(`S-gene target failure` = value) %>%
+  select(`S-gene target failure` = sgtf_first_alltests) %>%
+  mutate(`S-gene target failure` = fct_case_when(
+           `S-gene target failure` == "1" ~ "Cases with SGTF",
+           `S-gene target failure` == "0" ~ "Detectable S-gene",
+           `S-gene target failure` == "8" ~ "Classified as 8",
+           `S-gene target failure` == "9" ~ "Unclassifiable",
+           TRUE ~ "Not avaliable")) %>%
+  tbl_summary())
+  
+tbl_merge(tbls, tab_spanner = c("**Earliest Specimen Dataset**", "**All Tests Dataset**"))
+```
+
+### SGTF on first positive test date
+```{r, message=FALSE, warning=FALSE}
+
+# Counts
+colSums(!is.na(data_sgtf[,c("sgtf_first_covid_test_date_earliestspecimen", "sgtf_first_covid_test_date_alltests")]))
+
+tbls <- list(data_sgtf %>%
+  select(`S-gene target failure` = sgtf_first_covid_test_date_earliestspecimen,) %>%
+  mutate(`S-gene target failure` = fct_case_when(
+           `S-gene target failure` == "1" ~ "Cases with SGTF",
+           `S-gene target failure` == "0" ~ "Detectable S-gene",
+           `S-gene target failure` == "8" ~ "Classified as 8",
+           `S-gene target failure` == "9" ~ "Unclassifiable",
+           TRUE ~ "Not avaliable")) %>%
+  tbl_summary(),
+  data_sgtf %>%
+  select(`S-gene target failure` = sgtf_first_covid_test_date_alltests,) %>%
   mutate(`S-gene target failure` = fct_case_when(
            `S-gene target failure` == "1" ~ "Cases with SGTF",
            `S-gene target failure` == "0" ~ "Detectable S-gene",
@@ -231,14 +261,10 @@ tbls <- list(data_sgtf %>%
   
 tbl_merge(tbls, tab_spanner = c("**Earliest Specimen Dataset**", "**All Tests Dataset**"))
 
-
 ## Restricted to those with same positive test date
 tbls <- list(data_sgtf %>%
   filter(covid_first_test_positive_date_earliestspecimen == covid_first_test_positive_date_alltests) %>%
-  select(patient_id, `Earliest Specimen Dataset` = sgtf_first_earliestspecimen, `All Tests Dataset` = sgtf_first_alltests) %>%
-  melt(id.var = "patient_id") %>%
-  filter(variable == "Earliest Specimen Dataset") %>%
-  select(`S-gene target failure` = value) %>%
+  select(`S-gene target failure` = sgtf_first_covid_test_date_earliestspecimen,) %>%
   mutate(`S-gene target failure` = fct_case_when(
            `S-gene target failure` == "1" ~ "Cases with SGTF",
            `S-gene target failure` == "0" ~ "Detectable S-gene",
@@ -248,10 +274,7 @@ tbls <- list(data_sgtf %>%
   tbl_summary(),
   data_sgtf %>%
   filter(covid_first_test_positive_date_earliestspecimen == covid_first_test_positive_date_alltests) %>%
-  select(patient_id, `Earliest Specimen Dataset` = sgtf_first_earliestspecimen, `All Tests Dataset` = sgtf_first_alltests) %>%
-  melt(id.var = "patient_id") %>%
-  filter(variable == "All Tests Dataset") %>%
-  select(`S-gene target failure` = value) %>%
+  select(`S-gene target failure` = sgtf_first_covid_test_date_alltests,) %>%
   mutate(`S-gene target failure` = fct_case_when(
            `S-gene target failure` == "1" ~ "Cases with SGTF",
            `S-gene target failure` == "0" ~ "Detectable S-gene",
@@ -259,23 +282,19 @@ tbls <- list(data_sgtf %>%
            `S-gene target failure` == "9" ~ "Unclassifiable",
            TRUE ~ "Not avaliable")) %>%
   tbl_summary())
-  
+
 tbl_merge(tbls, tab_spanner = c("**Earliest Specimen Dataset**", "**All Tests Dataset**"))
 
 ```
 
-### SGTF for latest positive SARS-CoV-2 test
+### Latest SGTF result
 ```{r, message=FALSE, warning=FALSE}
 
 # Counts
-colSums(!is.na(data_sgtf[,c("sgtf_latest_earliestspecimen", "sgtf_latest_alltests")]))
+colSums(!is.na(data_sgtf[,c("sgtf_latest_covid_test_date_earliestspecimen", "sgtf_latest_covid_test_date_alltests")]))
 
-## Values
 tbls <- list(data_sgtf %>%
-  select(patient_id, `Earliest Specimen Dataset` = sgtf_latest_earliestspecimen, `All Tests Dataset` = sgtf_latest_alltests) %>%
-  melt(id.var = "patient_id") %>%
-  filter(variable == "Earliest Specimen Dataset") %>%
-  select(`S-gene target failure` = value) %>%
+  select(`S-gene target failure` = sgtf_latest_covid_test_date_earliestspecimen,) %>%
   mutate(`S-gene target failure` = fct_case_when(
            `S-gene target failure` == "1" ~ "Cases with SGTF",
            `S-gene target failure` == "0" ~ "Detectable S-gene",
@@ -284,10 +303,7 @@ tbls <- list(data_sgtf %>%
            TRUE ~ "Not avaliable")) %>%
   tbl_summary(),
   data_sgtf %>%
-  select(patient_id, `Earliest Specimen Dataset` = sgtf_latest_earliestspecimen, `All Tests Dataset` = sgtf_latest_alltests) %>%
-  melt(id.var = "patient_id") %>%
-  filter(variable == "All Tests Dataset") %>%
-  select(`S-gene target failure` = value) %>%
+  select(`S-gene target failure` = sgtf_latest_covid_test_date_alltests,) %>%
   mutate(`S-gene target failure` = fct_case_when(
            `S-gene target failure` == "1" ~ "Cases with SGTF",
            `S-gene target failure` == "0" ~ "Detectable S-gene",
@@ -298,14 +314,10 @@ tbls <- list(data_sgtf %>%
   
 tbl_merge(tbls, tab_spanner = c("**Earliest Specimen Dataset**", "**All Tests Dataset**"))
 
-
 ## Restricted to those with same positive test date
 tbls <- list(data_sgtf %>%
   filter(covid_latest_test_positive_date_earliestspecimen == covid_latest_test_positive_date_alltests) %>%
-  select(patient_id, `Earliest Specimen Dataset` = sgtf_latest_earliestspecimen, `All Tests Dataset` = sgtf_latest_alltests) %>%
-  melt(id.var = "patient_id") %>%
-  filter(variable == "Earliest Specimen Dataset") %>%
-  select(`S-gene target failure` = value) %>%
+  select(`S-gene target failure` = sgtf_latest_covid_test_date_earliestspecimen,) %>%
   mutate(`S-gene target failure` = fct_case_when(
            `S-gene target failure` == "1" ~ "Cases with SGTF",
            `S-gene target failure` == "0" ~ "Detectable S-gene",
@@ -315,10 +327,7 @@ tbls <- list(data_sgtf %>%
   tbl_summary(),
   data_sgtf %>%
   filter(covid_latest_test_positive_date_earliestspecimen == covid_latest_test_positive_date_alltests) %>%
-  select(patient_id, `Earliest Specimen Dataset` = sgtf_latest_earliestspecimen, `All Tests Dataset` = sgtf_latest_alltests) %>%
-  melt(id.var = "patient_id") %>%
-  filter(variable == "All Tests Dataset") %>%
-  select(`S-gene target failure` = value) %>%
+  select(`S-gene target failure` = sgtf_latest_covid_test_date_alltests,) %>%
   mutate(`S-gene target failure` = fct_case_when(
            `S-gene target failure` == "1" ~ "Cases with SGTF",
            `S-gene target failure` == "0" ~ "Detectable S-gene",
@@ -326,7 +335,7 @@ tbls <- list(data_sgtf %>%
            `S-gene target failure` == "9" ~ "Unclassifiable",
            TRUE ~ "Not avaliable")) %>%
   tbl_summary())
-  
+
 tbl_merge(tbls, tab_spanner = c("**Earliest Specimen Dataset**", "**All Tests Dataset**"))
 
 ```
