@@ -159,7 +159,7 @@ coverage_plot_data <- rbind(plot_data_coverage, plot_data_coverage_groups) %>%
 
 write_csv(coverage_plot_data %>% 
             select(elig_start, cum_count_redacted, high_risk_cohort) %>%
-            filter(elig_start >= as.Date("2021-12-11") & elig_start <= as.Date("2022-04-28")), 
+            filter(elig_start >= as.Date("2021-12-11")), 
           fs::path(output_dir, "table_cum_eligiblity_redacted.csv"))
 write_csv(coverage_plot_data, fs::path(output_dir2, "table_cum_eligiblity.csv"))
 
@@ -288,7 +288,7 @@ plot_data_prop_treated <- data_processed_clean %>%
 
 write_csv(plot_data_prop_treated %>% 
             select(high_risk_cohort, elig_start = week, prop_redacted) %>% 
-            filter(elig_start >= as.Date("2021-12-11") & elig_start <= as.Date("2022-04-28")), 
+            filter(elig_start >= as.Date("2021-12-11")), 
           fs::path(output_dir, "table_prop_treated_redacted.csv"))
 
 write_csv(plot_data_prop_treated, fs::path(output_dir2, "table_prop_treated.csv"))
