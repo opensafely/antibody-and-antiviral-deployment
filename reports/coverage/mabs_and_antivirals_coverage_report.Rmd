@@ -41,6 +41,7 @@ library(readr)
 library(htmltools)
 library(gt)
 library(scales)
+library(lubridate)
 
 
 # Import custom user functions ----
@@ -827,6 +828,9 @@ proportion_stp_decile <- read_csv(here::here(input_dir_os, "figure_stp.csv"))
 
 proportion_stp_decile <- proportion_stp_decile %>%
   mutate(line = ifelse(decile == "0.5", "Median", "Decile"))
+proportion_stp_decile <- 
+  proportion_stp_decile %>%
+  filter(week != ymd(20220625))
   
 proportion_stp_decile %>%
   ggplot(aes(x = week, y = prop_decile, group = decile)) +
