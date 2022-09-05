@@ -49,6 +49,7 @@ actions:
     outputs:
       highly_sensitive:
         data: output/data/data_processed_high_risk.rds
+      moderately_sensitive:
         csv: output/data_properties/n_high_risk.csv
   
   # Data summaries ----
