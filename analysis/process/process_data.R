@@ -70,6 +70,8 @@ data_extract0 <- read_csv(
     covid_symptoms_snomed = col_date(format = "%Y-%m-%d"),
     primary_covid_hospital_discharge_date = col_date(format = "%Y-%m-%d"),
     any_covid_hospital_discharge_date = col_date(format = "%Y-%m-%d"),
+    hospital_discharge_date_before_eligible = col_date(format = "%Y-%m-%d"),
+    hospital_admission_date_after_eligible = col_date(format = "%Y-%m-%d"),
     age = col_integer(),
     pregnancy = col_logical(),
     pregdel = col_logical(),
@@ -396,8 +398,8 @@ data_processed_eligible <- data_processed %>%
     !is.na(elig_start),
     
     # Overall exclusion criteria
-    is.na(primary_covid_hospital_discharge_date) | (primary_covid_hospital_discharge_date < (elig_start - 30) & 
-                                                      primary_covid_hospital_discharge_date > (elig_start))
+    is.na(hospital_discharge_date_before_eligible ) | (hospital_discharge_date_before_eligible <= (elig_start))
+    
     # 
     # # Treatment specific eligibility criteria
     # (tb_symponset_treat <= 5 | tb_symponset_treat >= 0) & treatment_type == "Paxlovid",
