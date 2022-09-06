@@ -66,6 +66,7 @@ data_extract0 <- read_csv(
     covid_test_positive_date2 = col_date(format = "%Y-%m-%d"),
     #covid_positive_test_type = col_character(),
     covid_positive_previous_30_days = col_logical(),
+    any_covid_hospital_admission_date = col_date(format = "%Y-%m-%d"),
     symptomatic_covid_test = col_character(),
     covid_symptoms_snomed = col_date(format = "%Y-%m-%d"),
     primary_covid_hospital_discharge_date = col_date(format = "%Y-%m-%d"),
@@ -401,7 +402,7 @@ data_processed_eligible <- data_processed %>%
     # we're additionally using hospitalisation data in case there is no record
     # of a +ve test in SGSS but someone has been hospitalised with a covid
     # diagnosis (primary or not primary) in the 30 days prior their positive test
-    is.na(any_covid_hospital_admission_date)
+    is.na(any_covid_hospital_admission_date),
     #symptomatic_covid_test != "N",
     !is.na(high_risk_group_nhsd_combined) | high_risk_group_nhsd_combined != "NA",
     
