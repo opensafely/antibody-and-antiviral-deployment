@@ -392,13 +392,26 @@ data_processed_eligible <- data_processed %>%
     
     # Overall eligibility criteria
     covid_test_positive == 1,
+    # in some cases, there is a +ve test, but date of +ve test was before someone became
+    # member of a high risk group. In those cases, that someone should be not included.
+    # elig_start equals the date of +ve test only if someone is a member of a high risk 
+    # group at that time
+    !is.na(elig_start),
     covid_positive_previous_30_days != 1,
+    # we're additionally using hospitalisation data in case there is no record
+    # of a +ve test in SGSS but someone has been hospitalised with a covid
+    # diagnosis (primary or not primary) in the 30 days prior their positive test
+    is.na(any_covid_hospital_admission_date)
     #symptomatic_covid_test != "N",
     !is.na(high_risk_group_nhsd_combined) | high_risk_group_nhsd_combined != "NA",
-    !is.na(elig_start),
     
     # Overall exclusion criteria
-    is.na(hospital_discharge_date_before_eligible ) | (hospital_discharge_date_before_eligible <= (elig_start))
+    # we're only including people if there is no record of a hospitalisation 
+    # before or on the date of +ve test, or when there is a record of a 
+    # hospitalisation, date of discharge is before or on date of +ve test 
+    # --> if someone is discharged on the same date as their +ve test, they're
+    #     eligible for at least  part of the day (so counted as eligible)
+    is.na(hospital_discharge_date_before_eligible ) | (hospital_discharge_date_before_eligible <= elig_start)
     
     # 
     # # Treatment specific eligibility criteria
