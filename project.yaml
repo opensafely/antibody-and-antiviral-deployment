@@ -28,6 +28,12 @@ actions:
     outputs:
       highly_sensitive:
         cohort: output/data/input_stp.csv.gz
+
+  extract_high_risk_data:
+    run: cohortextractor:latest generate_cohort --study-definition study_definition_high_risk --output-dir=output/data --output-format=csv.gz
+    outputs:
+      highly_sensitive:
+        cohort: output/data/input_high_risk.csv.gz
   
   # Data processing ----
   data_process:
@@ -36,6 +42,15 @@ actions:
     outputs:
       highly_sensitive:
         data: output/data/data_processed*.rds
+
+  data_process_high_risk:
+    run: r:latest analysis/process/process_data_high_risk.R
+    needs: [extract_high_risk_data]
+    outputs:
+      highly_sensitive:
+        data: output/data/data_processed_high_risk.rds
+      moderately_sensitive:
+        csv: output/data_properties/n_high_risk.csv
   
   # Data summaries ----
   data_properties:
