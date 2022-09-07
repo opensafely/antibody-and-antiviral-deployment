@@ -66,10 +66,13 @@ data_extract0 <- read_csv(
     covid_test_positive_date2 = col_date(format = "%Y-%m-%d"),
     #covid_positive_test_type = col_character(),
     covid_positive_previous_30_days = col_logical(),
+    any_covid_hospital_admission_date = col_date(format = "%Y-%m-%d"),
     symptomatic_covid_test = col_character(),
     covid_symptoms_snomed = col_date(format = "%Y-%m-%d"),
     primary_covid_hospital_discharge_date = col_date(format = "%Y-%m-%d"),
     any_covid_hospital_discharge_date = col_date(format = "%Y-%m-%d"),
+    hospital_discharge_date_before_eligible = col_date(format = "%Y-%m-%d"),
+    hospital_admission_date_after_eligible = col_date(format = "%Y-%m-%d"),
     age = col_integer(),
     pregnancy = col_logical(),
     pregdel = col_logical(),
@@ -390,14 +393,27 @@ data_processed_eligible <- data_processed %>%
     
     # Overall eligibility criteria
     covid_test_positive == 1,
+    # in some cases, there is a +ve test, but date of +ve test was before someone became
+    # member of a high risk group. In those cases, that someone should be not included.
+    # elig_start equals the date of +ve test only if someone is a member of a high risk 
+    # group at that time
+    !is.na(elig_start),
     covid_positive_previous_30_days != 1,
+    # we're additionally using hospitalisation data in case there is no record
+    # of a +ve test in SGSS but someone has been hospitalised with a covid
+    # diagnosis (primary or not primary) in the 30 days prior their positive test
+    is.na(any_covid_hospital_admission_date),
     #symptomatic_covid_test != "N",
     !is.na(high_risk_group_nhsd_combined) | high_risk_group_nhsd_combined != "NA",
-    !is.na(elig_start),
     
     # Overall exclusion criteria
-    is.na(primary_covid_hospital_discharge_date) | (primary_covid_hospital_discharge_date < (elig_start - 30) & 
-                                                      primary_covid_hospital_discharge_date > (elig_start))
+    # we're only including people if there is no record of a hospitalisation 
+    # before or on the date of +ve test, or when there is a record of a 
+    # hospitalisation, date of discharge is before or on date of +ve test 
+    # --> if someone is discharged on the same date as their +ve test, they're
+    #     eligible for at least  part of the day (so counted as eligible)
+    is.na(hospital_discharge_date_before_eligible ) | (hospital_discharge_date_before_eligible <= elig_start)
+    
     # 
     # # Treatment specific eligibility criteria
     # (tb_symponset_treat <= 5 | tb_symponset_treat >= 0) & treatment_type == "Paxlovid",
