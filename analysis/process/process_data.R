@@ -517,8 +517,9 @@ data_processed_clean <- data_processed_combined %>%
     start_date, has_died, death_date, dereg_date, registered_eligible, registered_treated,
     
     # Eligibility
-    covid_test_positive, symptomatic_covid_test, covid_test_positive_date, covid_positive_previous_30_days, tb_postest_treat, 
-    tb_symponset_treat, elig_start, primary_covid_hospital_discharge_date, any_covid_hospital_discharge_date, pregnancy,
+    covid_test_positive, symptomatic_covid_test, covid_test_positive_date, covid_positive_previous_30_days, any_covid_hospital_admission_date, 
+    tb_postest_treat, hospital_discharge_date_before_eligible, hospital_admission_date_after_eligible,
+    tb_symponset_treat, elig_start,  primary_covid_hospital_discharge_date, any_covid_hospital_discharge_date, pregnancy,
     weight,
     
     # Treatment
