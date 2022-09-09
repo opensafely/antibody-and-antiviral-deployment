@@ -84,6 +84,14 @@ actions:
         redacted_tables: output/coverage/table_*.csv
         unredacted_tables: output/coverage/for-checks/table_*.csv
   
+  hosp_after_pos_test:
+    run: r:latest analysis/descriptive/discharge_adm_after_pos_test.R
+    needs: [data_process]
+    outputs:
+      moderately_sensitive:
+        redacted_table1: output/coverage/table_discharge_after_pos_test.csv
+        redacted_table2: output/coverage/table_admitted_after_pos_test.csv
+  
   # Variation by STP ----
   stp_report:
     run: r:latest -e 'rmarkdown::render("analysis/descriptive/mabs-and-avs-by-stp.Rmd", knit_root_dir = "/workspace", output_dir="/workspace/output/variation")'
