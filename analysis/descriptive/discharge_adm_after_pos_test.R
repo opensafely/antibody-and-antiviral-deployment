@@ -34,6 +34,14 @@ data_processed_clean <-
 
 ## number of people admitted to hospital after post test on day 1, 2, 3, 4
 ## NB: number in (ELIGIBLE + NOT TREATED) population
+data_processed_clean %>% 
+  filter(!is.na(no_days_admitted_after_pos_test)) %>% 
+  nrow() %>% print()
+data_processed_clean %>% 
+  filter(!is.na(no_days_admitted_after_pos_test)) %>% 
+  pull(no_days_admitted_after_pos_test) %>% 
+  quantile() %>% print()
+
 overview_n_admitted_after_pos_test <-
   data_processed_clean %>%
   filter(eligibility_status == "Eligible",
