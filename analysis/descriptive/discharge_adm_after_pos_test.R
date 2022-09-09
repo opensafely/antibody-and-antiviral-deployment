@@ -26,7 +26,7 @@ data_processed_clean <-
          # they're not eligible for treatment anymore. 
          no_days_admitted_after_pos_test = 
            ifelse(hospital_admission_date_after_eligible > elig_start,
-                  difftime(hospital_discharge_date_before_eligible, elig_start, 
+                  difftime(hospital_admission_date_after_eligible, elig_start, 
                            units = "days") %>% as.numeric(),
                   NA_integer_))
 
