@@ -50,6 +50,18 @@ overview_n_admitted_after_pos_test <-
   group_by(no_days_admitted_after_pos_test) %>%
   summarise(n = n())
 
+# add total number of people in (ELIGIBLE x NOT TREATED) pop
+overview_n_admitted_after_pos_test <- 
+  overview_n_admitted_after_pos_test %>%
+  mutate(no_days_admitted_after_pos_test =
+           no_days_admitted_after_pos_test %>% as.character()) %>%
+  add_row(no_days_admitted_after_pos_test = "Total population",
+          n = data_processed_clean %>%
+                filter(eligibility_status == "Eligible",
+                       is.na(treatment_date)) %>%
+                nrow()
+          )
+          
 ## Redact output
 overview_n_admitted_after_pos_test <- 
   overview_n_admitted_after_pos_test %>%
