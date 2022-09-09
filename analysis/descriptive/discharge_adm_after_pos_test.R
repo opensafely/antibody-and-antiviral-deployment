@@ -22,21 +22,7 @@ library(dplyr)
 data_processed_clean <- 
   read_rds(here::here("output", "data", "data_processed_clean.rds")) %>%
   filter(elig_start >= as.Date("2021-12-11") & elig_start <= as.Date("2022-04-28")) %>%
-  mutate(# if someone was hospitalised before or on their date of positive test,
-         # and was not discharged before or on their date of positive test,
-         # someone is excluded from the eligible population.
-         # discharge might however been 1, 2, 3, 4 days after positive test, 
-         # making them eligible for treatment on those days. 
-         # we'd like to know how many were discharged, therefore, we need to 
-         # to know what the number of days between pos test and discharge was
-         # for those discharged after their pos test 
-         # NB pos test date is equal to elig_start
-         no_days_discharged_after_pos_test = 
-           ifelse(hospital_discharge_date_before_eligible > elig_start,
-                  difftime(hospital_discharge_date_before_eligible, elig_start, 
-                           units = "days") %>% as.numeric(),
-                  NA_integer_),
-         # if someone is admitted to hospital after their pos test,
+  mutate(# if someone is admitted to hospital after their pos test,
          # they're not eligible for treatment anymore. 
          no_days_admitted_after_pos_test = 
            ifelse(hospital_admission_date_after_eligible > elig_start,
@@ -45,19 +31,9 @@ data_processed_clean <-
                   NA_integer_))
 
 ## Make an overview 
-## number of people admitted to the hospital on or before day of pos test and
-## discharged on day 1, 2, 3, 4
-## NB: number in (ELIGIBLE + NOT TREATED) population
-overview_n_discharged_after_pos_test <- 
-  data_processed_clean %>%
-    filter(eligibility_status == "Eligible",
-           is.na(treatment_date),
-           between(no_days_discharged_after_pos_test, 1, 4)) %>%
-    group_by(no_days_discharged_after_pos_test) %>%
-    summarise(n = n())
 
 ## number of people admitted to hospital after post test on day 1, 2, 3, 4
-## NB: number in (ELIGIBLE + NOT TREATED) populati
+## NB: number in (ELIGIBLE + NOT TREATED) population
 overview_n_admitted_after_pos_test <-
   data_processed_clean %>%
   filter(eligibility_status == "Eligible",
@@ -67,18 +43,12 @@ overview_n_admitted_after_pos_test <-
   summarise(n = n())
 
 ## Redact output
-overview_n_discharged_after_pos_test <- 
-  overview_n_discharged_after_pos_test %>%
-  mutate(n = ifelse(n <= 5 & n > 0, "[REDACTED]", n %>% as.character()))
 overview_n_admitted_after_pos_test <- 
   overview_n_admitted_after_pos_test %>%
   mutate(n = ifelse(n <= 5 & n > 0, "[REDACTED]", n %>% as.character()))
 
 ## Save output
 fs::dir_create(here::here("output", "coverage"))
-write_csv(
-  overview_n_discharged_after_pos_test,
-  here::here("output", "coverage", "table_discharge_after_pos_test.csv"))
 write_csv(
   overview_n_admitted_after_pos_test,
   here::here("output", "coverage", "table_admitted_after_pos_test.csv"))
