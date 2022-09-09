@@ -4,7 +4,7 @@
 #
 # Input: /output/data/data_processed_clean.rds
 #
-# Output: /output/coverage/table_hosp_after_pos_test.csv
+# Output: /output/coverage/table_admitted_after_pos_test.csv
 #
 # Author(s): L Nab
 # Date created: 08/09/2022

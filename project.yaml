@@ -89,8 +89,7 @@ actions:
     needs: [data_process]
     outputs:
       moderately_sensitive:
-        redacted_table1: output/coverage/table_discharge_after_pos_test.csv
-        redacted_table2: output/coverage/table_admitted_after_pos_test.csv
+        redacted_table: output/coverage/table_admitted_after_pos_test.csv
   
   # Variation by STP ----
   stp_report:
