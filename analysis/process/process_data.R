@@ -507,7 +507,8 @@ date_ids <- data_processed_combined %>%
   select(patient_id, treatment_date, covid_test_positive_date) %>%
   filter((treatment_date <= covid_test_positive_date - 21 | treatment_date >= Sys.Date()))
 print(length(unique(date_ids$patient_id)))
-### save number of patients excluded in this step
+### save number of patients excluded in this step (minus the ones excluded in prev step)
+date_ids <- date_ids %>% filter(!(date_ids$patient_id %in% dup_ids$patient_id))
 n_implausible_treatment_date <- length(unique(date_ids$patient_id))
 n_implausible_treatment_date_redacted <- ifelse(n_implausible_treatment_date <= 5, 
                                                 "[REDACTED]",
