@@ -42,6 +42,7 @@ actions:
     outputs:
       highly_sensitive:
         data: output/data/data_processed*.rds
+        csv: output/coverage/n_excl_more_trtmnts_implausible_trtmnt_date.csv
 
   data_process_high_risk:
     run: r:latest analysis/process/process_data_high_risk.R

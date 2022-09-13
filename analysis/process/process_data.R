@@ -469,6 +469,7 @@ print(dim(data_processed_combined))
 print(table(data_processed_combined$eligibility_status))
 print(table(data_processed_combined$eligibility_status, data_processed_combined$match))
 
+cat("#### patients with more than one treatment ####\n")
 ## Exclude patients issued more than one treatment within two weeks
 dup_ids <- data_processed_combined %>%
   select(patient_id, treatment_date, covid_test_positive_date, paxlovid_covid_therapeutics, sotrovimab_covid_therapeutics, remdesivir_covid_therapeutics,
@@ -491,17 +492,46 @@ dup_ids <- data_processed_combined %>%
          value <= 14 | value >= -14) %>%
   group_by(patient_id) %>%
   arrange(patient_id)
-
-cat("#### patients with more than one treatment ####\n")
 print(length(unique(dup_ids$patient_id)))
+### save number of patients excluded in this step
+n_more_than_one_treatment <- length(unique(dup_ids$patient_id))
+n_more_than_one_treatment_redacted <- ifelse(n_more_than_one_treatment <= 5, 
+                                             "[REDACTED]",
+                                             n_more_than_one_treatment %>% 
+                                               plyr::round_any(10) %>%
+                                               as.character())
 
+cat("#### patients with implausible treatment date ####\n")
 ## Exclude patients with implausible treatment date
 date_ids <- data_processed_combined %>%
   select(patient_id, treatment_date, covid_test_positive_date) %>%
   filter((treatment_date <= covid_test_positive_date - 21 | treatment_date >= Sys.Date()))
-
-cat("#### patients with implausible treatment date ####\n")
 print(length(unique(date_ids$patient_id)))
+### save number of patients excluded in this step (minus the ones excluded in prev step)
+date_ids <- date_ids %>% filter(!(date_ids$patient_id %in% dup_ids$patient_id))
+n_implausible_treatment_date <- length(unique(date_ids$patient_id))
+n_implausible_treatment_date_redacted <- ifelse(n_implausible_treatment_date <= 5, 
+                                                "[REDACTED]",
+                                                n_implausible_treatment_date %>% 
+                                                  plyr::round_any(10) %>%
+                                                  as.character())
+
+### calc total number excluded here (= in previous two steps)
+n_total_excl <- n_more_than_one_treatment + n_implausible_treatment_date
+n_total_excl_redacted <- ifelse(n_total_excl <= 5,
+                                "[REDACTED]",
+                                n_total_excl %>%
+                                  plyr::round_any(10) %>%
+                                  as.character())
+
+### save these numbers to a csv file
+fs::dir_create(here::here("output", "coverage"))
+n_excl_more_trtmnts_implausible_trtmnt_date <- 
+  tibble(n_more_than_one_treatment = n_more_than_one_treatment_redacted,
+         n_implausible_treatment_date = n_implausible_treatment_date_redacted,
+         n_total_excl = n_total_excl_redacted)
+write.csv(n_excl_more_trtmnts_implausible_trtmnt_date,
+          here::here("output", "coverage", "n_excl_more_trtmnts_implausible_trtmnt_date.csv"))
 
 ## Clean data
 data_processed_clean <- data_processed_combined %>%

@@ -287,7 +287,8 @@ plot_data_prop_treated <- data_processed_clean %>%
          week = as.Date(week) - 2)
 
 write_csv(plot_data_prop_treated %>% 
-            select(high_risk_cohort, elig_start = week, prop_redacted) %>% 
+            select(high_risk_cohort, elig_start = week, prop_redacted,
+                   elig_redacted, treat_redacted) %>% 
             filter(elig_start >= as.Date("2021-12-11") & elig_start <= as.Date("2022-04-28")), 
           fs::path(output_dir, "table_prop_treated_redacted.csv"))
 
