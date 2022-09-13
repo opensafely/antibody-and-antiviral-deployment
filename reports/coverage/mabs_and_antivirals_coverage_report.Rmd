@@ -831,8 +831,8 @@ proportion_stp_decile <- proportion_stp_decile %>%
 proportion_stp_decile <- 
   proportion_stp_decile %>%
   filter(week != ymd(20220625))
-  
-proportion_stp_decile %>%
+
+proportion_stp_decile <- proportion_stp_decile %>%
   ggplot(aes(x = week, y = prop_decile, group = decile)) +
   geom_line(aes(colour = line, linetype = line)) +
   scale_color_manual(values = c("Decile" = "blue", "Median" = "blue")) +
@@ -852,6 +852,14 @@ proportion_stp_decile %>%
     axis.line.x = element_line(colour = "black"),
     panel.grid.minor.x = element_blank()) + 
   scale_y_continuous(labels = comma)
+
+ggsave(
+  here::here(output_dir_rmd, "figures", "figure_proportion_stp_decile.png"),
+  proportion_stp_decile,
+  units = "cm", width = 30, height = 15
+)
+
+include_graphics(fs::path(output_dir_rmd, "figures", "figure_proportion_stp_decile.png"))
 
 ```
 
