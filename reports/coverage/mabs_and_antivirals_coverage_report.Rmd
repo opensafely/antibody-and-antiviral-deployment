@@ -824,12 +824,12 @@ Details of all CMDUs can be found on the [national website](https://digital.nhs.
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '100%', fig.cap = "**Figure 5 Weekly proportion of eligible patients receiving an antiviral or nMAB for treating COVID-19 since 11th December 2021, stratified by STP decile.**", fig.topcaption=TRUE}
 
-proportion_stp_decile <- read_csv(here::here(input_dir_os, "figure_stp.csv"))
+proportion_stp_decile <- read_csv(here::here(input_dir_os, "figure_3.csv"))
 
 proportion_stp_decile <- proportion_stp_decile %>%
   mutate(line = ifelse(decile == "0.5", "Median", "Decile"))
   
-proportion_stp_decile %>%
+proportion_stp_decile <- proportion_stp_decile %>%
   ggplot(aes(x = week, y = prop_decile, group = decile)) +
   geom_line(aes(colour = line, linetype = line)) +
   scale_color_manual(values = c("Decile" = "blue", "Median" = "blue")) +
@@ -849,6 +849,13 @@ proportion_stp_decile %>%
     axis.line.x = element_line(colour = "black"),
     panel.grid.minor.x = element_blank()) + 
   scale_y_continuous(labels = comma)
+
+ggsave(
+  here::here(output_dir_rmd, "figures", "figure_proportion_stp_decile.png"),
+  proportion_stp_decile,
+  units = "cm", width = 30, height = 15
+)
+include_graphics(fs::path(output_dir_rmd, "figures", "figure_proportion_stp_decile.png"))
 
 ```
 
