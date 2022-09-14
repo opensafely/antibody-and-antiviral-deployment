@@ -101,7 +101,7 @@ data_processed_clean <- data_processed %>%
   )
 
 ## End date
-end_date <- as.Date("2022-04-30")
+end_date <- as.Date("2022-04-31")
 
 
 ## STP population coverage in TPP
@@ -186,7 +186,7 @@ eligible_stp_decile <- data_processed_clean %>%
     summarise(quibble(cum_count, seq(0.1,0.9,0.1)),
               quibble(cum_count_rounded, seq(0.1,0.9,0.1))) %>%
   arrange(cum_count_q, elig_start) %>%
-  filter(elig_start <= end_date) %>%
+  filter(elig_start < end_date) %>%
   rename(decile = cum_count_q) %>%
   left_join(eligible_stp_decile_n, by = c("elig_start", "decile")) %>%
   mutate(cum_count_decile_redacted = ifelse(cum_count < 8, NA, cum_count_rounded)) %>%
@@ -261,7 +261,7 @@ treated_stp_decile <- data_processed_clean %>%
     summarise(quibble(cum_count, seq(0.1,0.9,0.1)),
               quibble(cum_count_rounded, seq(0.1,0.9,0.1))) %>%
   arrange(cum_count_q, treatment_date) %>%
-  filter(treatment_date <= end_date) %>%
+  filter(treatment_date < end_date) %>%
   rename(decile = cum_count_q) %>%
   left_join(treated_stp_decile_n, by = c("treatment_date", "decile")) %>%
   mutate(cum_count_decile_redacted = ifelse(cum_count < 8, NA, cum_count_rounded)) %>%
@@ -342,7 +342,7 @@ proportion_stp_decile <- data_processed_clean %>%
   left_join(proportion_stp_decile_n_stp, by = c("decile" = "prop_q", "week" = "week")) %>%
   select(decile, week, n_stp, n_elig, n_treat, prop_decile = prop) %>%
   arrange(decile, week) %>%
-  filter(week <= end_date)
+  filter(week < end_date)
 
 write_csv(proportion_stp_decile, fs::path(output_dir_rmd, "figure_3_counts.csv"))
 write_csv(proportion_stp_decile %>% select(decile, week, prop_decile), fs::path(output_dir_rmd, "figure_3.csv"))
