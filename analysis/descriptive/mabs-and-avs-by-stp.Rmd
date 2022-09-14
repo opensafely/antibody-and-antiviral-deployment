@@ -202,6 +202,7 @@ eligible_stp_decile <- eligible_stp_decile %>%
   mutate(line = ifelse(decile == "0.5", "Median", "Decile"))
   
 eligible_stp_decile %>%
+  filter(elig_start >= as.Date("2021-12-11") & elig_start <= as.Date("2022-04-28")) %>%
   ggplot(aes(x = elig_start, y = cum_count_decile_redacted, group = decile)) +
   geom_step(aes(colour = line, linetype = line)) +
   scale_color_manual(values = c("Decile" = "blue", "Median" = "blue")) +
@@ -277,6 +278,7 @@ treated_stp_decile <- treated_stp_decile %>%
   mutate(line = ifelse(decile == "0.5", "Median", "Decile"))
   
 treated_stp_decile %>%
+  filter(treatment_date >= as.Date("2021-12-11") & treatment_date <= as.Date("2022-04-28")) %>%
   ggplot(aes(x = treatment_date, y = cum_count_decile_redacted, group = decile)) +
   geom_step(aes(colour = line, linetype = line)) +
   scale_color_manual(values = c("Decile" = "blue", "Median" = "blue")) +
