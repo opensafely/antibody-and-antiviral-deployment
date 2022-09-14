@@ -101,7 +101,7 @@ data_processed_clean <- data_processed %>%
   )
 
 ## End date
-end_date <- as.Date("2022-05-01")
+end_date <- as.Date("2022-05-14")
 
 
 ## STP population coverage in TPP
@@ -195,7 +195,7 @@ eligible_stp_decile <- data_processed_clean %>%
 write_csv(eligible_stp_decile, fs::path(output_dir_rmd, "figure_1.csv"))
 write_csv(eligible_stp_decile %>% 
             select(decile, elig_start, cum_count_decile_redacted) %>%
-            filter(elig_start >= as.Date("2021-12-11") & elig_start <= as.Date("2022-04-30")), 
+            filter(elig_start >= as.Date("2021-12-11") & elig_start <= as.Date("2022-04-28")), 
           fs::path(output_dir_rmd, "figure_1_redacted.csv"))
 
 eligible_stp_decile <- eligible_stp_decile %>%
@@ -270,7 +270,7 @@ treated_stp_decile <- data_processed_clean %>%
 write_csv(treated_stp_decile, fs::path(output_dir_rmd, "figure_2.csv"))
 write_csv(treated_stp_decile %>% 
             select(decile, treatment_date, cum_count_decile_redacted) %>%
-            filter(treatment_date >= as.Date("2021-12-11") & treatment_date <= as.Date("2022-04-30")), 
+            filter(treatment_date >= as.Date("2021-12-11") & treatment_date <= as.Date("2022-04-28")), 
           fs::path(output_dir_rmd, "figure_2_redacted.csv"))
 
 treated_stp_decile <- treated_stp_decile %>%
@@ -341,16 +341,19 @@ proportion_stp_decile <- data_processed_clean %>%
   mutate(decile = as.numeric(gsub("%", "", quantile))/100) %>%
   left_join(proportion_stp_decile_n_stp, by = c("decile" = "prop_q", "week" = "week")) %>%
   select(decile, week, n_stp, n_elig, n_treat, prop_decile = prop) %>%
-  arrange(decile, week) %>%
-  filter(week < end_date)
+  arrange(decile, week)
 
 write_csv(proportion_stp_decile, fs::path(output_dir_rmd, "figure_3_counts.csv"))
-write_csv(proportion_stp_decile %>% select(decile, week, prop_decile), fs::path(output_dir_rmd, "figure_3.csv"))
+write_csv(proportion_stp_decile %>%
+            filter(week >= as.Date("2021-12-11") & week <= as.Date("2022-04-28")) %>% 
+            select(decile, week, prop_decile),
+          fs::path(output_dir_rmd, "figure_3.csv"))
 
 proportion_stp_decile <- proportion_stp_decile %>%
   mutate(line = ifelse(decile == "0.5", "Median", "Decile"))
   
 proportion_stp_decile %>%
+  filter(week >= as.Date("2021-12-11") & week <= as.Date("2022-04-28")) %>%
   ggplot(aes(x = week, y = prop_decile, group = decile)) +
   geom_line(aes(colour = line, linetype = line)) +
   scale_color_manual(values = c("Decile" = "blue", "Median" = "blue")) +
