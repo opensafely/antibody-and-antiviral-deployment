@@ -101,7 +101,7 @@ data_processed_clean <- data_processed %>%
   )
 
 ## End date
-end_date <- as.Date("2022-04-31")
+end_date <- as.Date("2022-05-01")
 
 
 ## STP population coverage in TPP
