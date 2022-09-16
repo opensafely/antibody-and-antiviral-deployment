@@ -74,8 +74,12 @@ data_stp_tpp <- read_csv(here::here("output", "data", "input_stp.csv.gz"),
   group_by(stp) %>%
   summarise(n_tpp = n())
 
+## End date
+end_date <- as.Date("2022-04-28")
+
 ## Remove patients no longer registered at time of treatment and format variables
-data_processed_clean <- data_processed %>%
+data_processed_clean0 <- data_processed  %>%
+  filter(elig_start >= as.Date("2021-12-11") & elig_start <= end_date) %>%
   filter(has_died == 0,
          registered_eligible == 1 | registered_treated == 1) %>%
   mutate(
@@ -100,17 +104,13 @@ data_processed_clean <- data_processed %>%
     
   )
 
-## End date
-end_date <- as.Date("2022-04-28")
-
-
 ## STP population coverage in TPP
-eligibility_stp <- data_processed_clean %>%
+eligibility_stp <- data_processed_clean0 %>%
   select(stp, elig_start)  %>%
   group_by(stp) %>%
   tally()
 
-treatment_stp <- data_processed_clean %>%
+treatment_stp <- data_processed_clean0 %>%
   filter(!is.na(treatment_type)) %>%
   select(stp)  %>%
   group_by(stp) %>%
@@ -136,9 +136,8 @@ colnames(data_stp_clean) <- c("STP", "Number of patients in TPP", "Total populat
 write_csv(data_stp_clean, fs::path(output_dir_rmd, "table_stp_coverage.csv"))
 
 ## Exclude STPs with <10% coverage
-data_processed_clean <- data_processed_clean %>%
-  filter(!(stp %in% stp_exclude$stp_id),
-         elig_start <= end_date)
+data_processed_clean <- data_processed_clean0 %>%
+  filter(!(stp %in% stp_exclude$stp_id))
 ```
 
 <br>
@@ -147,9 +146,9 @@ This report describes the coverage and uptake of antivirals and neutralising mon
 
 ### Overall coverage of COVID-19 treatment, by STP decile
 
-Between **`r format(min(data_processed_clean$elig_start, na.rm = T), format = "%d-%b-%Y")`** and **`r format(max(data_processed_clean$elig_start, na.rm = T), format = "%d-%b-%Y")`**, a total of `r format(plyr::round_any(data_processed_clean %>% nrow(), 10), big.mark = ",", scientific = FALSE)` non-hospitalised patients registered at a TPP practice in England were identified as potentially being eligible for receiving an antiviral or nMAB for treating COVID-19. Of these `r format(plyr::round_any(data_processed_clean %>% nrow(), 10), big.mark = ",", scientific = FALSE)` potentially eligible patients, `r format(plyr::round_any(data_processed_clean %>% filter(!is.na(treatment_date)) %>% nrow(), 10), big.mark = ",", scientific = FALSE)` (**`r round(plyr::round_any(data_processed_clean %>% filter(!is.na(treatment_date)) %>% nrow(), 10)/plyr::round_any(data_processed_clean %>% nrow(), 10)*100, digits = 0)`%**) received treatment from a CMDU. 
+Between **`r format(min(data_processed_clean0$elig_start, na.rm = T), format = "%d-%b-%Y")`** and **`r format(max(data_processed_clean0$elig_start, na.rm = T), format = "%d-%b-%Y")`**, a total of `r format(plyr::round_any(data_processed_clean0 %>% nrow(), 10), big.mark = ",", scientific = FALSE)` non-hospitalised patients registered at a TPP practice in England were identified as potentially being eligible for receiving an antiviral or nMAB for treating COVID-19. Of these `r format(plyr::round_any(data_processed_clean0 %>% nrow(), 10), big.mark = ",", scientific = FALSE)` potentially eligible patients, `r format(plyr::round_any(data_processed_clean0 %>% filter(!is.na(treatment_date)) %>% nrow(), 10), big.mark = ",", scientific = FALSE)` (**`r round(plyr::round_any(data_processed_clean0 %>% filter(!is.na(treatment_date)) %>% nrow(), 10)/plyr::round_any(data_processed_clean0 %>% nrow(), 10)*100, digits = 0)`%**) received treatment from a CMDU. 
 
-STP (used as a proxy for CMDU) was available for `r format(plyr::round_any(data_processed_clean %>% filter(!is.na(stp)) %>% nrow(), 10), big.mark = ",", scientific = FALSE)` (`r round(round(data_processed_clean %>% filter(!is.na(stp)) %>% nrow(), 10)/plyr::round_any(data_processed_clean %>% nrow(), 10)*100, digits = 0)`%) of eligible patients and `r format(plyr::round_any(data_processed_clean %>% filter(!is.na(stp), !is.na(treatment_date)) %>% nrow(), 10), big.mark = ",", scientific = FALSE)` (`r round(round(data_processed_clean %>% filter(!is.na(stp), !is.na(treatment_date)) %>% nrow(), 10)/plyr::round_any(data_processed_clean %>% filter(!is.na(treatment_date)) %>% nrow(), 10)*100, digits = 0)`%) of treated patients with a total of `r format(length(unique(data_processed$stp)), big.mark = ",", scientific = FALSE)` STPs identified. Of these `r format(length(unique(data_processed$stp)), big.mark = ",", scientific = FALSE)` STPs,  `r format(data_stp %>% filter(perc < 10) %>% nrow(), big.mark = ",", scientific = FALSE)` were excluded due to having less than 10% population coverage in TPP practices; `r format(sum(subset(data_stp, perc < 10)$n.x, na.rm = T), big.mark = ",", scientific = FALSE)` eligible patients and `r format(sum(subset(data_stp, perc < 10)$n.y, na.rm = T), big.mark = ",", scientific = FALSE)` treated patients.
+STP (used as a proxy for CMDU) was available for `r format(plyr::round_any(data_processed_clean %>% filter(!is.na(stp)) %>% nrow(), 10), big.mark = ",", scientific = FALSE)` (`r round(round(data_processed_clean %>% filter(!is.na(stp)) %>% nrow(), 10)/plyr::round_any(data_processed_clean0 %>% nrow(), 10)*100, digits = 0)`%) of eligible patients and `r format(plyr::round_any(data_processed_clean %>% filter(!is.na(stp), !is.na(treatment_date)) %>% nrow(), 10), big.mark = ",", scientific = FALSE)` (`r round(round(data_processed_clean %>% filter(!is.na(stp), !is.na(treatment_date)) %>% nrow(), 10)/plyr::round_any(data_processed_clean0 %>% filter(!is.na(treatment_date)) %>% nrow(), 10)*100, digits = 0)`%) of treated patients with a total of `r format(length(unique(data_processed$stp)), big.mark = ",", scientific = FALSE)` STPs identified. Of these `r format(length(unique(data_processed$stp)), big.mark = ",", scientific = FALSE)` STPs,  `r format(data_stp %>% filter(perc < 10) %>% nrow(), big.mark = ",", scientific = FALSE)` were excluded due to having less than 10% population coverage in TPP practices; `r format(sum(subset(data_stp, perc < 10)$n.x, na.rm = T), big.mark = ",", scientific = FALSE)` eligible patients and `r format(sum(subset(data_stp, perc < 10)$n.y, na.rm = T), big.mark = ",", scientific = FALSE)` treated patients.
 
 ```{r, coverage plot, echo=FALSE, message=FALSE, warning=FALSE, results='asis' , fig.width=10, out.width = '100%', fig.cap = "**Figure 1 Cumulative total of potentially eligible patients for receiving an antiviral or nMABs for treating COVID-19 since 11th December 2021, stratified by STP decile.** Patients are considered eligible on the date of their positive SARS-CoV-2 test. Note, the overall number in each group is likely to be an overestimation due to including SARS-CoV-2 infection confirmed by either lateral flow or PCR test (where only PCR-confirmed infections should have been treated according to guidance in effect prior to 10th February 2022), and potentially including non-symptomatic patients. Decile values relating to patient counts of 0-7 have been redacted.", fig.topcaption=TRUE}
 
