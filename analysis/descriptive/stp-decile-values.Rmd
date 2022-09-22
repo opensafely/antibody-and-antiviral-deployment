@@ -1,0 +1,260 @@
+---
+title: "Variation in coverage and uptake of antivirals and neutralising monoclonal antibodies by STP"
+output:
+  html_document:
+  theme: journal
+github_document:
+  keep_html: TRUE
+---
+
+```{css, echo=FALSE}
+pre {
+  max-height: 300px;
+  overflow-y: auto;
+}
+pre[class] {
+  max-height: 200px;
+}
+```
+
+<style>
+  body {
+    text-align: justify;
+     font-size: 11pt}
+</style>
+
+```{r setup, include=FALSE}
+# Document settings ----
+knitr::opts_chunk$set(echo = TRUE)
+
+# Preliminaries ----
+
+## Import libraries
+library(tidyverse)
+library(here)
+library(glue)
+library(gt)
+library(gtsummary)
+library(reshape2)
+library(stringr)
+library(scales)
+library(kableExtra)
+library(knitr)
+library(ggplot2)
+library(png)
+library(readr)
+library(htmltools)
+
+## Import custom user functions
+source(here("analysis", "lib", "custom_functions.R"))
+
+## Output directory
+output_dir_rmd <- here("output", "variation")
+fs::dir_create(output_dir_rmd)
+
+## Redaction threshold
+threshold = 8
+
+## Functions
+quibble <- function(x, q = c(0.25, 0.5, 0.75)) {
+  ## function that takes a vector and returns a tibble of its quantiles
+  tibble("{{ x }}" := quantile(x, q), "{{ x }}_q" := q)
+}
+
+## Import data
+data_processed <- 
+  read_rds(here::here("output", "data", "data_processed_clean.rds"))
+
+# columns: stp_id, name, total_list_size
+data_stp_all <- 
+  read_csv(here::here("analysis/lib/stp_dict_total.csv"))
+
+# total number of people in each stp in extracted data (all pt registered 1/3/2020)
+data_stp_tpp <- 
+  read_csv(here::here("output", "data", "input_stp.csv.gz"),
+           col_types = cols_only(                      
+           patient_id = col_integer(),
+           stp = col_character())) %>%
+  group_by(stp) %>%
+  summarise(n_tpp = n())
+
+## End date
+end_date <- as.Date("2022-04-28")
+
+## Remove patients no longer registered at time of treatment and format variables
+data_processed_clean0 <- 
+  data_processed  %>%
+  filter(elig_start >= as.Date("2021-12-11") & elig_start <= end_date) %>%
+  filter(has_died == 0,
+         registered_eligible == 1 | registered_treated == 1) %>%
+  mutate(
+    
+    # Age groups
+    ageband = cut(
+      age,
+      breaks = c(12, 30, 40, 50, 60, 70, 80, Inf),
+      labels = c("12-29", "30-39", "40-49", "50-59", "60-69", "70-79", "80+"),
+      right = FALSE),
+    
+    # Vaccination status
+    vaccination_status = fct_case_when(
+      vaccination_status == "Un-vaccinated" ~ "Un-vaccinated",
+      vaccination_status == "Un-vaccinated (declined)" ~ "Un-vaccinated (declined)",
+      vaccination_status== "One vaccination" ~ "One vaccination",
+      vaccination_status == "Two vaccinations" ~ "Two vaccinations",
+      vaccination_status == "Three or more vaccinations" ~ "Three or more vaccinations",
+      #TRUE ~ "Unknown",
+      TRUE ~ NA_character_
+    )
+    
+  )
+
+## STP population coverage in TPP
+eligibility_stp <- 
+  data_processed_clean0 %>%
+  select(stp, elig_start)  %>%
+  group_by(stp) %>%
+  tally()
+
+treatment_stp <- 
+  data_processed_clean0 %>%
+  filter(!is.na(treatment_type)) %>%
+  select(stp)  %>%
+  group_by(stp) %>%
+  tally() 
+
+data_stp0 <- 
+  left_join(data_stp_all, data_stp_tpp, by = c("stp_id" = "stp")) %>%
+  mutate(#n_tpp = round(n_tpp/7, digits = 0)*7,
+         #total_list_size = round(total_list_size/7, digits = 0)*7,
+         perc = round(n_tpp/total_list_size*100, digits = 0)) %>%
+  left_join(eligibility_stp, by = c("stp_id" = "stp")) %>%
+  left_join(treatment_stp, by = c("stp_id" = "stp")) %>%
+  mutate(prop = round(n.y/n.x*100, digits = 0 )) 
+
+# the stp's not having any patients in TPP or a percentage lower than 10% will
+# be excluded
+stp_exclude <- 
+  data_stp0 %>%
+  filter(is.na(n_tpp) | perc < 10) %>%
+  select(stp_id)
+
+data_stp <- 
+  data_stp0 %>%
+  filter(!(stp_id %in% stp_exclude$stp_id))
+
+data_stp_clean <- 
+  data_stp %>%
+  select(name, n_tpp, total_list_size, perc, n.y, n.x, prop)
+
+colnames(data_stp_clean) <- 
+  c("STP", "Number of patients in TPP", "Total population", "Percentage of population included in TPP (%)",
+    "Number of treated patients in TPP", "Number of eligible patients in TPP", "Percentage treated (%)")
+
+write_csv(data_stp_clean, fs::path(output_dir_rmd, "table_stp_coverage.csv"))
+
+## Exclude STPs with <10% coverage
+data_processed_clean <- 
+  data_processed_clean0 %>%
+  filter(!(stp %in% stp_exclude$stp_id),
+         !is.na(stp))
+```
+
+<br>
+
+This report describes the coverage and uptake of antivirals and neutralising monoclonal antibodies for the treatment of non-hospitalised patients with COVID-19 by STP. Note, that a) practice-STP mappings used to calculate the coverage are as of March 2020 and since then some borders and population sizes may have changed and b) the subset of the population covered by TPP in each STP may not be representative of the whole STP and c) STPs with less than 10% population coverage in TPP practices have been omitted.
+
+### Overall coverage of COVID-19 treatment, by STP decile
+
+Between **`r format(min(data_processed_clean0$elig_start, na.rm = T), format = "%d-%b-%Y")`** and **`r format(max(data_processed_clean0$elig_start, na.rm = T), format = "%d-%b-%Y")`**, a total of `r format(plyr::round_any(data_processed_clean0 %>% nrow(), 10), big.mark = ",", scientific = FALSE)` non-hospitalised patients registered at a TPP practice in England were identified as potentially being eligible for receiving an antiviral or nMAB for treating COVID-19. Of these `r format(plyr::round_any(data_processed_clean0 %>% nrow(), 10), big.mark = ",", scientific = FALSE)` potentially eligible patients, `r format(plyr::round_any(data_processed_clean0 %>% filter(!is.na(treatment_date)) %>% nrow(), 10), big.mark = ",", scientific = FALSE)` (**`r round(plyr::round_any(data_processed_clean0 %>% filter(!is.na(treatment_date)) %>% nrow(), 10)/plyr::round_any(data_processed_clean0 %>% nrow(), 10)*100, digits = 0)`%**) received treatment from a CMDU. 
+
+STP (used as a proxy for CMDU) was available for `r format(plyr::round_any(data_processed_clean0 %>% filter(!is.na(stp)) %>% nrow(), 10), big.mark = ",", scientific = FALSE)` (`r round(round(data_processed_clean0 %>% filter(!is.na(stp)) %>% nrow(), 10)/plyr::round_any(data_processed_clean0 %>% nrow(), 10)*100, digits = 0)`%) of eligible patients and `r format(plyr::round_any(data_processed_clean0 %>% filter(!is.na(stp), !is.na(treatment_date)) %>% nrow(), 10), big.mark = ",", scientific = FALSE)` (`r round(round(data_processed_clean0 %>% filter(!is.na(stp), !is.na(treatment_date)) %>% nrow(), 10)/plyr::round_any(data_processed_clean0 %>% filter(!is.na(treatment_date)) %>% nrow(), 10)*100, digits = 0)`%) of treated patients with a total of `r format(data_processed_clean0$stp %>% unique() %>% na.omit() %>% length(), big.mark = ",", scientific = FALSE)` STPs identified. Of these `r format(data_processed_clean0$stp %>% unique() %>% na.omit() %>% length(), big.mark = ",", scientific = FALSE)` STPs,  `r format(data_processed_clean0 %>% filter(stp %in% stp_exclude$stp_id) %>% pull(stp) %>% unique() %>% length(), big.mark = ",", scientific = FALSE)` were excluded due to having less than 10% population coverage in TPP practices; `r format(sum(subset(data_stp0, !is.na(n_tpp) & perc < 10)$n.x, na.rm = T) %>% plyr::round_any(10), big.mark = ",", scientific = FALSE)` eligible patients and `r format(sum(subset(data_stp0, !is.na(n_tpp) & perc < 10)$n.y, na.rm = T) %>% plyr::round_any(10), big.mark = ",", scientific = FALSE)` treated patients. After exclusion, `r format(data_processed_clean %>% nrow() %>% plyr::round_any(10), big.mark = ",", scientific = FALSE)` eligible patients and `r format(data_processed_clean %>% filter(!is.na(treatment_date)) %>% nrow() %>% plyr::round_any(10), big.mark = ",", scientific = FALSE)` treated patients were included.
+
+
+```{r, echo = FALSE}
+cat("Total number of STPs in STP data: \n")
+data_stp0 %>% select(stp_id) %>% unique() %>% na.omit() %>% nrow() %>% print()
+
+cat("Total number of different STPs in study popuation: \n")
+data_processed_clean0 %>% select(stp) %>% unique() %>% na.omit() %>% nrow() %>% print()
+
+cat("Number of STPs with no TTP coverage: \n")
+data_stp0 %>% filter(is.na(n_tpp)) %>% select(stp_id) %>% unique() %>% na.omit() %>% nrow() %>% print()
+
+cat("Number of STPs with TTP coverage lower than 10% (and not NA): \n")
+data_stp0 %>% filter(!is.na(n_tpp) & perc < 10) %>% select(stp_id) %>% unique() %>% na.omit() %>% nrow() %>% print()
+
+cat("Total number of excluded STPs: \n")
+stp_exclude %>% select(stp_id) %>% unique() %>% nrow() %>% print()
+
+cat("Total number of STPs in STP data after exclusion: \n")
+data_stp %>% select(stp_id) %>% unique() %>% na.omit() %>% nrow() %>% print()
+
+cat("Total number of different STPs in study population after exclusion: \n")
+data_processed_clean %>% select(stp) %>% unique() %>% na.omit() %>% nrow() %>% print()
+```
+
+```{r, echo = FALSE}
+# calculate decile values of proportion treated
+decile_values_overall <- 
+  data_stp %>%
+  summarise(quibble(prop, seq(0.1,0.9,0.1))) %>%
+  rename(decile_value = prop, decile = prop_q)
+
+write_csv(decile_values_overall, fs::path(output_dir_rmd, "stp_decile_values.csv"))
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '100%', fig.cap = "**Figure 3 Weekly proportion of eligible patients receiving an antiviral or nMAB for treating COVID-19 since 11th December 2021, stratified by STP decile.**", fig.topcaption=TRUE}
+# calculate proportion treated in each STP in each week
+coverage_stp_week <- 
+  data_processed_clean %>%
+  mutate(week = cut(elig_start + 2 , "week"),
+         elig = 1, 
+         treat = ifelse(!is.na(treatment_date), 1, 0)) %>%
+  select(stp, week, elig, treat) %>%
+  group_by(stp, week) %>%  
+  summarise(elig = sum(elig, na.rm = T),
+            treat = sum(treat, na.rm = T),
+            .groups = "keep") %>%
+  mutate(elig = ifelse(is.na(elig), 0, elig), # make 0 if na
+         treat = ifelse(is.na(treat), 0, treat)) %>% 
+  mutate(prop = treat / elig,
+         week = as.Date(week) - 2)
+
+# calculate 9 decile values for each week
+decile_values_weekly <- 
+  coverage_stp_week %>%
+  group_by(week) %>%
+  summarise(quibble(prop, seq(0.1,0.9,0.1))) %>%
+  rename(decile_value = prop, decile = prop_q)
+# quibble takes the vector prop (i.e., proportion treated for a given week) and
+# calculates the decile values of that vector; and adds a column '0.1, 0.2, ..., 0.9
+# (0.1, week) is then the first decile value; etc.
+# save weekly decile values
+write_csv(decile_values_weekly, fs::path(output_dir_rmd, "stp_decile_values_weekly.csv"))
+
+# plot weekly decile values
+decile_values_weekly %>%
+  mutate(line = ifelse(decile == "0.5", "Median", "Decile")) %>% # median different line type
+  filter(week >= as.Date("2021-12-11") & week <= end_date) %>%
+  ggplot(aes(x = week, y = decile_value, group = decile)) +
+  geom_line(aes(colour = line, linetype = line)) +
+  scale_color_manual(values = c("Decile" = "blue", "Median" = "blue")) +
+  scale_linetype_manual(values = c("Decile" = "dashed", "Median" = "solid")) +
+  theme_classic(base_size = 8) +
+  scale_x_date(date_breaks = "2 week", date_labels =  "%d %b %Y") +
+  labs(
+    x = "Week",
+    y = "Decile values of the proportion of eligible patients who received treatment",
+    title = "(b)")  +
+  theme(legend.position = "bottom", 
+        legend.title = element_blank()) +
+  theme(
+    axis.text = element_text(size = 10),
+    axis.text.x = element_text(angle = 60, hjust = 1),
+    axis.title = element_text(size = 10),
+    axis.line.x = element_line(colour = "black"),
+    panel.grid.minor.x = element_blank()) + 
+  scale_y_continuous(labels = comma)
+
+```
