@@ -110,9 +110,8 @@ actions:
       moderately_sensitive:
         html: output/variation/stp-decile-values.html
         csv1: output/variation/table_stp_coverage.csv  
-        csv2: output/varation/stp_decile_values.csv
+        csv2: output/variation/stp_decile_values.csv
         csv3: output/variation/stp_decile_values_weekly.csv
-    
         
   # Obs vs exp ----
   obs_vs_exp_report:
