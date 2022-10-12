@@ -287,7 +287,8 @@ plot_data_prop_treated <- data_processed_clean %>%
          week = as.Date(week) - 2)
 
 write_csv(plot_data_prop_treated %>% 
-            select(high_risk_cohort, elig_start = week, prop_redacted) %>% 
+            select(high_risk_cohort, elig_start = week, prop_redacted,
+                   elig_redacted, treat_redacted) %>% 
             filter(elig_start >= as.Date("2021-12-11")), 
           fs::path(output_dir, "table_prop_treated_redacted.csv"))
 
@@ -354,6 +355,77 @@ table_elig_treat_redacted <- left_join(eligibility_table, treatment_table, by = 
 
 write_csv(table_elig_treat_redacted, fs::path(output_dir, "table_elig_treat_redacted.csv"))
 
+## Eligible and treated table version 2
+## Of some people who have been treated, high_risk_group might be unknown
+## Version 2 of 'table_elig_treat_redacted' does not leave these patients out, 
+## but instead adds a row to the table: 'high_risk_group_unknown'
+## NB: 'treatment_table' above also filters on !is.na(treatment_type) but this 
+##     is not causing any problems because treatment_type is only NA if 
+##     treatment_date is NA. [total number of treated people is calculated by 
+##     checking if treatment_date is not NA]
+
+data_processed_clean2 <-
+  data_processed_clean %>%
+  mutate(high_risk_group_unknown = case_when(is.na(high_risk_group_combined) ~ 1,
+                                             TRUE ~ 0))
+
+eligibility_table2 <- data_processed_clean2 %>%
+  select(downs_syndrome, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
+         hiv_aids, solid_organ_transplant, rare_neurological_conditions, high_risk_group_unknown)  %>%
+  summarise(
+    across(.fns=sum, na.rm = T)
+  ) %>%
+  pivot_longer(
+    cols = c(downs_syndrome, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
+             hiv_aids, solid_organ_transplant, rare_neurological_conditions, high_risk_group_unknown),
+    names_to = "high_risk_cohort",
+    values_to = "Eligibile"
+  ) %>%
+  add_row(high_risk_cohort = "All", Eligibile = (data_processed_clean %>% filter(!is.na(elig_start)) %>% nrow())) %>%
+  arrange(desc(Eligibile))
+
+treatment_table2 <- data_processed_clean2 %>%
+  filter(!is.na(treatment_date)) %>%
+  mutate(All = 1) %>%
+  select(treatment_type, All, downs_syndrome, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
+         hiv_aids, solid_organ_transplant, rare_neurological_conditions, high_risk_group_unknown)  %>%
+  group_by(treatment_type) %>%
+  summarise(
+    across(.fns=sum, na.rm = T)
+  ) %>%
+  pivot_longer(
+    cols = c(All, downs_syndrome, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 
+             hiv_aids, solid_organ_transplant, rare_neurological_conditions, high_risk_group_unknown),
+    names_to = "high_risk_cohort",
+    values_to = "Treated"
+  ) %>%
+  pivot_wider(
+    id_cols = high_risk_cohort,
+    names_from = treatment_type,
+    values_from = Treated)
+
+table_elig_treat_redacted2 <- left_join(eligibility_table2, treatment_table2, by = "high_risk_cohort") %>%
+  mutate(Treated = Casirivimab + Molnupiravir + Sotrovimab + Paxlovid + Remdesivir) %>%
+  select(high_risk_cohort, Eligibile, Treated, Paxlovid, Sotrovimab, Remdesivir, Molnupiravir, Casirivimab) %>%
+  mutate(
+    # Redact values < 8
+    Eligibile = ifelse(Eligibile < threshold, NA, as.numeric(Eligibile)),
+    Treated = ifelse(Treated < threshold, NA, as.numeric(Treated)),
+    Paxlovid = ifelse(Paxlovid < threshold, NA, as.numeric(Paxlovid)),
+    Sotrovimab = ifelse(Sotrovimab < threshold, NA, as.numeric(Sotrovimab)),
+    Remdesivir = ifelse(Remdesivir < threshold, NA, as.numeric(Remdesivir)),
+    Molnupiravir = ifelse(Molnupiravir < threshold, NA, as.numeric(Molnupiravir)),
+    Casirivimab = ifelse(Casirivimab < threshold, NA, as.numeric(Casirivimab)),
+    # Round to nearest 10
+    Eligibile = plyr::round_any(Eligibile, 10),
+    Treated = plyr::round_any(Treated, 10),
+    Paxlovid = plyr::round_any(as.numeric(Paxlovid), 10),
+    Sotrovimab = plyr::round_any(as.numeric(Sotrovimab), 10),
+    Remdesivir = plyr::round_any(as.numeric(Remdesivir), 10),
+    Molnupiravir = plyr::round_any(Molnupiravir, 10),
+    Casirivimab = plyr::round_any(Casirivimab, 10))
+
+write_csv(table_elig_treat_redacted2, fs::path(output_dir, "table_elig_treat_redacted2.csv"))
 
 ## Clinical and demographics table
 variables <- c("ageband", "sex", "ethnicity", "imd", "rural_urban", "region_nhs", "autism_nhsd", "care_home_primis",
@@ -441,8 +513,14 @@ non_elig_treated <-  data_processed_clean %>%
     patient_id,
     no_positive_covid_test = (covid_test_positive != 1),
     positive_covid_test_previous_30_days = (covid_positive_previous_30_days == 1),
+    # new exclusion criteria: admitted to the hospital with a covid diagnosis
+    # in the previous 30 days
+    covid_hosp_admission_previous_30_days = !is.na(any_covid_hospital_admission_date),
     no_high_risk_group_nhsd = is.na(high_risk_group_nhsd_combined),
     no_high_risk_group_match =  is.na(match) & !is.na(high_risk_group_nhsd_combined),
+    # new exclusion criteria: currently hospitalised
+    hosp_admission_and_not_discharged_on_or_before_pos_test = 
+      (!is.na(hospital_discharge_date_before_eligible) & hospital_discharge_date_before_eligible > elig_start),
     primary_covid_hospital_admission_last_30_days = (!is.na(primary_covid_hospital_discharge_date) | 
                                                   primary_covid_hospital_discharge_date > (treatment_date - 30) & 
                                                   primary_covid_hospital_discharge_date < (treatment_date)),
@@ -451,10 +529,12 @@ non_elig_treated <-  data_processed_clean %>%
                                                   any_covid_hospital_discharge_date < (treatment_date)),
     
     include = (
-      no_positive_covid_test  &
+      no_positive_covid_test &
         positive_covid_test_previous_30_days &
+        covid_hosp_admission_previous_30_days &
         no_high_risk_group_nhsd &
         no_high_risk_group_match &
+        hosp_admission_and_not_discharged_on_or_before_pos_test &
         primary_covid_hospital_admission_last_30_days &
         any_covid_hospital_admission_last_30_days
     )
@@ -466,8 +546,10 @@ data_flowchart <- non_elig_treated %>%
     c_all = TRUE,
     c_no_positive_covid_test = c_all & no_positive_covid_test,
     c_positive_covid_test_previous_30_days = c_all & positive_covid_test_previous_30_days,
+    c_covid_hosp_admission_previous_30_days = c_all & covid_hosp_admission_previous_30_days,
     c_no_high_risk_group_nhsd = c_all & no_high_risk_group_nhsd,
     c_no_high_risk_group_match = c_all & no_high_risk_group_match,
+    c_hosp_admission_and_not_discharged_on_or_before_pos_test = c_all & hosp_admission_and_not_discharged_on_or_before_pos_test,
     c_primary_covid_hospital_admission_last_30_days = c_all & primary_covid_hospital_admission_last_30_days,
     c_any_covid_hospital_admission_last_30_days =  c_all & any_covid_hospital_admission_last_30_days)  %>%
   summarise(

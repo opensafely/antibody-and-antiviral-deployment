@@ -334,6 +334,52 @@ study = StudyDefinition(
       "incidence": 0.05
     },
   ),
+
+  any_covid_hospital_admission_date = patients.admitted_to_hospital(
+    returning = "date_admitted",
+    with_these_diagnoses = covid_icd10_codes,
+    with_patient_classification = ["1"], # ordinary admissions only - exclude day cases and regular attenders
+    # see https://docs.opensafely.org/study-def-variables/#sus for more info
+    # NOT USE with_admission_method=["21", "22", "23", "24", "25", "2A", "2B", "2C", "2D", "28"], # emergency admissions only to exclude incidental COVID
+    between = ["covid_test_positive_date - 31 days","covid_test_positive_date - 1 day"],
+    date_format = "YYYY-MM-DD",
+    find_first_match_in_period = False,
+    return_expectations = {
+      "date": {"earliest": "2021-12-20"},
+      "rate": "uniform",
+      "incidence": 0.05
+    },
+  ),
+
+  # check if hospitalised before or on start_date (min of treatment date and +ve test)
+  hospital_discharge_date_before_eligible = patients.admitted_to_hospital(
+    returning = "date_discharged",
+    with_patient_classification = ["1"], # ordinary admissions only - exclude day cases and regular attenders
+    # DO NOT USE with_admission_method=["21", "22", "23", "24", "25", "2A", "2B", "2C", "2D", "28"], # emergency admissions only to exclude incidental COVID
+    on_or_before= "covid_test_positive_date",
+    date_format = "YYYY-MM-DD",
+    find_last_match_in_period = True,
+    return_expectations = {
+      "date": {"earliest": "2021-12-20"},
+      "rate": "uniform",
+      "incidence": 0.05
+    },
+  ),
+
+  # check if hospitalised after start_date
+  hospital_admission_date_after_eligible = patients.admitted_to_hospital(
+    returning = "date_admitted",
+    with_patient_classification = ["1"], # ordinary admissions only - exclude day cases and regular attenders
+    # DO NOT USE with_admission_method=["21", "22", "23", "24", "25", "2A", "2B", "2C", "2D", "28"], # emergency admissions only to exclude incidental COVID
+    on_or_after= "covid_test_positive_date + 1 day",
+    date_format = "YYYY-MM-DD",
+    find_last_match_in_period = True,
+    return_expectations = {
+      "date": {"earliest": "2021-12-20"},
+      "rate": "uniform",
+      "incidence": 0.05
+    },
+  ),
   
   ### New supplemental oxygen requirement specifically for the management of COVID-19 symptoms
   #   (not currently possible to define/code)

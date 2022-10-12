@@ -67,10 +67,13 @@ data_extract0 <- read_csv(
     covid_test_positive_date2 = col_date(format = "%Y-%m-%d"),
     #covid_positive_test_type = col_character(),
     covid_positive_previous_30_days = col_logical(),
+    any_covid_hospital_admission_date = col_date(format = "%Y-%m-%d"),
     symptomatic_covid_test = col_character(),
     covid_symptoms_snomed = col_date(format = "%Y-%m-%d"),
     primary_covid_hospital_discharge_date = col_date(format = "%Y-%m-%d"),
     any_covid_hospital_discharge_date = col_date(format = "%Y-%m-%d"),
+    hospital_discharge_date_before_eligible = col_date(format = "%Y-%m-%d"),
+    hospital_admission_date_after_eligible = col_date(format = "%Y-%m-%d"),
     age = col_integer(),
     pregnancy = col_logical(),
     pregdel = col_logical(),
@@ -392,14 +395,27 @@ data_processed_eligible <- data_processed %>%
     
     # Overall eligibility criteria
     covid_test_positive == 1,
+    # in some cases, there is a +ve test, but date of +ve test was before someone became
+    # member of a high risk group. In those cases, that someone should be not included.
+    # elig_start equals the date of +ve test only if someone is a member of a high risk 
+    # group at that time
+    !is.na(elig_start),
     covid_positive_previous_30_days != 1,
+    # we're additionally using hospitalisation data in case there is no record
+    # of a +ve test in SGSS but someone has been hospitalised with a covid
+    # diagnosis (primary or not primary) in the 30 days prior their positive test
+    is.na(any_covid_hospital_admission_date),
     #symptomatic_covid_test != "N",
     !is.na(high_risk_group_nhsd_combined) | high_risk_group_nhsd_combined != "NA",
-    !is.na(elig_start),
     
     # Overall exclusion criteria
-    is.na(primary_covid_hospital_discharge_date) | (primary_covid_hospital_discharge_date < (elig_start - 30) & 
-                                                      primary_covid_hospital_discharge_date > (elig_start))
+    # we're only including people if there is no record of a hospitalisation 
+    # before or on the date of +ve test, or when there is a record of a 
+    # hospitalisation, date of discharge is before or on date of +ve test 
+    # --> if someone is discharged on the same date as their +ve test, they're
+    #     eligible for at least  part of the day (so counted as eligible)
+    is.na(hospital_discharge_date_before_eligible ) | (hospital_discharge_date_before_eligible <= elig_start)
+    
     # 
     # # Treatment specific eligibility criteria
     # (tb_symponset_treat <= 5 | tb_symponset_treat >= 0) & treatment_type == "Paxlovid",
@@ -455,6 +471,7 @@ print(dim(data_processed_combined))
 print(table(data_processed_combined$eligibility_status))
 print(table(data_processed_combined$eligibility_status, data_processed_combined$match))
 
+cat("#### patients with more than one treatment ####\n")
 ## Exclude patients issued more than one treatment within two weeks
 dup_ids <- data_processed_combined %>%
   select(patient_id, treatment_date, covid_test_positive_date, paxlovid_covid_therapeutics, sotrovimab_covid_therapeutics, remdesivir_covid_therapeutics,
@@ -477,17 +494,46 @@ dup_ids <- data_processed_combined %>%
          value <= 14 | value >= -14) %>%
   group_by(patient_id) %>%
   arrange(patient_id)
-
-cat("#### patients with more than one treatment ####\n")
 print(length(unique(dup_ids$patient_id)))
+### save number of patients excluded in this step
+n_more_than_one_treatment <- length(unique(dup_ids$patient_id))
+n_more_than_one_treatment_redacted <- ifelse(n_more_than_one_treatment <= 5, 
+                                             "[REDACTED]",
+                                             n_more_than_one_treatment %>% 
+                                               plyr::round_any(10) %>%
+                                               as.character())
 
+cat("#### patients with implausible treatment date ####\n")
 ## Exclude patients with implausible treatment date
 date_ids <- data_processed_combined %>%
   select(patient_id, treatment_date, covid_test_positive_date) %>%
   filter((treatment_date <= covid_test_positive_date - 21 | treatment_date >= Sys.Date()))
-
-cat("#### patients with implausible treatment date ####\n")
 print(length(unique(date_ids$patient_id)))
+### save number of patients excluded in this step (minus the ones excluded in prev step)
+date_ids <- date_ids %>% filter(!(date_ids$patient_id %in% dup_ids$patient_id))
+n_implausible_treatment_date <- length(unique(date_ids$patient_id))
+n_implausible_treatment_date_redacted <- ifelse(n_implausible_treatment_date <= 5, 
+                                                "[REDACTED]",
+                                                n_implausible_treatment_date %>% 
+                                                  plyr::round_any(10) %>%
+                                                  as.character())
+
+### calc total number excluded here (= in previous two steps)
+n_total_excl <- n_more_than_one_treatment + n_implausible_treatment_date
+n_total_excl_redacted <- ifelse(n_total_excl <= 5,
+                                "[REDACTED]",
+                                n_total_excl %>%
+                                  plyr::round_any(10) %>%
+                                  as.character())
+
+### save these numbers to a csv file
+fs::dir_create(here::here("output", "coverage"))
+n_excl_more_trtmnts_implausible_trtmnt_date <- 
+  tibble(n_more_than_one_treatment = n_more_than_one_treatment_redacted,
+         n_implausible_treatment_date = n_implausible_treatment_date_redacted,
+         n_total_excl = n_total_excl_redacted)
+write.csv(n_excl_more_trtmnts_implausible_trtmnt_date,
+          here::here("output", "coverage", "n_excl_more_trtmnts_implausible_trtmnt_date.csv"))
 
 ## Clean data
 data_processed_clean <- data_processed_combined %>%
@@ -503,8 +549,9 @@ data_processed_clean <- data_processed_combined %>%
     start_date, has_died, death_date, dereg_date, registered_eligible, registered_treated,
     
     # Eligibility
-    covid_test_positive, symptomatic_covid_test, covid_test_positive_date, covid_first_test_positive_date, covid_positive_previous_30_days, tb_postest_treat, 
-    tb_symponset_treat, elig_start, primary_covid_hospital_discharge_date, any_covid_hospital_discharge_date, pregnancy,
+    covid_test_positive, symptomatic_covid_test, covid_test_positive_date, covid_positive_previous_30_days, any_covid_hospital_admission_date, 
+    tb_postest_treat, hospital_discharge_date_before_eligible, hospital_admission_date_after_eligible,
+    tb_symponset_treat, elig_start,  primary_covid_hospital_discharge_date, any_covid_hospital_discharge_date, pregnancy,
     weight,
     
     # Treatment

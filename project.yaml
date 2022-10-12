@@ -28,13 +28,7 @@ actions:
     outputs:
       highly_sensitive:
         cohort: output/data/input_stp.csv.gz
-    
-  extract_sgtf_data:
-    run: cohortextractor:latest generate_cohort --study-definition study_definition_sgtf --output-dir=output/data --output-format=csv.gz
-    outputs:
-      highly_sensitive:
-        cohort: output/data/input_sgtf.csv.gz
-  
+
   # Data processing ----
   data_process:
     run: r:latest analysis/process/process_data.R
@@ -42,6 +36,17 @@ actions:
     outputs:
       highly_sensitive:
         data: output/data/data_processed*.rds
+      moderately_sensitive:
+        csv: output/coverage/n_excl_more_trtmnts_implausible_trtmnt_date.csv
+
+  data_process_high_risk:
+    run: r:latest analysis/process/process_data_high_risk.R
+    needs: [extract_high_risk_data]
+    outputs:
+      highly_sensitive:
+        data: output/data/data_processed_high_risk.rds
+      moderately_sensitive:
+        csv: output/data_properties/n_high_risk.csv
   
   # Data summaries ----
   data_properties:
@@ -50,6 +55,13 @@ actions:
     outputs:
       moderately_sensitive:
         cohort: output/data_properties/data_processed*.txt
+        
+  excl_crit_checks:
+    run: r:latest analysis/descriptive/excl_crit_checks.R
+    needs: [data_process]
+    outputs:
+      moderately_sensitive:
+        csv: output/data_properties/excl_crit.csv
         
   # Sensitivity anslysis ----
   sa_symptomatic_test:
@@ -68,6 +80,13 @@ actions:
         redacted_tables: output/coverage/table_*.csv
         unredacted_tables: output/coverage/for-checks/table_*.csv
   
+  hosp_after_pos_test:
+    run: r:latest analysis/descriptive/discharge_adm_after_pos_test.R
+    needs: [data_process]
+    outputs:
+      moderately_sensitive:
+        redacted_table: output/coverage/table_admitted_after_pos_test.csv
+  
   # Variation by STP ----
   stp_report:
     run: r:latest -e 'rmarkdown::render("analysis/descriptive/mabs-and-avs-by-stp.Rmd", knit_root_dir = "/workspace", output_dir="/workspace/output/variation")'
@@ -77,6 +96,16 @@ actions:
         html: output/variation/mabs-and-avs-by-stp.html
         figures: output/variation/figure_*.csv
         csvs: output/variation/table_*.csv
+
+  stp_decile_values_report:
+    run: r:latest -e 'rmarkdown::render("analysis/descriptive/stp-decile-values.Rmd", knit_root_dir = "/workspace", output_dir="/workspace/output/variation")'
+    needs: [data_process, extract_stp_data]
+    outputs:
+      moderately_sensitive:
+        html: output/variation/stp-decile-values.html
+        csv1: output/variation/table_stp_coverage.csv  
+        csv2: output/variation/stp_decile_values.csv
+        csv3: output/variation/stp_decile_values_weekly.csv
         
   # Obs vs exp ----
   obs_vs_exp_report:
