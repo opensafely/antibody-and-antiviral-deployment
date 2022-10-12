@@ -38,15 +38,6 @@ actions:
         data: output/data/data_processed*.rds
       moderately_sensitive:
         csv: output/coverage/n_excl_more_trtmnts_implausible_trtmnt_date.csv
-
-  data_process_high_risk:
-    run: r:latest analysis/process/process_data_high_risk.R
-    needs: [extract_high_risk_data]
-    outputs:
-      highly_sensitive:
-        data: output/data/data_processed_high_risk.rds
-      moderately_sensitive:
-        csv: output/data_properties/n_high_risk.csv
   
   # Data summaries ----
   data_properties:
@@ -114,21 +105,6 @@ actions:
     outputs:
       moderately_sensitive:
         html: output/variation/obs-vs-exp.html
-        
-  # SGTF ----
-  sgtf_mabs_report:
-    run: r:latest -e 'rmarkdown::render("analysis/descriptive/sgtf.Rmd", knit_root_dir = "/workspace", output_dir="/workspace/output/coverage")'
-    needs: [data_process]
-    outputs:
-      moderately_sensitive:
-        html: output/coverage/sgtf.html
-  
-  sgtf_report:
-    run: r:latest -e 'rmarkdown::render("analysis/descriptive/sgtf_report.Rmd", knit_root_dir = "/workspace", output_dir="/workspace/output/coverage")'
-    needs: [extract_sgtf_data]
-    outputs:
-      moderately_sensitive:
-        html: output/coverage/sgtf_report.html
   
   
   
