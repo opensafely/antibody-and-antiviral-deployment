@@ -47,13 +47,6 @@ actions:
       moderately_sensitive:
         cohort: output/data_properties/data_processed*.txt
         
-  excl_crit_checks:
-    run: r:latest analysis/descriptive/excl_crit_checks.R
-    needs: [data_process]
-    outputs:
-      moderately_sensitive:
-        csv: output/data_properties/excl_crit.csv
-        
   # Sensitivity anslysis ----
   sa_symptomatic_test:
     run: r:latest -e 'rmarkdown::render("analysis/descriptive/sa_symptomatic_test.Rmd", knit_root_dir = "/workspace", output_dir="/workspace/output/coverage")'
