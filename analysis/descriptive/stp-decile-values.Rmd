@@ -79,12 +79,12 @@ data_stp_tpp <-
   summarise(n_tpp = n())
 
 ## End date
-end_date <- as.Date("2022-04-28")
+# end_date <- as.Date("2022-04-28")
 
 ## Remove patients no longer registered at time of treatment and format variables
 data_processed_clean0 <- 
   data_processed  %>%
-  filter(elig_start >= as.Date("2021-12-11") & elig_start <= end_date) %>%
+  filter(elig_start >= as.Date("2021-12-11")) %>%
   filter(has_died == 0,
          registered_eligible == 1 | registered_treated == 1) %>%
   mutate(
@@ -236,7 +236,7 @@ write_csv(decile_values_weekly, fs::path(output_dir_rmd, "stp_decile_values_week
 # plot weekly decile values
 decile_values_weekly %>%
   mutate(line = ifelse(decile == "0.5", "Median", "Decile")) %>% # median different line type
-  filter(week >= as.Date("2021-12-11") & week <= end_date) %>%
+  filter(week >= as.Date("2021-12-11")) %>%
   ggplot(aes(x = week, y = decile_value, group = decile)) +
   geom_line(aes(colour = line, linetype = line)) +
   scale_color_manual(values = c("Decile" = "blue", "Median" = "blue")) +
