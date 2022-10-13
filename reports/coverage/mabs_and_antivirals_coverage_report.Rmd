@@ -172,7 +172,7 @@ coverage_plot <- coverage_plot_data %>%
     axis.line.x = element_line(colour = "black"),
     panel.grid.minor.x = element_blank(),
     legend.box.margin = margin(t = 1, l = 1, b = 1, r = 1)) + 
-  scale_y_continuous(limits = c(0, 100000), labels = comma)
+  scale_y_continuous(limits = c(0, 150000), labels = comma)
 
 ggsave(
   here::here(output_dir_rmd, "figures", "figure_cum_eligiblity.png"),
@@ -212,7 +212,7 @@ treatment_type_plot <- treatment_plot_data %>%
   geom_step(size = 1) +
   theme_classic(base_size = 8) +
   scale_x_date(date_breaks = "1 week", date_labels =  "%d %b %Y") +
-  scale_y_continuous(limits = c(0, 20000), labels = comma) +
+  scale_y_continuous(limits = c(0, 40000), labels = comma) +
   labs(
     x = "Treatment date",
     y = "Number of patients receiving treatment",
@@ -280,7 +280,7 @@ treatment_plot_therapeutics <- treatment_plot_data_therapeutics %>%
   geom_step(size = 1) +
   theme_classic(base_size = 8) +
   scale_x_date(date_breaks = "1 week", date_labels =  "%d %b %Y") +
-  scale_y_continuous(limits = c(0, 20000), labels = comma) +
+  scale_y_continuous(limits = c(0, 40000), labels = comma) +
   labs(
     x = "Treatment date",
     y = "Number of patients receiving treatment",
@@ -417,7 +417,7 @@ write_csv(table_elig_treat_redacted, here::here(output_dir_rmd, "tables", "table
 
 ```
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '100%', fig.cap = "**Table 1 Count and proportion of potentially eligible patients in OpenSAFELY-TPP who have received treatment for COVID-19 between 11th December 2021 - 28th April 2022, broken down by high risk cohort and treatment type.** Patient counts of 0-7 are shown as <8 with remaining counts rounded to the nearest 10; as a result percentages may not add up to 100%", fig.topcaption=TRUE}
+```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '100%', fig.cap = "**Table 1 Count and proportion of potentially eligible patients in OpenSAFELY-TPP who have received treatment for COVID-19 since 11th December 2021, broken down by high risk cohort and treatment type.** Patient counts of 0-7 are shown as <8 with remaining counts rounded to the nearest 10; as a result percentages may not add up to 100%", fig.topcaption=TRUE}
 
 include_graphics(fs::path(output_dir_rmd, "tables", "table_prop_eligible_high_risk_cohort.png"))
 
@@ -471,8 +471,8 @@ weekly_treatment_proportion_plot <- weekly_treatment_proportion %>%
   geom_line(size = 1) +
   facet_wrap(~high_risk_cohort, scales = "free_y") +
   theme_classic(base_size = 8) +
-  scale_x_date(limit = c(ymd("20211211"), ymd("20220502")),
-               date_breaks = "2 week", date_labels =  "%d %b %Y") +
+  scale_x_date(limit = c(ymd("20211211"), ymd("20221003")),
+               date_breaks = "4 week", date_labels =  "%d %b %Y") +
   labs(
     x = "",
     y = "Proportion of eligble patients receiving treatment",
@@ -635,7 +635,7 @@ write_csv(table_demo_clinc_breakdown_redacted, here::here(output_dir_rmd, "table
 
 ```
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '100%', fig.cap = "***Table 2 Count and proportion of potentially eligible patients in OpenSAFELY-TPP who have received treatment for COVID-19 between 11th December 2021 and 28th April 2022, broken down by demographic and clinical categories and by treatment type.** Patient counts of 0-7 are shown as <8 with remaining counts rounded to the nearest 10; as a result percentages may not add up to 100%.", fig.topcaption=TRUE}
+```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '100%', fig.cap = "***Table 2 Count and proportion of potentially eligible patients in OpenSAFELY-TPP who have received treatment for COVID-19 since 11th December 2021, broken down by demographic and clinical categories and by treatment type.** Patient counts of 0-7 are shown as <8 with remaining counts rounded to the nearest 10; as a result percentages may not add up to 100%.", fig.topcaption=TRUE}
 
 include_graphics(fs::path(output_dir_rmd, "tables", "table_prop_eligible_clinc_demo.png"))
 
@@ -846,16 +846,6 @@ Details of all CMDUs can be found on the [national website](https://digital.nhs.
 
 proportion_stp_decile <- read_csv(here::here(input_dir_os, "stp_decile_values_weekly.csv"))
 
-# maximum over time in first decile
-proportion_stp_decile %>%
-  filter(decile == 0.1) %>%
-  summarise(max(decile_value))
-
-# maximum over time in ninth decile
-proportion_stp_decile %>%
-  filter(decile == 0.9) %>%
-  summarise(max(decile_value))
-
 proportion_stp_decile <- 
   proportion_stp_decile %>%
   mutate(line = ifelse(decile == "0.5", "Median", "Decile")) %>% # median different line type
@@ -864,7 +854,7 @@ proportion_stp_decile <-
   scale_color_manual(values = c("Decile" = "blue", "Median" = "blue")) +
   scale_linetype_manual(values = c("Decile" = "dashed", "Median" = "solid")) +
   theme_classic(base_size = 8) +
-  scale_x_date(limit = c(ymd("20211211"), ymd("20220502")),
+  scale_x_date(limit = c(ymd("20211211"), ymd("20221001")),
                date_breaks = "2 week", date_labels =  "%d %b %Y") +
   labs(
     x = "Week",

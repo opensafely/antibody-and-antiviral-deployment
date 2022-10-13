@@ -1,369 +1,394 @@
 tb,group,n,variable
--2,imd,20,1 most deprived
--1,imd,10,1 most deprived
-0,imd,120,1 most deprived
-1,imd,550,1 most deprived
-2,imd,750,1 most deprived
-3,imd,500,1 most deprived
-4,imd,230,1 most deprived
-5,imd,100,1 most deprived
-6,imd,90,1 most deprived
--2,ageband,10,12-29
-0,ageband,60,12-29
-1,ageband,330,12-29
-2,ageband,460,12-29
-3,ageband,280,12-29
-4,ageband,120,12-29
+-2,imd,40,1 most deprived
+-1,imd,20,1 most deprived
+0,imd,200,1 most deprived
+1,imd,850,1 most deprived
+2,imd,970,1 most deprived
+3,imd,620,1 most deprived
+4,imd,280,1 most deprived
+5,imd,120,1 most deprived
+6,imd,180,1 most deprived
+-2,ageband,20,12-29
+0,ageband,100,12-29
+1,ageband,460,12-29
+2,ageband,560,12-29
+3,ageband,330,12-29
+4,ageband,140,12-29
 5,ageband,40,12-29
-6,ageband,40,12-29
--2,imd,40,2
--1,imd,10,2
-0,imd,200,2
-1,imd,820,2
-2,imd,1130,2
-3,imd,720,2
-4,imd,310,2
-5,imd,90,2
-6,imd,110,2
--2,imd,40,3
+6,ageband,90,12-29
+-2,imd,60,2
+-1,imd,20,2
+0,imd,320,2
+1,imd,1260,2
+2,imd,1480,2
+3,imd,890,2
+4,imd,390,2
+5,imd,120,2
+6,imd,210,2
+-2,imd,80,3
 -1,imd,20,3
-0,imd,250,3
-1,imd,1220,3
-2,imd,1490,3
-3,imd,950,3
-4,imd,400,3
-5,imd,150,3
-6,imd,100,3
--2,ageband,10,30-39
--1,ageband,10,30-39
-0,ageband,140,30-39
-1,ageband,600,30-39
-2,ageband,800,30-39
-3,ageband,480,30-39
-4,ageband,250,30-39
-5,ageband,70,30-39
-6,ageband,70,30-39
--2,imd,50,4
--1,imd,30,4
-0,imd,260,4
-1,imd,1210,4
-2,imd,1500,4
-3,imd,920,4
-4,imd,400,4
-5,imd,130,4
-6,imd,110,4
--2,ageband,20,40-49
--1,ageband,20,40-49
-0,ageband,200,40-49
-1,ageband,890,40-49
-2,ageband,1140,40-49
-3,ageband,770,40-49
-4,ageband,320,40-49
-5,ageband,90,40-49
-6,ageband,110,40-49
--2,imd,40,5 least deprived
--1,imd,20,5 least deprived
-0,imd,290,5 least deprived
-1,imd,1270,5 least deprived
-2,imd,1550,5 least deprived
-3,imd,960,5 least deprived
-4,imd,450,5 least deprived
-5,imd,140,5 least deprived
-6,imd,130,5 least deprived
--2,ageband,40,50-59
+0,imd,470,3
+1,imd,1880,3
+2,imd,2030,3
+3,imd,1180,3
+4,imd,500,3
+5,imd,190,3
+6,imd,240,3
+-2,ageband,20,30-39
+-1,ageband,20,30-39
+0,ageband,220,30-39
+1,ageband,880,30-39
+2,ageband,990,30-39
+3,ageband,550,30-39
+4,ageband,280,30-39
+5,ageband,80,30-39
+6,ageband,170,30-39
+-2,imd,90,4
+-1,imd,40,4
+0,imd,460,4
+1,imd,1900,4
+2,imd,2060,4
+3,imd,1190,4
+4,imd,500,4
+5,imd,160,4
+6,imd,240,4
+-2,ageband,30,40-49
+-1,ageband,30,40-49
+0,ageband,340,40-49
+1,ageband,1340,40-49
+2,ageband,1420,40-49
+3,ageband,930,40-49
+4,ageband,370,40-49
+5,ageband,110,40-49
+6,ageband,210,40-49
+-2,imd,80,5 least deprived
+-1,imd,30,5 least deprived
+0,imd,500,5 least deprived
+1,imd,2040,5 least deprived
+2,imd,2100,5 least deprived
+3,imd,1240,5 least deprived
+4,imd,530,5 least deprived
+5,imd,180,5 least deprived
+6,imd,240,5 least deprived
+-2,ageband,80,50-59
 -1,ageband,20,50-59
-0,ageband,270,50-59
-1,ageband,1200,50-59
-2,ageband,1490,50-59
-3,ageband,950,50-59
-4,ageband,390,50-59
-5,ageband,140,50-59
-6,ageband,140,50-59
--2,ageband,40,60-69
--1,ageband,10,60-69
-0,ageband,250,60-69
-1,ageband,1060,60-69
-2,ageband,1300,60-69
-3,ageband,800,60-69
-4,ageband,380,60-69
-5,ageband,140,60-69
-6,ageband,110,60-69
--2,ageband,40,70-79
--1,ageband,10,70-79
-0,ageband,180,70-79
-1,ageband,860,70-79
-2,ageband,1060,70-79
-3,ageband,660,70-79
-4,ageband,270,70-79
-5,ageband,100,70-79
-6,ageband,70,70-79
--2,ageband,30,80+
+0,ageband,440,50-59
+1,ageband,1820,50-59
+2,ageband,2000,50-59
+3,ageband,1200,50-59
+4,ageband,480,50-59
+5,ageband,180,50-59
+6,ageband,280,50-59
+-2,ageband,80,60-69
+-1,ageband,20,60-69
+0,ageband,450,60-69
+1,ageband,1740,60-69
+2,ageband,1880,60-69
+3,ageband,1060,60-69
+4,ageband,480,60-69
+5,ageband,160,60-69
+6,ageband,210,60-69
+-2,ageband,80,70-79
+-1,ageband,20,70-79
+0,ageband,350,70-79
+1,ageband,1460,70-79
+2,ageband,1520,70-79
+3,ageband,860,70-79
+4,ageband,350,70-79
+5,ageband,140,70-79
+6,ageband,130,70-79
+-2,ageband,40,80+
 -1,ageband,10,80+
-0,ageband,60,80+
-1,ageband,280,80+
-2,ageband,360,80+
-3,ageband,200,80+
-4,ageband,120,80+
-5,ageband,40,80+
-6,ageband,20,80+
+0,ageband,110,80+
+1,ageband,490,80+
+2,ageband,510,80+
+3,ageband,300,80+
+4,ageband,150,80+
+5,ageband,60,80+
+6,ageband,60,80+
 -2,ethnicity,10,Asian or Asian British
-0,ethnicity,30,Asian or Asian British
-1,ethnicity,170,Asian or Asian British
-2,ethnicity,240,Asian or Asian British
-3,ethnicity,140,Asian or Asian British
-4,ethnicity,80,Asian or Asian British
-5,ethnicity,30,Asian or Asian British
-6,ethnicity,20,Asian or Asian British
-0,ethnicity,10,Black or Black British
-1,ethnicity,80,Black or Black British
-2,ethnicity,120,Black or Black British
+0,ethnicity,50,Asian or Asian British
+1,ethnicity,240,Asian or Asian British
+2,ethnicity,300,Asian or Asian British
+3,ethnicity,170,Asian or Asian British
+4,ethnicity,90,Asian or Asian British
+5,ethnicity,40,Asian or Asian British
+6,ethnicity,40,Asian or Asian British
+0,ethnicity,20,Black or Black British
+1,ethnicity,110,Black or Black British
+2,ethnicity,140,Black or Black British
 3,ethnicity,70,Black or Black British
-4,ethnicity,30,Black or Black British
+4,ethnicity,40,Black or Black British
 5,ethnicity,10,Black or Black British
-6,ethnicity,20,Black or Black British
--2,region_nhs,20,East Midlands
--1,region_nhs,10,East Midlands
-0,region_nhs,210,East Midlands
-1,region_nhs,940,East Midlands
-2,region_nhs,1220,East Midlands
-3,region_nhs,860,East Midlands
-4,region_nhs,360,East Midlands
-5,region_nhs,120,East Midlands
-6,region_nhs,100,East Midlands
--2,region_nhs,70,East of England
--1,region_nhs,30,East of England
-0,region_nhs,390,East of England
-1,region_nhs,1670,East of England
-2,region_nhs,2010,East of England
-3,region_nhs,1230,East of England
-4,region_nhs,540,East of England
-5,region_nhs,180,East of England
-6,region_nhs,160,East of England
--2,sex,100,Female
--1,sex,50,Female
-0,sex,690,Female
-1,sex,3070,Female
-2,sex,3940,Female
-3,sex,2560,Female
-4,sex,1120,Female
-5,sex,390,Female
-6,sex,360,Female
+6,ethnicity,30,Black or Black British
+-2,region_nhs,60,East Midlands
+-1,region_nhs,20,East Midlands
+0,region_nhs,370,East Midlands
+1,region_nhs,1660,East Midlands
+2,region_nhs,1780,East Midlands
+3,region_nhs,1140,East Midlands
+4,region_nhs,480,East Midlands
+5,region_nhs,150,East Midlands
+6,region_nhs,220,East Midlands
+-2,region_nhs,100,East of England
+-1,region_nhs,40,East of England
+0,region_nhs,660,East of England
+1,region_nhs,2560,East of England
+2,region_nhs,2600,East of England
+3,region_nhs,1480,East of England
+4,region_nhs,620,East of England
+5,region_nhs,210,East of England
+6,region_nhs,300,East of England
+-2,sex,190,Female
+-1,sex,80,Female
+0,sex,1220,Female
+1,sex,4880,Female
+2,sex,5300,Female
+3,sex,3230,Female
+4,sex,1350,Female
+5,sex,470,Female
+6,sex,740,Female
 -2,region_nhs,10,London
-0,region_nhs,50,London
-1,region_nhs,260,London
-2,region_nhs,330,London
-3,region_nhs,170,London
+-1,region_nhs,10,London
+0,region_nhs,60,London
+1,region_nhs,300,London
+2,region_nhs,370,London
+3,region_nhs,180,London
 4,region_nhs,70,London
-5,region_nhs,20,London
-6,region_nhs,20,London
--2,sex,90,Male
--1,sex,30,Male
-0,sex,460,Male
-1,sex,2140,Male
-2,sex,2670,Male
-3,sex,1590,Male
-4,sex,730,Male
-5,sex,240,Male
-6,sex,210,Male
-0,ethnicity,10,Mixed
-1,ethnicity,50,Mixed
-2,ethnicity,70,Mixed
+5,region_nhs,30,London
+6,region_nhs,30,London
+-2,sex,160,Male
+-1,sex,50,Male
+0,sex,800,Male
+1,sex,3300,Male
+2,sex,3590,Male
+3,sex,2010,Male
+4,sex,910,Male
+5,sex,310,Male
+6,sex,410,Male
+0,ethnicity,20,Mixed
+1,ethnicity,70,Mixed
+2,ethnicity,80,Mixed
 3,ethnicity,40,Mixed
-4,ethnicity,10,Mixed
+4,ethnicity,20,Mixed
 5,ethnicity,10,Mixed
-0,region_nhs,70,North East
-1,region_nhs,200,North East
-2,region_nhs,240,North East
-3,region_nhs,170,North East
-4,region_nhs,70,North East
+6,ethnicity,10,Mixed
+0,region_nhs,140,North East
+1,region_nhs,280,North East
+2,region_nhs,290,North East
+3,region_nhs,200,North East
+4,region_nhs,80,North East
 5,region_nhs,20,North East
-6,region_nhs,10,North East
--2,region_nhs,10,North West
-0,region_nhs,80,North West
-1,region_nhs,490,North West
-2,region_nhs,630,North West
-3,region_nhs,360,North West
-4,region_nhs,190,North West
-5,region_nhs,50,North West
-6,region_nhs,60,North West
-0,vaccination_status,20,One vaccination
-1,vaccination_status,50,One vaccination
-2,vaccination_status,90,One vaccination
-3,vaccination_status,60,One vaccination
+6,region_nhs,30,North East
+-2,region_nhs,20,North West
+-1,region_nhs,10,North West
+0,region_nhs,130,North West
+1,region_nhs,720,North West
+2,region_nhs,820,North West
+3,region_nhs,440,North West
+4,region_nhs,220,North West
+5,region_nhs,70,North West
+6,region_nhs,130,North West
+-2,vaccination_status,10,One vaccination
+0,vaccination_status,30,One vaccination
+1,vaccination_status,80,One vaccination
+2,vaccination_status,110,One vaccination
+3,vaccination_status,70,One vaccination
 4,vaccination_status,20,One vaccination
 5,vaccination_status,10,One vaccination
-6,vaccination_status,10,One vaccination
-1,ethnicity,50,Other ethnic groups
-2,ethnicity,70,Other ethnic groups
+6,vaccination_status,20,One vaccination
+0,ethnicity,10,Other ethnic groups
+1,ethnicity,80,Other ethnic groups
+2,ethnicity,90,Other ethnic groups
 3,ethnicity,50,Other ethnic groups
-4,ethnicity,10,Other ethnic groups
--2,rural_urban,20,Rural - town and fringe
--1,rural_urban,10,Rural - town and fringe
-0,rural_urban,200,Rural - town and fringe
-1,rural_urban,790,Rural - town and fringe
-2,rural_urban,980,Rural - town and fringe
-3,rural_urban,660,Rural - town and fringe
-4,rural_urban,250,Rural - town and fringe
-5,rural_urban,100,Rural - town and fringe
-6,rural_urban,90,Rural - town and fringe
--2,rural_urban,30,Rural - village and dispersed
--1,rural_urban,10,Rural - village and dispersed
-0,rural_urban,140,Rural - village and dispersed
-1,rural_urban,650,Rural - village and dispersed
-2,rural_urban,760,Rural - village and dispersed
-3,rural_urban,490,Rural - village and dispersed
-4,rural_urban,210,Rural - village and dispersed
-5,rural_urban,50,Rural - village and dispersed
-6,rural_urban,50,Rural - village and dispersed
--2,region_nhs,20,South East
-0,region_nhs,60,South East
-1,region_nhs,340,South East
-2,region_nhs,490,South East
-3,region_nhs,270,South East
-4,region_nhs,140,South East
-5,region_nhs,40,South East
-6,region_nhs,50,South East
--2,region_nhs,30,South West
--1,region_nhs,10,South West
-0,region_nhs,170,South West
-1,region_nhs,720,South West
-2,region_nhs,990,South West
-3,region_nhs,600,South West
-4,region_nhs,240,South West
-5,region_nhs,100,South West
-6,region_nhs,90,South West
--2,vaccination_status,170,Three or more vaccinations
--1,vaccination_status,80,Three or more vaccinations
-0,vaccination_status,1070,Three or more vaccinations
-1,vaccination_status,4840,Three or more vaccinations
-2,vaccination_status,6070,Three or more vaccinations
-3,vaccination_status,3800,Three or more vaccinations
-4,vaccination_status,1680,Three or more vaccinations
-5,vaccination_status,560,Three or more vaccinations
-6,vaccination_status,490,Three or more vaccinations
--2,vaccination_status,20,Two vaccinations
-0,vaccination_status,40,Two vaccinations
-1,vaccination_status,230,Two vaccinations
-2,vaccination_status,350,Two vaccinations
-3,vaccination_status,220,Two vaccinations
-4,vaccination_status,110,Two vaccinations
+4,ethnicity,20,Other ethnic groups
+5,ethnicity,10,Other ethnic groups
+6,ethnicity,10,Other ethnic groups
+-2,rural_urban,50,Rural - town and fringe
+-1,rural_urban,20,Rural - town and fringe
+0,rural_urban,310,Rural - town and fringe
+1,rural_urban,1310,Rural - town and fringe
+2,rural_urban,1340,Rural - town and fringe
+3,rural_urban,860,Rural - town and fringe
+4,rural_urban,320,Rural - town and fringe
+5,rural_urban,120,Rural - town and fringe
+6,rural_urban,150,Rural - town and fringe
+-2,rural_urban,50,Rural - village and dispersed
+-1,rural_urban,20,Rural - village and dispersed
+0,rural_urban,260,Rural - village and dispersed
+1,rural_urban,1010,Rural - village and dispersed
+2,rural_urban,1110,Rural - village and dispersed
+3,rural_urban,630,Rural - village and dispersed
+4,rural_urban,280,Rural - village and dispersed
+5,rural_urban,70,Rural - village and dispersed
+6,rural_urban,120,Rural - village and dispersed
+-2,region_nhs,30,South East
+-1,region_nhs,10,South East
+0,region_nhs,130,South East
+1,region_nhs,570,South East
+2,region_nhs,690,South East
+3,region_nhs,330,South East
+4,region_nhs,160,South East
+5,region_nhs,50,South East
+6,region_nhs,90,South East
+-2,region_nhs,70,South West
+-1,region_nhs,20,South West
+0,region_nhs,300,South West
+1,region_nhs,1070,South West
+2,region_nhs,1330,South West
+3,region_nhs,820,South West
+4,region_nhs,320,South West
+5,region_nhs,140,South West
+6,region_nhs,170,South West
+-2,vaccination_status,310,Three or more vaccinations
+-1,vaccination_status,120,Three or more vaccinations
+0,vaccination_status,1890,Three or more vaccinations
+1,vaccination_status,7680,Three or more vaccinations
+2,vaccination_status,8240,Three or more vaccinations
+3,vaccination_status,4840,Three or more vaccinations
+4,vaccination_status,2070,Three or more vaccinations
+5,vaccination_status,710,Three or more vaccinations
+6,vaccination_status,990,Three or more vaccinations
+-2,vaccination_status,30,Two vaccinations
+0,vaccination_status,60,Two vaccinations
+1,vaccination_status,300,Two vaccinations
+2,vaccination_status,410,Two vaccinations
+3,vaccination_status,260,Two vaccinations
+4,vaccination_status,120,Two vaccinations
 5,vaccination_status,50,Two vaccinations
-6,vaccination_status,60,Two vaccinations
+6,vaccination_status,100,Two vaccinations
 -2,vaccination_status,10,Un-vaccinated
-0,vaccination_status,20,Un-vaccinated
-1,vaccination_status,60,Un-vaccinated
-2,vaccination_status,80,Un-vaccinated
-3,vaccination_status,50,Un-vaccinated
-4,vaccination_status,20,Un-vaccinated
-6,vaccination_status,10,Un-vaccinated
+0,vaccination_status,30,Un-vaccinated
+1,vaccination_status,100,Un-vaccinated
+2,vaccination_status,100,Un-vaccinated
+3,vaccination_status,60,Un-vaccinated
+4,vaccination_status,30,Un-vaccinated
+5,vaccination_status,10,Un-vaccinated
+6,vaccination_status,20,Un-vaccinated
 1,vaccination_status,20,Un-vaccinated (declined)
 2,vaccination_status,20,Un-vaccinated (declined)
 3,vaccination_status,20,Un-vaccinated (declined)
 4,vaccination_status,10,Un-vaccinated (declined)
--2,rural_urban,110,Urban - city and town
--1,rural_urban,50,Urban - city and town
-0,rural_urban,590,Urban - city and town
-1,rural_urban,2720,Urban - city and town
-2,rural_urban,3520,Urban - city and town
-3,rural_urban,2140,Urban - city and town
-4,rural_urban,980,Urban - city and town
-5,rural_urban,360,Urban - city and town
-6,rural_urban,300,Urban - city and town
--2,rural_urban,30,Urban - conurbation
--1,rural_urban,10,Urban - conurbation
-0,rural_urban,190,Urban - conurbation
-1,rural_urban,910,Urban - conurbation
-2,rural_urban,1160,Urban - conurbation
-3,rural_urban,770,Urban - conurbation
-4,rural_urban,350,Urban - conurbation
-5,rural_urban,100,Urban - conurbation
-6,rural_urban,120,Urban - conurbation
+6,vaccination_status,10,Un-vaccinated (declined)
+-2,rural_urban,190,Urban - city and town
+-1,rural_urban,70,Urban - city and town
+0,rural_urban,1030,Urban - city and town
+1,rural_urban,4240,Urban - city and town
+2,rural_urban,4690,Urban - city and town
+3,rural_urban,2710,Urban - city and town
+4,rural_urban,1190,Urban - city and town
+5,rural_urban,440,Urban - city and town
+6,rural_urban,620,Urban - city and town
+-2,rural_urban,60,Urban - conurbation
+-1,rural_urban,20,Urban - conurbation
+0,rural_urban,370,Urban - conurbation
+1,rural_urban,1380,Urban - conurbation
+2,rural_urban,1500,Urban - conurbation
+3,rural_urban,920,Urban - conurbation
+4,rural_urban,410,Urban - conurbation
+5,rural_urban,130,Urban - conurbation
+6,rural_urban,230,Urban - conurbation
 -2,region_nhs,10,West Midlands
-0,region_nhs,10,West Midlands
-1,region_nhs,120,West Midlands
-2,region_nhs,170,West Midlands
-3,region_nhs,160,West Midlands
-4,region_nhs,80,West Midlands
-5,region_nhs,30,West Midlands
-6,region_nhs,40,West Midlands
--2,ethnicity,180,White
--1,ethnicity,80,White
-0,ethnicity,1080,White
-1,ethnicity,4790,White
-2,ethnicity,6030,White
-3,ethnicity,3810,White
-4,ethnicity,1690,White
-5,ethnicity,570,White
-6,ethnicity,510,White
--2,region_nhs,20,Yorkshire and the Humber
-0,region_nhs,90,Yorkshire and the Humber
-1,region_nhs,450,Yorkshire and the Humber
-2,region_nhs,510,Yorkshire and the Humber
-3,region_nhs,320,Yorkshire and the Humber
-4,region_nhs,160,Yorkshire and the Humber
-5,region_nhs,60,Yorkshire and the Humber
-6,region_nhs,50,Yorkshire and the Humber
+0,region_nhs,20,West Midlands
+1,region_nhs,160,West Midlands
+2,region_nhs,240,West Midlands
+3,region_nhs,210,West Midlands
+4,region_nhs,110,West Midlands
+5,region_nhs,40,West Midlands
+6,region_nhs,60,West Midlands
+-2,ethnicity,330,White
+-1,ethnicity,120,White
+0,ethnicity,1900,White
+1,ethnicity,7580,White
+2,ethnicity,8180,White
+3,ethnicity,4850,White
+4,ethnicity,2070,White
+5,ethnicity,710,White
+6,ethnicity,1050,White
+-2,region_nhs,40,Yorkshire and the Humber
+-1,region_nhs,10,Yorkshire and the Humber
+0,region_nhs,180,Yorkshire and the Humber
+1,region_nhs,840,Yorkshire and the Humber
+2,region_nhs,760,Yorkshire and the Humber
+3,region_nhs,440,Yorkshire and the Humber
+4,region_nhs,190,Yorkshire and the Humber
+5,region_nhs,70,Yorkshire and the Humber
+6,region_nhs,120,Yorkshire and the Humber
 0,autism_nhsd,10,autism_nhsd
-1,autism_nhsd,40,autism_nhsd
+1,autism_nhsd,60,autism_nhsd
 2,autism_nhsd,40,autism_nhsd
-3,autism_nhsd,30,autism_nhsd
-1,care_home_primis,40,care_home_primis
-2,care_home_primis,80,care_home_primis
-3,care_home_primis,50,care_home_primis
-4,care_home_primis,30,care_home_primis
+3,autism_nhsd,40,autism_nhsd
+4,autism_nhsd,10,autism_nhsd
+6,autism_nhsd,10,autism_nhsd
+0,care_home_primis,10,care_home_primis
+1,care_home_primis,60,care_home_primis
+2,care_home_primis,100,care_home_primis
+3,care_home_primis,60,care_home_primis
+4,care_home_primis,40,care_home_primis
 5,care_home_primis,10,care_home_primis
-1,dementia_nhsd,30,dementia_nhsd
-2,dementia_nhsd,50,dementia_nhsd
-3,dementia_nhsd,20,dementia_nhsd
-4,dementia_nhsd,20,dementia_nhsd
-0,housebound_opensafely,30,housebound_opensafely
-1,housebound_opensafely,170,housebound_opensafely
-2,housebound_opensafely,170,housebound_opensafely
-3,housebound_opensafely,100,housebound_opensafely
-4,housebound_opensafely,40,housebound_opensafely
-5,housebound_opensafely,10,housebound_opensafely
-6,housebound_opensafely,10,housebound_opensafely
+6,care_home_primis,20,care_home_primis
+0,dementia_nhsd,10,dementia_nhsd
+1,dementia_nhsd,50,dementia_nhsd
+2,dementia_nhsd,70,dementia_nhsd
+3,dementia_nhsd,40,dementia_nhsd
+4,dementia_nhsd,30,dementia_nhsd
+-2,housebound_opensafely,10,housebound_opensafely
+0,housebound_opensafely,50,housebound_opensafely
+1,housebound_opensafely,220,housebound_opensafely
+2,housebound_opensafely,220,housebound_opensafely
+3,housebound_opensafely,120,housebound_opensafely
+4,housebound_opensafely,50,housebound_opensafely
+5,housebound_opensafely,20,housebound_opensafely
+6,housebound_opensafely,20,housebound_opensafely
 -2,learning_disability_primis,10,learning_disability_primis
-0,learning_disability_primis,20,learning_disability_primis
-1,learning_disability_primis,140,learning_disability_primis
-2,learning_disability_primis,200,learning_disability_primis
-3,learning_disability_primis,130,learning_disability_primis
-4,learning_disability_primis,40,learning_disability_primis
-5,learning_disability_primis,10,learning_disability_primis
-6,learning_disability_primis,10,learning_disability_primis
-1,serious_mental_illness_nhsd,50,serious_mental_illness_nhsd
-2,serious_mental_illness_nhsd,60,serious_mental_illness_nhsd
-3,serious_mental_illness_nhsd,40,serious_mental_illness_nhsd
+0,learning_disability_primis,50,learning_disability_primis
+1,learning_disability_primis,200,learning_disability_primis
+2,learning_disability_primis,260,learning_disability_primis
+3,learning_disability_primis,140,learning_disability_primis
+4,learning_disability_primis,50,learning_disability_primis
+5,learning_disability_primis,20,learning_disability_primis
+6,learning_disability_primis,20,learning_disability_primis
+0,serious_mental_illness_nhsd,20,serious_mental_illness_nhsd
+1,serious_mental_illness_nhsd,70,serious_mental_illness_nhsd
+2,serious_mental_illness_nhsd,80,serious_mental_illness_nhsd
+3,serious_mental_illness_nhsd,50,serious_mental_illness_nhsd
 4,serious_mental_illness_nhsd,20,serious_mental_illness_nhsd
 5,serious_mental_illness_nhsd,10,serious_mental_illness_nhsd
 6,serious_mental_illness_nhsd,10,serious_mental_illness_nhsd
--2,shielded_primis,140,shielded_primis
--1,shielded_primis,60,shielded_primis
-0,shielded_primis,730,shielded_primis
-1,shielded_primis,3380,shielded_primis
-2,shielded_primis,4460,shielded_primis
-3,shielded_primis,2810,shielded_primis
-4,shielded_primis,1260,shielded_primis
-5,shielded_primis,440,shielded_primis
-6,shielded_primis,380,shielded_primis
-0,ethnicity,10,NA
-1,ethnicity,80,NA
-2,ethnicity,80,NA
-3,ethnicity,60,NA
+-2,shielded_primis,240,shielded_primis
+-1,shielded_primis,90,shielded_primis
+0,shielded_primis,1220,shielded_primis
+1,shielded_primis,5190,shielded_primis
+2,shielded_primis,5890,shielded_primis
+3,shielded_primis,3500,shielded_primis
+4,shielded_primis,1510,shielded_primis
+5,shielded_primis,530,shielded_primis
+6,shielded_primis,720,shielded_primis
+0,ethnicity,20,NA
+1,ethnicity,100,NA
+2,ethnicity,110,NA
+3,ethnicity,70,NA
 4,ethnicity,20,NA
-0,imd,40,NA
-1,imd,150,NA
-2,imd,190,NA
-3,imd,100,NA
-4,imd,50,NA
+5,ethnicity,10,NA
+6,ethnicity,10,NA
+-2,imd,10,NA
+0,imd,60,NA
+1,imd,250,NA
+2,imd,260,NA
+3,imd,140,NA
+4,imd,60,NA
 5,imd,20,NA
-6,imd,10,NA
+6,imd,30,NA
+0,region_nhs,20,NA
 1,region_nhs,20,NA
 2,region_nhs,20,NA
-0,rural_urban,30,NA
-1,rural_urban,150,NA
-2,rural_urban,180,NA
-3,rural_urban,100,NA
-4,rural_urban,50,NA
+3,region_nhs,10,NA
+6,region_nhs,10,NA
+-2,rural_urban,10,NA
+0,rural_urban,60,NA
+1,rural_urban,240,NA
+2,rural_urban,250,NA
+3,rural_urban,130,NA
+4,rural_urban,60,NA
 5,rural_urban,20,NA
-6,rural_urban,10,NA
+6,rural_urban,30,NA
