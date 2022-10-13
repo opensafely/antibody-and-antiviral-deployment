@@ -115,7 +115,7 @@ Of the `r format(report_stats$eligible_patients, big.mark = ",", scientific = FA
 
 <br>
 
-```{r, coverage plot, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '100%', fig.cap = "**Figure 1 Cumulative total of potentially eligible patients for receiving an antiviral or nMABs for treating COVID-19 since 11th December 2021, stratified by high risk cohort.** Patients are considered eligible on the date of their positive SARS-CoV-2 test. Note, patients can appear in more than one high risk group, and the overall number in each group is likely to be an overestimation due to including SARS-CoV-2 infection confirmed by either lateral flow or PCR test (where only PCR-confirmed infections should have been treated according to guidance in effect prior to 10th February 2022), and potentially including non-symptomatic patients; ", fig.topcaption=TRUE}
+```{r, coverage plot, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '100%', fig.cap = "**Figure 1 Cumulative total of potentially eligible patients for receiving an antiviral or nMABs for treating COVID-19 since 11th December 2021, stratified by high risk cohort.** Patients are considered eligible on the date of their positive SARS-CoV-2 test. Note, patients can appear in more than one high risk group, and the overall number in each group is likely to be an overestimation due to including SARS-CoV-2 infection confirmed by either lateral flow or PCR test (where only PCR-confirmed infections should have been treated according to guidance in effect prior to 10th February 2022), and potentially including non-symptomatic patients.", fig.topcaption=TRUE}
 
 coverage_plot_data <- read_csv(here::here(input_dir_os, "table_cum_eligiblity_redacted.csv")) %>%
   mutate(high_risk_cohort = case_when(
@@ -324,7 +324,7 @@ table_elig_treat_redacted <- read_csv(fs::path(input_dir_os, "table_elig_treat_r
     high_risk_cohort == "renal_disease" ~ "Renal disease", 
     high_risk_cohort == "liver_disease" ~ "Liver disease", 
     high_risk_cohort == "imid" ~ "Immune-mediated inflammatory disorders", 
-    high_risk_cohort == "immunosupression" ~ "Primary immune deficiencies", 
+    high_risk_cohort == "immunosupression" ~ "Immune deficiencies", 
     high_risk_cohort == "hiv_aids" ~ "Immunosuppression due to HIV or AIDS", 
     high_risk_cohort == "solid_organ_transplant" ~ "Solid organ transplant recipients",
     high_risk_cohort == "rare_neurological_conditions" ~ "Rare neurological conditions",
@@ -444,7 +444,7 @@ weekly_treatment_proportion <- read_csv(here::here(input_dir_os, "table_prop_tre
     high_risk_cohort == "renal_disease" ~ "Renal disease", 
     high_risk_cohort == "liver_disease" ~ "Liver disease", 
     high_risk_cohort == "imid" ~ "Immune-mediated inflammatory disorders", 
-    high_risk_cohort == "immunosupression" ~ "Primary immune deficiencies", 
+    high_risk_cohort == "immunosupression" ~ "Immune deficiencies", 
     high_risk_cohort == "hiv_aids" ~ "Immunosuppression due to HIV or AIDS", 
     high_risk_cohort == "solid_organ_transplant" ~ "Solid organ transplant recipients",
     high_risk_cohort == "rare_neurological_conditions" ~ "Rare neurological conditions",
