@@ -70,7 +70,7 @@ Note that currently the clinician-assigned risk group for patients receiving Pax
 
 The code and data for this report can be found in the OpenSAFELY [antibody-and-antiviral-deployment repository](https://github.com/opensafely/antibody-and-antiviral-deployment). The accompanying manuscript is available on [MedRXiV](https://www.medrxiv.org/content/10.1101/2022.03.07.22272026v2) and is currently undergoing review at a peer-reviewed journal.
 
-*Update: As of 1st July 2022, our coverage report will be published monthly. If you rely on more regular updates for your own reporting or analysis please contact team@opensafely.org to let us know.*
+*Update: The release date of this report can be found at the top. Our report is updated regularly. If you rely on a more recent update for your own reporting or analysis please contact team@opensafely.org to let us know.*
 
 
 ##### Contents
