@@ -23,15 +23,6 @@ actions:
       highly_sensitive:
         cohort: output/data/input.csv.gz
   
-  data_preparation:
-    run: stata-mp:latest analysis/data_preparation.do
-    needs: [extract_data]
-    outputs:
-      highly_sensitive:
-        data: output/data/main.dta
-      moderately_sensitive:
-        log: logs/data_preparation.log
-
   extract_stp_data:
     run: cohortextractor:latest generate_cohort --study-definition study_definition_stp --output-dir=output/data --output-format=csv.gz
     outputs:
