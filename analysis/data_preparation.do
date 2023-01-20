@@ -1,6 +1,6 @@
 ********************************************************************************
 *
-*	Do-file:		data_preparation_and_descriptives.do
+*	Do-file:		data_preparation.do
 *
 *	Project:		sotrovimab-and-Paxlovid
 *
@@ -11,13 +11,7 @@
 *	Data created:	output/main.dta  (main analysis dataset)
 *
 *	Other output:	logs/data_preparation.log
-*
-********************************************************************************
-*
-*	Purpose: This do-file creates the variables required for the 
-*			 main analysis and saves into Stata dataset, and describes 
-*            variables by drug groups.
-*  
+
 ********************************************************************************
 
 * Open a log file
