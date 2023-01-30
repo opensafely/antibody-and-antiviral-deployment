@@ -68,7 +68,7 @@ This OpenSAFELY report has been rapidly developed to support monitoring the ongo
 
 Note that currently the clinician-assigned risk group for patients receiving Paxlovid or Remdesivir is not available. While we’re able to assign high risk groups to about 70% of these patients by implementing the NHS Digital logic, the other 30% are most likely identified via non-digital routes. For now, where results are broken down by high risk cohort and no high risk cohort is able to assigned, these patients are excluded.
 
-The code and data for this report can be found in the OpenSAFELY [antibody-and-antiviral-deployment repository](https://github.com/opensafely/antibody-and-antiviral-deployment). The accompanying manuscript is available on [MedRXiV](https://www.medrxiv.org/content/10.1101/2022.03.07.22272026v2) and is currently undergoing review at a peer-reviewed journal.
+The code and data for this report can be found in the OpenSAFELY [antibody-and-antiviral-deployment repository](https://github.com/opensafely/antibody-and-antiviral-deployment). The accompanying manuscript is published in BMJ Medicine [doi:10.1136/bmjmed-2022-000276](http://dx.doi.org/10.1136/bmjmed-2022-000276).
 
 *Update: The release date of this report can be found at the top. Our report is updated regularly. If you rely on a more recent update for your own reporting or analysis please contact team@opensafely.org to let us know.*
 
@@ -93,7 +93,7 @@ With the recent roll-out of nMABs and antivirals, there is an urgent need assess
 
 Using the OpenSAFELY platform we have developed and delivered a rapid, near real-time data-monitoring framework for the roll-out of antivirals and nMABs in England that can deliver detailed coverage reports in fine-grained clinical and demographic risk groups, using publicly auditable methods, using linked but pseudonymised patient-level NHS data in a highly secure Trusted Research Environment. 
 
-Full methods in code form can be found in the accompanying [antibody-and-antiviral-deployment repository](https://github.com/opensafely/antibody-and-antiviral-deployment) and are also described in our paper, linked above. [Brief methods](#methods) can be found at the end of the this report.  
+Full methods in code form can be found in the accompanying [antibody-and-antiviral-deployment repository](https://github.com/opensafely/antibody-and-antiviral-deployment) and are also described in our paper [doi:10.1136/bmjmed-2022-000276](http://dx.doi.org/10.1136/bmjmed-2022-000276). [Brief methods](#methods) can be found at the end of the this report.  
 
 
       
