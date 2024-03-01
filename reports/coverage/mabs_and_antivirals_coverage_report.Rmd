@@ -423,7 +423,7 @@ write_csv(table_elig_treat_redacted, here::here(output_dir_rmd, "tables", "table
 
 webshot2::webshot("tables/table_prop_eligible_high_risk_cohort.html","tables/table_prop_eligible_high_risk_cohort.png", vwidth = 1000, vheight = 900)
 
-include_graphics(fs::path(output_dir_rmd, "tables","table_prop_eligible_high_risk_cohort.png"))
+#include_graphics(fs::path(output_dir_rmd, "tables","table_prop_eligible_high_risk_cohort.png"))
 
 ```
 
@@ -643,7 +643,7 @@ write_csv(table_demo_clinc_breakdown_redacted, here::here(output_dir_rmd, "table
 
 webshot2::webshot("tables/table_prop_eligible_clinc_demo.html","tables/table_prop_eligible_clinc_demo.png", vwidth = 1350)
 
-include_graphics(fs::path(output_dir_rmd, "tables", "table_prop_eligible_clinc_demo.png"))
+#include_graphics(fs::path(output_dir_rmd, "tables", "table_prop_eligible_clinc_demo.png"))
 
 ```
 
