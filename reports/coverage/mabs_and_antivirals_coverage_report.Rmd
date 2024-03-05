@@ -42,6 +42,8 @@ library(htmltools)
 library(gt)
 library(scales)
 library(lubridate)
+library(webshot)
+library(magick)
 
 
 # Import custom user functions ----
@@ -172,7 +174,7 @@ coverage_plot <- coverage_plot_data %>%
     axis.line.x = element_line(colour = "black"),
     panel.grid.minor.x = element_blank(),
     legend.box.margin = margin(t = 1, l = 1, b = 1, r = 1)) + 
-  scale_y_continuous(limits = c(0, 150000), labels = comma)
+  scale_y_continuous(limits = c(0, 180000), labels = comma)
 
 ggsave(
   here::here(output_dir_rmd, "figures", "figure_cum_eligiblity.png"),
@@ -211,8 +213,8 @@ treatment_type_plot <- treatment_plot_data %>%
   ggplot(aes(x = treatment_date, y = cum_count_redacted, colour = treatment_type, group = treatment_type)) +
   geom_step(size = 1) +
   theme_classic(base_size = 8) +
-  scale_x_date(date_breaks = "1 week", date_labels =  "%d %b %Y") +
-  scale_y_continuous(limits = c(0, 40000), labels = comma) +
+  scale_x_date(date_breaks = "2 week", date_labels =  "%d %b %Y") +
+  scale_y_continuous(limits = c(0, 50000), labels = comma) +
   labs(
     x = "Treatment date",
     y = "Number of patients receiving treatment",
@@ -279,8 +281,8 @@ treatment_plot_therapeutics <- treatment_plot_data_therapeutics %>%
   ggplot(aes(x = treatment_date, y = cum_count_redacted, colour = high_risk_cohort, group = high_risk_cohort)) +
   geom_step(size = 1) +
   theme_classic(base_size = 8) +
-  scale_x_date(date_breaks = "1 week", date_labels =  "%d %b %Y") +
-  scale_y_continuous(limits = c(0, 40000), labels = comma) +
+  scale_x_date(date_breaks = "2 week", date_labels =  "%d %b %Y") +
+  scale_y_continuous(limits = c(0, 50000), labels = comma) +
   labs(
     x = "Treatment date",
     y = "Number of patients receiving treatment",
@@ -312,7 +314,7 @@ include_graphics(fs::path(output_dir_rmd, "figures", "figure_cum_treatment_thera
 
 <br>
 
-```{r, eligible-treatment breakdown, echo=FALSE, message=FALSE, warning=FALSE, out.width = '90%'}
+```{r, eligible-treatment breakdown, include = FALSE, echo=FALSE, message=FALSE, warning=FALSE, out.width = '90%'}
 
 table_elig_treat_redacted <- read_csv(fs::path(input_dir_os, "table_elig_treat_redacted2.csv")) %>%
   mutate(high_risk_cohort = case_when(
@@ -410,8 +412,8 @@ table_elig_treat_redacted %>%
   add_footnote(c("High risk cohorts are arranged in descending order, according to number of potentially eligible patients",
                  "All percentages (%) are caluclated with 95% confidence intervals"), 
                notation = "symbol") %>%
-  save_kable(file = "tables/table_prop_eligible_high_risk_cohort.png",
-             zoom = 1.5)
+  save_kable(file = "tables/table_prop_eligible_high_risk_cohort.html",
+              zoom = 1.5)
 
 write_csv(table_elig_treat_redacted, here::here(output_dir_rmd, "tables", "table_prop_eligible_high_risk_cohort.csv"))
 
@@ -419,7 +421,9 @@ write_csv(table_elig_treat_redacted, here::here(output_dir_rmd, "tables", "table
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '100%', fig.cap = "**Table 1 Count and proportion of potentially eligible patients in OpenSAFELY-TPP who have received treatment for COVID-19 since 11th December 2021, broken down by high risk cohort and treatment type.** Patient counts of 0-7 are shown as <8 with remaining counts rounded to the nearest 10; as a result percentages may not add up to 100%", fig.topcaption=TRUE}
 
-include_graphics(fs::path(output_dir_rmd, "tables", "table_prop_eligible_high_risk_cohort.png"))
+webshot2::webshot("tables/table_prop_eligible_high_risk_cohort.html","tables/table_prop_eligible_high_risk_cohort.png", vwidth = 1000, vheight = 900)
+
+#include_graphics(fs::path(output_dir_rmd, "tables","table_prop_eligible_high_risk_cohort.png"))
 
 ```
 
@@ -471,8 +475,8 @@ weekly_treatment_proportion_plot <- weekly_treatment_proportion %>%
   geom_line(size = 1) +
   facet_wrap(~high_risk_cohort, scales = "free_y") +
   theme_classic(base_size = 8) +
-  scale_x_date(limit = c(ymd("20211211"), ymd("20221003")),
-               date_breaks = "4 week", date_labels =  "%d %b %Y") +
+  scale_x_date(limit = c(ymd("20211211"), ymd("20230701")),   #end date updated to reflect most recent complete data
+               date_breaks = "2 months", date_labels =  "%d %b %Y") +
   labs(
     x = "",
     y = "Proportion of eligble patients receiving treatment",
@@ -500,7 +504,7 @@ include_graphics(fs::path(output_dir_rmd, "figures", "figure_prop_treatment.png"
 
 Table 2 shows the count and proportion of potentially eligible patients who received treatment for COVID-19 by `r format(report_stats$study_end, format = "%d-%b-%Y")`, broken down by demographic and clinical categories and by treatment type. The proportion treated varied by ethnicity, NHS Regions and by rurality. There was also lower coverage among care home residents, those with dementia, those with sickle cell disease, unvaccinated patients and in the most socioeconomically deprived areas. Patients who were housebound, or who had a severe mental illness also had a slightly reduced chance of being treated.
 
-```{r, echo=FALSE, warning=FALSE, message=FALSE, out.width = '100%'}
+```{r, echo=FALSE, include = FALSE, warning=FALSE, message=FALSE, out.width = '100%'}
 table_elig_treat_redacted_all <- 
   read_csv(fs::path(input_dir_os, "table_elig_treat_redacted2.csv")) %>%
   filter(high_risk_cohort == "All") %>%
@@ -628,7 +632,7 @@ table_demo_clinc_breakdown_redacted %>%
   add_header_above(., c(" ", "", "", "Treated" = 12)) %>%
   add_footnote(c("All percentages (%) are caluclated with 95% confidence intervals"), 
                notation = "symbol")  %>%
-  save_kable(file = "tables/table_prop_eligible_clinc_demo.png",
+  save_kable(file = "tables/table_prop_eligible_clinc_demo.html",
              zoom = 1.5)
 
 write_csv(table_demo_clinc_breakdown_redacted, here::here(output_dir_rmd, "tables", "table_prop_eligible_clinc_demo.csv"))
@@ -637,7 +641,9 @@ write_csv(table_demo_clinc_breakdown_redacted, here::here(output_dir_rmd, "table
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '100%', fig.cap = "***Table 2 Count and proportion of potentially eligible patients in OpenSAFELY-TPP who have received treatment for COVID-19 since 11th December 2021, broken down by demographic and clinical categories and by treatment type.** Patient counts of 0-7 are shown as <8 with remaining counts rounded to the nearest 10; as a result percentages may not add up to 100%.", fig.topcaption=TRUE}
 
-include_graphics(fs::path(output_dir_rmd, "tables", "table_prop_eligible_clinc_demo.png"))
+webshot2::webshot("tables/table_prop_eligible_clinc_demo.html","tables/table_prop_eligible_clinc_demo.png", vwidth = 1350)
+
+#include_graphics(fs::path(output_dir_rmd, "tables", "table_prop_eligible_clinc_demo.png"))
 
 ```
 
@@ -854,7 +860,7 @@ proportion_stp_decile <-
   scale_color_manual(values = c("Decile" = "blue", "Median" = "blue")) +
   scale_linetype_manual(values = c("Decile" = "dashed", "Median" = "solid")) +
   theme_classic(base_size = 8) +
-  scale_x_date(limit = c(ymd("20211211"), ymd("20221001")),
+  scale_x_date(limit = c(ymd("20211211"), ymd("20230701")),   #end date updated to reflect most recent complete data
                date_breaks = "2 week", date_labels =  "%d %b %Y") +
   labs(
     x = "Week",
