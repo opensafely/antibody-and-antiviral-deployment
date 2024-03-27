@@ -430,7 +430,7 @@ write_csv(table_elig_treat_redacted2, fs::path(output_dir, "table_elig_treat_red
 ## Clinical and demographics table
 variables <- c("ageband", "sex", "ethnicity", "imd", "rural_urban", "region_nhs", "autism_nhsd", "care_home_primis",
                "dementia_nhsd", "learning_disability_primis", "serious_mental_illness_nhsd", 
-               "housebound_opensafely", "shielded_primis", "sickle_cell_disease_nhsd", "vaccination_status")
+               "housebound_opensafely", "shielded_primis", "sickle_cell_disease_nhsd", "long_covid", "vaccination_status")
 
 table_demo_clinc_breakdown_base <- data_processed_clean %>%
   select(all_of(variables)) %>%
