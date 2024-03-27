@@ -51,16 +51,13 @@ source(here("analysis", "lib", "custom_functions.R"))
 
 # Input directory ----
 
-#input_dir_os <- here("released_outputs", "reports", "coverage")
-input_dir_os <- here("released_outputs", "reports_wip", "coverage")
+input_dir_os <- here("released_outputs", "reports", "coverage")
 #input_dir_os <- here("output", "coverage")
 
 # Output directory ----
-# output_dir_rmd <- here("reports", "coverage")
-output_dir_rmd <- here("reports", "coverage_wip")
+output_dir_rmd <- here("reports", "coverage")
 fs::dir_create(output_dir_rmd)
-fs::dir_create(output_dir_rmd,"figures")
-fs::dir_create(output_dir_rmd,"tables")
+
 
 # Import data ----
 report_stats <- read_csv(fs::path(input_dir_os, "table_report_stats_redacted.csv"))
