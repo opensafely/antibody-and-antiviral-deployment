@@ -57,4 +57,8 @@ primis-covid19-vacc-uptake/nonshield/v1
 nhsd-primary-care-domain-refsets/mh_cod/20210127
 opensafely/covid-19-vaccination-first-dose-declined/0c16880b
 opensafely/covid-19-vaccination-second-dose-declined/27d8bb36
+opensafely/nice-managing-the-long-term-effects-of-covid-19/64f1ae69
+opensafely/referral-and-signposting-for-long-covid/12d06dc0
+opensafely/assessment-instruments-and-outcome-measures-for-long-covid/79c0fa8a
+user/hendersonad/hes-long-covid/7565af4d
 

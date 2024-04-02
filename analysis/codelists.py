@@ -414,3 +414,28 @@ covid_vaccine_declined_codes = combine_codelists(
   first_dose_declined, second_dose_declined
 )
 
+## Long COVID (used from openprompt vaccine work https://github.com/opensafely/openprompt-vaccine-long-covid/blob/main/analysis/codelists.py)
+long_covid_nice_dx = codelist_from_csv(
+    "codelists/opensafely-nice-managing-the-long-term-effects-of-covid-19.csv",
+    system = "snomed",
+    column="code",
+)
+long_covid_referral_codes = codelist_from_csv(
+    "codelists/opensafely-referral-and-signposting-for-long-covid.csv",
+    system = "snomed",
+    column="code",
+)
+long_covid_assessment_codes = codelist_from_csv(
+    "codelists/opensafely-assessment-instruments-and-outcome-measures-for-long-covid.csv",
+    system = "snomed",
+    column="code",
+)
+long_covid_combine = combine_codelists(
+    long_covid_nice_dx, long_covid_referral_codes, long_covid_assessment_codes
+)
+
+long_covid_hosp = codelist_from_csv(
+    "codelists/user-hendersonad-hes-long-covid.csv",
+    system = "icd10",
+    column="code"
+)

@@ -1391,6 +1391,34 @@ study = StudyDefinition(
   ),
   
   
+
+  # # Long COVID
+
+  first_lc_dx_flag = patients.with_these_clinical_events(
+      long_covid_nice_dx,
+      on_or_before = "date_treated",
+      returning = "code",
+      include_date_of_match = True,
+      return_first_date_in_period = True,
+      date_format = "YYYY-MM-DD",
+      return_expectations = {"incidence": 0.1},
+      ),
+
+  first_lc_dxrx_flag = patients.with_these_clinical_events(
+      long_covid_combine,
+      on_or_before = "date_treated",
+      returning = "binary _flag",
+      include_date_of_match = True,
+      return_first_date_in_period = True,
+      date_format = "YYYY-MM-DD",
+      return_expectations = {"incidence": 0.1},
+      ),  
+  
+  first_lc_code_date = patients.minimum_of(
+    "first_lc_dx_flag_date","first_lc_dxrx_flag_date"
+    ),
+
+
   
   # CLINICAL CO-MORBIDITIES TBC ----
   

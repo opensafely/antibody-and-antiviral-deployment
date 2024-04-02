@@ -129,7 +129,7 @@
     "nhsd-immunosuppresant-drugs-pra-dmd.csv": {
       "id": "nhsd/immunosuppresant-drugs-pra-dmd/526d9f5f",
       "url": "https://www.opencodelists.org/codelist/nhsd/immunosuppresant-drugs-pra-dmd/526d9f5f/",
-      "downloaded_at": "2024-02-14 13:10:23.166362Z",
+      "downloaded_at": "2024-03-05 16:43:26.365935Z",
       "sha": "b86c1ff06c9208851b40b668fc846e25ccabcbb1"
     },
     "nhsd-immunosuppresant-drugs-pra-snomed.csv": {
@@ -141,7 +141,7 @@
     "nhsd-oral-steroid-drugs-pra-dmd.csv": {
       "id": "nhsd/oral-steroid-drugs-pra-dmd/44292c02",
       "url": "https://www.opencodelists.org/codelist/nhsd/oral-steroid-drugs-pra-dmd/44292c02/",
-      "downloaded_at": "2024-02-14 13:10:23.423657Z",
+      "downloaded_at": "2024-03-05 16:43:26.614328Z",
       "sha": "c0008e3734ad82744e3643d4a0f692d76a70085f"
     },
     "nhsd-oral-steroid-drugs-snomed.csv": {
@@ -285,7 +285,7 @@
     "primis-covid19-vacc-uptake-eth2001.csv": {
       "id": "primis-covid19-vacc-uptake/eth2001/v1",
       "url": "https://www.opencodelists.org/codelist/primis-covid19-vacc-uptake/eth2001/v1/",
-      "downloaded_at": "2024-02-14 13:10:26.407595Z",
+      "downloaded_at": "2024-03-05 16:43:29.656369Z",
       "sha": "2ff9aea91a05f41fe911a885eee50d2494247d58"
     },
     "nhsd-primary-care-domain-refsets-autism_cod.csv": {
@@ -353,6 +353,30 @@
       "url": "https://www.opencodelists.org/codelist/opensafely/covid-19-vaccination-second-dose-declined/27d8bb36/",
       "downloaded_at": "2022-02-16 16:33:44.441520Z",
       "sha": "5f79648b7682f0fc85eb0c47c1da6dc180c5a89d"
+    },
+    "opensafely-nice-managing-the-long-term-effects-of-covid-19.csv": {
+      "id": "opensafely/nice-managing-the-long-term-effects-of-covid-19/64f1ae69",
+      "url": "https://www.opencodelists.org/codelist/opensafely/nice-managing-the-long-term-effects-of-covid-19/64f1ae69/",
+      "downloaded_at": "2024-03-05 16:43:31.119028Z",
+      "sha": "8ba3006b5e3d054bbc6ed1861d08fdc682a52a31"
+    },
+    "opensafely-referral-and-signposting-for-long-covid.csv": {
+      "id": "opensafely/referral-and-signposting-for-long-covid/12d06dc0",
+      "url": "https://www.opencodelists.org/codelist/opensafely/referral-and-signposting-for-long-covid/12d06dc0/",
+      "downloaded_at": "2024-03-05 16:43:31.254016Z",
+      "sha": "4574b35cc14eee04bd149d0226f1dae0dfadcb3e"
+    },
+    "opensafely-assessment-instruments-and-outcome-measures-for-long-covid.csv": {
+      "id": "opensafely/assessment-instruments-and-outcome-measures-for-long-covid/79c0fa8a",
+      "url": "https://www.opencodelists.org/codelist/opensafely/assessment-instruments-and-outcome-measures-for-long-covid/79c0fa8a/",
+      "downloaded_at": "2024-03-05 16:43:31.367401Z",
+      "sha": "f09228d28e9a43ea823b4570e7d82ff3714a0010"
+    },
+    "user-hendersonad-hes-long-covid.csv": {
+      "id": "user/hendersonad/hes-long-covid/7565af4d",
+      "url": "https://www.opencodelists.org/codelist/user/hendersonad/hes-long-covid/7565af4d/",
+      "downloaded_at": "2024-03-05 16:43:31.490204Z",
+      "sha": "49812e5b946cd87c1a84a293e11a2f01a4d7a233"
     }
   }
 }

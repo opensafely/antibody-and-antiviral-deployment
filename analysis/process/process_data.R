@@ -120,7 +120,8 @@ data_extract0 <- read_csv(
     serious_mental_illness_nhsd = col_logical(),
     sickle_cell_disease_nhsd = col_date(format = "%Y-%m-%d"),
     vaccination_status = col_character(),
-    
+    first_lc_code_date = col_date(format = "%Y-%m-%d"),
+
     # COVID VARIENT
     sgtf = col_character(),
     sgtf_first = col_character(),
@@ -209,6 +210,9 @@ data_processed <- data_extract %>%
     
     ## Convert sickle cell disease from date
     sickle_cell_disease_nhsd = ifelse(!is.na(sickle_cell_disease_nhsd), 1, 0),
+
+    ## Long COVID
+    long_covid = ifelse(!is.na(first_lc_code_date), 1, 0),
     
     # Combine subgoups of rare neurological conditions cohort
     rare_neurological_conditions_nhsd =  pmin(multiple_sclerosis_nhsd, motor_neurone_disease_nhsd, myasthenia_gravis_nhsd,
@@ -568,7 +572,7 @@ data_processed_clean <- data_processed_combined %>%
     
     # Clinical groups
     autism_nhsd, care_home_primis, dementia_nhsd, housebound_opensafely, learning_disability_primis, shielded_primis, 
-    serious_mental_illness_nhsd, sickle_cell_disease_nhsd, vaccination_status,
+    serious_mental_illness_nhsd, sickle_cell_disease_nhsd, long_covid, vaccination_status,
     
     # COVID variant
     sgtf, sgtf_first, variant,
