@@ -1396,7 +1396,7 @@ study = StudyDefinition(
 
   first_lc_dx_flag = patients.with_these_clinical_events(
       long_covid_nice_dx,
-      on_or_before = "date_treated",
+      on_or_before = "start_date",
       returning = "code",
       include_date_of_match = True,
       return_first_date_in_period = True,
@@ -1406,7 +1406,7 @@ study = StudyDefinition(
 
   first_lc_dxrx_flag = patients.with_these_clinical_events(
       long_covid_combine,
-      on_or_before = "date_treated",
+      on_or_before = "start_date",
       returning = "binary _flag",
       include_date_of_match = True,
       return_first_date_in_period = True,
