@@ -97,6 +97,20 @@ study = StudyDefinition(
       "incidence": 0.05
     },
   ), 
+
+  paxlovid_covid_therapeutics_last = patients.with_covid_therapeutics(
+    #with_these_statuses = ["Approved", "Treatment Complete"],
+    with_these_therapeutics = "Paxlovid",
+    with_these_indications = "non_hospitalised",
+    on_or_after = "index_date",
+    find_last_match_in_period = True,
+    returning = "date",
+    date_format = "YYYY-MM-DD",
+    return_expectations = {
+      "date": {"earliest": "2022-02-10"},
+      "incidence": 0.05
+    },
+  ), 
   
   ## Sotrovimab
   sotrovimab_covid_therapeutics = patients.with_covid_therapeutics(
@@ -112,6 +126,20 @@ study = StudyDefinition(
       "incidence": 0.2
     },
   ),
+
+  sotrovimab_covid_therapeutics_last = patients.with_covid_therapeutics(
+    #with_these_statuses = ["Approved", "Treatment Complete"],
+    with_these_therapeutics = "Sotrovimab",
+    with_these_indications = "non_hospitalised",
+    on_or_after = "index_date",
+    find_last_match_in_period = True,
+    returning = "date",
+    date_format = "YYYY-MM-DD",
+    return_expectations = {
+      "date": {"earliest": "2021-12-16"},
+      "incidence": 0.2
+    },
+  ),
   
   ## Remdesivir
   remdesivir_covid_therapeutics = patients.with_covid_therapeutics(
@@ -120,6 +148,20 @@ study = StudyDefinition(
     with_these_indications = "non_hospitalised",
     on_or_after = "index_date",
     find_first_match_in_period = True,
+    returning = "date",
+    date_format = "YYYY-MM-DD",
+    return_expectations = {
+      "date": {"earliest": "2021-12-16"},
+      "incidence": 0.2
+    },
+  ),
+
+  remdesivir_covid_therapeutics_last = patients.with_covid_therapeutics(
+    #with_these_statuses = ["Approved", "Treatment Complete"],
+    with_these_therapeutics = "Remdesivir",
+    with_these_indications = "non_hospitalised",
+    on_or_after = "index_date",
+    find_last_match_in_period = True,
     returning = "date",
     date_format = "YYYY-MM-DD",
     return_expectations = {
@@ -143,6 +185,20 @@ study = StudyDefinition(
     },
   ),
   
+  molnupiravir_covid_therapeutics_last = patients.with_covid_therapeutics(
+    #with_these_statuses = ["Approved", "Treatment Complete"],
+    with_these_therapeutics = "Molnupiravir",
+    with_these_indications = "non_hospitalised",
+    on_or_after = "index_date",
+    find_last_match_in_period = True,
+    returning = "date",
+    date_format = "YYYY-MM-DD",
+    return_expectations = {
+      "date": {"earliest": "2021-12-16"},
+      "incidence": 0.2
+    },
+  ),
+  
   ### Casirivimab and imdevimab
   casirivimab_covid_therapeutics = patients.with_covid_therapeutics(
     #with_these_statuses = ["Approved", "Treatment Complete"],
@@ -158,6 +214,19 @@ study = StudyDefinition(
     },
   ), 
   
+  casirivimab_covid_therapeutics_last = patients.with_covid_therapeutics(
+    #with_these_statuses = ["Approved", "Treatment Complete"],
+    with_these_therapeutics = "Casirivimab and imdevimab",
+    with_these_indications = "non_hospitalised",
+    on_or_after = "index_date",
+    find_last_match_in_period = True,
+    returning = "date",
+    date_format = "YYYY-MM-DD",
+    return_expectations = {
+      "date": {"earliest": "2021-12-16"},
+      "incidence": 0.05
+    },
+  ),  
   
   ## Date treated
   date_treated = patients.minimum_of(
@@ -1394,30 +1463,14 @@ study = StudyDefinition(
 
   # # Long COVID
 
-  first_lc_dx_flag = patients.with_these_clinical_events(
-      long_covid_nice_dx,
-      on_or_before = "start_date",
-      returning = "code",
-      include_date_of_match = True,
-      return_first_date_in_period = True,
-      date_format = "YYYY-MM-DD",
-      return_expectations = {"incidence": 0.1},
-      ),
-
-  first_lc_dxrx_flag = patients.with_these_clinical_events(
+  first_long_covid = patients.with_these_clinical_events(
       long_covid_combine,
       on_or_before = "start_date",
-      returning = "binary _flag",
-      include_date_of_match = True,
-      return_first_date_in_period = True,
+      returning = "date",
+      find_first_match_in_period = True,
       date_format = "YYYY-MM-DD",
       return_expectations = {"incidence": 0.1},
       ),  
-  
-  first_lc_code_date = patients.minimum_of(
-    "first_lc_dx_flag_date","first_lc_dxrx_flag_date"
-    ),
-
 
   
   # CLINICAL CO-MORBIDITIES TBC ----
