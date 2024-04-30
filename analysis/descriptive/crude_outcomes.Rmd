@@ -685,7 +685,7 @@ sgtf_outcomes <- data_processed_clean %>%
     # Redact values < threshold
     count = ifelse(count < threshold, NA, as.numeric(count)),
     covid_positive_test = ifelse(covid_positive_test < threshold, NA, covid_positive_test),
-    covid_hospital_admission = ifelse(covid_hospital_admission < threshold, NA, as.numeric(covid_hospital_admission)),
+    covid_hospital_admission = ifelse(covid_hospital_admission < threshold, NA_integer_, as.numeric(covid_hospital_admission)),
     covid_hospitalisation_critical_care = ifelse(covid_hospitalisation_critical_care < threshold, NA, as.numeric(covid_hospitalisation_critical_care)),
     covid_death = ifelse(covid_death < threshold, NA, as.numeric(covid_death)),
     any_death = ifelse(any_death < threshold, NA, as.numeric(any_death)),
