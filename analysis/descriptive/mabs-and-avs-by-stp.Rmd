@@ -498,8 +498,8 @@ table_elig_treat_redacted <- table_elig_treat %>%
     Paxlovid = plyr::round_any(as.numeric(Paxlovid), 10),
     Sotrovimab = plyr::round_any(as.numeric(Sotrovimab), 10),
     Remdesivir = plyr::round_any(as.numeric(Remdesivir), 10),
-    Molnupiravir = plyr::round_any(Molnupiravir, 10),
-    Casirivimab = plyr::round_any(Casirivimab, 10)) %>%
+    Molnupiravir = plyr::round_any(as.numeric(Molnupiravir), 10),
+    Casirivimab = plyr::round_any(as.numeric(Casirivimab), 10)) %>%
   arrange(desc(decile)) %>%
   mutate(Paxlovid_perc = paste(round(Paxlovid/Treated*100, digits = 0), " (",
                                round((Paxlovid/Treated - 1.96*sqrt((Paxlovid/Treated)*(1-Paxlovid/Treated)/Treated))*100, digits = 0),
