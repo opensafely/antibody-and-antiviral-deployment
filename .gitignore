@@ -15,6 +15,6 @@ reports/coverage/table_prop_eligible_clinc_demo.csv
 reports/coverage/mabs_and_antivirals_coverage_report.html
 reports/coverage/figures/*
 reports/coverage/tables/*
-released_outputs/reports_wip/coverage/*
+released_outputs/*
 reports/coverage_wip/*
 analysis/descriptive/mabs-and-avs-by-stp.html
