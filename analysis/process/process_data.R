@@ -59,6 +59,12 @@ data_extract0 <- read_csv(
     remdesivir_covid_therapeutics = col_date(format = "%Y-%m-%d"),
     molnupiravir_covid_therapeutics = col_date(format = "%Y-%m-%d"),
     casirivimab_covid_therapeutics = col_date(format = "%Y-%m-%d"),
+
+    paxlovid_covid_therapeutics_last = col_date(format = "%Y-%m-%d"),
+    sotrovimab_covid_therapeutics_last = col_date(format = "%Y-%m-%d"),
+    remdesivir_covid_therapeutics_last = col_date(format = "%Y-%m-%d"),
+    molnupiravir_covid_therapeutics_last = col_date(format = "%Y-%m-%d"),
+    casirivimab_covid_therapeutics_last = col_date(format = "%Y-%m-%d"),
     
     # ELIGIBILITY CRITERIA VARIABLES ----
     covid_test_positive = col_logical(),
@@ -120,7 +126,7 @@ data_extract0 <- read_csv(
     serious_mental_illness_nhsd = col_logical(),
     sickle_cell_disease_nhsd = col_date(format = "%Y-%m-%d"),
     vaccination_status = col_character(),
-    first_lc_code_date = col_date(format = "%Y-%m-%d"),
+    first_long_covid = col_date(format = "%Y-%m-%d"),
 
     # COVID VARIENT
     sgtf = col_character(),
@@ -151,7 +157,13 @@ if(Sys.getenv("OPENSAFELY_BACKEND") %in% c("", "expectations")){
            remdesivir_covid_therapeutics = as.Date(ifelse(!is.na(remdesivir_covid_therapeutics), date, NA), origin = "1970-01-01"),
            molnupiravir_covid_therapeutics = as.Date(ifelse(!is.na(molnupiravir_covid_therapeutics), date, NA),  origin = "1970-01-01"),
            casirivimab_covid_therapeutics = as.Date(ifelse(!is.na(casirivimab_covid_therapeutics), date, NA),  origin = "1970-01-01"),
-           
+
+          paxlovid_covid_therapeutics_last = as.Date(ifelse(!is.na(paxlovid_covid_therapeutics_last), date, NA),  origin = "1970-01-01"),
+           sotrovimab_covid_therapeutics_last = as.Date(ifelse(!is.na(sotrovimab_covid_therapeutics_last), date, NA),  origin = "1970-01-01"),
+           remdesivir_covid_therapeutics_last = as.Date(ifelse(!is.na(remdesivir_covid_therapeutics_last), date, NA), origin = "1970-01-01"),
+           molnupiravir_covid_therapeutics_last = as.Date(ifelse(!is.na(molnupiravir_covid_therapeutics_last), date, NA),  origin = "1970-01-01"),
+           casirivimab_covid_therapeutics_last = as.Date(ifelse(!is.na(casirivimab_covid_therapeutics_last), date, NA),  origin = "1970-01-01"),
+
            covid_positive_test_30_days_post_elig_or_treat = as.Date(ifelse(covid_positive_test_30_days_post_elig_or_treat > covid_test_positive_date + 30,
                                                                    covid_positive_test_30_days_post_elig_or_treat, NA),  origin = "1970-01-01"))
            
@@ -192,6 +204,19 @@ data_processed <- data_extract %>%
       treatment_date == casirivimab_covid_therapeutics ~ "Casirivimab", 
       TRUE ~ NA_character_),
     
+    # last MAB or Antiviral recorded
+    last_treatment_date = as.Date(pmin(paxlovid_covid_therapeutics_last, sotrovimab_covid_therapeutics_last, 
+                                  remdesivir_covid_therapeutics_last, molnupiravir_covid_therapeutics_last, 
+                                  casirivimab_covid_therapeutics_last, na.rm = TRUE), origin = "1970-01-01"),
+    last_treatment_type = case_when(
+      last_treatment_date == paxlovid_covid_therapeutics_last ~ "Paxlovid", 
+      last_treatment_date == sotrovimab_covid_therapeutics_last ~ "Sotrovimab", 
+      last_treatment_date == remdesivir_covid_therapeutics_last ~ "Remdesivir", 
+      last_treatment_date == molnupiravir_covid_therapeutics_last ~ "Molnupiravir", 
+      last_treatment_date == casirivimab_covid_therapeutics_last ~ "Casirivimab", 
+      TRUE ~ NA_character_),
+
+
     
     # ELIGIBILITY VARIABLES ----
     
@@ -212,7 +237,7 @@ data_processed <- data_extract %>%
     sickle_cell_disease_nhsd = ifelse(!is.na(sickle_cell_disease_nhsd), 1, 0),
 
     ## Long COVID
-    long_covid = ifelse(!is.na(first_lc_code_date), 1, 0),
+    long_covid = ifelse(!is.na(first_long_covid), 1, 0),
     
     # Combine subgoups of rare neurological conditions cohort
     rare_neurological_conditions_nhsd =  pmin(multiple_sclerosis_nhsd, motor_neurone_disease_nhsd, myasthenia_gravis_nhsd,
@@ -561,6 +586,9 @@ data_processed_clean <- data_processed_combined %>%
     # Treatment
     paxlovid_covid_therapeutics, sotrovimab_covid_therapeutics, remdesivir_covid_therapeutics, molnupiravir_covid_therapeutics, 
     casirivimab_covid_therapeutics, treatment_date, treatment_type,
+
+    # Last treatment code recorded 
+    last_treatment_date, last_treatment_type,
     
     # High risk cohort
     downs_syndrome, solid_cancer, haematological_disease, renal_disease, liver_disease, imid, immunosupression, 

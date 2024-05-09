@@ -39,7 +39,7 @@ library(ggplot2)
 library(png)
 library(readr)
 library(htmltools)
-library(gt)
+# library(gt)
 library(scales)
 library(lubridate)
 library(webshot)
@@ -477,8 +477,7 @@ weekly_treatment_proportion_plot <- weekly_treatment_proportion %>%
   geom_line(size = 1) +
   facet_wrap(~high_risk_cohort, scales = "free_y") +
   theme_classic(base_size = 8) +
-  scale_x_date(limit = c(ymd("20211211"), ymd("20230701")),   #end date updated to reflect most recent complete data
-               date_breaks = "2 months", date_labels =  "%d %b %Y") +
+  scale_x_date(date_breaks = "2 months", date_labels =  "%d %b %Y") +
   labs(
     x = "",
     y = "Proportion of eligble patients receiving treatment",
@@ -862,7 +861,7 @@ proportion_stp_decile <-
   scale_color_manual(values = c("Decile" = "blue", "Median" = "blue")) +
   scale_linetype_manual(values = c("Decile" = "dashed", "Median" = "solid")) +
   theme_classic(base_size = 8) +
-  scale_x_date(limit = c(ymd("20211211"), ymd("20230701")),   #end date updated to reflect most recent complete data
+  scale_x_date(
                date_breaks = "2 week", date_labels =  "%d %b %Y") +
   labs(
     x = "Week",
@@ -888,7 +887,62 @@ include_graphics(fs::path(output_dir_rmd, "figures", "figure_proportion_stp_deci
 
 ```
 
+<br>
 
+```{r, treatment type count plot, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '100%', fig.cap = "**Figure 6 Total number of patients who received an antiviral or nMAB for treating COVID-19 since 11th December 2021, stratified by treatment type based on the most recent recorded treatment code recorded ** Shorter lines for Paxlovid and casirivimab reflect availability and guidance.", fig.topcaption=TRUE}
+
+treatment_codes_data <- 
+  read_csv(here::here(input_dir_os, "table_last_treatment_codes_redacted.csv")) %>%
+  filter(!is.na(last_treatment_date),
+         last_treatment_date <= end_date,
+         count_redacted > 0) %>% 
+  mutate(last_treatment_type = case_when(last_treatment_type == "Casirivimab" ~ "Casirivimab/imdevimab",
+                                    TRUE ~ last_treatment_type))
+
+plot_order <- treatment_codes_data %>%
+  group_by(last_treatment_type) %>%
+  mutate(order = max(count_redacted, na.rm = T)) %>%
+  arrange(desc(order)) %>%
+  filter(count_redacted == order) %>%
+  select(last_treatment_type, order) %>%
+  distinct()
+
+treatment_codes_data <- treatment_codes_data %>%
+  mutate(last_treatment_type = factor(last_treatment_type, levels = plot_order$last_treatment_type))
+
+treatment_codes_plot <- treatment_codes_data %>%
+  ggplot(aes(x = last_treatment_date, y = count_redacted, colour = last_treatment_type, group = last_treatment_type)) +
+  geom_step(size = 1) +
+  theme_classic(base_size = 8) +
+  scale_x_date(date_breaks = "2 week", date_labels =  "%d %b %Y") +
+  scale_y_continuous(limits = c(0, 200), labels = comma) +
+  labs(
+    x = "Most recent treatment date",
+    y = "Number of patients receiving treatment by most recent treatment date",
+    colour = "Treatment type",) +
+  theme(
+    axis.text = element_text(size = 12),
+    axis.text.x = element_text(angle = 60, hjust = 1),
+    axis.title = element_text(size = 12),
+    legend.text = element_text(size = 12),
+    legend.title=element_text(size=12, face = "bold"),
+    legend.position = c(0.1,0.75),
+    legend.background = element_rect(colour = "white"),
+    legend.box.background = element_rect(colour = "black"),
+    axis.line.x = element_line(colour = "black"),
+    panel.grid.minor.x = element_blank(),
+    legend.box.margin = margin(t = 1, l = 1, b = 1, r = 1),
+    plot.title = element_text(size=20, face="bold"))
+
+ggsave(
+  here::here(output_dir_rmd, "figures", "figure_last_treatment_code.png"),
+  treatment_codes_plot,
+  units = "cm", width = 35, height = 20
+)
+
+include_graphics(fs::path(output_dir_rmd, "figures", "figure_last_treatment_code.png"))
+
+```
 <!-- **Table 3 Count and proportion of potentially eligible patients in OpenSAFELY-TPP who have received treatment for COVID-19 since 11th December 2021, broken down by STP decile and treatment type.** Counts <8 have been redacted and counts >7 are rounded to the nearest 10; as a result percentages may not add up to 100%." -->
 
 <!-- ```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis', fig.width=10, out.width = '100%'} -->

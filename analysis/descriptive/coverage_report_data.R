@@ -751,3 +751,44 @@ groups2 <- groups2 %>%
 
 write_csv(rbind(all, groups) %>% filter(!is.na(tb)), fs::path(output_dir, "table_time_to_treat_redacted.csv"))
 write_csv(groups2, fs::path(output_dir, "table_time_to_treat_groups_redacted.csv"))
+
+
+# Treatment recording over time
+plot_data_treatment_codes <- data_processed_clean %>%
+  filter(!is.na(last_treatment_date)) %>%
+  select(last_treatment_date, last_treatment_type)  %>%
+  rbind(data_processed_clean %>%
+          filter(!is.na(last_treatment_date)) %>%
+          select(last_treatment_date, last_treatment_type) %>%
+          mutate(last_treatment_type = "All")) %>%
+  group_by(last_treatment_date, last_treatment_type) %>%
+  tally() %>%
+  group_by(last_treatment_type) %>%
+  arrange(last_treatment_type, last_treatment_date) %>%
+  complete(last_treatment_date = seq.Date(min(last_treatment_date, na.rm = T), max(last_treatment_date, na.rm = T), by="day"))  %>%
+  mutate(count = ifelse(is.na(n), 0, n),
+         count_redacted = plyr::round_any(count, 10),
+         count_redacted = ifelse(count < threshold, NA, count_redacted)) %>%
+          # cum_count = cumsum(count),
+          # cum_count_redacted =  plyr::round_any(cum_count, 10),
+          # cum_count_redacted = ifelse(cum_count < threshold, NA, cum_count_redacted)
+  select(-n) %>%
+  arrange(last_treatment_type, last_treatment_date)
+
+plot_order <- plot_data_treatment_codes %>%
+  group_by(last_treatment_type) %>%
+  mutate(order = max(count_redacted, na.rm = T)) %>%
+  arrange(desc(order)) %>%
+  filter(count_redacted == order) %>%
+  select(last_treatment_type, order) %>%
+  distinct()
+
+treatment_codes_plot_data <- plot_data_treatment_codes %>%
+  mutate(last_treatment_type = factor(last_treatment_type, levels = plot_order$last_treatment_type))
+
+write_csv(treatment_codes_plot_data %>% 
+            select(last_treatment_date, count_redacted, last_treatment_type),
+          fs::path(output_dir, "table_last_treatment_codes_redacted.csv"))
+write_csv(treatment_plot_data, fs::path(output_dir2, "table_last_treatment_codes.csv"))
+
+print("treatment_codes_plot_data saved")
