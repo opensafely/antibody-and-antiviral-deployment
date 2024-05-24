@@ -157,8 +157,18 @@ plot_order <- rbind(plot_data_coverage, plot_data_coverage_groups) %>%
 coverage_plot_data <- rbind(plot_data_coverage, plot_data_coverage_groups) %>%
   mutate(high_risk_cohort = factor(high_risk_cohort, levels = plot_order$high_risk_cohort))
 
-write_csv(coverage_plot_data %>% 
-            select(elig_start, cum_count_redacted, high_risk_cohort) %>%
+## Convert from daily to weekly due to 5000 line limit
+coverage_plot_data_weekly <- coverage_plot_data %>%
+  mutate(week = cut(elig_start + 2 , "week")) %>%
+  group_by(high_risk_cohort, week) %>%
+  summarise(count_week = sum(count, na.rm = T)) %>%
+  mutate(week = as.Date(week) - 2,
+         cum_count = cumsum(count_week),
+         cum_count_redacted =  plyr::round_any(cum_count, 10),
+         cum_count_redacted = ifelse(cum_count < threshold, NA, cum_count_redacted)) 
+
+write_csv(coverage_plot_data_weekly %>% 
+            select(elig_start = week, cum_count_redacted, high_risk_cohort) %>%
             filter(elig_start >= as.Date("2021-12-11")), 
           fs::path(output_dir, "table_cum_eligiblity_redacted.csv"))
 write_csv(coverage_plot_data, fs::path(output_dir2, "table_cum_eligiblity.csv"))
@@ -217,10 +227,20 @@ plot_order <- rbind(plot_data_treatment, plot_data_treatment_groups) %>%
 treatment_plot_data <- rbind(plot_data_treatment, plot_data_treatment_groups) %>%
   mutate(high_risk_cohort = factor(high_risk_cohort, levels = plot_order$high_risk_cohort))
 
-write_csv(treatment_plot_data %>% 
-            select(treatment_date, cum_count_redacted, high_risk_cohort), 
+## Convert from daily to weekly due to 5000 line limit
+treatment_plot_data_weekly <- treatment_plot_data %>%
+  mutate(week = cut(treatment_date + 2 , "week")) %>%
+  group_by(high_risk_cohort, week) %>%
+  summarise(count_week = sum(count, na.rm = T)) %>%
+  mutate(week = as.Date(week) - 2,
+         cum_count = cumsum(count_week),
+         cum_count_redacted =  plyr::round_any(cum_count, 10),
+         cum_count_redacted = ifelse(cum_count < threshold, NA, cum_count_redacted))
+
+write_csv(treatment_plot_data_weekly %>% 
+            select(treatment_date = week, cum_count_redacted, high_risk_cohort), 
           fs::path(output_dir, "table_cum_treatment_redacted.csv"))
-write_csv(treatment_plot_data, fs::path(output_dir2, "table_cum_treatment.csv"))
+write_csv(treatment_plot_data_weekly, fs::path(output_dir2, "table_cum_treatment.csv"))
 
 print("treatment_plot_data saved")
 
@@ -786,9 +806,18 @@ plot_order <- plot_data_treatment_codes %>%
 treatment_codes_plot_data <- plot_data_treatment_codes %>%
   mutate(last_treatment_type = factor(last_treatment_type, levels = plot_order$last_treatment_type))
 
-write_csv(treatment_codes_plot_data %>% 
-            select(last_treatment_date, count_redacted, last_treatment_type),
+## Convert from daily to weekly due to 5000 line limit
+treatment_codes_plot_data_weekly <- treatment_codes_plot_data %>%
+  mutate(week = cut(last_treatment_date + 2 , "week")) %>%
+  group_by(last_treatment_type, week) %>%
+  summarise(count_week = sum(count, na.rm = T)) %>%
+  mutate(week = as.Date(week) - 2,
+         count_week_redacted =  plyr::round_any(count_week, 10),
+         count_week_redacted = ifelse(count_week < threshold, NA, count_week_redacted))
+
+write_csv(treatment_codes_plot_data_weekly %>% 
+            select(last_treatment_date = week, count_redacted = count_week_redacted, last_treatment_type),
           fs::path(output_dir, "table_last_treatment_codes_redacted.csv"))
-write_csv(treatment_plot_data, fs::path(output_dir2, "table_last_treatment_codes.csv"))
+write_csv(treatment_codes_plot_data_weekly, fs::path(output_dir2, "table_last_treatment_codes.csv"))
 
 print("treatment_codes_plot_data saved")
