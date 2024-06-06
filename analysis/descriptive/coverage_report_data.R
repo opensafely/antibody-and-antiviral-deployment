@@ -464,6 +464,7 @@ variables <- c("ageband", "sex", "ethnicity", "imd", "rural_urban", "region_nhs"
                "housebound_opensafely", "shielded_primis", "sickle_cell_disease_nhsd", "long_covid", "vaccination_status")
 
 table_demo_clinc_breakdown_base <- data_processed_clean %>%
+  filter(treatment_date <= study_end) %>%
   select(all_of(variables)) %>%
   tbl_summary()
 
@@ -478,6 +479,7 @@ table_demo_clinc_breakdown_base <- table_demo_clinc_breakdown_base$table_body %>
 
 table_demo_clinc_breakdown <- data_processed_clean %>%
   filter(!is.na(treatment_type)) %>%
+  filter(treatment_date <= study_end) %>%
   select(treatment_type, all_of(variables)) %>%
   tbl_summary(by = treatment_type) %>%
   add_overall() %>%
@@ -541,7 +543,7 @@ non_elig_treated <-  data_processed_clean %>%
   filter(!is.na(treatment_date),
          eligibility_status == "Treated"
          ) %>%
-  filter(treatment_date<=study_date) %>%
+  filter(treatment_date<=study_end) %>%
   mutate(
     patient_id,
     no_positive_covid_test = (covid_test_positive != 1),
@@ -676,7 +678,7 @@ print("data_flowchart saved")
 print(table(data_processed_clean$match))
 
 high_risk_cohort_comparison_redacted <- data_processed_clean %>%
-  filter(!is.na(treatment_date) & (treatment_date <=study_date)) %>%
+  filter(!is.na(treatment_date) & (treatment_date <=study_end)) %>%
   filter(is.na(match)) %>%
   select(high_risk_group_nhsd_combined, high_risk_cohort_covid_therapeutics) %>%
   group_by(high_risk_group_nhsd_combined, high_risk_cohort_covid_therapeutics) %>%
@@ -792,7 +794,7 @@ plot_data_treatment_codes <- data_processed_clean %>%
   filter(!is.na(last_treatment_date) & (treatment_date <= study_end)) %>%
   select(last_treatment_date, last_treatment_type)  %>%
   rbind(data_processed_clean %>%
-          filter(!is.na(last_treatment_date)) %>%
+          filter(!is.na(last_treatment_date) & (treatment_date <= study_end)) %>%
           select(last_treatment_date, last_treatment_type) %>%
           mutate(last_treatment_type = "All")) %>%
   group_by(last_treatment_date, last_treatment_type) %>%
@@ -811,9 +813,9 @@ plot_data_treatment_codes <- data_processed_clean %>%
 
 plot_order <- plot_data_treatment_codes %>%
   group_by(last_treatment_type) %>%
-  mutate(order = max(count_redacted, na.rm = T)) %>%
+  mutate(order = max(count, na.rm = T)) %>%
   arrange(desc(order)) %>%
-  filter(count_redacted == order) %>%
+  filter(count == order) %>%
   select(last_treatment_type, order) %>%
   distinct()
 
@@ -835,3 +837,4 @@ write_csv(treatment_codes_plot_data_weekly %>%
 write_csv(treatment_codes_plot_data_weekly, fs::path(output_dir2, "table_last_treatment_codes.csv"))
 
 print("treatment_codes_plot_data saved")
+

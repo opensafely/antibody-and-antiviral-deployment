@@ -78,13 +78,14 @@ data_stp_tpp <-
   group_by(stp) %>%
   summarise(n_tpp = n())
 
-## End date
-# end_date <- as.Date("2022-04-28")
+# End date
+end_date <- as.Date("2023-06-30")
 
 ## Remove patients no longer registered at time of treatment and format variables
 data_processed_clean0 <- 
   data_processed  %>%
   filter(elig_start >= as.Date("2021-12-11")) %>%
+  filter(elig_start<=end_date) %>%
   filter(has_died == 0,
          registered_eligible == 1 | registered_treated == 1) %>%
   mutate(
@@ -119,6 +120,7 @@ eligibility_stp <-
 treatment_stp <- 
   data_processed_clean0 %>%
   filter(!is.na(treatment_type)) %>%
+  filter(treatment_date<=end_date) %>%
   select(stp)  %>%
   group_by(stp) %>%
   tally() 
@@ -208,6 +210,7 @@ write_csv(decile_values_overall, fs::path(output_dir_rmd, "stp_decile_values.csv
 # calculate proportion treated in each STP in each week
 coverage_stp_week <- 
   data_processed_clean %>%
+  filter(treatment_date<=end_date) %>%
   mutate(week = cut(elig_start + 2 , "week"),
          elig = 1, 
          treat = ifelse(!is.na(treatment_date), 1, 0)) %>%
