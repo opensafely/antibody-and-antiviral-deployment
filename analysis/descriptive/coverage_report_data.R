@@ -466,7 +466,7 @@ variables <- c("ageband", "sex", "ethnicity", "imd", "rural_urban", "region_nhs"
 table_demo_clinc_breakdown_base <- data_processed_clean %>%
   filter(treatment_date <= study_end) %>%
   select(all_of(variables)) %>%
-  tbl_summary()
+  gtsummary::tbl_summary()
 
 table_demo_clinc_breakdown_base$inputs$data <- NULL
 
