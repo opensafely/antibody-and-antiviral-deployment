@@ -1,0 +1,60 @@
+Group,Variable,All,Treated,Sotrovimab,Remedesivir,Paxlovid,Molnupiravir,Casirivimab
+ageband,ageband,NA,NA,NA,NA,NA,NA,NA
+ageband,12-29,11050,2500,990,10,1010,480,10
+ageband,30-39,16210,4590,1680,20,2060,830,NA
+ageband,40-49,23600,7150,2530,20,3220,1360,10
+ageband,50-59,34750,10390,3800,30,4430,2120,10
+ageband,60-69,36560,10340,3850,40,4090,2350,10
+ageband,70-79,35250,9110,3340,60,3110,2600,NA
+ageband,80+,18970,3580,1230,20,920,1410,NA
+ageband,Unknown,NA,NA,NA,NA,NA,NA,NA
+sex,sex,NA,NA,NA,NA,NA,NA,NA
+sex,Female,100980,28800,10020,120,12270,6370,20
+sex,Male,75420,18860,7400,100,6560,4780,30
+sex,Unknown,NA,NA,NA,NA,NA,NA,NA
+ethnicity,ethnicity,NA,NA,NA,NA,NA,NA,NA
+ethnicity,White,159630,44210,16020,200,17530,10420,40
+ethnicity,Mixed,1870,420,160,NA,160,100,NA
+ethnicity,Asian or Asian British,6270,1530,710,NA,530,280,NA
+ethnicity,Black or Black British,4190,630,250,NA,220,150,NA
+ethnicity,Other ethnic groups,1780,460,190,NA,160,110,NA
+ethnicity,Unknown,2650,420,100,NA,220,100,NA
+imd,imd,NA,NA,NA,NA,NA,NA,NA
+imd,1 most deprived,26580,5250,2180,30,1890,1150,NA
+imd,2,31420,7800,2940,30,2840,1970,10
+imd,3,38320,10860,4080,40,4080,2640,10
+imd,4,37820,10960,3900,40,4550,2460,10
+imd,5 least deprived,37510,11420,3880,60,4850,2620,10
+imd,Unknown,4770,1370,450,NA,610,300,NA
+rural_urban,rural_urban,NA,NA,NA,NA,NA,NA,NA
+rural_urban,Urban - conurbation,37160,8440,3840,60,2990,1540,NA
+rural_urban,Urban - city and town,90490,24400,8320,100,9710,6240,30
+rural_urban,Rural - town and fringe,25050,7440,2630,30,3110,1670,10
+rural_urban,Rural - village and dispersed,19100,6050,2190,20,2420,1410,NA
+rural_urban,Unknown,4600,1330,440,NA,600,290,NA
+region_nhs,region_nhs,NA,NA,NA,NA,NA,NA,NA
+region_nhs,London,8050,2250,880,10,860,500,NA
+region_nhs,East of England,43130,13550,4820,40,4610,4060,20
+region_nhs,East Midlands,31580,9710,4260,80,4310,1040,20
+region_nhs,North East,7690,1400,890,30,370,110,NA
+region_nhs,North West,16660,4360,1510,NA,2190,650,NA
+region_nhs,South East,12950,3680,810,NA,1530,1340,NA
+region_nhs,South West,27830,6850,2500,30,2400,1920,NA
+region_nhs,West Midlands,5690,1290,820,10,250,210,NA
+region_nhs,Yorkshire and the Humber,22370,4420,890,10,2200,1310,NA
+region_nhs,Unknown,450,160,60,NA,100,10,NA
+autism_nhsd,autism_nhsd,980,300,110,NA,110,80,NA
+care_home_primis,care_home_primis,6190,550,90,NA,150,300,NA
+dementia_nhsd,dementia_nhsd,4130,460,130,NA,100,220,NA
+learning_disability_primis,learning_disability_primis,4480,1040,320,NA,440,280,NA
+serious_mental_illness_nhsd,serious_mental_illness_nhsd,2240,480,180,NA,120,180,NA
+housebound_opensafely,housebound_opensafely,3960,900,280,NA,250,360,NA
+shielded_primis,shielded_primis,91860,29280,11910,130,10140,7060,40
+sickle_cell_disease_nhsd,sickle_cell_disease_nhsd,1300,160,40,NA,80,30,NA
+long_covid,long_covid,1080,540,180,NA,220,140,NA
+vaccination_status,vaccination_status,NA,NA,NA,NA,NA,NA,NA
+vaccination_status,Un-vaccinated,4760,650,220,10,260,160,NA
+vaccination_status,Un-vaccinated (declined),1620,170,60,NA,60,50,NA
+vaccination_status,One vaccination,3120,540,200,NA,210,120,NA
+vaccination_status,Two vaccinations,13250,1990,800,10,680,500,10
+vaccination_status,Three or more vaccinations,153660,44300,16150,190,17620,10310,40
